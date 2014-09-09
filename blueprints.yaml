@@ -1,0 +1,22 @@
+name: Login Plugin
+version: 1.0.0
+description: Enables user authentication and login screen.
+validation: strict
+
+form:
+  fields:
+    enabled:
+        type: toggle
+        label: Plugin status
+        highlight: 1
+        default: 1
+        options:
+          1: Enabled
+          0: Disabled
+        validate:
+          type: bool
+
+    route:
+      type: text
+      label: Login path
+      placeholder: "Route used to login a user"

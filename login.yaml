@@ -1,0 +1,3 @@
+enabled: true
+route: '/login'
+timeout: 1800

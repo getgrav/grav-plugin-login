@@ -1,0 +1,9 @@
+{% extends 'partials/base.html.twig' %}
+
+{% block content %}
+    {% if (grav.user.fullname) %}
+    {% include 'partials/logout.html.twig' %}
+    {% else %}
+    {% include 'partials/login.html.twig' %}
+    {% endif %}
+{% endblock %}
