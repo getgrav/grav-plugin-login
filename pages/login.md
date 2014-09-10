@@ -5,10 +5,10 @@ form:
     fields:
         - name: username
           type: text
-          label: Username
+          placeholder: Username
 
         - name: password
           type: password
-          label: Password
+          placeholder: Password
 ---
 
