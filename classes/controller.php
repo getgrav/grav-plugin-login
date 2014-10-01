@@ -1,11 +1,10 @@
 <?php
 namespace Grav\Plugin;
 
-use Grav\Common\Filesystem\File\Yaml;
 use Grav\Common\Grav;
-use Grav\Common\Session\Message;
-use Grav\Common\Uri;
 use Grav\Common\User\User;
+use RocketTheme\Toolbox\File\YamlFile;
+use RocketTheme\Toolbox\Session\Message;
 
 class LoginController
 {
@@ -133,7 +132,7 @@ class LoginController
         $user = $this->grav['user'];
 
         if (!$user->authenticated && isset($form['username']) && isset($form['password'])) {
-            $file = Yaml::instance(ACCOUNTS_DIR . $form['username'] . YAML_EXT);
+            $file = YamlFile::instance(ACCOUNTS_DIR . $form['username'] . YAML_EXT);
             if ($file->exists()) {
                 $user = new User($file->content());
 

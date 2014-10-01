@@ -4,12 +4,11 @@ namespace Grav\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Plugin;
-use Grav\Common\Session\Message;
-use Grav\Common\Session\Session;
 use Grav\Common\Twig;
 use Grav\Common\Uri;
 use Grav\Common\User\User;
-use Grav\Component\Filesystem\File\Yaml;
+use RocketTheme\Toolbox\Session\Message;
+use RocketTheme\Toolbox\Session\Session;
 
 class LoginPlugin extends Plugin
 {
