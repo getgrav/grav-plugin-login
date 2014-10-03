@@ -1,6 +1,13 @@
 name: Login Plugin
 version: 1.0.0
 description: Enables user authentication and login screen.
+icon: sign-in
+author:
+  name: Team Grav
+  email: devs@getgrav.org
+  url: http://getgrav.org
+keywords: admin, plugin, login
+
 validation: strict
 
 form:
