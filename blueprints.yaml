@@ -1,4 +1,4 @@
-name: Login Plugin
+name: Login
 version: 1.0.0
 description: Enables user authentication and login screen.
 icon: sign-in
