@@ -24,7 +24,8 @@ class LoginPlugin extends Plugin
     /**
      * @return array
      */
-    public static function getSubscribedEvents() {
+    public static function getSubscribedEvents()
+    {
         return [
             'onPluginsInitialized' => ['initialize', 10000],
             'onTask.login.login' => ['loginController', 0],
