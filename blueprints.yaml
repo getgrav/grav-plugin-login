@@ -26,3 +26,10 @@ form:
       type: text
       label: Login path
       placeholder: "Route used to login a user"
+
+    session:
+      type: hidden
+
+      fields:
+        path:
+          type: hidden

@@ -46,7 +46,10 @@ class LoginPlugin extends Plugin
 
         // Define session service.
         $this->grav['session'] = function ($c) use ($uri) {
-            $session = new Session($this->config->get('plugins.login.timeout', 1800), $uri->rootUrl(false));
+            $session = new Session(
+                $c['config']->get('plugins.login.timeout', 1800),
+                $c['config']->get('plugins.login.session.path', '/' . $uri->rootUrl(false))
+            );
             $session->start();
 
             return $session;
