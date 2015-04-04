@@ -181,10 +181,13 @@ class LoginPlugin extends Plugin
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
 
+        $extension = $this->grav['uri']->extension();
+        $extension = $extension ?: 'html';
+
         if (!$this->authenticated) {
-            $twig->template = "login.html.twig";
+            $twig->template = "login." . $extension . ".twig";
         } elseif (!$this->authorised) {
-            $twig->template = "denied.html.twig";
+            $twig->template = "denied." . $extension . ".twig";
         }
     }
 }
