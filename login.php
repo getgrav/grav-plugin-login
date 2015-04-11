@@ -48,8 +48,11 @@ class LoginPlugin extends Plugin
         $this->grav['session'] = function ($c) use ($uri) {
             $session = new Session(
                 $c['config']->get('plugins.login.timeout', 1800),
-		$c['config']->get('plugins.login.session.path', '/' . ltrim($uri->rootUrl(false), '/'))
+                $c['config']->get('plugins.login.session.path', '/' . ltrim($uri->rootUrl(false), '/'))
             );
+
+            $site_identifier = $c['config']->get('site.title', 'unkown');
+            $session->setName($c['config']->get('plugins.login.session.name', 'grav_site') . '_' . substr(md5($site_identifier), 0, 7));
             $session->start();
 
             return $session;
