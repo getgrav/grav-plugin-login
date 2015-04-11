@@ -48,7 +48,7 @@ class LoginPlugin extends Plugin
         $this->grav['session'] = function ($c) use ($uri) {
             $session = new Session(
                 $c['config']->get('plugins.login.timeout', 1800),
-                $c['config']->get('plugins.login.session.path', '/' . $uri->rootUrl(false))
+		$c['config']->get('plugins.login.session.path', '/' . ltrim($uri->rootUrl(false), '/'))
             );
             $session->start();
 
