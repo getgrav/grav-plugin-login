@@ -132,9 +132,8 @@ class LoginController
         $user = $this->grav['user'];
 
         if (!$user->authenticated && isset($form['username']) && isset($form['password'])) {
-            $file = CompiledYamlFile::instance(ACCOUNTS_DIR . $form['username'] . YAML_EXT);
-            if ($file->exists()) {
-                $user = new User($file->content());
+            $user = User::load($form['username']);
+            if ($user->exists()) {
 
                 // Authenticate user.
                 $result = $user->authenticate($form['password']);
