@@ -41,23 +41,6 @@ class LoginPlugin extends Plugin
      */
     public function initialize()
     {
-        /** @var Uri $uri */
-        $uri = $this->grav['uri'];
-
-        // Define session service.
-        $this->grav['session'] = function ($c) use ($uri) {
-            $session = new Session(
-                $c['config']->get('plugins.login.timeout', 1800),
-                $c['config']->get('plugins.login.session.path', '/' . ltrim($uri->rootUrl(false), '/'))
-            );
-
-            $site_identifier = $c['config']->get('site.title', 'unkown');
-            $session->setName($c['config']->get('plugins.login.session.name', 'grav_site') . '_' . substr(md5($site_identifier), 0, 7));
-            $session->start();
-
-            return $session;
-        };
-
         /// Define session message service.
         $this->grav['messages'] = function ($c) {
             $session = $c['session'];
