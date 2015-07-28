@@ -43,7 +43,7 @@ class LoginPlugin extends Plugin
      */
     public function initialize()
     {
-        /// Define session message service.
+        // Define session message service.
         $this->grav['messages'] = function ($c) {
             $session = $c['session'];
 
@@ -117,8 +117,6 @@ class LoginPlugin extends Plugin
             return;
         }
 
-
-
         /** @var User $user */
         $user = $this->grav['user'];
 
@@ -134,21 +132,19 @@ class LoginPlugin extends Plugin
             $this->grav->redirect($this->route, 302);
         }
 
-        /** @var Admin $admin */
-        $admin = $this->grav['admin'];
-
         /** @var Language $l */
         $l = $this->grav['language'];
 
         // Reset page with login page.
         if (!$user->authenticated) {
-            $admin->setMessage($l->translate('LOGIN_SESSION_EXPIRED'), 'info');
+            $this->grav['messages']->add($l->translate('LOGIN_SESSION_EXPIRED'), 'info');
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
             $page->slug(basename($this->route));
 
             $this->authenticated = false;
         } else {
+            $this->grav['messages']->add($l->translate('LOGIN_ACCESS_DENIED'), 'info');
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/denied.md"));
             $page->slug(basename($this->route));

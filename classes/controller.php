@@ -96,7 +96,7 @@ class LoginController
     public function taskLogin()
     {
         if ($this->authenticate($this->post)) {
-            $this->setMessage('You have been logged in.');
+            $this->setMessage('You have been successfully logged in.');
             $referrer = $this->grav['uri']->referrer('/');
             $this->setRedirect($referrer);
         } else {

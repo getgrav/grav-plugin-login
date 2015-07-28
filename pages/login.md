@@ -1,7 +1,12 @@
 ---
 title: Login
+template: form
 
 form:
+    name: login
+    action: 
+    method: post
+
     fields:
         - name: username
           type: text
@@ -12,3 +17,6 @@ form:
           placeholder: Password
 ---
 
+# User Login
+
+This page is restricted...
