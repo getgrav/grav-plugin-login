@@ -7,6 +7,7 @@ use Grav\Common\Plugin;
 use Grav\Common\Twig;
 use Grav\Common\Uri;
 use Grav\Common\User\User;
+use Grav\Plugin\Admin;
 use RocketTheme\Toolbox\Session\Message;
 use RocketTheme\Toolbox\Session\Session;
 
@@ -115,6 +116,8 @@ class LoginPlugin extends Plugin
             return;
         }
 
+
+
         /** @var User $user */
         $user = $this->grav['user'];
 
@@ -130,14 +133,19 @@ class LoginPlugin extends Plugin
             $this->grav->redirect($this->route, 302);
         }
 
+        /** @var Admin $admin */
+        $admin = $this->grav['admin'];
+
         // Reset page with login page.
         if (!$user->authenticated) {
+            $admin->setLoginRedirect();
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
             $page->slug(basename($this->route));
 
             $this->authenticated = false;
         } else {
+            $admin->removeLoginRedirect();
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/denied.md"));
             $page->slug(basename($this->route));
