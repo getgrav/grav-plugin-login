@@ -1,6 +1,7 @@
 <?php
 namespace Grav\Plugin;
 
+use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Plugin;
@@ -136,16 +137,18 @@ class LoginPlugin extends Plugin
         /** @var Admin $admin */
         $admin = $this->grav['admin'];
 
+        /** @var Language $l */
+        $l = $this->grav['language'];
+
         // Reset page with login page.
         if (!$user->authenticated) {
-            $admin->setLoginRedirect();
+            $admin->setMessage($l->translate('LOGIN_SESSION_EXPIRED'), 'info');
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
             $page->slug(basename($this->route));
 
             $this->authenticated = false;
         } else {
-            $admin->removeLoginRedirect();
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/denied.md"));
             $page->slug(basename($this->route));
