@@ -137,7 +137,6 @@ class LoginPlugin extends Plugin
 
         // Reset page with login page.
         if (!$user->authenticated) {
-            $this->grav['messages']->add($l->translate('LOGIN_SESSION_EXPIRED'), 'info');
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
             $page->slug(basename($this->route));

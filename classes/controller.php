@@ -114,7 +114,6 @@ class LoginController
     public function taskLogout()
     {
         $this->grav['session']->invalidate()->start();
-        $this->setMessage('You have been logged out.');
         $this->setRedirect('/');
 
         return true;
