@@ -9,7 +9,7 @@ author:
 keywords: admin, plugin, login
 
 form:
-  validation: strict
+  validation: loose
   fields:
     enabled:
         type: toggle
@@ -26,10 +26,3 @@ form:
       type: text
       label: Login path
       placeholder: "Route used to login a user"
-
-    session:
-      type: hidden
-
-      fields:
-        path:
-          type: hidden
