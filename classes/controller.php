@@ -1,11 +1,10 @@
 <?php
 namespace Grav\Plugin;
 
-use Grav\Common\Filesystem\File\Yaml;
+use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\Grav;
-use Grav\Common\Session\Message;
-use Grav\Common\Uri;
 use Grav\Common\User\User;
+use RocketTheme\Toolbox\Session\Message;
 
 class LoginController
 {
@@ -97,7 +96,7 @@ class LoginController
     public function taskLogin()
     {
         if ($this->authenticate($this->post)) {
-            $this->setMessage('You have been logged in.');
+            $this->setMessage('You have been successfully logged in.');
             $referrer = $this->grav['uri']->referrer('/');
             $this->setRedirect($referrer);
         } else {
@@ -115,7 +114,6 @@ class LoginController
     public function taskLogout()
     {
         $this->grav['session']->invalidate()->start();
-        $this->setMessage('You have been logged out.');
         $this->setRedirect('/');
 
         return true;
@@ -133,9 +131,8 @@ class LoginController
         $user = $this->grav['user'];
 
         if (!$user->authenticated && isset($form['username']) && isset($form['password'])) {
-            $file = Yaml::instance(ACCOUNTS_DIR . $form['username'] . YAML_EXT);
-            if ($file->exists()) {
-                $user = new User($file->content());
+            $user = User::load($form['username']);
+            if ($user->exists()) {
 
                 // Authenticate user.
                 $result = $user->authenticate($form['password']);

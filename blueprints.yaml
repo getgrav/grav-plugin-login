@@ -1,9 +1,23 @@
-name: Login Plugin
-version: 1.0.0
+name: Login
+version: 0.1.0
 description: Enables user authentication and login screen.
-validation: strict
+icon: sign-in
+author:
+  name: Team Grav
+  email: devs@getgrav.org
+  url: http://getgrav.org
+keywords: admin, plugin, login
+homepage: https://github.com/getgrav/grav-plugin-login
+keywords: login, authentication, admin, security
+bugs: https://github.com/getgrav/grav-plugin-login/issues
+license: MIT
+
+dependencies:
+  - form
+  - email
 
 form:
+  validation: loose
   fields:
     enabled:
         type: toggle

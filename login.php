@@ -1,15 +1,16 @@
 <?php
 namespace Grav\Plugin;
 
+use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Plugin;
-use Grav\Common\Session\Message;
-use Grav\Common\Session\Session;
 use Grav\Common\Twig;
 use Grav\Common\Uri;
 use Grav\Common\User\User;
-use Grav\Component\Filesystem\File\Yaml;
+use Grav\Plugin\Admin;
+use RocketTheme\Toolbox\Session\Message;
+use RocketTheme\Toolbox\Session\Session;
 
 class LoginPlugin extends Plugin
 {
@@ -25,7 +26,8 @@ class LoginPlugin extends Plugin
     /**
      * @return array
      */
-    public static function getSubscribedEvents() {
+    public static function getSubscribedEvents()
+    {
         return [
             'onPluginsInitialized' => ['initialize', 10000],
             'onTask.login.login' => ['loginController', 0],
@@ -41,18 +43,7 @@ class LoginPlugin extends Plugin
      */
     public function initialize()
     {
-        /** @var Uri $uri */
-        $uri = $this->grav['uri'];
-
-        // Define session service.
-        $this->grav['session'] = function ($c) use ($uri) {
-            $session = new Session($this->config->get('plugins.login.timeout', 1800), $uri->rootUrl(false));
-            $session->start();
-
-            return $session;
-        };
-
-        /// Define session message service.
+        // Define session message service.
         $this->grav['messages'] = function ($c) {
             $session = $c['session'];
 
@@ -141,6 +132,9 @@ class LoginPlugin extends Plugin
             $this->grav->redirect($this->route, 302);
         }
 
+        /** @var Language $l */
+        $l = $this->grav['language'];
+
         // Reset page with login page.
         if (!$user->authenticated) {
             $page = new Page;
@@ -149,6 +143,7 @@ class LoginPlugin extends Plugin
 
             $this->authenticated = false;
         } else {
+            $this->grav['messages']->add($l->translate('LOGIN_ACCESS_DENIED'), 'info');
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/denied.md"));
             $page->slug(basename($this->route));
@@ -178,10 +173,13 @@ class LoginPlugin extends Plugin
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
 
+        $extension = $this->grav['uri']->extension();
+        $extension = $extension ?: 'html';
+
         if (!$this->authenticated) {
-            $twig->template = "login.html.twig";
+            $twig->template = "login." . $extension . ".twig";
         } elseif (!$this->authorised) {
-            $twig->template = "denied.html.twig";
+            $twig->template = "denied." . $extension . ".twig";
         }
     }
 }

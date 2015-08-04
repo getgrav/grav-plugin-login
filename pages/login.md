@@ -1,14 +1,22 @@
 ---
 title: Login
+template: form
 
 form:
+    name: login
+    action: 
+    method: post
+
     fields:
         - name: username
           type: text
-          label: Username
+          placeholder: Username
 
         - name: password
           type: password
-          label: Password
+          placeholder: Password
 ---
 
+# User Login
+
+This page is restricted...
