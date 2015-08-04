@@ -12,6 +12,10 @@ keywords: login, authentication, admin, security
 bugs: https://github.com/getgrav/grav-plugin-login/issues
 license: MIT
 
+dependencies:
+  - form
+  - email
+
 form:
   validation: loose
   fields:
