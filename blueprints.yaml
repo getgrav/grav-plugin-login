@@ -1,5 +1,5 @@
 name: Login
-version: 0.1.0
+version: 0.2.0
 description: Enables user authentication and login screen.
 icon: sign-in
 author:
@@ -20,7 +20,7 @@ form:
   validation: loose
   fields:
     enabled:
-        type: toggle
+        type: hidden
         label: Plugin status
         highlight: 1
         default: 1
