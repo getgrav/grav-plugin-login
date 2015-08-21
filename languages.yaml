@@ -1,2 +1,5 @@
 en:
-  LOGIN_ACCESS_DENIED: Your user does not have permission to access this page.
+  LOGIN_PLUGIN:
+    ACCESS_DENIED: Your user does not have permission to access this page.
+    BTN_LOGIN: Login
+    BTN_FORGOT: Forgot
