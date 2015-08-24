@@ -1,2 +1,8 @@
 en:
-  LOGIN_ACCESS_DENIED: Your user does not have permission to access this page.
+  LOGIN_PLUGIN:
+    ACCESS_DENIED: Access denied...
+    LOGIN_FAILED: Login failed...
+    LOGIN_SUCCESSFUL: You have been successfully logged in.
+    BTN_LOGIN: Login
+    BTN_LOGOUT: Logout
+    BTN_FORGOT: Forgot

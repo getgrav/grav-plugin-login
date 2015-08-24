@@ -95,12 +95,19 @@ class LoginController
      */
     public function taskLogin()
     {
+        $t = $this->grav['language'];
+        $user = $this->grav['user'];
+
         if ($this->authenticate($this->post)) {
-            $this->setMessage('You have been successfully logged in.');
+            $this->setMessage($t->translate('LOGIN_PLUGIN.LOGIN_SUCCESSFUL'));
             $referrer = $this->grav['uri']->referrer('/');
             $this->setRedirect($referrer);
         } else {
-            $this->setMessage('Login failed.');
+            if ($user->username) {
+                $this->setMessage($t->translate('LOGIN_PLUGIN.ACCESS_DENIED'));
+            } else {
+                $this->setMessage($t->translate('LOGIN_PLUGIN.LOGIN_FAILED'));
+            }
         }
 
         return true;
