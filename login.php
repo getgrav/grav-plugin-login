@@ -142,17 +142,14 @@ class LoginPlugin extends Plugin
             $page->slug(basename($this->route));
 
             $this->authenticated = false;
+
+            unset($this->grav['page']);
+            $this->grav['page'] = $page;
         } else {
             $this->grav['messages']->add($l->translate('LOGIN_ACCESS_DENIED'), 'info');
-            $page = new Page;
-            $page->init(new \SplFileInfo(__DIR__ . "/pages/denied.md"));
-            $page->slug(basename($this->route));
-
-            $this->authorised = false;
+            $this->authenticated = false;
         }
 
-        unset($this->grav['page']);
-        $this->grav['page'] = $page;
     }
 
 
@@ -178,8 +175,11 @@ class LoginPlugin extends Plugin
 
         if (!$this->authenticated) {
             $twig->template = "login." . $extension . ".twig";
-        } elseif (!$this->authorised) {
-            $twig->template = "denied." . $extension . ".twig";
+        }
+
+        // add CSS for frontend if required
+        if (!$this->isAdmin() && $this->config->get('plugins.login.built_in_css')) {
+            $this->grav['assets']->add('plugin://login/css/login.css');
         }
     }
 }
