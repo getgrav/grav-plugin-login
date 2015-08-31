@@ -11,6 +11,7 @@ form:
         - name: username
           type: text
           placeholder: Username
+          autofocus: true
 
         - name: password
           type: password
