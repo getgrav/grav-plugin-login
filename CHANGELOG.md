@@ -1,3 +1,9 @@
+# v0.3.1
+## 08/31/2015
+
+1. [](#improved)
+    * Added username field autofocus
+
 # v0.3.0
 ## 08/24/2015
 
