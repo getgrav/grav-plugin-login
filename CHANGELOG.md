@@ -1,3 +1,9 @@
+# v0.3.2
+## 09/01/2015
+
+1. [](#improved)
+    * Broke out login form into its own partial
+
 # v0.3.1
 ## 08/31/2015
 
