@@ -146,8 +146,11 @@ class LoginPlugin extends Plugin
             unset($this->grav['page']);
             $this->grav['page'] = $page;
         } else {
-            $this->grav['messages']->add($l->translate('LOGIN_ACCESS_DENIED'), 'info');
+            $this->grav['messages']->add($l->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
             $this->authenticated = false;
+
+            $twig = $this->grav['twig'];
+            $twig->twig_vars['notAuthorized'] = true;
         }
 
     }
