@@ -149,7 +149,7 @@ class LoginController
                 }
             }
         }
-        $user->authenticated = $user->authorise('site.login');
+        $user->authenticated = $user->authorize('site.login');
 
         return $user->authenticated;
     }
