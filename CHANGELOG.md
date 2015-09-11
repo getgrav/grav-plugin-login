@@ -1,5 +1,5 @@
 # v0.3.3
-## 09/011/2015
+## 09/11/2015
 
 1. [](#improved)
     * Changed authorise to authorize
