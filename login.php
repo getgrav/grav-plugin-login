@@ -21,7 +21,7 @@ class LoginPlugin extends Plugin
      * @var bool
      */
     protected $authenticated = true;
-    protected $authorised = true;
+    protected $authorized = true;
 
     /**
      * @return array
@@ -122,7 +122,7 @@ class LoginPlugin extends Plugin
 
         // Continue to the page if user is authorized to access the page.
         foreach ($rules as $rule => $value) {
-            if ($user->authorise($rule) == $value) {
+            if ($user->authorize($rule) == $value) {
                 return;
             }
         }
@@ -146,8 +146,11 @@ class LoginPlugin extends Plugin
             unset($this->grav['page']);
             $this->grav['page'] = $page;
         } else {
-            $this->grav['messages']->add($l->translate('LOGIN_ACCESS_DENIED'), 'info');
+            $this->grav['messages']->add($l->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
             $this->authenticated = false;
+
+            $twig = $this->grav['twig'];
+            $twig->twig_vars['notAuthorized'] = true;
         }
 
     }
