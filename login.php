@@ -112,10 +112,18 @@ class LoginPlugin extends Plugin
         $header = $page->header();
         $rules = isset($header->access) ? (array) $header->access : [];
 
-        // If page has no ACL rules, use those of its parent.
-        if (!$rules) {
-          $header = $page->parent()->header();
-          $rules = isset($header->access) ? (array) $header->access : [];
+        $config = $this->mergeConfig($page);
+
+        if ($config->get('parent_acl')) {
+          // If page has no ACL rules, use its parent's rules
+          if (!$rules) {
+            $parent = $page->parent();
+            while (!$rules and $parent) {
+              $header = $parent->header();
+              $rules = isset($header->access) ? (array) $header->access : [];
+              $parent = $parent->parent();
+            }
+          }
         }
 
         // Continue to the page if it has no ACL rules.
