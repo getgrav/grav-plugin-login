@@ -48,4 +48,15 @@ form:
       help: "Custom route to a custom login page that your theme provides"
       placeholder: "/my-custom-login"
 
+    parent_acl:
+      type: toggle
+      label: Use parent access rules
+      highlight: 1
+      default: 0
+      help: "Check for parent access rules if no rules are defined"
+      options:
+        1: Enabled
+        0: Disabled
+      validate:
+        type: bool
 
