@@ -9,7 +9,7 @@
 }
 
 #grav-login .form-actions {
-    text-align: center;
+    text-align: right;
 }
 
 #grav-logout {
@@ -20,4 +20,100 @@
 
 .alert.info {
     color: #c00;
+}
+
+#grav-login p {
+    font-size: small;
+    margin: 1rem 0;
+    padding: 0;
+    text-align: center;
+}
+#grav-login .form-oauth .oauth-provider {
+    list-style: outside none none;
+    margin: 0.5rem 0;
+    padding: 0;
+}
+#grav-login .oauth-provider li {
+    display: inline-block;
+    padding: 0.25rem;
+}
+#grav-login .oauth-provider .button {
+    height: 5rem;
+    width: 5rem;
+    opacity: 1;
+}
+
+#grav-login .oauth-provider .button:hover {
+  opacity: 0.75;
+}
+
+.button.facebook {
+    background-color: #4c699e;
+}
+.button.google {
+    background-color: #da573b;
+}
+.button.twitter {
+    background-color: #1daee3;
+}
+.button.github {
+    background-color: #5c5853;
+}
+.form-oauth > input {
+    display: none;
+}
+
+#grav-login .oauth-provider .button {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: bold;
+    height: 5rem;
+    line-height: 8rem;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    text-align: center;
+    width: 5rem;
+    color: white;
+    border: none;
+}
+
+#grav-login .form-oauth .button i {
+    bottom: 0;
+    content: " ";
+    display: block;
+    font-size: 3rem;
+    left: 0;
+    margin-top: .5rem;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+#grav-login .delimiter {
+    display: block;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    line-height: 1.6rem;
+    position: relative;
+    text-transform: uppercase;
+    margin: 1rem 0;
+}
+
+#grav-login .delimiter:after,
+#grav-login .delimiter:before {
+    background-color: #777777;
+    content: "";
+    height: 1px;
+    position: absolute;
+    top: 0.8rem;
+    width: 40%;
+}
+#grav-login .delimiter:before {
+    background-image: -moz-linear-gradient(right center , #777777, #ffffff);
+    left: 0;
+}
+#grav-login .delimiter:after {
+    background-image: -moz-linear-gradient(left center , #777777, #ffffff);
+    right: 0;
 }

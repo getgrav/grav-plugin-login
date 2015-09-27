@@ -65,6 +65,13 @@ class LoginPlugin extends Plugin
             return $session->user;
         };
 
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
+        if (!$task && isset($_POST['oauth'])) {
+            $this->oauthLoginController();
+        }
+
         // Register route to login page if it has been set.
         $this->route = $this->config->get('plugins.login.route');
         if ($this->route) {
@@ -102,6 +109,11 @@ class LoginPlugin extends Plugin
         $controller = new LoginController($this->grav, $task, $post);
         $controller->execute();
         $controller->redirect();
+    }
+
+    public function oauthLoginController()
+    {
+        $this->grav['debugger']->addMessage('OAuth: ' . $_POST['oauth']);
     }
 
     public function authorizePage()
@@ -178,6 +190,17 @@ class LoginPlugin extends Plugin
 
         if (!$this->authenticated) {
             $twig->template = "login." . $extension . ".twig";
+
+            $providers = [];
+            foreach ($this->config->get('plugins.login.oauth.providers') as $provider => $options) {
+                if ($options['enabled']) {
+                    $providers[$provider] = $options['credentials'];
+                }
+            }
+            $twig->twig_vars['oauth'] = [
+                'enabled' => $this->config->get('plugins.login.oauth.enabled'),
+                'providers' => $providers
+            ];
         }
 
         // add CSS for frontend if required

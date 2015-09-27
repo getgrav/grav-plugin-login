@@ -6,3 +6,5 @@ en:
     BTN_LOGIN: Login
     BTN_LOGOUT: Logout
     BTN_FORGOT: Forgot
+    OAUTH_LOGIN: Sign in with %s
+    OR: Or

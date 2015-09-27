@@ -4,6 +4,24 @@
     {% include 'partials/messages.html.twig' %}
 
     <form method="post" action="{{ uri.url ~ page.header.form.action}}">
+        {# <h3>Sign in to Grav</h3> #}
+        {% if oauth.enabled %}
+            <div class="form-oauth button-group">
+                {# Create hidden duplicate of submit button to designate it as default #}
+                <input type="submit" name="task" value="login.login" tabindex="-1" />
+                {% set providers = oauth.providers|slice(0,4) %}
+                <p>Connect with a social network{% if oauth.providers|count > 4 %}or <a href="#">other social networks</a></p>{% endif %}
+                <ul class="oauth-provider">
+                    {% for provider,credentials in providers %}
+                        {% set provider = provider|lower %}
+                        <li><button name="oauth" value="{{ provider }}" type="submit" class="button {{ provider }}" href="{{ base_url_relative }}/login/oauth:{{ provider }}" title="{{ 'LOGIN_PLUGIN.OAUTH_LOGIN'|t(provider|ucwords) }}"><i class="fa fa-{{ provider }}"></i> {{ provider|ucwords }}</button></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <span class="delimiter">{{ 'LOGIN_PLUGIN.OR'|t }}</span>
+            <p>Sign in with your username and password</p>
+        {% endif %}
+
         {% for field in page.header.form.fields %}
             {% if field.type %}
                 <div>

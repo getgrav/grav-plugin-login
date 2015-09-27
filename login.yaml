@@ -2,3 +2,30 @@ enabled: true
 built_in_css: true
 route: false
 
+oauth:
+  enabled: true
+
+  providers:
+    facebook:
+      enabled: true
+      credentials:
+        key:
+        secret:
+
+    google:
+      enabled: true
+      credentials:
+        key:
+        secret:
+
+    github:
+      enabled: true
+      credentials:
+        key:
+        secret:
+
+    twitter:
+      enabled: true
+      credentials:
+        key:
+        secret:
