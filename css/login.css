@@ -12,6 +12,12 @@
     text-align: right;
 }
 
+@media screen and (max-width: 479.008px){
+    #grav-login .form-actions .button {
+        width: 100%;
+    }
+}
+
 #grav-logout {
     position: absolute;
     bottom: 5px;
@@ -42,7 +48,6 @@
     width: 5rem;
     opacity: 1;
 }
-
 #grav-login .oauth-provider .button:hover {
   opacity: 0.75;
 }
@@ -77,6 +82,13 @@
     color: white;
     border: none;
 }
+@media screen and (max-width: 479.008px){
+    #grav-login .oauth-provider .button {
+        height: 4rem;
+        width: 4rem;
+        line-height: 6.5rem;
+    }
+}
 
 #grav-login .form-oauth .button i {
     bottom: 0;
@@ -88,6 +100,11 @@
     position: absolute;
     right: 0;
     top: 0;
+}
+@media screen and (max-width: 479.008px){
+    #grav-login .form-oauth .button i {
+        font-size: 2rem;
+    }
 }
 
 #grav-login .delimiter {
