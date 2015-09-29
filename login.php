@@ -107,7 +107,6 @@ class LoginPlugin extends Plugin
         $task = substr($task, strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
 
-        require_once __DIR__ . '/classes/controller.php';
         $controller = new LoginController($this->grav, $task, $post);
         $controller->execute();
         $controller->redirect();
