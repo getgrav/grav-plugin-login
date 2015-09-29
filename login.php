@@ -43,6 +43,8 @@ class LoginPlugin extends Plugin
      */
     public function initialize()
     {
+        //Require the autoloader (provided by composer)
+        require __DIR__ . '/vendor/autoload.php';
         // Define session message service.
         $this->grav['messages'] = function ($c) {
             $session = $c['session'];
