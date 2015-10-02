@@ -7,4 +7,30 @@ en:
     BTN_LOGOUT: Logout
     BTN_FORGOT: Forgot
     OAUTH_LOGIN: Sign in with %s
-    OR: Or
+    OAUTH_SIGNIN: Sign in with your username and password
+    OAUTH_CONNECT_MESSAGE: Connect with a social network
+    OAUTH_CONNECT_MESSAGE_EXTRA: other social networks
+    OAUTH_PROVIDER_NOT_SUPPORTED: OAuth provider "%s" is not supported
+    OR: or
+
+    PLUGIN_STATUS: Plugin status
+    BUILTIN_CSS: Use built in CSS
+    BUILTIN_CSS_HELP: Include the CSS provided by the admin plugin
+    ROUTE: Login path
+    ROUTE_HELP: Custom route to a custom login page that your theme provides
+
+    OAUTH_SECTION: OAuth
+    OAUTH_ENABLE: Enable OAuth
+    ACCESS: OAuth access rights
+    OAUTH_PROVIDER_SECTION: OAuth providers
+    OAUTH_PROVIDER_FACEBOOK: Enable Facebook OAuth
+    OAUTH_PROVIDER_GOOGLE: Enable Google OAuth
+    OAUTH_PROVIDER_GITHUB: Enable GitHub OAuth
+    OAUTH_PROVIDER_TWITTER: Enable Twitter OAuth
+    OAUTH_CLIENT_ID: Client ID
+    OAUTH_CLIENT_SECRET: Client secret
+
+    FACEBOOK: Facebook
+    GOOGLE: Google
+    GITHUB: GitHub
+    TWITTER: Twitter
