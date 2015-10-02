@@ -84,8 +84,6 @@ class LoginPlugin extends Plugin
             return $session->user;
         };
 
-        $this->grav['debugger']->addMessage($this->grav['session']->user);
-
         // Manage OAuth login
         $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
         if (!$task && isset($_POST['oauth']) || (!empty($_GET) && $session->oauth)) {
