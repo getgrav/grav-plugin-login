@@ -14,13 +14,19 @@ use RocketTheme\Toolbox\Session\Session;
 
 class LoginPlugin extends Plugin
 {
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $route;
 
     /**
      * @var bool
      */
     protected $authenticated = true;
+
+    /**
+     * @var bool
+     */
     protected $authorized = true;
 
     /**
@@ -43,8 +49,19 @@ class LoginPlugin extends Plugin
      */
     public function initialize()
     {
-        //Require the autoloader (provided by composer)
-        require __DIR__ . '/vendor/autoload.php';
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+
+        /** @var Grav\Common\Session */
+        $session = $this->grav['session'];
+
+        // Autoload classes
+        $autoload = __DIR__ . '/vendor/autoload.php';
+        if (!is_file($autoload)) {
+            throw new \Exception('Login Plugin failed to load. Composer dependencies not met.');
+        }
+        require_once $autoload;
+
         // Define session message service.
         $this->grav['messages'] = function ($c) {
             $session = $c['session'];
@@ -67,12 +84,16 @@ class LoginPlugin extends Plugin
             return $session->user;
         };
 
-        /** @var Uri $uri */
-        $uri = $this->grav['uri'];
+        $this->grav['debugger']->addMessage($this->grav['session']->user);
+
+        // Manage OAuth login
         $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
-        if (!$task && isset($_POST['oauth'])) {
-            $this->oauthLoginController();
+        if (!$task && isset($_POST['oauth']) || (!empty($_GET) && $session->oauth)) {
+            $this->oauthController();
         }
+
+        // Aborted OAuth authentication (invalidate it)
+        unset($session->oauth);
 
         // Register route to login page if it has been set.
         $this->route = $this->config->get('plugins.login.route');
@@ -83,6 +104,9 @@ class LoginPlugin extends Plugin
         }
     }
 
+    /**
+     * Add Login page
+     */
     public function addLoginPage()
     {
         /** @var Pages $pages */
@@ -99,6 +123,9 @@ class LoginPlugin extends Plugin
         }
     }
 
+    /**
+     * Initialize login controller
+     */
     public function loginController()
     {
         /** @var Uri $uri */
@@ -107,16 +134,30 @@ class LoginPlugin extends Plugin
         $task = substr($task, strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
 
-        $controller = new LoginController($this->grav, $task, $post);
+        $controller = new Login\LoginController($this->grav, $task, $post);
         $controller->execute();
         $controller->redirect();
     }
 
-    public function oauthLoginController()
+    /**
+     * Initialize OAuth login controller
+     */
+    public function oauthController()
     {
-        $this->grav['debugger']->addMessage('OAuth: ' . $_POST['oauth']);
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        $oauth = !empty($_POST['oauth']) ? $_POST['oauth'] : $uri->param('oauth');
+        $oauth = $oauth ?: $this->grav['session']->oauth;
+        $post = !empty($_POST) ? $_POST : [];
+
+        $controller = new Login\OAuthLoginController($this->grav, $oauth, $post);
+        $controller->execute();
+        $controller->redirect();
     }
 
+    /**
+     * Authorize Page
+     */
     public function authorizePage()
     {
         /** @var Page $page */
@@ -165,7 +206,6 @@ class LoginPlugin extends Plugin
             $twig = $this->grav['twig'];
             $twig->twig_vars['notAuthorized'] = true;
         }
-
     }
 
 
@@ -194,7 +234,7 @@ class LoginPlugin extends Plugin
 
             $providers = [];
             foreach ($this->config->get('plugins.login.oauth.providers') as $provider => $options) {
-                if ($options['enabled']) {
+                if ($options['enabled'] && isset($options['credentials'])) {
                     $providers[$provider] = $options['credentials'];
                 }
             }
