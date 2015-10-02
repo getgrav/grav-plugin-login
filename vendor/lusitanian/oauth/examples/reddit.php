@@ -4,7 +4,7 @@
  * Example of retrieving an authentication token of the Reddit service
  *
  * PHP version 5.4
- *
+ * 
  * @author     Connor Hindley <conn.hindley@gmail.com>
  * @copyright  Copyright (c) 2012 The authors
  * @license    http://www.opensource.org/licenses/mit-license.html  MIT License

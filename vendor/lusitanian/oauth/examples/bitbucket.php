@@ -5,7 +5,7 @@
  *
  * PHP version 5.4
  * @author     Ændrew Rininsland <me@aendrew.com>
- *
+ * 
  * Shamelessly cribbed from work by:
  * @author     David Desberg <david@daviddesberg.com>
  * @author     Pieter Hordijk <info@pieterhordijk.com>

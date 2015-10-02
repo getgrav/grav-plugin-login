@@ -44,35 +44,35 @@ switch($step){
 	default:
 		print "<a href='".$currentUri->getRelativeUri().'?step=1'."'>Login with Flickr!</a>";
 		break;
-
+	
 	case 1:
-
+		
 		if($token = $flickrService->requestRequestToken()){
 			$oauth_token = $token->getAccessToken();
 			$secret = $token->getAccessTokenSecret();
-
+			
 			if($oauth_token && $secret){
 				$url = $flickrService->getAuthorizationUri(array('oauth_token' => $oauth_token, 'perms' => 'write'));
 				header('Location: '.$url);
 			}
 		}
-
+		
 		break;
-
+	
 	case 2:
 		$token = $storage->retrieveAccessToken('Flickr');
 		$secret = $token->getAccessTokenSecret();
-
+		
 		if($token = $flickrService->requestAccessToken($oauth_token, $oauth_verifier, $secret)){
 			$oauth_token = $token->getAccessToken();
 			$secret = $token->getAccessTokenSecret();
-
+			
 			$storage->storeAccessToken('Flickr', $token);
-
+			
 			header('Location: '.$currentUri->getAbsoluteUri().'?step=3');
 		}
 		break;
-
+	
 	case 3:
 		$xml = simplexml_load_string($flickrService->request('flickr.test.login'));
 		print "status: ".(string)$xml->attributes()->stat."\n";

@@ -1,6 +1,6 @@
 {
     "require": {
-        "lusitanian/oauth": "~0.3"
+        "lusitanian/oauth": "~0.6"
     },
     "autoload": {
         "classmap": ["classes/"]

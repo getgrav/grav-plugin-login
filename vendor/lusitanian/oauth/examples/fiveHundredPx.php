@@ -2,7 +2,7 @@
 
 /**
  * 500px service.
- *
+ * 
  * Example of retrieving an authentication token of the fiveHundredPx service
  *
  *

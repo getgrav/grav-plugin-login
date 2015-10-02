@@ -21,7 +21,7 @@ $storage = new Session();
 /**
  * In case if you don't use bootstrap from example folder uncomment lines below
  */
-//$serviceFactory = new \OAuth\ServiceFactory();
+//$serviceFactory = new \OAuth\ServiceFactory(); 
 /* Create a new instance of the URI class with the current URI, stripping the query string
  */
 //$uriFactory = new \OAuth\Common\Http\Uri\UriFactory();
@@ -44,7 +44,7 @@ if (!empty($_GET['code'])) {
 
     // yammer token, save somewhere and use it for all requests to yammer service
     echo $token->getAccessToken();
-
+    
     // example of showing all public messages for current user
     // all endpoints can be find here: https://developer.yammer.com/restapi/#rest-networks
     $result = json_decode($yammerService->request('messages.json'), true);

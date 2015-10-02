@@ -37,26 +37,26 @@ $pocketService = $serviceFactory->createService('Pocket', $credentials, $storage
 switch($step){
 	default:
 		print '<a href="'.$currentUri->getRelativeUri().'?step=1">Login with Pocket</a>';
-
+		
 		break;
-
+	
 	case 1:
 		$code = $pocketService->requestRequestToken();
 		header('Location: '.$currentUri->getRelativeUri().'?step=2&code='.$code);
-
+		
 		break;
-
+	
 	case 2:
 		$url = $pocketService->getAuthorizationUri(array('request_token' => $code));
 		header('Location: '.$url);
-
+		
 		break;
-
+	
 	case 3:
 		$token = $pocketService->requestAccessToken($code);
 		$accessToken = $token->getAccessToken();
 		$extraParams = $token->getExtraParams();
-
+		
 		print 'User: '.$extraParams['username'].'<br />';
 		print 'Access Token: '.$accessToken;
 		break;
