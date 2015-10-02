@@ -3,29 +3,32 @@ built_in_css: true
 route: false
 
 oauth:
-  enabled: true
+  enabled: false
+  access:
+    site:
+      login: true
 
   providers:
     facebook:
-      enabled: true
+      enabled: false
       credentials:
         key:
         secret:
 
     google:
-      enabled: true
+      enabled: false
       credentials:
         key:
         secret:
 
     github:
-      enabled: true
+      enabled: false
       credentials:
         key:
         secret:
 
     twitter:
-      enabled: true
+      enabled: false
       credentials:
         key:
         secret:
