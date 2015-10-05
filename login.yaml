@@ -9,25 +9,25 @@ oauth:
       login: true
 
   providers:
-    facebook:
+    Facebook:
       enabled: false
       credentials:
         key:
         secret:
 
-    google:
+    Google:
       enabled: false
       credentials:
         key:
         secret:
 
-    github:
+    GitHub:
       enabled: false
       credentials:
         key:
         secret:
 
-    twitter:
+    Twitter:
       enabled: false
       credentials:
         key:
