@@ -50,7 +50,7 @@ class OAuthLoginController extends Controller
     protected $scopes = [
         'github' => ['user'],
         'google' => ['userinfo_email', 'userinfo_profile'],
-        'facebook' => ['public_profile', 'email']
+        'facebook' => ['public_profile']
     ];
 
     /**
@@ -216,7 +216,7 @@ class OAuthLoginController extends Controller
     {
         return $this->genericOAuthProvider(function() {
             // Send a request now that we have access token
-            $data = json_decode($this->service->request('/me&fields=name,email,id'), true);
+            $data = json_decode($this->service->request('/me'), true);
             $email = isset($data['email']) ? $data['email'] : '';
 
             // Authenticate OAuth user against Grav system.
