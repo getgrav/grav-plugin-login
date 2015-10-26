@@ -294,7 +294,11 @@ class OAuthLoginController extends Controller
         if (User::load($username . "." . strtolower($this->action))->exists()) {
             $user = User::load($username. "." . strtolower($this->action));
             $password = md5($username . $email);
-            return $user->authenticate($password);
+            $result = $user->authenticate($password);
+            if ($result) {
+                $this->grav['session']->user = $user;
+            }
+            return $result;
         } else {
             $this->create($username, $email, $language);
         }
