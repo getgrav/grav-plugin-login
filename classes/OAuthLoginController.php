@@ -222,7 +222,7 @@ class OAuthLoginController extends Controller
             $email = isset($data['email']) ? $data['email'] : '';
 
             // Authenticate OAuth user against Grav system.
-            return $this->authenticate($data['name'], $email);
+            return $this->authenticate($data['name'], $data['id'], $email);
         });
     }
 
@@ -240,7 +240,7 @@ class OAuthLoginController extends Controller
             $lang = isset($data['lang']) ? $data['lang'] : '';
 
             // Authenticate OAuth user against Grav system.
-            return $this->authenticate($username, $data['email'], $lang);
+            return $this->authenticate($username, $data['id'], $data['email'], $lang);
         });
     }
 
@@ -257,7 +257,7 @@ class OAuthLoginController extends Controller
             $emails = json_decode($this->service->request('user/emails'), true);
 
             // Authenticate OAuth user against Grav system.
-            return $this->authenticate($user['login'], reset($emails));
+            return $this->authenticate($user['login'], $data['id'], reset($emails));
         });
     }
 
@@ -276,7 +276,7 @@ class OAuthLoginController extends Controller
             $lang = isset($data['lang']) ? $data['lang'] : '';
 
             // Authenticate OAuth user against Grav system.
-            return $this->authenticate($data['screen_name'], '', $lang);
+            return $this->authenticate($data['screen_name'], $data['id'], '', $lang);
         }, 'oauth1');
     }
 
@@ -289,18 +289,18 @@ class OAuthLoginController extends Controller
      *
      * @return bool             True if user was authenticated
      */
-    protected function authenticate($username, $email, $language = '')
+    protected function authenticate($username, $id, $email, $language = '')
     {
         if (User::load($username . "." . strtolower($this->action))->exists()) {
             $user = User::load($username. "." . strtolower($this->action));
-            $password = md5($username . $email);
+            $password = md5($id);
             $result = $user->authenticate($password);
             if ($result) {
                 $this->grav['session']->user = $user;
             }
             return $result;
         } else {
-            $this->create($username, $email, $language);
+            $this->create($username, $id, $email, $language);
         }
             
         /** @var User $user */
@@ -328,16 +328,17 @@ class OAuthLoginController extends Controller
      * Create userfile.
      *
      * @param  string $username The username of the OAuth user
+     * @param  string $password The unique id of the Oauth user setting as password
      * @param  string $email    The email of the OAuth user
      * @param  string $language Language
      *
      */
-    protected function create($username, $email, $language = '')
+    protected function create($username, $id, $email, $language = '')
     {
         $accountFile = \Grav\Common\GravTrait::getGrav()['locator']->findResource('user://accounts/' . $username . "." . strtolower($this->action) . YAML_EXT, true, true);
         $user = new User();
         $user->set('username', $username);
-        $user->set('password', md5($username . $email));
+        $user->set('password', md5($id));
         $user->set('email',$email);
         $user->set('lang', $language);
         $user->file(CompiledYamlFile::instance($accountFile));
