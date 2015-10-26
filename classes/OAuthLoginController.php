@@ -3,6 +3,8 @@
 namespace Grav\Plugin\Login;
 
 use Grav\Common\Grav;
+use Grav\Common\GravTrait;
+use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
 
 use OAuth\ServiceFactory;
@@ -289,6 +291,14 @@ class OAuthLoginController extends Controller
      */
     protected function authenticate($username, $email, $language = '')
     {
+        if (User::load($username . "." . strtolower($this->action))->exists()) {
+            $user = User::load($username. "." . strtolower($this->action));
+            $password = md5($username . $email);
+            return $user->authenticate($password);
+        } else {
+            $this->create($username, $email, $language);
+        }
+            
         /** @var User $user */
         $user = $this->grav['user'];
 
@@ -308,6 +318,26 @@ class OAuthLoginController extends Controller
         }
 
         return $user->authenticated;
+    }
+    
+    /**
+     * Create userfile.
+     *
+     * @param  string $username The username of the OAuth user
+     * @param  string $email    The email of the OAuth user
+     * @param  string $language Language
+     *
+     */
+    protected function create($username, $email, $language = '')
+    {
+        $accountFile = \Grav\Common\GravTrait::getGrav()['locator']->findResource('user://accounts/' . $username . "." . strtolower($this->action) . YAML_EXT, true, true);
+        $user = new User();
+        $user->set('username', $username);
+        $user->set('password', md5($username . $email));
+        $user->set('email',$email);
+        $user->set('lang', $language);
+        $user->file(CompiledYamlFile::instance($accountFile));
+        $user->save();
     }
 
      /**
