@@ -21,7 +21,8 @@ en:
 
     OAUTH_SECTION: OAuth
     OAUTH_ENABLE: Enable OAuth
-    ACCESS: OAuth access rights
+    OAUTH_USER_AUTOCREATE: Auto-create user account
+    OAUTH_ACCESS: OAuth user access rights
     OAUTH_PROVIDER_SECTION: OAuth providers
     OAUTH_PROVIDER_FACEBOOK: Enable Facebook OAuth
     OAUTH_PROVIDER_GOOGLE: Enable Google OAuth

@@ -1,16 +1,10 @@
 <?php
 namespace Grav\Plugin;
 
-use Grav\Common\Language\Language;
-use Grav\Common\Page\Page;
-use Grav\Common\Page\Pages;
 use Grav\Common\Plugin;
-use Grav\Common\Twig;
-use Grav\Common\Uri;
+use Grav\Common\Page\Page;
 use Grav\Common\User\User;
-use Grav\Plugin\Admin;
 use RocketTheme\Toolbox\Session\Message;
-use RocketTheme\Toolbox\Session\Session;
 
 class LoginPlugin extends Plugin
 {

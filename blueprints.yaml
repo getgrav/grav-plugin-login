@@ -66,9 +66,20 @@ form:
           validate:
             type: bool
 
-        oauth.access:
+        oauth.user.autocreate:
+          type: toggle
+          label: LOGIN_PLUGIN.OAUTH_USER_AUTOCREATE
+          highlight: 0
+          default: 0
+          options:
+            1: PLUGIN_ADMIN.ENABLED
+            0: PLUGIN_ADMIN.DISABLED
+          validate:
+            type: bool
+
+        oauth.user.access:
           type: array
-          label: LOGIN_PLUGIN.ACCESS
+          label: LOGIN_PLUGIN.OAUTH_ACCESS
           placeholder_key: signin.login
           placeholder_value: true
 

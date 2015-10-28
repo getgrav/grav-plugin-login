@@ -4,9 +4,12 @@ route: false
 
 oauth:
   enabled: false
-  access:
-    site:
-      login: true
+
+  user:
+    autocreate: false
+    access:
+      site:
+        login: true
 
   providers:
     Facebook:

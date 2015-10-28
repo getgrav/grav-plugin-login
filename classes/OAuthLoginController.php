@@ -3,9 +3,9 @@
 namespace Grav\Plugin\Login;
 
 use Grav\Common\Grav;
-use Grav\Common\GravTrait;
-use Grav\Common\File\CompiledYamlFile;
+use Grav\Common\Inflector;
 use Grav\Common\User\User;
+use Grav\Common\File\CompiledYamlFile;
 
 use OAuth\ServiceFactory;
 use OAuth\Common\Storage\Session;
@@ -106,7 +106,7 @@ class OAuthLoginController extends Controller
             return true;
         }
 
-        // Check OAuth authentication statues
+        // Check OAuth authentication status
         $authenticated = parent::execute();
         if (is_bool($authenticated)) {
             $this->reset();
@@ -236,7 +236,11 @@ class OAuthLoginController extends Controller
         return $this->genericOAuthProvider(function() {
             // Get username, email and language
             $data = json_decode($this->service->request('userinfo'), true);
+
             $username = $data['given_name'] . ' ' . $data['family_name'];
+            if (preg_match('~[\w\s]+\((\w+)\)~i', $data['name'], $matches)) {
+                $username = $matches[1];
+            }
             $lang = isset($data['lang']) ? $data['lang'] : '';
 
             // Authenticate OAuth user against Grav system.
@@ -257,7 +261,7 @@ class OAuthLoginController extends Controller
             $emails = json_decode($this->service->request('user/emails'), true);
 
             // Authenticate OAuth user against Grav system.
-            return $this->authenticate($user['login'], $data['id'], reset($emails));
+            return $this->authenticate($user['login'], $user['id'], reset($emails));
         });
     }
 
@@ -291,58 +295,84 @@ class OAuthLoginController extends Controller
      */
     protected function authenticate($username, $id, $email, $language = '')
     {
-        if (User::load($username . "." . strtolower($this->action))->exists()) {
-            $user = User::load($username. "." . strtolower($this->action));
+        $accountFile = Inflector::underscorize($username);
+        $user = User::load(strtolower("$accountFile.{$this->action}"));
+
+        if ($user->exists()) {
+            // Update username (hide OAuth from user)
+            $user->set('username', $username);
+
             $password = md5($id);
-            $result = $user->authenticate($password);
-            if ($result) {
-                $this->grav['session']->user = $user;
-            }
-            return $result;
+            $authenticated = $user->authenticate($password);
         } else {
-            $this->create($username, $id, $email, $language);
+            /** @var User $user */
+            $user = $this->grav['user'];
+
+            // Check user rights
+            if (!$user->authenticated) {
+                $oauthUser = $this->grav['config']->get('plugins.login.oauth.user', []);
+
+                // Create new user from OAuth request
+                $user = $this->createUser([
+                    'id' => $id,
+                    'username' => $username,
+                    'email' => $email,
+                    'lang' => $language,
+                    'access' => $oauthUser['access']
+                ], $oauthUser['autocreate']);
+            }
+
+            // Authenticate user against oAuth rules
+            $authenticated = $user->authenticated;
         }
-            
+
+        // Store user in session
+        if ($authenticated) {
+            $this->grav['session']->user = $user;
+        }
+
+        return $authenticated;
+    }
+
+    /**
+     * Create user.
+     *
+     * @param  string $data['username']   The username of the OAuth user
+     * @param  string $data['password']   The unique id of the Oauth user
+     *                                    setting as password
+     * @param  string $data['email']      The email of the OAuth user
+     * @param  string $data['language']   Language
+     * @param  bool   $save               Save user
+     *
+     * @return User                       A user object
+     */
+    protected function createUser($data, $save = false)
+    {
         /** @var User $user */
         $user = $this->grav['user'];
 
-        if (!$user->authenticated) {
-            // Create new user from OAuth request
-            $user->set('username', $username);
-            $user->set('email', $email);
-            $user->set('lang', $language);
+        $accountFile = Inflector::underscorize($data['username']);
+        $accountFile = $this->grav['locator']->findResource('user://accounts/' . strtolower("$accountFile.{$this->action}") . YAML_EXT, true, true);
 
-            // Set access rights
-            $user->join('access',
-                $this->grav['config']->get('plugins.login.oauth.access', [])
-            );
+        $user->set('username', $data['username']);
+        $user->set('password', md5($data['id']));
+        $user->set('email', $data['email']);
+        $user->set('lang', $data['lang']);
 
-            // Authorize OAuth user to access page(s)
-            $user->authenticated = $user->authorize('site.login');
+        // Set access rights
+        $user->join('access',
+            $this->grav['config']->get('plugins.login.oauth.user.access', [])
+        );
+
+        // Authorize OAuth user to access page(s)
+        $user->authenticated = $user->authorize('site.login');
+
+        if ($save) {
+            $user->file(CompiledYamlFile::instance($accountFile));
+            $user->save();
         }
 
-        return $user->authenticated;
-    }
-    
-    /**
-     * Create userfile.
-     *
-     * @param  string $username The username of the OAuth user
-     * @param  string $password The unique id of the Oauth user setting as password
-     * @param  string $email    The email of the OAuth user
-     * @param  string $language Language
-     *
-     */
-    protected function create($username, $id, $email, $language = '')
-    {
-        $accountFile = \Grav\Common\GravTrait::getGrav()['locator']->findResource('user://accounts/' . $username . "." . strtolower($this->action) . YAML_EXT, true, true);
-        $user = new User();
-        $user->set('username', $username);
-        $user->set('password', md5($id));
-        $user->set('email',$email);
-        $user->set('lang', $language);
-        $user->file(CompiledYamlFile::instance($accountFile));
-        $user->save();
+        return $user;
     }
 
      /**
