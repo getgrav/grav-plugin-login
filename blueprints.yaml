@@ -48,4 +48,10 @@ form:
       help: "Custom route to a custom login page that your theme provides"
       placeholder: "/my-custom-login"
 
+    redirect:
+      type: text
+      label: Redirect after login
+      help: "Custom route to redirect after login"
+      placeholder: "/my-page"
+
 
