@@ -149,6 +149,8 @@ class LoginController
 
                 if ($result) {
                     $this->grav['session']->user = $user;
+                } else {
+                    return false;
                 }
             }
         }
