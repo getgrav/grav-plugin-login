@@ -104,25 +104,5 @@ You can also copy this `login-status.html.twig` file into your theme and modify 
 You can add OAuth providers to the **STUFF HERE - DO NOT PUBLISH UNTIL GENERAL OAUTH SETTINGS FINISHED**
 
 ## Google
+Visit the [Google Developers Console](https://console.developers.google.com) (sign in with a google account, preferably your businesses gmail). Select **Create Project** and give the project a name (can be anything). Click **Create**. ![](assets/google/google.png)When it's finished creating in the left hand menu choose **Credentials** under **APIs & Auth** (you may need to click **APIs & Auth** in order to display **Credntials**). ![](assets/google/google_3.png) Under **Add credentials** (center of screen) select **OAuth 2.0 client ID**.![](assets/google/google_4.png) Then select **Configure consent screen** in the top right corner. ![](assets/google/google_5.png)The only requirement is **Product name** which should be the name of your website/business (not a url). You may fill in the other options as you want on the consent screen. (The consent screen can also be changed later). ![](assets/google/google_6.png) Then once you save the consent screen select **Web application** from the radio buttons and fill in the fields. **Name** being name of product/business. **Authorized Javascript origins** is the root domain name of the login page (no routes or wildcards) such as `http://getgrav.org`. ![](assets/google/google_7.png) If needed, enter multiple sub domains, creating an entry for each. **Authorized redirect URIs** include the **same** Authorized Javascript origins used along with the **route** to the login page such as `http://getgrav.org/login`. Click **create**. Copy **Client ID** and **client secret** into login.yaml under Google. ![](assets/google/google_8.png)Be sure to change `Google.enabled` to `true`
 
-Visit the [Google Developers Console](https://console.developers.google.com) (sign in with a google account, preferably your businesses gmail).
-
-Select **Create Project** and give the project a name (can be anything). Click **Create**. ![](assets/google/google.png)
-
-When it's finished creating in the left hand menu choose **Credentials** under **APIs & Auth** (you may need to click **APIs & Auth** in order to display **Credntials**). ![](assets/google/google_3.png) 
-
-Under **Add credentials** (center of screen) select **OAuth 2.0 client ID**.![](assets/google/google_4.png) 
-
-Then select **Configure consent screen** in the top right corner. ![](assets/google/google_5.png)
-
-The only requirement is **Product name** which should be the name of your website/business (not a url). You may fill in the other options as you want on the consent screen. (The consent screen can also be changed later). ![](assets/google/google_6.png)
-
-Then once you save the consent screen select **Web application** from the radio buttons and fill in the fields. **Name** being name of product/business. **Authorized Javascript origins** is the root domain name of the login page (no routes or wildcards) such as `http://getgrav.org`.
->IMPORTANT: You may not use localhost as a domain as verifications will fail
-
-If needed, enter multiple sub domains, creating an entry for each. **Authorized redirect URIs** include the **same** Authorized Javascript origins used along with the **route** to the login page such as `http://getgrav.org/login`. Click **create**. 
->Again, localhost is not a permitted domain
-
-![](assets/google/google_7.png) 
-
-Copy **Client ID** and **client secret** into login.yaml under Google. ![](assets/google/google_8.png)Be sure to change `Google.enabled` to `true`
