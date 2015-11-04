@@ -6,3 +6,12 @@ en:
     BTN_LOGIN: Login
     BTN_LOGOUT: Logout
     BTN_FORGOT: Forgot
+
+fr:
+  LOGIN_PLUGIN:
+    ACCESS_DENIED: Accès non autorisé...
+    LOGIN_FAILED: Echec de la connexion...
+    LOGIN_SUCCESSFUL: Vous avez été connecté avec succès.
+    BTN_LOGIN: Connexion
+    BTN_LOGOUT: Déconnexion
+    BTN_FORGOT: Mot de passe oublié
