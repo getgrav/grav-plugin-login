@@ -102,6 +102,15 @@ You can also copy this `login-status.html.twig` file into your theme and modify 
 # OAuth
 
 You can add OAuth providers to the **STUFF HERE - DO NOT PUBLISH UNTIL GENERAL OAUTH SETTINGS FINISHED**
+>Note: OAuth has not been tested with Grav's multilang feature! Due to this, certain OAuth providers may not function properly on multilang sites
+
+## Github
+
+Visit Github's [Developer Applications Console](https://github.com/settings/developers) and press button **Register new application** (login if necesarry). ![](assets/github/github.png) 
+
+Fill out the name and the URL (can be anything) and fill in the **callback**, which must be equal to where your grav site is located, generally just the host, i.e. `http://getgrav.org`. ![](assets/github/github_2.png)
+
+Copy **Client ID** and **client secret** into login.yaml under Github. ![](assets/github/github_3.png)Be sure to change `Github.enabled` to `true`
 
 ## Google
 
@@ -126,3 +135,7 @@ If needed, enter multiple sub domains, creating an entry for each. **Authorized 
 ![](assets/google/google_7.png) 
 
 Copy **Client ID** and **client secret** into login.yaml under Google. ![](assets/google/google_8.png)Be sure to change `Google.enabled` to `true`
+
+## Twitter
+
+Login if necessary. Create a [new Twitter App](https://apps.twitter.com/app/new) , fill out name, application website, choose "Browser" as application type, choose the callback URL like above, default access type can be set to read-only, click on "Register application" and then you should be directed to your new application with the Client ID and secret ready to be copied and pasted into the YAML file.
