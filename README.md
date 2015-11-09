@@ -104,6 +104,18 @@ You can also copy this `login-status.html.twig` file into your theme and modify 
 You can add OAuth providers to the **STUFF HERE - DO NOT PUBLISH UNTIL GENERAL OAUTH SETTINGS FINISHED**
 >Note: OAuth has not been tested with Grav's multilang feature! Due to this, certain OAuth providers may not function properly on multilang sites
 
+>IMPORTANT: `localhost` may NOT be used for callback and allowed URLs when creating OAuth provider applications due to certificate verification issues. Some services allow other URLs and it may be possible to add custom domains pointing to 127.0.0.1 in your hosts file and point applications there.
+
+## Facebook
+
+![](assets/facebook/facebook_2.png)
+![](assets/facebook/facebook_3.png)
+![](assets/facebook/facebook_4.png)
+![](assets/facebook/facebook_5.png)
+![](assets/facebook/facebook_6.png)
+![](assets/facebook/facebook_7.png)
+![](assets/facebook/facebook_8.png)
+
 ## Github
 
 Visit Github's [Developer Applications Console](https://github.com/settings/developers) and press button **Register new application** (login if necesarry). ![](assets/github/github.png) 
@@ -127,10 +139,8 @@ Then select **Configure consent screen** in the top right corner. ![](assets/goo
 The only requirement is **Product name** which should be the name of your website/business (not a url). You may fill in the other options as you want on the consent screen. (The consent screen can also be changed later). ![](assets/google/google_6.png)
 
 Then once you save the consent screen select **Web application** from the radio buttons and fill in the fields. **Name** being name of product/business. **Authorized Javascript origins** is the root domain name of the login page (no routes or wildcards) such as `http://getgrav.org`.
->IMPORTANT: You may not use localhost as a domain as verifications will fail
 
 If needed, enter multiple sub domains, creating an entry for each. **Authorized redirect URIs** include the **same** Authorized Javascript origins used along with the **route** to the login page such as `http://getgrav.org/login`. Click **create**. 
->Again, localhost is not a permitted domain
 
 ![](assets/google/google_7.png) 
 
