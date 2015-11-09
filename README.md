@@ -101,7 +101,7 @@ You can also copy this `login-status.html.twig` file into your theme and modify 
 
 # OAuth
 
-You can add OAuth providers to the **STUFF HERE - DO NOT PUBLISH UNTIL GENERAL OAUTH SETTINGS FINISHED**
+You can add OAuth providers to the login plugin as another method to have users on your site. To enable OAuth change `oauth.enabled` to `true` in `login.yaml`. By default OAuth allows users to login though they do not create an account file for the user. If you want an account file created (ex: for tracking purposes) change `oauth.user.autocreate` to `true` in `login.yaml`. 
 >Note: OAuth has not been tested with Grav's multilang feature! Due to this, certain OAuth providers may not function properly on multilang sites
 
 >IMPORTANT: `localhost` may NOT be used for callback and allowed URLs when creating OAuth provider applications due to certificate verification issues. Some services allow other URLs and it may be possible to add custom domains pointing to 127.0.0.1 in your hosts file and point applications there.
