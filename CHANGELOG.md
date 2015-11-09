@@ -1,5 +1,5 @@
 # v0.4.0
-## 10/XX/2015
+## 11/09/2015
 
 1. [](#new)
     * Added OAuth login support for _Facebook_, _Google_, _GitHub_ and _Twitter_
