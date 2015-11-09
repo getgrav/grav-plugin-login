@@ -108,13 +108,17 @@ You can add OAuth providers to the **STUFF HERE - DO NOT PUBLISH UNTIL GENERAL O
 
 ## Facebook
 
-![](assets/facebook/facebook_2.png)
-![](assets/facebook/facebook_3.png)
-![](assets/facebook/facebook_4.png)
-![](assets/facebook/facebook_5.png)
-![](assets/facebook/facebook_6.png)
-![](assets/facebook/facebook_7.png)
-![](assets/facebook/facebook_8.png)
+Visit https://developers.facebook.com/quickstarts/?platform=web and create an app name then click **Create New Facebook App ID.**
+
+Choose a category most similar to your business then click **Create App ID.**
+
+Scroll down on the next screen to the section titled **Tell us about your website.** Input a URL for the site (no need to include the protocol). Click **Next**
+
+Click **Skip Quick Start** Copy the **App ID** and **App Secret** into `login.yaml`
+
+On the left hand side click **Settings**
+In the **Basic** tab add your domain into the **App Domains** section as well as enter a contact email (required for facebook developer program). In the **Advanced** tab scroll down to the **Client OAuth Settings** Make sure that **Client OAuth Login** is enabled as well as **Web OAuth Login** is enabled. In the **Valid OAuth redirect URIs** section add the routes of all pages that are protected by login. This includes the domains. EX: `http://getgrav.org/`, `http://getgrav.org/login`, `http://getgrav.org/en/login`, and `http://getgrav.org/protected/page/route`
+
 
 ## Github
 
