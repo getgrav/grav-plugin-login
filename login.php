@@ -8,6 +8,7 @@ use Grav\Common\Plugin;
 use Grav\Common\Twig;
 use Grav\Common\Uri;
 use Grav\Common\User\User;
+use Grav\Common\Utils;
 use Grav\Plugin\Admin;
 use RocketTheme\Toolbox\Session\Message;
 use RocketTheme\Toolbox\Session\Session;
@@ -97,6 +98,21 @@ class LoginPlugin extends Plugin
         $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
         $task = substr($task, strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
+
+        if ($task == 'login') {
+            if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+                $this->grav['messages']->add($this->grav['language']->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
+                $this->authenticated = false;
+                $twig = $this->grav['twig'];
+                $twig->twig_vars['notAuthorized'] = true;
+                return;
+            }
+        } else if ($task == 'logout') {
+            $nonce = $this->grav['uri']->param('logout-nonce');
+            if (!isset($nonce) || !Utils::verifyNonce($nonce, 'logout-form')) {
+                return;
+            }
+        }
 
         require_once __DIR__ . '/classes/controller.php';
         $controller = new LoginController($this->grav, $task, $post);
