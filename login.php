@@ -99,18 +99,20 @@ class LoginPlugin extends Plugin
         $task = substr($task, strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
 
-        if ($task == 'login') {
-            if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
-                $this->grav['messages']->add($this->grav['language']->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
-                $this->authenticated = false;
-                $twig = $this->grav['twig'];
-                $twig->twig_vars['notAuthorized'] = true;
-                return;
-            }
-        } else if ($task == 'logout') {
-            $nonce = $this->grav['uri']->param('logout-nonce');
-            if (!isset($nonce) || !Utils::verifyNonce($nonce, 'logout-form')) {
-                return;
+        if (method_exists('Utils', 'getNonce')) {
+            if ($task == 'login') {
+                if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+                    $this->grav['messages']->add($this->grav['language']->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
+                    $this->authenticated = false;
+                    $twig = $this->grav['twig'];
+                    $twig->twig_vars['notAuthorized'] = true;
+                    return;
+                }
+            } else if ($task == 'logout') {
+                $nonce = $this->grav['uri']->param('logout-nonce');
+                if (!isset($nonce) || !Utils::verifyNonce($nonce, 'logout-form')) {
+                    return;
+                }
             }
         }
 
