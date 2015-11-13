@@ -99,7 +99,7 @@ class LoginPlugin extends Plugin
         $task = substr($task, strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
 
-        if (method_exists('Utils', 'getNonce')) {
+        if (method_exists('Grav\Common\Utils', 'getNonce')) {
             if ($task == 'login') {
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
