@@ -211,3 +211,15 @@
          -o-transition: opacity 0.3s ease-in-out 0s;
             transition: opacity 0.3s ease-in-out 0s;
 }
+
+#grav-login .rememberme {
+    display: inline-block;
+    float: left;
+    padding: 7px 0;
+    vertical-align: middle;
+}
+
+#grav-login .rememberme label {
+    font-weight: inherit;
+    display: inline;
+}

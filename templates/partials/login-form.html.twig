@@ -45,6 +45,15 @@
             {% endif %}
         {% endfor %}
         <div class="form-actions secondary-accent">
+            {% if config.plugins.login.rememberme.enabled %}
+                <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
+                    <div class="form-input-wrapper">
+                        <input type="checkbox" value="1" name="rememberme" id="#rememberme">
+                        <label class="inline" for="#rememberme" title="{{ 'LOGIN_PLUGIN.REMEMBER_ME_HELP'|t }}">{{ 'LOGIN_PLUGIN.REMEMBER_ME'|t }}</label>
+                    </div>
+                </div>
+            {% endif %}
+
             <button type="submit" class="button primary" name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'LOGIN_PLUGIN.BTN_LOGIN'|t }}</button>
         </div>
     </form>

@@ -3,9 +3,16 @@ en:
     ACCESS_DENIED: Access denied...
     LOGIN_FAILED: Login failed...
     LOGIN_SUCCESSFUL: You have been successfully logged in.
+
     BTN_LOGIN: Login
     BTN_LOGOUT: Logout
     BTN_FORGOT: Forgot
+
+    SESSION: "&ldquo;Remember Me&rdquo;-Session"
+    REMEMBER_ME: Remember Me
+    REMEMBER_ME_HELP: "Sets a persistent cookie on your browser to allow persistent-login authentication between sessions."
+    REMEMBER_ME_STOLEN_COOKIE: "Someone else has used your login information to access this page! All sessions were logged out. Please log in with your credentials and check your data."
+
     OAUTH_LOGIN: Sign in with %s
     OAUTH_SIGNIN: Sign in with your username and password
     OAUTH_CONNECT_MESSAGE: Connect with a social network
