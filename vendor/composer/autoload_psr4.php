@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Grav\\Plugin\\Login\\' => array($baseDir . '/classes'),
+    'Birke\\' => array($vendorDir . '/birke/rememberme/src'),
 );
