@@ -1,17 +1,17 @@
 [
     {
         "name": "lusitanian/oauth",
-        "version": "v0.6.0",
-        "version_normalized": "0.6.0.0",
+        "version": "v0.8.3",
+        "version_normalized": "0.8.3.0",
         "source": {
             "type": "git",
             "url": "https://github.com/Lusitanian/PHPoAuthLib.git",
-            "reference": "74a5a62457568176d9c1af41a900dd3389b70414"
+            "reference": "d47849e3838a7ea738111e3f1d7c810cc950539a"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/Lusitanian/PHPoAuthLib/zipball/74a5a62457568176d9c1af41a900dd3389b70414",
-            "reference": "74a5a62457568176d9c1af41a900dd3389b70414",
+            "url": "https://api.github.com/repos/Lusitanian/PHPoAuthLib/zipball/d47849e3838a7ea738111e3f1d7c810cc950539a",
+            "reference": "d47849e3838a7ea738111e3f1d7c810cc950539a",
             "shasum": ""
         },
         "require": {
@@ -28,7 +28,7 @@
             "predis/predis": "Allows using the Redis storage backend.",
             "symfony/http-foundation": "Allows using the Symfony Session storage backend."
         },
-        "time": "2015-09-24 00:18:45",
+        "time": "2015-11-17 21:54:31",
         "type": "library",
         "extra": {
             "branch-alias": {

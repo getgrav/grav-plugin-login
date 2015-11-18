@@ -52,6 +52,11 @@ class Google extends AbstractService
     const SCOPE_ADWORDS                     = 'https://www.googleapis.com/auth/adwords/';
     const SCOPE_GAN                         = 'https://www.googleapis.com/auth/gan'; // google affiliate network...?
 
+    //Doubleclick for Publishers
+    const SCOPE_DFP                         = 'https://www.googleapis.com/auth/dfp';
+    const SCOPE_DFP_TRAFFICKING             = 'https://www.googleapis.com/auth/dfatrafficking';
+    const SCOPE_DFP_REPORTING               = 'https://www.googleapis.com/auth/dfareporting';
+
     // Google Analytics
     const SCOPE_ANALYTICS                   = 'https://www.googleapis.com/auth/analytics';
     const SCOPE_ANALYTICS_EDIT              = 'https://www.googleapis.com/auth/analytics.edit';
@@ -73,6 +78,7 @@ class Google extends AbstractService
     const SCOPE_CALENDAR                    = 'https://www.googleapis.com/auth/calendar';
     const SCOPE_CALENDAR_READ_ONLY          = 'https://www.googleapis.com/auth/calendar.readonly';
     const SCOPE_CONTACT                     = 'https://www.google.com/m8/feeds/';
+    const SCOPE_CONTACTS_RO                 = 'https://www.googleapis.com/auth/contacts.readonly';
     const SCOPE_CHROMEWEBSTORE              = 'https://www.googleapis.com/auth/chromewebstore.readonly';
     const SCOPE_GMAIL                       = 'https://mail.google.com/mail/feed/atom';
     const SCOPE_GMAIL_IMAP_SMTP             = 'https://mail.google.com';
