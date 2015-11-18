@@ -56,5 +56,7 @@
 
             <button type="submit" class="button primary" name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'LOGIN_PLUGIN.BTN_LOGIN'|t }}</button>
         </div>
+
+        {{ nonce_field('login-form', 'login-form-nonce') }}
     </form>
 </section>

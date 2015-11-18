@@ -1,6 +1,7 @@
 enabled: true
 built_in_css: true
 route: false
+redirect:
 
 rememberme:
   enabled: true

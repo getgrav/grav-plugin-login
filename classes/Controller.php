@@ -94,7 +94,10 @@ class Controller implements ControllerInterface
      */
     public function redirect()
     {
-        if ($this->redirect) {
+        $redirect = $this->grav['config']->get('plugins.login.redirect');
+        if ($redirect) {
+            $this->grav->redirect($redirect, $this->redirectCode);
+        } else if ($this->redirect) {
             $this->grav->redirect($this->redirect, $this->redirectCode);
         }
     }

@@ -1,6 +1,8 @@
 <?php
 namespace Grav\Plugin;
 
+use Grav\Plugin\Admin;
+use Grav\Common\Utils;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\User\User;
@@ -151,6 +153,23 @@ class LoginPlugin extends Plugin
         $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
         $task = substr($task, strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
+
+        if (method_exists('Grav\Common\Utils', 'getNonce')) {
+            if ($task == 'login') {
+                if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+                    $this->grav['messages']->add($this->grav['language']->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
+                    $this->authenticated = false;
+                    $twig = $this->grav['twig'];
+                    $twig->twig_vars['notAuthorized'] = true;
+                    return;
+                }
+            } else if ($task == 'logout') {
+                $nonce = $this->grav['uri']->param('logout-nonce');
+                if (!isset($nonce) || !Utils::verifyNonce($nonce, 'logout-form')) {
+                    return;
+                }
+            }
+        }
 
         $controller = new Login\LoginController($this->grav, $task, $post);
         $controller->execute();

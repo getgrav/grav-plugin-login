@@ -49,6 +49,12 @@ form:
       help: LOGIN_PLUGIN.ROUTE_HELP
       placeholder: "/my-custom-login"
 
+    redirect:
+      type: text
+      label: Redirect after login
+      help: "Custom route to redirect after login"
+      placeholder: "/my-page"
+
     rememberme:
       type: section
       title: LOGIN_PLUGIN.SESSION
@@ -230,5 +236,3 @@ form:
                   label: LOGIN_PLUGIN.OAUTH_CLIENT_SECRET
                   validate:
                     type: string
-
-
