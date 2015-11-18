@@ -49,10 +49,40 @@ form:
       help: LOGIN_PLUGIN.ROUTE_HELP
       placeholder: "/my-custom-login"
 
+    rememberme:
+      type: section
+      title: LOGIN_PLUGIN.SESSION
+
+      fields:
+        rememberme.enabled:
+          type: toggle
+          label: PLUGIN_ADMIN.ENABLED
+          help: PLUGIN_ADMIN.SESSION_ENABLED_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        rememberme.timeout:
+          type: text
+          size: small
+          label: PLUGIN_ADMIN.TIMEOUT
+          help: PLUGIN_ADMIN.TIMEOUT_HELP
+          validate:
+              type: number
+              min: 1
+
+        rememberme.name:
+          type: text
+          size: small
+          label: PLUGIN_ADMIN.NAME
+          help: PLUGIN_ADMIN.SESSION_NAME_HELP
+
     oauth:
       type: section
       title: LOGIN_PLUGIN.OAUTH_SECTION
-      underline: true
 
       fields:
         oauth.enabled:

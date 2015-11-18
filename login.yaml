@@ -2,6 +2,11 @@ enabled: true
 built_in_css: true
 route: false
 
+rememberme:
+  enabled: true
+  timeout: 1800                        # Timeout in seconds
+  name: grav-rememberme                # Name prefix of the session cookie
+
 oauth:
   enabled: false
 
