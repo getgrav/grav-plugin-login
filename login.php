@@ -4,6 +4,7 @@ namespace Grav\Plugin;
 use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\User\User;
+
 use RocketTheme\Toolbox\Session\Message;
 
 class LoginPlugin extends Plugin
@@ -73,6 +74,31 @@ class LoginPlugin extends Plugin
 
             if (!isset($session->user)) {
                 $session->user = new User;
+
+                if ($c['config']->get('plugins.login.rememberme.enabled')) {
+                    $controller = new Login\Controller($this->grav, '');
+                    $rememberMe = $controller->rememberMe();
+
+                    // If we can present the correct tokens from the cookie, we are logged in
+                    $username = $rememberMe->login();
+                    if ($username) {
+                        // Normal login process
+                        $user = User::load($username);
+                        if ($user->exists()) {
+                            // There is a chance that an attacker has stolen
+                            // the login token, so we store the fact that
+                            // the user was logged in via RememberMe
+                            // (instead of login form)
+                            $session->remember_me = $rememberMe;
+                            $session->user = $user;
+                        }
+                    }
+
+                    // Check if the token was invalid
+                    if ($rememberMe->loginTokenWasInvalid()) {
+                        $controller->setMessage($t->translate('LOGIN_PLUGIN.REMEMBER_ME_STOLEN_COOKIE'));
+                    }
+                }
             }
 
             return $session->user;
@@ -152,6 +178,9 @@ class LoginPlugin extends Plugin
      */
     public function authorizePage()
     {
+        /** @var User $user */
+        $user = $this->grav['user'];
+
         /** @var Page $page */
         $page = $this->grav['page'];
 
@@ -162,9 +191,6 @@ class LoginPlugin extends Plugin
         if (!$rules) {
             return;
         }
-
-        /** @var User $user */
-        $user = $this->grav['user'];
 
         // Continue to the page if user is authorized to access the page.
         foreach ($rules as $rule => $value) {

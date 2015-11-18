@@ -329,6 +329,9 @@ class OAuthLoginController extends Controller
         // Store user in session
         if ($authenticated) {
             $this->grav['session']->user = $user;
+
+            unset($this->grav['user']);
+            $this->grav['user'] = $user;
         }
 
         return $authenticated;

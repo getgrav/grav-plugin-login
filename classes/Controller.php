@@ -3,11 +3,14 @@
 namespace Grav\Plugin\Login;
 
 use Grav\Common\Grav;
+use Grav\Plugin\Login\RememberMe;
+
+use Birke\Rememberme\Cookie;
 
 class Controller implements ControllerInterface
 {
     /**
-     * @var Grav
+     * @var \Grav\Common\Grav
      */
     public $grav;
 
@@ -37,6 +40,11 @@ class Controller implements ControllerInterface
     protected $prefix = 'do';
 
     /**
+     * @var \Birke\Rememberme\Authenticator
+     */
+    protected $rememberMe;
+
+    /**
      * @param Grav   $grav
      * @param string $action
      * @param array  $post
@@ -46,6 +54,8 @@ class Controller implements ControllerInterface
         $this->grav = $grav;
         $this->action = $action;
         $this->post = $this->getPost($post);
+
+        $this->rememberMe();
     }
 
     /**
@@ -112,6 +122,41 @@ class Controller implements ControllerInterface
         /** @var Message $messages */
         $messages = $this->grav['messages'];
         $messages->add($msg, $type);
+    }
+
+    /**
+     * Gets and sets the RememberMe class
+     *
+     * @param  mixed            $var    A rememberMe instance to set
+     *
+     * @return Authenticator            Returns the current rememberMe instance
+     */
+    public function rememberMe($var = null)
+    {
+        if ($var !== null) {
+            $this->rememberMe = $var;
+        }
+        if (!$this->rememberMe) {
+            /** @var Config $config */
+            $config = $this->grav['config'];
+
+            // Setup storage for RememberMe cookies
+            $storage = new RememberMe\TokenStorage();
+            $this->rememberMe = new RememberMe\RememberMe($storage);
+            $this->rememberMe->setCookieName($config->get('plugins.login.rememberme.name'));
+            $this->rememberMe->setExpireTime($config->get('plugins.login.rememberme.timeout'));
+
+            // Secure cookies with system based hash
+            $hash = $config->get('system.security.default_hash');
+            $this->rememberMe->setSalt($hash);
+
+            // Set cookie with correct base path of Grav install
+            $cookie = new Cookie();
+            $cookie->setPath($this->grav['base_url_relative']);
+            $this->rememberMe->setCookie($cookie);
+        }
+
+        return $this->rememberMe;
     }
 
     /**
