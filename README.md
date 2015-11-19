@@ -34,7 +34,7 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 | [ -P, --permissions=PERMISSIONS ] | The user permissions. It can be either `a` for Admin access only, `s` for Site access only and `b` for both Admin and Site access. |
 | [ -N, --fullname=FULLNAME ]       | The user full name                                              |
 | [ -t, --title=TITLE ]             | The title of the user. Usually used as a subtext. Example: Admin, Collaborator, Developer |
-
+| [ -s, --state=STATE ]             | The state of the account. Either `enabled` (default) or `disabled` |
 
 ### CLI Example
 ```
@@ -60,7 +60,11 @@ Please choose a set of permissions:
  > b
 Enter a fullname: Joe User
 Enter a title:    Site Administrator
-
+Please choose the state for the account:
+  [enabled ] Enabled
+  [disabled] Disabled
+ > enabled
+ 
 Success! User joeuser created.
 ```
 

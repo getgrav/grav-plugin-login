@@ -66,6 +66,12 @@ class NewUserCommand extends ConsoleCommand
                 InputOption::VALUE_REQUIRED,
                 'The title of the user. Usually used as a subtext. Example: Admin, Collaborator, Developer'
             )
+            ->addOption(
+                'state',
+                's',
+                InputOption::VALUE_REQUIRED,
+                'The state of the account. Can be either `enabled` or `disabled`. [default: "enabled"]'
+            )
             ->setDescription('Creates a new user')
             ->setHelp('The <info>new-user</info> creates a new user file in user/accounts/ folder')
         ;
@@ -82,7 +88,8 @@ class NewUserCommand extends ConsoleCommand
             'email'       => $this->input->getOption('email'),
             'permissions' => $this->input->getOption('permissions'),
             'fullname'    => $this->input->getOption('fullname'),
-            'title'       => $this->input->getOption('title')
+            'title'       => $this->input->getOption('title'),
+            'state'       => $this->input->getOption('state')
         ];
 
         $this->validateOptions();
@@ -181,6 +188,20 @@ class NewUserCommand extends ConsoleCommand
             $data['title'] = $this->options['title'];
         }
 
+        if (!$this->options['state'] && !count(array_filter($this->options))) {
+            // Choose State
+            $question = new ChoiceQuestion(
+                'Please choose the <yellow>state</yellow> for the account:',
+                array('enabled' => 'Enabled', 'disabled' => 'Disabled'),
+                'enabled'
+            );
+
+            $question->setErrorMessage('State %s is invalid.');
+            $data['state'] = $helper->ask($this->input, $this->output, $question);
+        } else {
+            $data['state'] = $this->options['state'] ?: 'enabled';
+        }
+
 
         // Create user object and save it
         $user = new User($data);
@@ -253,6 +274,13 @@ class NewUserCommand extends ConsoleCommand
             case 'fullname':
                 if ($value === null || trim($value) == '') {
                     throw new \RuntimeException('Fullname cannot be empty');
+                }
+
+                break;
+
+            case 'state':
+                if ($value !== 'enabled' && $value !== 'disabled') {
+                    throw new \RuntimeException('State is not valid');
                 }
 
                 break;
