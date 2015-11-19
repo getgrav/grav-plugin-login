@@ -19,13 +19,36 @@ $ bin/gpm install login
 
 You can either use the built-in CLI capabilities, or you create a user manually by creating a new YAML file in your `user/acounts` folder.
 
-### CLI NewUser
 
-The simplest way to create a new user is to simply run the `bin/grav newuser` command. This will take you through a few questions to gather information with which to create your user.
+# CLI Usage
 
+The simplest way to create a new user is to simply run the `bin/plugin login newuser` command. This will take you through a few questions to gather information with which to create your user. You can also use inline arguments to avoid the interactive questions.
+
+### Commands
+
+| `bin/plugin login newuser`       | (Supports Interactive Questionnaire)                            |
+|-----------------------------------|-----------------------------------------------------------------|
+| [ -u, --user=USER ]               | The username.                                                   |
+| [ -p, --password=PASSWORD ]       | The password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
+| [ -e, --email=EMAIL ]             | The user email address.                                         |
+| [ -P, --permissions=PERMISSIONS ] | The user permissions. It can be either `a` for Admin access only, `s` for Site access only and `b` for both Admin and Site access. |
+| [ -N, --fullname=FULLNAME ]       | The user full name                                              |
+| [ -t, --title=TITLE ]             | The title of the user. Usually used as a subtext. Example: Admin, Collaborator, Developer |
+| [ -s, --state=STATE ]             | The state of the account. Either `enabled` (default) or `disabled` |
+
+### CLI Example
 ```
-> bin/grav newuser
-Create new user
+> bin/plugin login newuser -u joeuser -p 8c9sRCeBExAiwk -e joeuser@grav.org -P b -N "Joe User" -t "Site Administrator"
+Creating new user
+
+
+Success! User joeuser created.
+```
+
+### Interactive Example
+```
+> bin/plugin login newuser
+Creating new user
 
 Enter a username: joeuser
 Enter a password: 8c9sRCeBExAiwk
@@ -37,7 +60,11 @@ Please choose a set of permissions:
  > b
 Enter a fullname: Joe User
 Enter a title:    Site Administrator
-
+Please choose the state for the account:
+  [enabled ] Enabled
+  [disabled] Disabled
+ > enabled
+ 
 Success! User joeuser created.
 ```
 
