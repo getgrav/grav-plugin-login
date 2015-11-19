@@ -15,3 +15,12 @@ fr:
     BTN_LOGIN: Connexion
     BTN_LOGOUT: Déconnexion
     BTN_FORGOT: Mot de passe oublié
+
+hu:
+  LOGIN_PLUGIN:
+    ACCESS_DENIED: Hozzáférés megtagadva...
+    LOGIN_FAILED: Sikertelen belépés...
+    LOGIN_SUCCESSFUL: Sikeresen beléptél.
+    BTN_LOGIN: Belépés
+    BTN_LOGOUT: Kilépés
+    BTN_FORGOT: Elfelejtettem
