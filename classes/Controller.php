@@ -1,27 +1,23 @@
 <?php
-namespace Grav\Plugin;
 
-use Grav\Common\File\CompiledYamlFile;
+namespace Grav\Plugin\Login;
+
 use Grav\Common\Grav;
-use Grav\Common\User\User;
-use RocketTheme\Toolbox\Session\Message;
+use Grav\Plugin\Login\RememberMe;
 
-class LoginController
+use Birke\Rememberme\Cookie;
+
+class Controller implements ControllerInterface
 {
     /**
-     * @var Grav
+     * @var \Grav\Common\Grav
      */
     public $grav;
 
     /**
      * @var string
      */
-    public $view;
-
-    /**
-     * @var string
-     */
-    public $task;
+    public $action;
 
     /**
      * @var array
@@ -39,19 +35,31 @@ class LoginController
     protected $redirectCode;
 
     /**
+     * @var string
+     */
+    protected $prefix = 'do';
+
+    /**
+     * @var \Birke\Rememberme\Authenticator
+     */
+    protected $rememberMe;
+
+    /**
      * @param Grav   $grav
-     * @param string $task
+     * @param string $action
      * @param array  $post
      */
-    public function __construct(Grav $grav, $task, $post)
+    public function __construct(Grav $grav, $action, $post = null)
     {
         $this->grav = $grav;
-        $this->task = $task ?: 'display';
+        $this->action = $action;
         $this->post = $this->getPost($post);
+
+        $this->rememberMe();
     }
 
     /**
-     * Performs a task.
+     * Performs an action.
      */
     public function execute()
     {
@@ -62,7 +70,7 @@ class LoginController
         }
 
         $success = false;
-        $method = 'task' . ucfirst($this->task);
+        $method = $this->prefix . ucfirst($this->action);
 
         if (!method_exists($this, $method)) {
             throw new \RuntimeException('Page Not Found', 404);
@@ -81,77 +89,17 @@ class LoginController
         return $success;
     }
 
+    /**
+     * Redirects an action
+     */
     public function redirect()
     {
-        if ($this->redirect) {
+        $redirect = $this->grav['config']->get('plugins.login.redirect');
+        if ($redirect) {
+            $this->grav->redirect($redirect, $this->redirectCode);
+        } else if ($this->redirect) {
             $this->grav->redirect($this->redirect, $this->redirectCode);
         }
-    }
-
-    /**
-     * Handle login.
-     *
-     * @return bool True if the action was performed.
-     */
-    public function taskLogin()
-    {
-        $t = $this->grav['language'];
-        $user = $this->grav['user'];
-
-        if ($this->authenticate($this->post)) {
-            $this->setMessage($t->translate('LOGIN_PLUGIN.LOGIN_SUCCESSFUL'));
-            $referrer = $this->grav['uri']->referrer('/');
-            $this->setRedirect($referrer);
-        } else {
-            if ($user->username) {
-                $this->setMessage($t->translate('LOGIN_PLUGIN.ACCESS_DENIED'));
-            } else {
-                $this->setMessage($t->translate('LOGIN_PLUGIN.LOGIN_FAILED'));
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * Handle logout.
-     *
-     * @return bool True if the action was performed.
-     */
-    public function taskLogout()
-    {
-        $this->grav['session']->invalidate()->start();
-        $this->setRedirect('/');
-
-        return true;
-    }
-
-    /**
-     * Authenticate user.
-     *
-     * @param  array $form Form fields.
-     * @return bool
-     */
-    protected function authenticate($form)
-    {
-        /** @var User $user */
-        $user = $this->grav['user'];
-
-        if (!$user->authenticated && isset($form['username']) && isset($form['password'])) {
-            $user = User::load($form['username']);
-            if ($user->exists()) {
-
-                // Authenticate user.
-                $result = $user->authenticate($form['password']);
-
-                if ($result) {
-                    $this->grav['session']->user = $user;
-                }
-            }
-        }
-        $user->authenticated = $user->authorize('site.login');
-
-        return $user->authenticated;
     }
 
     /**
@@ -162,7 +110,7 @@ class LoginController
      */
     public function setRedirect($path, $code = 303)
     {
-        $this->redirect = '/' . preg_replace('|/+|', '/', trim($path, '/'));
+        $this->redirect = $path;
         $this->code = $code;
     }
 
@@ -180,6 +128,41 @@ class LoginController
     }
 
     /**
+     * Gets and sets the RememberMe class
+     *
+     * @param  mixed            $var    A rememberMe instance to set
+     *
+     * @return Authenticator            Returns the current rememberMe instance
+     */
+    public function rememberMe($var = null)
+    {
+        if ($var !== null) {
+            $this->rememberMe = $var;
+        }
+        if (!$this->rememberMe) {
+            /** @var Config $config */
+            $config = $this->grav['config'];
+
+            // Setup storage for RememberMe cookies
+            $storage = new RememberMe\TokenStorage();
+            $this->rememberMe = new RememberMe\RememberMe($storage);
+            $this->rememberMe->setCookieName($config->get('plugins.login.rememberme.name'));
+            $this->rememberMe->setExpireTime($config->get('plugins.login.rememberme.timeout'));
+
+            // Secure cookies with system based hash
+            $hash = $config->get('system.security.default_hash');
+            $this->rememberMe->setSalt($hash);
+
+            // Set cookie with correct base path of Grav install
+            $cookie = new Cookie();
+            $cookie->setPath($this->grav['base_url_relative']);
+            $this->rememberMe->setCookie($cookie);
+        }
+
+        return $this->rememberMe;
+    }
+
+    /**
      * Prepare and return POST data.
      *
      * @param array $post
@@ -187,7 +170,7 @@ class LoginController
      */
     protected function &getPost($post)
     {
-        unset($post['task']);
+        unset($post[$this->prefix]);
 
         // Decode JSON encoded fields and merge them to data.
         if (isset($post['_json'])) {
