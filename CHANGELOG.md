@@ -1,8 +1,12 @@
-# v0.4.0
-## 11/09/2015
+# v1.0.0
+## 11/21/2015
 
 1. [](#new)
     * Added OAuth login support for _Facebook_, _Google_, _GitHub_ and _Twitter_
+    * Added **Nonce** form security support
+    * Added option to "redirect after login"
+    * Added "remember me" functionality
+    * Added Hungarian translation
 2. [](#improved)
     * Added blueprints for Grav Admin plugin (multi-language support!)
 
