@@ -67,7 +67,7 @@ hu:
     REMEMBER_ME_STOLEN_COOKIE: "Valaki a belépési adataid felhasználásával látogatta meg ezt az oldalt! Minden munkamenetet kiléptettünk. Kérlek, jelentkezz be ismét és ellenőrizd az adataidat."
 
     OAUTH_LOGIN: Belépés %s használatával
-    OAUTH_SIGNIN: Belépés felhasználóneved és jelszavad használatával
+    OAUTH_SIGNIN: Belépés felhasználóneved és jelszavad megadásával
     OAUTH_CONNECT_MESSAGE: Összekapcsolás egy közösségi oldallal
     OAUTH_CONNECT_MESSAGE_EXTRA: más közösségi oldalak
     OAUTH_PROVIDER_NOT_SUPPORTED: Az "%s" OAuth szolgáltató nem használható
