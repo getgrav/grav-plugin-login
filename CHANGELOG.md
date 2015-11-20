@@ -1,3 +1,11 @@
+# v0.4.0
+## 11/09/2015
+
+1. [](#new)
+    * Added OAuth login support for _Facebook_, _Google_, _GitHub_ and _Twitter_
+2. [](#improved)
+    * Added blueprints for Grav Admin plugin (multi-language support!)
+
 # v0.3.3
 ## 09/11/2015
 
@@ -34,7 +42,7 @@
 
 1. [](#improved)
     * Disable `enable` in admin
-    
+
 # v0.1.0
 ## 08/04/2015
 
