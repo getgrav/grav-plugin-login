@@ -208,6 +208,10 @@ class LoginPlugin extends Plugin
         /** @var Page $page */
         $page = $this->grav['page'];
 
+        if (!$page) {
+            return;
+        }
+
         $header = $page->header();
         $rules = isset($header->access) ? (array) $header->access : [];
 
