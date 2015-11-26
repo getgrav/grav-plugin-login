@@ -1,3 +1,12 @@
+# v1.0.2
+## XX/XX/2015
+
+1. [](#improved)
+    * Use new security salt for newer and fallback otherwise
+    * Composer update of libraries
+1. [](#bugfix)
+    * Fix remember-me functionality
+    
 # v1.0.1
 ## 11/23/2015
 
