@@ -78,7 +78,7 @@ class LoginPlugin extends Plugin
                 $session->user = new User;
 
                 if ($c['config']->get('plugins.login.rememberme.enabled')) {
-                    $controller = new Login\Controller($this->grav, '');
+                    $controller = new Login\Controller($c, '');
                     $rememberMe = $controller->rememberMe();
 
                     // If we can present the correct tokens from the cookie, we are logged in
