@@ -78,7 +78,7 @@ class LoginPlugin extends Plugin
                 $session->user = new User;
 
                 if ($c['config']->get('plugins.login.rememberme.enabled')) {
-                    $controller = new Login\Controller($this->grav, '');
+                    $controller = new Login\Controller($c, '');
                     $rememberMe = $controller->rememberMe();
 
                     // If we can present the correct tokens from the cookie, we are logged in
@@ -98,7 +98,7 @@ class LoginPlugin extends Plugin
 
                     // Check if the token was invalid
                     if ($rememberMe->loginTokenWasInvalid()) {
-                        $controller->setMessage($t->translate('LOGIN_PLUGIN.REMEMBER_ME_STOLEN_COOKIE'));
+                        $controller->setMessage($c['language']->translate('LOGIN_PLUGIN.REMEMBER_ME_STOLEN_COOKIE'));
                     }
                 }
             }
