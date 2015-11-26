@@ -98,7 +98,7 @@ class LoginPlugin extends Plugin
 
                     // Check if the token was invalid
                     if ($rememberMe->loginTokenWasInvalid()) {
-                        $controller->setMessage($t->translate('LOGIN_PLUGIN.REMEMBER_ME_STOLEN_COOKIE'));
+                        $controller->setMessage($c['language']->translate('LOGIN_PLUGIN.REMEMBER_ME_STOLEN_COOKIE'));
                     }
                 }
             }
