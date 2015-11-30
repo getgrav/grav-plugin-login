@@ -49,6 +49,11 @@ class LoginPlugin extends Plugin
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
 
+        // Check to ensure sessions are enabled.
+        if ($this->grav['config']->get('system.session.enabled') === false) {
+            throw new \RuntimeException('The Login plugin requires "system.session" to be enabled');
+        }
+
         /** @var Grav\Common\Session */
         $session = $this->grav['session'];
 
