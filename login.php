@@ -362,24 +362,27 @@ class LoginPlugin extends Plugin
         }
 
         switch ($action) {
-            case 'validate_password':
-                $this->validate('password1', $form->value('password1'));
-                $this->validate('password2', $form->value('password2'), $form->value('password1'));
-                break;
-
             case 'register_user':
 
                 $data = [];
                 $username = $form->value('username');
                 $this->validate('user', $username);
+                $this->validate('password1', $form->value('password1'));
+                $this->validate('password2', $form->value('password2'), $form->value('password1'));
+
                 $fields = $this->config->get('plugins.login.user_registration.fields', []);
+
+
+
 
                 foreach($fields as $field) {
                     // Process value of field if set in the page process.register_user
-                    foreach($params as $param) {
-                        foreach($param as $key => $paramValue) {
-                            if ($key == $field) {
-                                $data[$field] = $paramValue;
+                    if (isset($params['fields'])) {
+                        foreach($params['fields'] as $param) {
+                            foreach($param as $key => $paramValue) {
+                                if ($key == $field) {
+                                    $data[$field] = $paramValue;
+                                }
                             }
                         }
                     }

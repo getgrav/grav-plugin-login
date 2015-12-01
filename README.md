@@ -236,9 +236,8 @@ form:
           value: Reset
 
   process:
-      -
-        validate_password: []
       - register_user:
+        - fields:
           - access: ['site.login']
           - state: 'enabled'
       - display: '/welcome'
