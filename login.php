@@ -319,6 +319,7 @@ class LoginPlugin extends Plugin
                 if (!preg_match('/^[a-z0-9_-]{3,16}$/', $value)) {
                     throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
                 }
+
                 if (file_exists($this->grav['locator']->findResource('user://accounts/' . $value . YAML_EXT))) {
                     throw new \RuntimeException('Username "' . $value . '" already exists, please pick another username');
                 }
@@ -367,22 +368,25 @@ class LoginPlugin extends Plugin
                 $data = [];
                 $username = $form->value('username');
                 $this->validate('user', $username);
-                $this->validate('password1', $form->value('password1'));
-                $this->validate('password2', $form->value('password2'), $form->value('password1'));
+
+                if (isset($params['options']['validate_password1_and_password2']) && $params['options']['validate_password1_and_password2']) {
+                    $this->validate('password1', $form->value('password1'));
+                    $this->validate('password2', $form->value('password2'), $form->value('password1'));
+                    $data['password'] = $form->value('password1');
+                }
+
+                if (isset($params['options']['validate_password']) && $params['options']['validate_password']) {
+                    $this->validate('password1', $form->value('password'));
+                }
 
                 $fields = $this->config->get('plugins.login.user_registration.fields', []);
-
-
-
 
                 foreach($fields as $field) {
                     // Process value of field if set in the page process.register_user
                     if (isset($params['fields'])) {
-                        foreach($params['fields'] as $param) {
-                            foreach($param as $key => $paramValue) {
-                                if ($key == $field) {
-                                    $data[$field] = $paramValue;
-                                }
+                        foreach($params['fields'] as $key => $param) {
+                            if ($key == $field) {
+                                $data[$field] = $param;
                             }
                         }
                     }
@@ -390,6 +394,11 @@ class LoginPlugin extends Plugin
                     if (!isset($data[$field]) && $form->value($field)) {
                         $data[$field] = $form->value($field);
                     }
+                }
+
+                if (isset($params['options']['validate_password1_and_password2']) && $params['options']['validate_password1_and_password2']) {
+                    unset($data['password1']);
+                    unset($data['password2']);
                 }
 
                 // Don't store the username: that is part of the filename
@@ -400,6 +409,15 @@ class LoginPlugin extends Plugin
                 $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT, true, true));
                 $user->file($file);
                 $user->save();
+
+                if (isset($params['options']['login_after_registration']) && $params['options']['login_after_registration']) {
+                    //Login user
+                    $user = User::load($username);
+                    $this->grav['session']->user = $user;
+                    unset($this->grav['user']);
+                    $this->grav['user'] = $user;
+                    $user->authenticated = $user->authorize('site.login');
+                }
 
                 break;
         }

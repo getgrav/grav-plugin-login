@@ -236,11 +236,13 @@ form:
           value: Reset
 
   process:
-      - register_user:
-        - fields:
-          - access: ['site.login']
-          - state: 'enabled'
-      - display: '/welcome'
+      -
+        register_user:
+          fields:
+            - access: ['site.login']
+            - state: 'enabled'
+      -
+        display: '/welcome'
       -
         message: "Welcome to my site!"
 ---
@@ -248,21 +250,22 @@ form:
 # Registration
 ```
 
-This is a normal form. The only thing different from a contact form or another form that you might write on your site is the process fields.
-
-`validate_password` validates the password entered, and `register_user` processes the actual user registration.
+This is a normal form. The only thing different from a contact form or another form that you might write on your site is the process field `register_user`, which takes care of processing the user registration.
 
 Once the user is registered, Grav redirects the user to the `display` page with the `message` message.
 
-It's important that you add the fields named
+The only field strictly required by Grav is `username`. Then the other fields can be added as needed.
 
-- username
+For example in this case we added
+
 - password1
 - password2
 
-to the form.
+to the form. And, we added to the `register_user.options` the field property `validate_password1_and_password2`. What this does is picking the password1 and password2 fields, validate them, and put the content in the `password` field.
 
-They are the only required fields. You can of course add many other fields, but as a minimum you need those 3.
+You can avoid having 2 fields for the password, which by the way is a recommended option, and just put a single `password` field, along with the option `validate_password`.
+
+If you don't add an option, the `password` field is considered like a normal field, so just the usual form validation is applied. The `validate_password1_and_password2` and `validate_password` checks ensure the password respects the Grav password standards: password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters.
 
 ## Enable the Login plugin registration
 
@@ -301,25 +304,54 @@ The example form shows:
 
 ```
   process:
-      - register_user:
-        - fields:
-          - access: ['site.login']
-          - state: 'enabled'
+      -
+        register_user:
+          fields:
+            - access: ['site.login']
+            - state: 'enabled'
 ```
 
 Access is set to `site.login`, and the user is set to be `enabled`.
 
 ## Login users directly after the registration
 
-TODO
+Just add the option `login_after_registration` and set it to true.
 
-## Activate the user via email
+Example:
 
-TODO
+```
+  process:
+        -
+            register_user:
+                options:
+                    login_after_registration: true
+
+```
 
 ## Add captcha to the user registration
 
-Add a captcha like you would with any form.
+Add a captcha like you would with any form:
+
+Add
+
+```
+        - name: g-recaptcha-response
+          label: Captcha
+          type: captcha
+          recatpcha_site_key: aeio43kdk3idko3k4ikd4
+          recaptcha_not_validated: 'Captcha not valid!'
+          validate:
+            required: true
+```
+
+to the form field, and
+
+```
+process:
+  - captcha
+```
+
+to validate it server-side. Put this process action before all the other actions, so it's processed first and the user is not created if the captcha is not valid.
 
 ## Redirect to another page after login
 
