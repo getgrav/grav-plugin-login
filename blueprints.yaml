@@ -49,6 +49,13 @@ form:
       help: LOGIN_PLUGIN.ROUTE_HELP
       placeholder: "/my-custom-login"
 
+    route_register:
+      type: text
+      size: medium
+      label: LOGIN_PLUGIN.ROUTE_REGISTER
+      help: LOGIN_PLUGIN.ROUTE_REGISTER_HELP
+      placeholder: "/register"
+
     redirect:
       type: text
       label: Redirect after login
