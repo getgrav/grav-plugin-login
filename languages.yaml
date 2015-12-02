@@ -82,6 +82,8 @@ hu:
     BUILTIN_CSS_HELP: Az admin plugin által biztosított CSS beillesztése
     ROUTE: Belépés útvonala
     ROUTE_HELP: Egyedi útvonal egy egyedi belépő oldalhoz, melyet az aktuális téma biztosít
+    ROUTE_REGISTER: Regisztráció útvonala
+    ROUTE_REGISTER_HELP: A regisztrációs oldal elérési útja. Akkor állítsd be, ha a beépített regisztrációs oldalt szeretnéd használni
 
     OAUTH_SECTION: OAuth
     OAUTH_ENABLE: OAuth engedélyezése
