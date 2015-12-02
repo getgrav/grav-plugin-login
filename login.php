@@ -19,6 +19,11 @@ class LoginPlugin extends Plugin
     protected $route;
 
     /**
+     * @var string
+     */
+    protected $route_register;
+
+    /**
      * @var bool
      */
     protected $authenticated = true;
@@ -130,9 +135,17 @@ class LoginPlugin extends Plugin
             $this->route = $this->config->get('plugins.login.route');
         }
 
-        if ($this->route) {
+        $this->route_register = $this->config->get('plugins.login.route_register');
+
+        if ($this->route && $this->route == $uri->path()) {
             $this->enable([
-                'onPagesInitialized' => ['addLoginPage', 0]
+                'onPagesInitialized' => ['addLoginPage', 0],
+            ]);
+        }
+
+        if ($this->route_register && $this->route_register == $uri->path()) {
+            $this->enable([
+                'onPagesInitialized' => ['addRegisterPage', 0],
             ]);
         }
     }
@@ -154,6 +167,22 @@ class LoginPlugin extends Plugin
 
             $pages->addPage($page, $this->route);
         }
+    }
+
+    /**
+     * Add Register page
+     */
+    public function addRegisterPage()
+    {
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+
+        $page = new Page;
+        $page->init(new \SplFileInfo(__DIR__ . "/pages/register.md"));
+        $page->template('form');
+        $page->slug(basename($this->route_register));
+
+        $pages->addPage($page, $this->route_register);
     }
 
     /**

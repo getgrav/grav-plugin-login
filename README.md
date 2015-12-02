@@ -183,15 +183,37 @@ Login if necessary. Create a [new Twitter App](https://apps.twitter.com/app/new)
 
 # Allow User Registration
 
-The login plugin handles user registration. You just need to follow this simple tutorial to make it work.
+The login plugin handles user registration. To enable the registration form, in the Login Plugin configuration just add a path for your registration form page.
+
+Then you probably want to add a "Register" page on your menu.
+
+Here are two ways you can do it, but of course Grav is flexible and you can come up with other ways too.
+
+The first and easiest way is to add a page with the same slug (route) as the registration form. So for example if in the Login Plugin settings you set /register as the registration form path, then create a `04.register` page (the 04 number is just an example, use your own ordering), with no content.
+The Login plugin will "override" that page, serving the registration page form when the user clicks on that menu item.
+
+A second way is to add a custom menu item that points to the registration page, by editing `site.yaml` with this code, that will append a "Register" menu item:
+
+```
+menu:
+  -
+    url: 'register'
+    text: Register
+```
+
+This works in most themes, Antimatter included, but it's not guaranteed to work in all themes, as it's something that must be added to the navigation twig code.
+
+## Customizing the registration form
+
+The provided registration form is just a quick way to start using it. You might however need different fields on the registration form, or you want to add more content. Here's how to do it.
 
 First, create a registration form page.
 
-Create a folder `04.registration/form.md`. The folder name is just an example. Pick the one that suits you. The important part is the filename. Since we're building a form, we need a form.md file.
+Create a folder `04.registration/form.md`. The folder name is just an example. Pick the one that suits you. The important part is the file name: since we're building a form, we need a `form.md` file.
 
 Also, your theme needs to implement forms. Use Antimatter or another form-compatible theme if yours does not work, then once you're setup with the form you can migrate the forms files and make it work on your theme too.
 
-Add the following content to your registration form:
+Add the following content to your registration form page:
 
 ```
 ---
