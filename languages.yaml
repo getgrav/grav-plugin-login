@@ -106,3 +106,8 @@ hu:
     GOOGLE: Google
     GITHUB: GitHub
     TWITTER: Twitter
+
+    USERNAME_NOT_VALID: "A felhasználónév 3-16 karakter hosszú legyen, tartalmazhat kisbetűket, számokat, aláhúzást és kötőjelet. Nagybetűk, szóköz és speciális karakterek használata nem megengedett"
+    USERNAME_NOT_AVAILABLE: "%s nevű felhasználó már létezik, kérlek válassz más felhasználónevet"
+    PASSWORD_NOT_VALID: "A jelszónak tartalmaznia kell legalább egy számot, egy kisbetűt és egy nagybetűt, valamint legalább 8 karakter hosszú kell, hogy legyen"
+    PASSWORDS_DO_NOT_MATCH: "A két jelszó nem egyezik meg. Győzödj meg róla, hogy azonos legyen a kettő"
