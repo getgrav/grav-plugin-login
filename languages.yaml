@@ -46,6 +46,11 @@ en:
     GITHUB: GitHub
     TWITTER: Twitter
 
+    USERNAME_NOT_VALID: "Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed"
+    USERNAME_NOT_AVAILABLE: "Username %s already exists, please pick another username"
+    PASSWORD_NOT_VALID: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+    PASSWORDS_DO_NOT_MATCH: "Passwords do not match. Double-check you entered the same password twice"
+
 fr:
   LOGIN_PLUGIN:
     ACCESS_DENIED: Accès non autorisé...
