@@ -340,37 +340,43 @@ class LoginPlugin extends Plugin
      * - 'password1' for password format
      * - 'password2' for equality to password1
      *
-     * @param        $type
-     * @param        $value
-     * @param string $extra
+     * @param object $form      The form
+     * @param string $type      The field type
+     * @param string $value     The field value
+     * @param string $extra     Any extra value required
      *
      * @return mixed
      */
     protected function validate($type, $value, $extra = '')
     {
         switch ($type) {
-            case 'user':
+            case 'username_format':
                 if (!preg_match('/^[a-z0-9_-]{3,16}$/', $value)) {
-                    throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
+                    return false;
                 }
+                return true;
+                break;
 
+            case 'username_is_available':
                 if (file_exists($this->grav['locator']->findResource('user://accounts/' . $value . YAML_EXT))) {
-                    throw new \RuntimeException('Username "' . $value . '" already exists, please pick another username');
+                    return false;
                 }
-
+                return true;
                 break;
 
             case 'password1':
                 if (!preg_match('/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/', $value)) {
-                    throw new \RuntimeException('Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters');
+                    return false;
                 }
-
+                return true;
                 break;
 
             case 'password2':
                 if (strcmp($value, $extra)) {
-                    throw new \RuntimeException('Passwords did not match.');
+                    return false;
                 }
+                return true;
+                break;
         }
     }
 
@@ -388,29 +394,52 @@ class LoginPlugin extends Plugin
         $action = $event['action'];
         $params = $event['params'];
 
-        if (!$this->config->get('plugins.login.enabled')) {
-            throw new \RuntimeException($this->grav['language']->translate('LOGIN_PLUGIN.LOGIN_PLUGIN_DISABLED'));
-        }
-
-        if (!$this->config->get('plugins.login.user_registration.enabled')) {
-            throw new \RuntimeException($this->grav['language']->translate('LOGIN_PLUGIN.USER_REGISTRATION_DISABLED'));
-        }
-
         switch ($action) {
+
             case 'register_user':
+
+                if (!$this->config->get('plugins.login.enabled')) {
+                    throw new \RuntimeException($this->grav['language']->translate('LOGIN_PLUGIN.LOGIN_PLUGIN_DISABLED'));
+                }
+
+                if (!$this->config->get('plugins.login.user_registration.enabled')) {
+                    throw new \RuntimeException($this->grav['language']->translate('LOGIN_PLUGIN.USER_REGISTRATION_DISABLED'));
+                }
 
                 $data = [];
                 $username = $form->value('username');
-                $this->validate('user', $username);
+                if (!$this->validate('username_format', $username)) {
+                    $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.USERNAME_NOT_VALID')]));
+                    $event->stopPropagation();
+                    return;
+                }
+
+                if (!$this->validate('username_is_available', $username)) {
+                    $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate(['LOGIN_PLUGIN.USERNAME_NOT_AVAILABLE', $username])]));
+                    $event->stopPropagation();
+                    return;
+                }
 
                 if (isset($params['options']['validate_password1_and_password2']) && $params['options']['validate_password1_and_password2']) {
-                    $this->validate('password1', $form->value('password1'));
-                    $this->validate('password2', $form->value('password2'), $form->value('password1'));
+                    if (!$this->validate('password1', $form->value('password1'))) {
+                        $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.PASSWORD_NOT_VALID')]));
+                        $event->stopPropagation();
+                        return;
+                    }
+                    if (!$this->validate('password2', $form->value('password2'), $form->value('password1'))) {
+                        $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.PASSWORDS_DO_NOT_MATCH')]));
+                        $event->stopPropagation();
+                        return;
+                    }
                     $data['password'] = $form->value('password1');
                 }
 
                 if (isset($params['options']['validate_password']) && $params['options']['validate_password']) {
-                    $this->validate('password1', $form->value('password'));
+                    if (!$this->validate('password1', $form->value('password'))) {
+                        $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.PASSWORD_NOT_VALID')]));
+                        $event->stopPropagation();
+                        return;
+                    }
                 }
 
                 $fields = $this->config->get('plugins.login.user_registration.fields', []);
