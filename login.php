@@ -275,9 +275,16 @@ class LoginPlugin extends Plugin
         // Reset page with login page.
         if (!$user->authenticated) {
             $page = new Page;
-            $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
-            $page->slug(basename($this->route));
 
+            // Get the admin Login page is needed, else teh default
+            if (isset($this->grav['admin'])) {
+                $login_file = $this->grav['locator']->findResource("plugins://admin/pages/admin/login.md");
+                $page->init(new \SplFileInfo($login_file));
+            } else {
+                $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
+            }
+
+            $page->slug(basename($this->route));
             $this->authenticated = false;
 
             unset($this->grav['page']);
