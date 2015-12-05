@@ -111,7 +111,7 @@ class LoginPlugin extends Plugin
 
                     // Check if the token was invalid
                     if ($rememberMe->loginTokenWasInvalid()) {
-                        $controller->setMessage($c['language']->translate('LOGIN_PLUGIN.REMEMBER_ME_STOLEN_COOKIE'));
+                        $controller->setMessage($c['language']->translate('PLUGIN_LOGIN.REMEMBER_ME_STOLEN_COOKIE'));
                     }
                 }
             }
@@ -199,7 +199,7 @@ class LoginPlugin extends Plugin
         if (method_exists('Grav\Common\Utils', 'getNonce')) {
             if ($task == 'login') {
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
-                    $this->grav['messages']->add($this->grav['language']->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
                     $this->authenticated = false;
                     $twig = $this->grav['twig'];
                     $twig->twig_vars['notAuthorized'] = true;
@@ -290,7 +290,7 @@ class LoginPlugin extends Plugin
             unset($this->grav['page']);
             $this->grav['page'] = $page;
         } else {
-            $this->grav['messages']->add($l->translate('LOGIN_PLUGIN.ACCESS_DENIED'), 'info');
+            $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
             $this->authenticated = false;
 
             $twig = $this->grav['twig'];
@@ -406,35 +406,50 @@ class LoginPlugin extends Plugin
             case 'register_user':
 
                 if (!$this->config->get('plugins.login.enabled')) {
-                    throw new \RuntimeException($this->grav['language']->translate('LOGIN_PLUGIN.LOGIN_PLUGIN_DISABLED'));
+                    throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
                 }
 
                 if (!$this->config->get('plugins.login.user_registration.enabled')) {
-                    throw new \RuntimeException($this->grav['language']->translate('LOGIN_PLUGIN.USER_REGISTRATION_DISABLED'));
+                    throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
                 }
 
                 $data = [];
                 $username = $form->value('username');
                 if (!$this->validate('username_format', $username)) {
-                    $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.USERNAME_NOT_VALID')]));
+                    $this->grav->fireEvent('onFormValidationError',
+                        new Event([
+                            'form' => $form,
+                            'message' => $this->grav['language']->translate('PLUGIN_LOGIN.USERNAME_NOT_VALID')]));
                     $event->stopPropagation();
                     return;
                 }
 
                 if (!$this->validate('username_is_available', $username)) {
-                    $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate(['LOGIN_PLUGIN.USERNAME_NOT_AVAILABLE', $username])]));
+                    $this->grav->fireEvent('onFormValidationError',
+                        new Event([
+                            'form' => $form,
+                            'message' => $this->grav['language']->translate(['PLUGIN_LOGIN.USERNAME_NOT_AVAILABLE', $username])
+                        ]));
                     $event->stopPropagation();
                     return;
                 }
 
                 if (isset($params['options']['validate_password1_and_password2']) && $params['options']['validate_password1_and_password2']) {
                     if (!$this->validate('password1', $form->value('password1'))) {
-                        $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.PASSWORD_NOT_VALID')]));
+                        $this->grav->fireEvent('onFormValidationError',
+                            new Event([
+                                'form' => $form,
+                                'message' => $this->grav['language']->translate('PLUGIN_LOGIN.PASSWORD_NOT_VALID')
+                            ]));
                         $event->stopPropagation();
                         return;
                     }
                     if (!$this->validate('password2', $form->value('password2'), $form->value('password1'))) {
-                        $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.PASSWORDS_DO_NOT_MATCH')]));
+                        $this->grav->fireEvent('onFormValidationError',
+                            new Event([
+                                'form' => $form,
+                                'message' => $this->grav['language']->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH')
+                            ]));
                         $event->stopPropagation();
                         return;
                     }
@@ -443,7 +458,11 @@ class LoginPlugin extends Plugin
 
                 if (isset($params['options']['validate_password']) && $params['options']['validate_password']) {
                     if (!$this->validate('password1', $form->value('password'))) {
-                        $this->grav->fireEvent('onFormValidationError', new Event(['form' => $form, 'message' => $this->grav['language']->translate('LOGIN_PLUGIN.PASSWORD_NOT_VALID')]));
+                        $this->grav->fireEvent('onFormValidationError',
+                            new Event([
+                                'form' => $form,
+                                'message' => $this->grav['language']->translate('PLUGIN_LOGIN.PASSWORD_NOT_VALID')
+                            ]));
                         $event->stopPropagation();
                         return;
                     }

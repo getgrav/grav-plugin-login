@@ -1,5 +1,5 @@
 en:
-  LOGIN_PLUGIN:
+  PLUGIN_LOGIN:
     ACCESS_DENIED: Access denied...
     LOGIN_FAILED: Login failed...
     LOGIN_SUCCESSFUL: You have been successfully logged in.
@@ -52,7 +52,7 @@ en:
     PASSWORDS_DO_NOT_MATCH: "Passwords do not match. Double-check you entered the same password twice"
 
 fr:
-  LOGIN_PLUGIN:
+  PLUGIN_LOGIN:
     ACCESS_DENIED: Accès non autorisé...
     LOGIN_FAILED: Echec de la connexion...
     LOGIN_SUCCESSFUL: Vous avez été connecté avec succès.
@@ -61,7 +61,7 @@ fr:
     BTN_FORGOT: Mot de passe oublié
 
 hu:
-  LOGIN_PLUGIN:
+  PLUGIN_LOGIN:
     ACCESS_DENIED: Hozzáférés megtagadva...
     LOGIN_FAILED: Sikertelen belépés...
     LOGIN_SUCCESSFUL: Sikeresen beléptél.
