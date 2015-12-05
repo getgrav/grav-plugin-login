@@ -262,7 +262,6 @@ form:
         register_user:
           fields:
             - access: ['site.login']
-            - state: 'enabled'
       -
         display: '/welcome'
       -
@@ -289,11 +288,78 @@ You can avoid having 2 fields for the password, which by the way is a recommende
 
 If you don't add an option, the `password` field is considered like a normal field, so just the usual form validation is applied. The `validate_password1_and_password2` and `validate_password` checks ensure the password respects the Grav password standards: password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters.
 
-## Enable the Login plugin registration
+Last important thing before the registration is correctly setup: make sure in the Login plugin settings you have `user_registration.enabled` set to true, otherwise the registration will trigger an error, as by default user registration is DISABLED.
 
-Make sure in the Login plugin settings you have `user_registration.enabled` set to true, otherwise the registration will trigger an error.
+## Sending an activation email
 
-By default user registration is DISABLED.
+By default the registration process adds a new user, and sets it as enabled.
+Grav allows disabled user accounts, so we can take advantage of this functionality and add a new user, but with a disabled state. Then we can send an email to the user, asking to validate the email address.
+
+That validation email will contain a link to set the user account to enabled. Let's see how to do this.
+
+First, set a `process.register_user.options.set_user_disabled` option to `true`.
+
+Second, set a `process.register_user.options.send_activation_email` option to `true`.
+
+Like this:
+
+```
+  [... registration form ...]
+  process:
+        register_user:
+            options:
+                set_user_disabled: true
+                send_activation_email: true
+```
+
+## Send a welcome email
+
+Add a `register_user.options.send_welcome_email: true` option to `process` in the registration form.
+
+The content of the welcome email is defined in the language file, strings `PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT` and `PLUGIN_LOGIN.WELCOME_EMAIL_BODY`. Customize them as needed in your language file override.
+
+Note: if the activation email is enabled, the welcome email to be sent upon the account activation action (when the user clicks the link to activate the account)
+
+## Send a notification email to the site owner
+
+
+Add a `register_user.options.send_notification_email: true` option to `process` in the registration form.
+
+The content of the notification email is defined in the language file, strings `PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT` and `PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY`. Customize them as needed in your language file override.
+
+## An example of setting up the emails
+
+This is an example `process` field to setup the email notifications. It will validate two password fields, set the user as disabled, send the account activation email to the user, and upon verification of the account, send a welcome email and a notification email to the site owner (as specified in the `to` field of the Email plugin configuration)
+
+```
+  process:
+        register_user:
+            fields:
+                access: ['site.login']
+            options:
+                validate_password1_and_password2: true
+                set_user_disabled: true
+                send_activation_email: true
+                send_notification_email: true
+                send_welcome_email: true
+
+        message: "You are logged in"
+```
+
+The following example instead will validate two password fields, send a welcome email and a notification email to the site owner, without the user account activation.
+
+```
+  process:
+        register_user:
+            fields:
+                access: ['site.login']
+            options:
+                validate_password1_and_password2: true
+                send_notification_email: true
+                send_welcome_email: true
+
+        message: "You are logged in"
+```
 
 ## Adding your own fields
 
@@ -330,10 +396,10 @@ The example form shows:
         register_user:
           fields:
             - access: ['site.login']
-            - state: 'enabled'
 ```
 
-Access is set to `site.login`, and the user is set to be `enabled`.
+By default, no access level is set, you need to manually set the access level you want to grant to new users.
+In the case of the above example, access is set to `site.login` for all new users.
 
 ## Login users directly after the registration
 
@@ -349,6 +415,8 @@ Example:
                     login_after_registration: true
 
 ```
+
+This workflow is of course incompatible with the user activation email flow explained above. If that is enabled, this one will not work, and user login is ignored.
 
 ## Add captcha to the user registration
 

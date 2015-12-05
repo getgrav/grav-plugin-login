@@ -135,17 +135,23 @@ class LoginPlugin extends Plugin
             $this->route = $this->config->get('plugins.login.route');
         }
 
-        $this->route_register = $this->config->get('plugins.login.route_register');
-
         if ($this->route && $this->route == $uri->path()) {
             $this->enable([
                 'onPagesInitialized' => ['addLoginPage', 0],
             ]);
         }
 
+        $this->route_register = $this->config->get('plugins.login.route_register');
         if ($this->route_register && $this->route_register == $uri->path()) {
             $this->enable([
                 'onPagesInitialized' => ['addRegisterPage', 0],
+            ]);
+        }
+
+        $this->route_activate = $this->config->get('plugins.login.route_activate');
+        if ($this->route_activate && $this->route_activate == $uri->path()) {
+            $this->enable([
+                'onPagesInitialized' => ['handleUserActivation', 0],
             ]);
         }
     }
@@ -183,6 +189,63 @@ class LoginPlugin extends Plugin
         $page->slug(basename($this->route_register));
 
         $pages->addPage($page, $this->route_register);
+    }
+
+    /**
+     * Handle user activation
+     */
+    public function handleUserActivation()
+    {
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+
+        $username = $uri->param('username');
+
+        $nonce = $uri->param('nonce');
+        if (!isset($nonce) || !Utils::verifyNonce($nonce, 'user-activation')) {
+            $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
+            $messages->add($message, 'error');
+            $this->grav->redirect('/');
+            return;
+        }
+
+        $token = $uri->param('token');
+        $user = User::load($username);
+
+        if (!$user->activation_token) {
+            $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
+            $messages->add($message, 'error');
+        } else {
+            list($good_token, $expire) = explode('::', $user->activation_token);
+
+            if ($good_token === $token) {
+                if (time() > $expire) {
+                    $message = $this->grav['language']->translate('PLUGIN_LOGIN.ACTIVATION_LINK_EXPIRED');
+                    $messages->add($message, 'error');
+                } else {
+                    $user['state'] = 'enabled';
+                    $user->save();
+                    $message = $this->grav['language']->translate('PLUGIN_LOGIN.USER_ACTIVATED_SUCCESSFULLY');
+                    $messages->add($message, 'info');
+
+                    if ($uri->param('send_welcome_email')) {
+                        $this->sendWelcomeEmail($user);
+                    }
+                    if ($uri->param('send_notification_email')) {
+                        $this->sendNotificationEmail($user);
+                    }
+                }
+            } else {
+                $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
+                $messages->add($message, 'error');
+
+            }
+        }
+
+        $this->grav->redirect('/');
     }
 
     /**
@@ -478,7 +541,9 @@ class LoginPlugin extends Plugin
                     }
                 }
 
-                if (isset($params['options']['validate_password1_and_password2']) && $params['options']['validate_password1_and_password2']) {
+                if (isset($params['options']['validate_password1_and_password2']) &&
+                    $params['options']['validate_password1_and_password2']) {
+
                     unset($data['password1']);
                     unset($data['password2']);
                 }
@@ -486,22 +551,179 @@ class LoginPlugin extends Plugin
                 // Don't store the username: that is part of the filename
                 unset($data['username']);
 
+                if (isset($params['options']['set_user_disabled']) &&
+                    $params['options']['set_user_disabled']) {
+
+                    $data['state'] = 'disabled';
+                } else {
+                    $data['state'] = 'enabled';
+                }
+
                 // Create user object and save it
                 $user = new User($data);
                 $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT, true, true));
                 $user->file($file);
                 $user->save();
+                $user = User::load($username);
 
-                if (isset($params['options']['login_after_registration']) && $params['options']['login_after_registration']) {
+                if ($data['state'] == 'enabled' &&
+                    isset($params['options']['login_after_registration']) &&
+                    $params['options']['login_after_registration']) {
+
                     //Login user
-                    $user = User::load($username);
                     $this->grav['session']->user = $user;
                     unset($this->grav['user']);
                     $this->grav['user'] = $user;
                     $user->authenticated = $user->authorize('site.login');
                 }
 
+                if (isset($params['options']['send_activation_email']) &&
+                    $params['options']['send_activation_email']) {
+                    $this->sendActivationEmail($user);
+                } else {
+                    if (isset($params['options']['send_welcome_email']) &&
+                        $params['options']['send_welcome_email']) {
+                        $this->sendWelcomeEmail($user);
+                    }
+                    if (isset($params['options']['send_notification_email']) &&
+                        $params['options']['send_notification_email']) {
+                        $this->sendNotificationEmail($user);
+                    }
+                }
+
                 break;
         }
     }
+
+    /**
+     * Handle the email to notificate the user account creation to the site admin.
+     *
+     * @return bool True if the action was performed.
+     */
+    protected function sendNotificationEmail($user)
+    {
+        if (empty($user->email)) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
+        }
+
+        $sitename = $this->grav['config']->get('site.title', 'Website');
+
+        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT', $sitename]);
+        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY', $sitename, $user->username, $user->email]);
+        $to = $this->grav['config']->get('plugins.email.from');
+
+        if (empty($to)) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
+        }
+
+        $sent = $this->sendEmail($subject, $content, $to);
+
+        if ($sent < 1) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+        }
+
+        return true;
+    }
+
+    /**
+     * Handle the email to welcome the new user
+     *
+     * @return bool True if the action was performed.
+     */
+    protected function sendWelcomeEmail($user)
+    {
+        if (empty($user->email)) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
+        }
+
+        $sitename = $this->grav['config']->get('site.title', 'Website');
+
+        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT', $sitename]);
+        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY', $user->username, $sitename]);
+        $to = $user->email;
+
+        $sent = $this->sendEmail($subject, $content, $to);
+
+        if ($sent < 1) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+        }
+
+        return true;
+    }
+
+    /**
+     * Handle the email to activate the user account.
+     *
+     * @return bool True if the action was performed.
+     */
+    protected function sendActivationEmail($user)
+    {
+        if (empty($user->email)) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
+        }
+
+        $token = md5(uniqid(mt_rand(), true));
+        $expire = time() + 604800; // next week
+        $user->activation_token = $token . '::' . $expire;
+        $user->save();
+
+        $param_sep = $this->grav['config']->get('system.param_sep', ':');
+        $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('user-activation');
+
+        if (isset($params['options']['send_welcome_email']) &&
+            $params['options']['send_welcome_email']) {
+
+            $activation_link .= '/send_welcome_email' . $param_sep . '1';
+        }
+
+        $sitename = $this->grav['config']->get('site.title', 'Website');
+
+        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $sitename]);
+        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY', $user->username, $activation_link, $sitename]);
+        $to = $user->email;
+
+        $sent = $this->sendEmail($subject, $content, $to);
+
+        if ($sent < 1) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+        }
+
+        return true;
+    }
+
+    /**
+     * Handle sending an email.
+     *
+     * @param string $content
+     * @param string $to
+     *
+     * @return bool True if the action was performed.
+     */
+    private function sendEmail($subject, $content, $to)
+    {
+        $from = $this->grav['config']->get('plugins.email.from');
+
+        if (!isset($this->grav['Email']) || empty($from)) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
+        }
+
+        if (empty($to) || empty($subject) || empty($content)) {
+            return false;
+        }
+
+        $body = $this->grav['twig']->processTemplate('email/base.html.twig', ['content' => $content]);
+
+        $message = $this->grav['Email']->message($subject, $body, 'text/html')
+            ->setFrom($from)
+            ->setTo($to);
+
+        $sent = $this->grav['Email']->send($message);
+
+        if ($sent < 1) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 }

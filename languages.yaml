@@ -51,6 +51,22 @@ en:
     PASSWORD_NOT_VALID: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
     PASSWORDS_DO_NOT_MATCH: "Passwords do not match. Double-check you entered the same password twice"
 
+    EMAIL_NOT_CONFIGURED: "Email not configured"
+    USER_NEEDS_EMAIL_FIELD: "The user needs an email field"
+    EMAIL_SENDING_FAILURE: "An error occurred while sending the email"
+
+    ACTIVATION_EMAIL_SUBJECT: "Activate your account on %s"
+    ACTIVATION_EMAIL_BODY: "Hi %s, click %s to activate your account on %s"
+    WELCOME_EMAIL_SUBJECT: "Welcome to %s"
+    WELCOME_EMAIL_BODY: "Hi %s, welcome to %s!"
+
+    NOTIFICATION_EMAIL_SUBJECT: "New user on %s"
+    NOTIFICATION_EMAIL_BODY: "Hi, a new user registered on %s. Username: %s, email: %s"
+
+    EMAIL_FOOTER: "GetGrav.org"
+    ACTIVATION_LINK_EXPIRED: "Activation link expired"
+    USER_ACTIVATED_SUCCESSFULLY: "User activated successfully"
+    INVALID_REQUEST: "Invalid request"
 fr:
   PLUGIN_LOGIN:
     ACCESS_DENIED: Accès non autorisé...
