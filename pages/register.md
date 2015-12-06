@@ -39,15 +39,8 @@ form:
           value: Reset
 
   process:
-        register_user:
-            fields:
-                access: ['site.login']
-                state: 'enabled'
-            options:
-                validate_password1_and_password2: true
-                login_after_registration: true
-
-        message: "You are logged in"
+      register_user: true
+      message: "You are logged in"
 ---
 
 # Register
