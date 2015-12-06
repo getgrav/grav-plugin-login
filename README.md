@@ -374,3 +374,7 @@ Copy **Client ID** and **client secret** into login.yaml under Google. ![](asset
 ## Twitter
 
 Login if necessary. Create a [new Twitter App](https://apps.twitter.com/app/new) , fill out name, application website, choose "Browser" as application type, choose the callback URL like above, default access type can be set to read-only, click on "Register application" and then you should be directed to your new application with the Client ID and secret ready to be copied and pasted into the YAML file.
+
+# Known issues
+
+When updating from an older version, pre-october 2015, you might have an error `Class 'Grav\Login\Controller' Not Found`. The problem is during the update, since a file name was changed from lowercase to capitalized. Solution: reinstall the Login plugin, or change the file name `user/plugins/login/classes/controller.php` to `user/plugins/login/classes/Controller.php` (notice the capital `C`).
