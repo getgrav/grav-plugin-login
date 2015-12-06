@@ -49,18 +49,132 @@ form:
       help: PLUGIN_LOGIN.ROUTE_HELP
       placeholder: "/my-custom-login"
 
-    route_register:
-      type: text
-      size: medium
-      label: PLUGIN_LOGIN.ROUTE_REGISTER
-      help: PLUGIN_LOGIN.ROUTE_REGISTER_HELP
-      placeholder: "/register"
-
     redirect:
       type: text
-      label: Redirect after login
-      help: "Custom route to redirect after login"
+      label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN
+      help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
       placeholder: "/my-page"
+
+    user_registration:
+      type: section
+      title: PLUGIN_LOGIN.USER_REGISTRATION
+
+      fields:
+        user_registration.enabled:
+          type: toggle
+          label: PLUGIN_ADMIN.ENABLED
+          help: PLUGIN_LOGIN.USER_REGISTRATION_ENABLED_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        route_register:
+          type: text
+          size: medium
+          label: PLUGIN_LOGIN.ROUTE_REGISTER
+          help: PLUGIN_LOGIN.ROUTE_REGISTER_HELP
+          placeholder: "/register"
+
+        user_registration.redirect_after_registration:
+          type: text
+          label: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION
+          help: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION_HELP
+          placeholder: "/my-page"
+
+        user_registration.fields:
+          type: array
+          value_only: true
+          label: PLUGIN_LOGIN.REGISTRATION_FIELDS
+          help: PLUGIN_LOGIN.REGISTRATION_FIELDS_HELP
+          placeholder_key: PLUGIN_LOGIN.REGISTRATION_FIELD_KEY
+          placeholder_value: PLUGIN_LOGIN.REGISTRATION_FIELD_VALUE
+
+        user_registration.default_values:
+          type: array
+          label: PLUGIN_LOGIN.DEFAULT_VALUES
+          help: PLUGIN_LOGIN.DEFAULT_VALUES_HELP
+          placeholder_key: PLUGIN_LOGIN.ADDITIONAL_PARAM_KEY
+          placeholder_value: PLUGIN_LOGIN.ADDITIONAL_PARAM_VALUE
+
+        user_registration.options.validate_password1_and_password2:
+          type: toggle
+          label: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2
+          help: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        user_registration.options.validate_password:
+          type: toggle
+          label: PLUGIN_LOGIN.VALIDATE_PASSWORD
+          help: PLUGIN_LOGIN.VALIDATE_PASSWORD_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        user_registration.options.set_user_disabled:
+          type: toggle
+          label: PLUGIN_LOGIN.SET_USER_DISABLED
+          help: PLUGIN_LOGIN.SET_USER_DISABLED_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        user_registration.options.login_after_registration:
+          type: toggle
+          label: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION
+          help: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        user_registration.options.send_activation_email:
+          type: toggle
+          label: PLUGIN_LOGIN.SEND_ACTIVATION_EMAIL
+          help: PLUGIN_LOGIN.SEND_ACTIVATION_EMAIL_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        user_registration.options.send_notification_email:
+          type: toggle
+          label: PLUGIN_LOGIN.SEND_NOTIFICATION_EMAIL
+          help: PLUGIN_LOGIN.SEND_NOTIFICATION_EMAIL_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
+
+        user_registration.options.send_welcome_email:
+          type: toggle
+          label: PLUGIN_LOGIN.SEND_WELCOME_EMAIL
+          help: PLUGIN_LOGIN.SEND_WELCOME_EMAIL_HELP
+          highlight: 1
+          options:
+              1: PLUGIN_ADMIN.YES
+              0: PLUGIN_ADMIN.NO
+          validate:
+              type: bool
 
     rememberme:
       type: section

@@ -231,10 +231,10 @@ class LoginPlugin extends Plugin
                     $message = $this->grav['language']->translate('PLUGIN_LOGIN.USER_ACTIVATED_SUCCESSFULLY');
                     $messages->add($message, 'info');
 
-                    if ($uri->param('send_welcome_email')) {
+                    if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
                         $this->sendWelcomeEmail($user);
                     }
-                    if ($uri->param('send_notification_email')) {
+                    if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
                         $this->sendNotificationEmail($user);
                     }
                 }
@@ -490,7 +490,7 @@ class LoginPlugin extends Plugin
                     return;
                 }
 
-                if (isset($params['options']['validate_password1_and_password2']) && $params['options']['validate_password1_and_password2']) {
+                if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2', false)) {
                     if (!$this->validate('password1', $form->value('password1'))) {
                         $this->grav->fireEvent('onFormValidationError',
                             new Event([
@@ -512,7 +512,7 @@ class LoginPlugin extends Plugin
                     $data['password'] = $form->value('password1');
                 }
 
-                if (isset($params['options']['validate_password']) && $params['options']['validate_password']) {
+                if ($this->config->get('plugins.login.user_registration.options.validate_password', false)) {
                     if (!$this->validate('password1', $form->value('password'))) {
                         $this->grav->fireEvent('onFormValidationError',
                             new Event([
@@ -528,11 +528,12 @@ class LoginPlugin extends Plugin
 
                 foreach($fields as $field) {
                     // Process value of field if set in the page process.register_user
-                    if (isset($params['fields'])) {
-                        foreach($params['fields'] as $key => $param) {
-                            if ($key == $field) {
-                                $data[$field] = $param;
-                            }
+                    $default_values = $this->config->get('plugins.login.user_registration.default_values');
+                    foreach($default_values as $key => $param) {
+                        $values = explode(',', $param);
+
+                        if ($key == $field) {
+                            $data[$field] = $values;
                         }
                     }
 
@@ -541,9 +542,7 @@ class LoginPlugin extends Plugin
                     }
                 }
 
-                if (isset($params['options']['validate_password1_and_password2']) &&
-                    $params['options']['validate_password1_and_password2']) {
-
+                if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2', false)) {
                     unset($data['password1']);
                     unset($data['password2']);
                 }
@@ -551,9 +550,7 @@ class LoginPlugin extends Plugin
                 // Don't store the username: that is part of the filename
                 unset($data['username']);
 
-                if (isset($params['options']['set_user_disabled']) &&
-                    $params['options']['set_user_disabled']) {
-
+                if ($this->config->get('plugins.login.user_registration.options.set_user_disabled', false)) {
                     $data['state'] = 'disabled';
                 } else {
                     $data['state'] = 'enabled';
@@ -567,8 +564,7 @@ class LoginPlugin extends Plugin
                 $user = User::load($username);
 
                 if ($data['state'] == 'enabled' &&
-                    isset($params['options']['login_after_registration']) &&
-                    $params['options']['login_after_registration']) {
+                    $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
 
                     //Login user
                     $this->grav['session']->user = $user;
@@ -577,18 +573,19 @@ class LoginPlugin extends Plugin
                     $user->authenticated = $user->authorize('site.login');
                 }
 
-                if (isset($params['options']['send_activation_email']) &&
-                    $params['options']['send_activation_email']) {
+                if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
                     $this->sendActivationEmail($user);
                 } else {
-                    if (isset($params['options']['send_welcome_email']) &&
-                        $params['options']['send_welcome_email']) {
+                    if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
                         $this->sendWelcomeEmail($user);
                     }
-                    if (isset($params['options']['send_notification_email']) &&
-                        $params['options']['send_notification_email']) {
+                    if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
                         $this->sendNotificationEmail($user);
                     }
+                }
+
+                if ($redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false)) {
+                    $this->grav->redirect($redirect);
                 }
 
                 break;
@@ -669,12 +666,6 @@ class LoginPlugin extends Plugin
 
         $param_sep = $this->grav['config']->get('system.param_sep', ':');
         $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('user-activation');
-
-        if (isset($params['options']['send_welcome_email']) &&
-            $params['options']['send_welcome_email']) {
-
-            $activation_link .= '/send_welcome_email' . $param_sep . '1';
-        }
 
         $sitename = $this->grav['config']->get('site.title', 'Website');
 

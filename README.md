@@ -126,6 +126,200 @@ The login plugin comes with a simple Twig partial to provide a logout link (`log
 
 You can also copy this `login-status.html.twig` file into your theme and modify it as you see fit.
 
+# Allow User Registration
+
+The Login plugin handles user registration.
+To enable the built-in registration form, in the Login Plugin configuration enable user registration and just add a value to the "Registration path" field.
+
+Then just open your browser on that page, and you'll be presented a registration form.
+
+## Adding the registration page to the menu
+
+Here are two ways you can do it, but of course Grav is flexible and you can come up with other ways too.
+
+The first and easiest way is to add a page with the same slug (route) as the registration form. So for example if in the Login Plugin settings you set /register as the registration form path, then create a `04.register` page (the 04 number is just an example, use your own ordering), with no content.
+The Login plugin will "override" that page, serving the registration page form when the user clicks on that menu item.
+
+A second way is to add a custom menu item that points to the registration page, by editing `site.yaml` with this code, that will append a "Register" menu item:
+
+```
+menu:
+  -
+    url: 'register'
+    text: Register
+```
+
+This works in most themes, Antimatter included, but it's not guaranteed to work in all themes, as it's something that must be added to the navigation twig code.
+
+## Customizing the registration form
+
+The provided registration form is just a quick way to start using it. You might however need different fields on the registration form, or you want to add more content. Here's how to do it.
+
+First, create a registration form page.
+
+Create a folder `04.registration/form.md`. The folder name is just an example. Pick the one that suits you. The important part is the file name: since we're building a form, we need a `form.md` file.
+
+Also, your theme needs to implement forms. Use Antimatter or another form-compatible theme if yours does not work, then once you're setup with the form you can migrate the forms files and make it work on your theme too.
+
+Add the following content to your registration form page:
+
+```
+---
+form:
+  fields:
+    -
+      name: username
+      type: text
+      validate:
+        required: true
+
+    -
+      name: email
+      type: text
+      validate:
+        required: true
+
+    -
+      name: password1
+      type: password
+      label: Enter a password
+      validate:
+        required: true
+
+    -
+      name: password2
+      type: password
+      label: Repeat the password
+      validate:
+        required: true
+
+  buttons:
+      -
+          type: submit
+          value: Submit
+      -
+          type: reset
+          value: Reset
+
+  process:
+      register_user: true
+      display: '/welcome'
+      message: "Welcome to my site!"
+---
+
+# Registration
+```
+
+This is a normal form. The only thing different from a contact form or another form that you might write on your site is the process field `register_user`, which takes care of processing the user registration.
+
+Once the user is registered, Grav redirects the user to the `display` page with the `message` message.
+
+The only field strictly required by Grav is `username`. Then the other fields can be added as needed.
+
+For example in this case we added
+
+- password1
+- password2
+
+to the form. And, in the Login plugin configuration we have by default enable the double password verification with the "Validate double entered password" option. What this does is picking the password1 and password2 fields, validate them, check they are equal and put the content in the `password` field.
+
+You can avoid having 2 fields for the password, which by the way is a recommended option, and just put a single `password` field. Then in the Login plugin option just enable "Validate a single password".
+
+If you don't add an option, the `password` field is considered like a normal field, so just the usual form validation is applied. "Validate a single password" and "Validate double entered password" checks ensure the password respects the Grav password standards: password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters.
+
+Last important thing before the registration is correctly setup: make sure in the Login plugin settings you have the user registration enabled, otherwise the registration will trigger an error, as by default user registration is DISABLED.
+
+## Sending an activation email
+
+By default the registration process adds a new user, and sets it as enabled.
+Grav allows disabled user accounts, so we can take advantage of this functionality and add a new user, but with a disabled state. Then we can send an email to the user, asking to validate the email address.
+
+That validation email will contain a link to set the user account to enabled. To do this, just enable "Set the user as disabled" and "Send activation email" in the Login Plugin options.
+
+## Send a welcome email
+
+Enable "Send welcome email" in the options.
+
+The content of the welcome email is defined in the language file, strings `PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT` and `PLUGIN_LOGIN.WELCOME_EMAIL_BODY`. Customize them as needed in your language file override.
+
+Note: if the activation email is enabled, the welcome email to be sent upon the account activation action (when the user clicks the link to activate the account)
+
+## Send a notification email to the site owner
+
+Enable "Send notification email" in the options.
+
+The content of the notification email is defined in the language file, strings `PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT` and `PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY`. Customize them as needed in your language file override.
+
+Note: if the activation email is enabled, the notification email to be sent upon the account activation action (when the user clicks the link to activate the account)
+
+## Adding your own fields
+
+If you want to add your own custom fields to the registration form, just add fields to the form like you would with any other form.
+
+Then, to let the Login plugin add those fields to the user yaml file, you also need to add it to the "Registration fields" option in the Login Plugin configuration.
+
+By default we have
+
+```
+    - 'username'
+    - 'password'
+    - 'email'
+    - 'fullname'
+    - 'title'
+    - 'access'
+    - 'state'
+```
+
+Add your own as you prefer, to build any custom registration form you can think of.
+
+## Specifying a default value for a field
+
+If you want to pre-fill a field, without showing it to the user in the form, you could set it as an hidden field. But the user could see it - and modify it via the browser dev tools.
+
+To add a field and make sure the user cannot modify it, add it to "Default values" list.
+
+## Login users directly after the registration
+
+Just enable "Login the user after registration"
+
+If the user activation email is enabled, the user will be logged in as soon as the activation link is clicked.
+
+## Add captcha to the user registration
+
+Add a captcha like you would with any form:
+
+Add
+
+```
+        - name: g-recaptcha-response
+          label: Captcha
+          type: captcha
+          recatpcha_site_key: aeio43kdk3idko3k4ikd4
+          recaptcha_not_validated: 'Captcha not valid!'
+          validate:
+            required: true
+```
+
+to the form field, and
+
+```
+process:
+  - captcha
+```
+
+to validate it server-side. Put this process action before all the other actions, so it's processed first and the user is not created if the captcha is not valid.
+
+## Redirect to another page after login
+
+You can set the "Redirect after registration" option in the Login plugin, or as with any form, use the `process.display` property, and set it to the destination page route:
+
+```
+  process:
+     -
+       display: /welcome
+```
+
+
 # OAuth
 
 You can add OAuth providers to the login plugin as another method to have users on your site. To enable OAuth change `oauth.enabled` to `true` in `login.yaml`. By default OAuth allows users to login though they do not create an account file for the user. If you want an account file created (ex: for tracking purposes) change `oauth.user.autocreate` to `true` in `login.yaml`.
@@ -180,275 +374,3 @@ Copy **Client ID** and **client secret** into login.yaml under Google. ![](asset
 ## Twitter
 
 Login if necessary. Create a [new Twitter App](https://apps.twitter.com/app/new) , fill out name, application website, choose "Browser" as application type, choose the callback URL like above, default access type can be set to read-only, click on "Register application" and then you should be directed to your new application with the Client ID and secret ready to be copied and pasted into the YAML file.
-
-# Allow User Registration
-
-The login plugin handles user registration. To enable the registration form, in the Login Plugin configuration just add a path for your registration form page.
-
-Then you probably want to add a "Register" page on your menu.
-
-Here are two ways you can do it, but of course Grav is flexible and you can come up with other ways too.
-
-The first and easiest way is to add a page with the same slug (route) as the registration form. So for example if in the Login Plugin settings you set /register as the registration form path, then create a `04.register` page (the 04 number is just an example, use your own ordering), with no content.
-The Login plugin will "override" that page, serving the registration page form when the user clicks on that menu item.
-
-A second way is to add a custom menu item that points to the registration page, by editing `site.yaml` with this code, that will append a "Register" menu item:
-
-```
-menu:
-  -
-    url: 'register'
-    text: Register
-```
-
-This works in most themes, Antimatter included, but it's not guaranteed to work in all themes, as it's something that must be added to the navigation twig code.
-
-## Customizing the registration form
-
-The provided registration form is just a quick way to start using it. You might however need different fields on the registration form, or you want to add more content. Here's how to do it.
-
-First, create a registration form page.
-
-Create a folder `04.registration/form.md`. The folder name is just an example. Pick the one that suits you. The important part is the file name: since we're building a form, we need a `form.md` file.
-
-Also, your theme needs to implement forms. Use Antimatter or another form-compatible theme if yours does not work, then once you're setup with the form you can migrate the forms files and make it work on your theme too.
-
-Add the following content to your registration form page:
-
-```
----
-form:
-  fields:
-    -
-      name: username
-      type: text
-      default: 'xxx'
-      validate:
-        required: true
-
-    -
-      name: email
-      type: text
-      default: 'xxx@te.it'
-      validate:
-        required: true
-
-    -
-      name: password1
-      type: password
-      label: Enter a password
-      default: '2e32Ejeoij32ie'
-      validate:
-        required: true
-
-    -
-      name: password2
-      type: password
-      label: Repeat the password
-      default: '2e32Ejeoij32ie'
-      validate:
-        required: true
-
-  buttons:
-      -
-          type: submit
-          value: Submit
-      -
-          type: reset
-          value: Reset
-
-  process:
-      -
-        register_user:
-          fields:
-            - access: ['site.login']
-      -
-        display: '/welcome'
-      -
-        message: "Welcome to my site!"
----
-
-# Registration
-```
-
-This is a normal form. The only thing different from a contact form or another form that you might write on your site is the process field `register_user`, which takes care of processing the user registration.
-
-Once the user is registered, Grav redirects the user to the `display` page with the `message` message.
-
-The only field strictly required by Grav is `username`. Then the other fields can be added as needed.
-
-For example in this case we added
-
-- password1
-- password2
-
-to the form. And, we added to the `register_user.options` the field property `validate_password1_and_password2`. What this does is picking the password1 and password2 fields, validate them, and put the content in the `password` field.
-
-You can avoid having 2 fields for the password, which by the way is a recommended option, and just put a single `password` field, along with the option `validate_password`.
-
-If you don't add an option, the `password` field is considered like a normal field, so just the usual form validation is applied. The `validate_password1_and_password2` and `validate_password` checks ensure the password respects the Grav password standards: password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters.
-
-Last important thing before the registration is correctly setup: make sure in the Login plugin settings you have `user_registration.enabled` set to true, otherwise the registration will trigger an error, as by default user registration is DISABLED.
-
-## Sending an activation email
-
-By default the registration process adds a new user, and sets it as enabled.
-Grav allows disabled user accounts, so we can take advantage of this functionality and add a new user, but with a disabled state. Then we can send an email to the user, asking to validate the email address.
-
-That validation email will contain a link to set the user account to enabled. Let's see how to do this.
-
-First, set a `process.register_user.options.set_user_disabled` option to `true`.
-
-Second, set a `process.register_user.options.send_activation_email` option to `true`.
-
-Like this:
-
-```
-  [... registration form ...]
-  process:
-        register_user:
-            options:
-                set_user_disabled: true
-                send_activation_email: true
-```
-
-## Send a welcome email
-
-Add a `register_user.options.send_welcome_email: true` option to `process` in the registration form.
-
-The content of the welcome email is defined in the language file, strings `PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT` and `PLUGIN_LOGIN.WELCOME_EMAIL_BODY`. Customize them as needed in your language file override.
-
-Note: if the activation email is enabled, the welcome email to be sent upon the account activation action (when the user clicks the link to activate the account)
-
-## Send a notification email to the site owner
-
-
-Add a `register_user.options.send_notification_email: true` option to `process` in the registration form.
-
-The content of the notification email is defined in the language file, strings `PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT` and `PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY`. Customize them as needed in your language file override.
-
-## An example of setting up the emails
-
-This is an example `process` field to setup the email notifications. It will validate two password fields, set the user as disabled, send the account activation email to the user, and upon verification of the account, send a welcome email and a notification email to the site owner (as specified in the `to` field of the Email plugin configuration)
-
-```
-  process:
-        register_user:
-            fields:
-                access: ['site.login']
-            options:
-                validate_password1_and_password2: true
-                set_user_disabled: true
-                send_activation_email: true
-                send_notification_email: true
-                send_welcome_email: true
-
-        message: "You are logged in"
-```
-
-The following example instead will validate two password fields, send a welcome email and a notification email to the site owner, without the user account activation.
-
-```
-  process:
-        register_user:
-            fields:
-                access: ['site.login']
-            options:
-                validate_password1_and_password2: true
-                send_notification_email: true
-                send_welcome_email: true
-
-        message: "You are logged in"
-```
-
-## Adding your own fields
-
-Just add fields to the form like you would with any other form.
-
-To let the Login plugin add those fields to the user yaml file, however, you also need to add it to the `user_registration.fields` property.
-
-By default we have
-
-```
-  fields:
-    - 'username'
-    - 'password'
-    - 'email'
-    - 'fullname'
-    - 'title'
-    - 'access'
-    - 'state'
-```
-
-Add your own as you prefer, to build any custom registration form you can think of.
-
-## Specifying a default value for a field
-
-If you want to pre-fill a field, without showing it to the user in the form, you could set it as an hidden field. But the user could see it - and modify it via the browser dev tools.
-
-To add a field and make sure the user cannot modify it, add it to `process.register_user.fields`.
-
-The example form shows:
-
-```
-  process:
-      -
-        register_user:
-          fields:
-            - access: ['site.login']
-```
-
-By default, no access level is set, you need to manually set the access level you want to grant to new users.
-In the case of the above example, access is set to `site.login` for all new users.
-
-## Login users directly after the registration
-
-Just add the option `login_after_registration` and set it to true.
-
-Example:
-
-```
-  process:
-        -
-            register_user:
-                options:
-                    login_after_registration: true
-
-```
-
-This workflow is of course incompatible with the user activation email flow explained above. If that is enabled, this one will not work, and user login is ignored.
-
-## Add captcha to the user registration
-
-Add a captcha like you would with any form:
-
-Add
-
-```
-        - name: g-recaptcha-response
-          label: Captcha
-          type: captcha
-          recatpcha_site_key: aeio43kdk3idko3k4ikd4
-          recaptcha_not_validated: 'Captcha not valid!'
-          validate:
-            required: true
-```
-
-to the form field, and
-
-```
-process:
-  - captcha
-```
-
-to validate it server-side. Put this process action before all the other actions, so it's processed first and the user is not created if the captcha is not valid.
-
-## Redirect to another page after login
-
-Use the `process.display` property, and set it to your favourite page:
-
-```
-  process:
-     -
-       display: /welcome
-```
