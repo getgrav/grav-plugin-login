@@ -237,6 +237,14 @@ class LoginPlugin extends Plugin
                     if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
                         $this->sendNotificationEmail($user);
                     }
+
+                    if ($this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
+                        //Login user
+                        $this->grav['session']->user = $user;
+                        unset($this->grav['user']);
+                        $this->grav['user'] = $user;
+                        $user->authenticated = $user->authorize('site.login');
+                    }
                 }
             } else {
                 $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
