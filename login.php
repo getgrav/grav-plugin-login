@@ -7,6 +7,7 @@ use Grav\Common\Plugin;
 use Grav\Common\Page\Page;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
+use Grav\Plugin\Login\Utils as LoginUtils;
 
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
@@ -22,6 +23,11 @@ class LoginPlugin extends Plugin
      * @var string
      */
     protected $route_register;
+
+    /**
+     * @var string
+     */
+    protected $route_forgot;
 
     /**
      * @var bool
@@ -41,7 +47,9 @@ class LoginPlugin extends Plugin
         return [
             'onPluginsInitialized' => ['initialize', 10000],
             'onTask.login.login' => ['loginController', 0],
+            'onTask.login.forgot' => ['loginController', 0],
             'onTask.login.logout' => ['loginController', 0],
+            'onTask.login.reset' => ['loginController', 0],
             'onPageInitialized' => ['authorizePage', 0],
             'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables' => ['onTwigSiteVariables', -100000],
@@ -141,15 +149,25 @@ class LoginPlugin extends Plugin
             ]);
         }
 
-        $this->route_register = $this->config->get('plugins.login.route_register');
-        if ($this->route_register && $this->route_register == $uri->path()) {
+        if ($uri->path() == $this->config->get('plugins.login.route_forgot')) {
+            $this->enable([
+                'onPagesInitialized' => ['addForgotPage', 0],
+            ]);
+        }
+
+        if ($uri->path() == $this->config->get('plugins.login.route_reset')) {
+            $this->enable([
+                'onPagesInitialized' => ['addResetPage', 0],
+            ]);
+        }
+
+        if ($uri->path() == $this->config->get('plugins.login.route_register')) {
             $this->enable([
                 'onPagesInitialized' => ['addRegisterPage', 0],
             ]);
         }
 
-        $this->route_activate = $this->config->get('plugins.login.route_activate');
-        if ($this->route_activate && $this->route_activate == $uri->path()) {
+        if ($uri->path() == $this->config->get('plugins.login.route_activate')) {
             $this->enable([
                 'onPagesInitialized' => ['handleUserActivation', 0],
             ]);
@@ -176,19 +194,70 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Add Login page
+     */
+    public function addForgotPage()
+    {
+        $route = $this->config->get('plugins.login.route_forgot');
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            // Only add login page if it hasn't already been defined.
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . "/pages/forgot.md"));
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+    }
+
+    /**
+     * Add Reset page
+     */
+    public function addResetPage()
+    {
+        $route = $this->config->get('plugins.login.route_reset');
+
+        $uri = $this->grav['uri'];
+        $token = $uri->param('token');
+        $user = $uri->param('user');
+
+        if (!$user || !$token) {
+            return;
+        }
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            // Only add login page if it hasn't already been defined.
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . "/pages/reset.md"));
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+    }
+
+    /**
      * Add Register page
      */
     public function addRegisterPage()
     {
+        $route = $this->config->get('plugins.login.route_register');
+
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
 
         $page = new Page;
         $page->init(new \SplFileInfo(__DIR__ . "/pages/register.md"));
         $page->template('form');
-        $page->slug(basename($this->route_register));
+        $page->slug(basename($route));
 
-        $pages->addPage($page, $this->route_register);
+        $pages->addPage($page, $route);
     }
 
     /**
@@ -280,6 +349,16 @@ class LoginPlugin extends Plugin
                 $nonce = $this->grav['uri']->param('logout-nonce');
                 if (!isset($nonce) || !Utils::verifyNonce($nonce, 'logout-form')) {
                     return;
+                }
+            } else if ($task == 'forgot') {
+                if (!isset($post['forgot-form-nonce']) || !Utils::verifyNonce($post['forgot-form-nonce'], 'forgot-form')) {
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+                    return;
+                }
+            } else if ($task == 'reset') {
+                if (!isset($post['reset-form-nonce']) || !Utils::verifyNonce($post['reset-form-nonce'], 'reset-form')) {
+                    //$this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+                    //return;
                 }
             }
         }
@@ -401,6 +480,19 @@ class LoginPlugin extends Plugin
         // add CSS for frontend if required
         if (!$this->isAdmin() && $this->config->get('plugins.login.built_in_css')) {
             $this->grav['assets']->add('plugin://login/css/login.css');
+        }
+
+        $task = $this->grav['uri']->param('task');
+        $task = substr($task, strlen('login.'));
+        if ($task == 'reset') {
+            $username = $this->grav['uri']->param('user');
+            $token = $this->grav['uri']->param('token');
+
+            if (!empty($username) && !empty($token)) {
+                $twig->twig_vars['username'] = $username;
+                $twig->twig_vars['token'] = $token;
+            }
+
         }
     }
 
@@ -621,7 +713,7 @@ class LoginPlugin extends Plugin
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
         }
 
-        $sent = $this->sendEmail($subject, $content, $to);
+        $sent = LoginUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
@@ -647,7 +739,7 @@ class LoginPlugin extends Plugin
         $content = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY', $user->username, $sitename]);
         $to = $user->email;
 
-        $sent = $this->sendEmail($subject, $content, $to);
+        $sent = LoginUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
@@ -681,7 +773,7 @@ class LoginPlugin extends Plugin
         $content = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY', $user->username, $activation_link, $sitename]);
         $to = $user->email;
 
-        $sent = $this->sendEmail($subject, $content, $to);
+        $sent = LoginUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
@@ -689,40 +781,4 @@ class LoginPlugin extends Plugin
 
         return true;
     }
-
-    /**
-     * Handle sending an email.
-     *
-     * @param string $content
-     * @param string $to
-     *
-     * @return bool True if the action was performed.
-     */
-    private function sendEmail($subject, $content, $to)
-    {
-        $from = $this->grav['config']->get('plugins.email.from');
-
-        if (!isset($this->grav['Email']) || empty($from)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
-        }
-
-        if (empty($to) || empty($subject) || empty($content)) {
-            return false;
-        }
-
-        $body = $this->grav['twig']->processTemplate('email/base.html.twig', ['content' => $content]);
-
-        $message = $this->grav['Email']->message($subject, $body, 'text/html')
-            ->setFrom($from)
-            ->setTo($to);
-
-        $sent = $this->grav['Email']->send($message);
-
-        if ($sent < 1) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
 }
