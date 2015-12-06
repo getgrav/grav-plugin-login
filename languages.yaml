@@ -102,6 +102,8 @@ en:
     REDIRECT_AFTER_REGISTRATION: "Redirect after registration"
     REDIRECT_AFTER_REGISTRATION_HELP: "Custom route to redirect after the registration"
 
+    OPTIONS: Options
+
 fr:
   PLUGIN_LOGIN:
     ACCESS_DENIED: Accès non autorisé...
