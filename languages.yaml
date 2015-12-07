@@ -121,6 +121,7 @@ hu:
     BTN_LOGIN: Belépés
     BTN_LOGOUT: Kilépés
     BTN_FORGOT: Elfelejtettem
+    BTN_REGISTER: Regisztráció
     SESSION: "Munkamenet Megjegyzése"
 
     REMEMBER_ME: Jegyezz Meg
@@ -131,7 +132,7 @@ hu:
     OAUTH_SIGNIN: Belépés felhasználóneved és jelszavad megadásával
     OAUTH_CONNECT_MESSAGE: Összekapcsolás egy közösségi oldallal
     OAUTH_CONNECT_MESSAGE_EXTRA: más közösségi oldalak
-    OAUTH_PROVIDER_NOT_SUPPORTED: Az "%s" OAuth szolgáltató nem használható
+    OAUTH_PROVIDER_NOT_SUPPORTED: A(z) "%s" OAuth szolgáltató nem használható
     OR: vagy
 
     PLUGIN_STATUS: Plugin állapota
@@ -139,6 +140,8 @@ hu:
     BUILTIN_CSS_HELP: Az admin plugin által biztosított CSS beillesztése
     ROUTE: Belépés útvonala
     ROUTE_HELP: Egyedi útvonal egy egyedi belépő oldalhoz, melyet az aktuális téma biztosít
+    ROUTE_REGISTER: Regisztráció útvonala
+    ROUTE_REGISTER_HELP: A regisztrációs oldal elérési útja. Akkor állítsd be, ha a beépített regisztrációs oldalt szeretnéd használni
 
     OAUTH_SECTION: OAuth
     OAUTH_ENABLE: OAuth engedélyezése
@@ -156,3 +159,8 @@ hu:
     GOOGLE: Google
     GITHUB: GitHub
     TWITTER: Twitter
+
+    USERNAME_NOT_VALID: "A felhasználónév 3-16 karakter hosszú legyen, tartalmazhat kisbetűket, számokat, aláhúzást és kötőjelet. Nagybetűk, szóköz és speciális karakterek használata nem megengedett"
+    USERNAME_NOT_AVAILABLE: "%s nevű felhasználó már létezik, kérlek válassz más felhasználónevet"
+    PASSWORD_NOT_VALID: "A jelszónak tartalmaznia kell legalább egy számot, egy kisbetűt és egy nagybetűt, valamint legalább 8 karakter hosszú kell, hogy legyen"
+    PASSWORDS_DO_NOT_MATCH: "A két jelszó nem egyezik meg. Győzödj meg róla, hogy azonos legyen a kettő"
