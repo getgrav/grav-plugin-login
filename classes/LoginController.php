@@ -141,7 +141,6 @@ class LoginController extends Controller
      */
     public function taskReset()
     {
-         //50793846bb0c14d45502e1cab583663d
         $data = $this->post;
         $language = $this->grav['language'];
         $messages = $this->grav['messages'];
