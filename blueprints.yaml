@@ -20,19 +20,6 @@ form:
   validation: loose
   fields:
 
-    parent_acl:
-      type: toggle
-      label: Use parent access rules
-      highlight: 1
-      default: 0
-      help: "Check for parent access rules if no rules are defined"
-      options:
-        1: Enabled
-        0: Disabled
-      validate:
-        type: bool
-
-
     tabs:
       type: tabs
       active: 1
@@ -79,6 +66,18 @@ form:
               label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
               placeholder: "/my-page"
+
+            parent_acl:
+              type: toggle
+              label: Use parent access rules
+              highlight: 1
+              default: 0
+              help: "Check for parent access rules if no rules are defined"
+              options:
+                1: Enabled
+                0: Disabled
+              validate:
+                type: bool
 
             rememberme:
               type: section

@@ -6,6 +6,7 @@ route_activate: /activate_user
 route_forgot: /forgot_password
 route_reset: /reset_password
 redirect:
+parent_acl: false
 
 user_registration:
   enabled: true
