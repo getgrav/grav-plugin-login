@@ -100,6 +100,10 @@ Others will be forwarded to login screen.
 
 Because the admin user contains an `admin.login: true` reference he will be able to login to the secured page because that is one of the conditions defined in the page header. You are free to create any specific set of ACL rules you like.  Your user account must simply contain those same rules if you wish th user to have access.
 
+## Create Private Areas
+
+Enabling the setting "Use parent access rules" (`parent_acl` in login.yaml) allows you to create private areas where you set the access level on the parent page, and all the subpages inherit that requirement.
+
 # Login Page
 
 >> Note: the **frontend site** and **admin plugin** use different sessions so you need to explicitly provide a login on the frontend.
