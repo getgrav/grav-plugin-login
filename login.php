@@ -636,7 +636,7 @@ class LoginPlugin extends Plugin
                 foreach($fields as $field) {
                     // Process value of field if set in the page process.register_user
                     $default_values = $this->config->get('plugins.login.user_registration.default_values');
-                    foreach($default_values as $key => $param) {
+                    if ($default_values) foreach($default_values as $key => $param) {
                         $values = explode(',', $param);
 
                         if ($key == $field) {
