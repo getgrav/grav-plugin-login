@@ -1,22 +1,18 @@
 ---
-title: Login
+title: Reset password
 
 form:
-    name: login
-    action:
-    method: post
-
     fields:
         - name: username
           type: text
           placeholder: Username
-          autofocus: true
-
+          readonly: true
         - name: password
           type: password
           placeholder: Password
+          autofocus: true
+        - name: token
+          type: hidden
 ---
 
-# User Login
-
-This page is restricted...
+# Password Reset
