@@ -10,7 +10,7 @@ form:
 
     -
       name: email
-      type: text
+      type: email
       placeholder: "Enter your email"
       validate:
         required: true
