@@ -134,7 +134,7 @@ hr:
 
     PLUGIN_STATUS: Plugin status
     BUILTIN_CSS: Koristi ugrađeni CSS
-    BUILTIN_CSS_HELP: Ukljući CSS koji dolazi sa admin pluginom
+    BUILTIN_CSS_HELP: Uključi CSS koji dolazi sa admin pluginom
     ROUTE: Putanja prijave
 
     ROUTE_REGISTER: Putanja registracije
