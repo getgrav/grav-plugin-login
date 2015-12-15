@@ -111,7 +111,7 @@ fr:
     BTN_LOGIN: Connexion
     BTN_LOGOUT: Déconnexion
     BTN_FORGOT: Mot de passe oublié
-    
+
 hr:
   PLUGIN_LOGIN:
     ACCESS_DENIED: Pristup odbijen...
@@ -164,7 +164,7 @@ hr:
     LOGIN_AFTER_REGISTRATION: "Ulogiraj korisnika nakon reegistracije"
     LOGIN_AFTER_REGISTRATION_HELP: "Ulogiraj korisnika odmah nakon registracije. Ako je potrebna email aktivacija, korisnik će biti ulogiran odmah nakon aktiviranja računa"
     SEND_ACTIVATION_EMAIL:  "Pošalji aktivacijski email"
-    SEND_ACTIVATION_EMAIL_HELP: "Šalje email korisniku da aktivira svoja račun.
+    SEND_ACTIVATION_EMAIL_HELP: "Šalje email korisniku da aktivira svoja račun."
     SEND_NOTIFICATION_EMAIL: "Pošalji email obavijest"
     SEND_NOTIFICATION_EMAIL_HELP: "Obavještava administratora da se novi korisnik registrirao. Email će biti poslan na `To` polje u Email Plugin konfiguraciji"
     SEND_WELCOME_EMAIL: "Pošalji email dobrodošlice"
