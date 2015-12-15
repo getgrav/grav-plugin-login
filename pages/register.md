@@ -7,6 +7,8 @@ form:
       placeholder: "Choose a username"
       validate:
         required: true
+        message: PLUGIN_LOGIN.USERNAME_NOT_VALID
+        pattern: '^[a-z0-9_-]{3,16}$'
 
     -
       name: email
@@ -14,6 +16,7 @@ form:
       placeholder: "Enter your email"
       validate:
         required: true
+        message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
 
     -
       name: password1
@@ -21,6 +24,8 @@ form:
       label: Enter a password
       validate:
         required: true
+        message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
+        pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}'
 
     -
       name: password2
@@ -28,7 +33,8 @@ form:
       label: Enter the password again
       validate:
         required: true
-
+        message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
+        pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}'
 
   buttons:
       -
