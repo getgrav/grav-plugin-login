@@ -105,13 +105,52 @@ en:
 
 fr:
   PLUGIN_LOGIN:
-    ACCESS_DENIED: Accès non autorisé...
-    LOGIN_FAILED: Echec de la connexion...
-    LOGIN_SUCCESSFUL: Vous avez été connecté avec succès.
+    ACCESS_DENIED: Accès refusé...
+    LOGIN_FAILED: Échec de la connexion...
+    LOGIN_SUCCESSFUL: Vous vous êtes connecté avec succès.
+    
     BTN_LOGIN: Connexion
     BTN_LOGOUT: Déconnexion
     BTN_FORGOT: Mot de passe oublié
+    BTN_REGISTER: "S'enregister"
+    
+    SESSION: "&ldquo;Se souvenir de moi&rdquo; - Session"
+    REMEMBER_ME: Se souvenir de moi
+    REMEMBER_ME_HELP: "Définit un cookie sur votre navigateur pour permettant l'authentification par connexion persistante entre les sessions."
+    REMEMBER_ME_STOLEN_COOKIE: "Quelqu'un d'autre a utilisé vos informations de connexion pour accéder à cette page ! Toutes les sessions ont été déconnectées. Veuillez vous connecter avec vos identifiants et vérifier vos données."
+    
+    OAUTH_LOGIN: Se connecter avec %s
+    OAUTH_SIGNIN: Se connecter avec votre identifiant et mot de passe
+    OAUTH_CONNECT_MESSAGE: Se connecter avec un réseau social
+    OAUTH_CONNECT_MESSAGE_EXTRA: "d'autres réseaux sociaux"
+    OAUTH_PROVIDER_NOT_SUPPORTED: Le fournisseur OAuth "%s" n'est pas pris en charge
+    OR: ou
+    
+    PLUGIN_STATUS: Statut du plugin
+    BUILTIN_CSS: Utiliser les CSS intégrés
+    BUILTIN_CSS_HELP: Utiliser les CSS fournis dans le plugin d'administration
+    ROUTE: Chemin de connexion
+    ROUTE_HELP: Chemin personnalisé vers une page de connexion personnalisée proposée par votre thème
+    ROUTE_REGISTER: "Chemin d'enregistrement"
+    ROUTE_REGISTER_HELP: "Chemin vers la page d'enregistrement. A définir si vous souhaitez utiliser la page d'enregistrement intégrée. Laisser vide si vous disposez de votre propre formulaire d'enregistrement."
 
+    OAUTH_SECTION: OAuth
+    OAUTH_ENABLE: OAuth activé
+    OAUTH_USER_AUTOCREATE: "Création automatique d'un compte utilisateur"
+    OAUTH_ACCESS: "Droits d'accès OAuth de l'utilisateur"
+    OAUTH_PROVIDER_SECTION: Fournisseurs OAuth
+    OAUTH_PROVIDER_FACEBOOK: OAuth Facebook activé
+    OAUTH_PROVIDER_GOOGLE: OAuth Google activé
+    OAUTH_PROVIDER_GITHUB: OAuth GitHub activé
+    OAUTH_PROVIDER_TWITTER: OAuth Twitter activé
+    OAUTH_CLIENT_ID: ID Client
+    OAUTH_CLIENT_SECRET: Secret client
+
+    FACEBOOK: Facebook
+    GOOGLE: Google
+    GITHUB: GitHub
+    TWITTER: Twitter
+    
 hr:
   PLUGIN_LOGIN:
     ACCESS_DENIED: Pristup odbijen...
