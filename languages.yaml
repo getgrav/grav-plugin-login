@@ -114,7 +114,7 @@ fr:
     BTN_LOGIN: Connexion
     BTN_LOGOUT: Déconnexion
     BTN_FORGOT: Mot de passe oublié
-    BTN_REGISTER: "S'enregister"
+    BTN_REGISTER: S'enregister
 
     SESSION: "&ldquo;Se souvenir de moi&rdquo; - Session"
     REMEMBER_ME: Se souvenir de moi
@@ -124,7 +124,7 @@ fr:
     OAUTH_LOGIN: Se connecter avec %s
     OAUTH_SIGNIN: Se connecter avec votre identifiant et mot de passe
     OAUTH_CONNECT_MESSAGE: Se connecter avec un réseau social
-    OAUTH_CONNECT_MESSAGE_EXTRA: "d'autres réseaux sociaux"
+    OAUTH_CONNECT_MESSAGE_EXTRA: d'autres réseaux sociaux
     OAUTH_PROVIDER_NOT_SUPPORTED: Le fournisseur OAuth "%s" n'est pas pris en charge
     OR: ou
 
@@ -137,9 +137,9 @@ fr:
     ROUTE_REGISTER_HELP: "Chemin vers la page d'enregistrement. A définir si vous souhaitez utiliser la page d'enregistrement intégrée. Laisser vide si vous disposez de votre propre formulaire d'enregistrement."
 
     OAUTH_SECTION: OAuth
-    OAUTH_ENABLE: OAuth activé
-    OAUTH_USER_AUTOCREATE: "Création automatique d'un compte utilisateur"
-    OAUTH_ACCESS: "Droits d'accès OAuth de l'utilisateur"
+    OAUTH_ENABLE: Activer OAuth
+    OAUTH_USER_AUTOCREATE: Création automatique d'un compte utilisateur
+    OAUTH_ACCESS: Droits d'accès OAuth de l'utilisateur
     OAUTH_PROVIDER_SECTION: Fournisseurs OAuth
     OAUTH_PROVIDER_FACEBOOK: OAuth Facebook activé
     OAUTH_PROVIDER_GOOGLE: OAuth Google activé
@@ -153,14 +153,14 @@ fr:
     GITHUB: GitHub
     TWITTER: Twitter
 
-    USERNAME_NOT_VALID: "Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed"
-    USERNAME_NOT_AVAILABLE: "Username %s already exists, please pick another username"
-    PASSWORD_NOT_VALID: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
-    PASSWORDS_DO_NOT_MATCH: "Les mots de passe sont différents. Réessayez de saisir deux fois le même mot de passe"
+    USERNAME_NOT_VALID: "Le nom d'utilisateur doit comporter entre 3 et 16 caractères et peut être composé de lettres minuscules, de chiffres et de tirets de soulignement (underscores) et des traits d'union. Les lettres majuscules, les espaces et les caractères spéciaux ne sont pas autorisés."
+    USERNAME_NOT_AVAILABLE: "Le nom d'utilisateur %s existe déjà, veuillez en choisir un autre."
+    PASSWORD_NOT_VALID: "Le mot de passe doit être composé d'au moins un chiffre, une majuscule et minuscule et au moins 8 caractères ou plus."
+    PASSWORDS_DO_NOT_MATCH: "Les mots de passe sont différents. Réessayez de saisir le même mot de passe deux fois."
 
-    EMAIL_NOT_CONFIGURED: "Email not configured"
-    USER_NEEDS_EMAIL_FIELD: "The user needs an email field"
-    EMAIL_SENDING_FAILURE: "Une erreur est survenue lors de l'envoi de l' e-mail"
+    EMAIL_NOT_CONFIGURED: "L'e-mail n'est pas configuré"
+    USER_NEEDS_EMAIL_FIELD: "L'utilisateur a besoin d'un champ pour e-mail"
+    EMAIL_SENDING_FAILURE: "Une erreur est survenue lors de l'envoi de l'e-mail."
 
     ACTIVATION_EMAIL_SUBJECT: "Activer votre compte sur %s"
     ACTIVATION_EMAIL_BODY: "Hi %s, click %s to activate your account on %s"
@@ -180,6 +180,8 @@ fr:
 
     VALIDATE_PASSWORD1_AND_PASSWORD2: "Validate double entered password"
     VALIDATE_PASSWORD1_AND_PASSWORD2_HELP: "Validate and compare two different fields for the passwords, named `password1` and `password2`. Enable this if you have two password fields in the registration form"
+    
+    VALIDATE_PASSWORD: "Validation du mot de passe"
 
     SET_USER_DISABLED: "Définir l'utilisateur comme désactivé"
     SET_USER_DISABLED_HELP: "Best used along with the `Send activation email` email. Adds the user to Grav, but sets it as disabled"
@@ -190,7 +192,7 @@ fr:
     SEND_NOTIFICATION_EMAIL: "Envoyer un e-mail de notification"
     SEND_NOTIFICATION_EMAIL_HELP: "Notifies the site admin that a new user has registered. The email will be sent to the `To` field in the Email Plugin configuration"
     SEND_WELCOME_EMAIL: "Envoyer un e-mail de bienvenue"
-    SEND_WELCOME_EMAIL_HELP: "Sends an email to the newly registered user"
+    SEND_WELCOME_EMAIL_HELP: "Envoyer un e-mail à un nouvel utilisateur enregistré."
 
     DEFAULT_VALUES: "Valeurs par défaut"
     DEFAULT_VALUES_HELP: "List of field names and values associated, that will be added to the user profile (yaml file) by default, without being configurable by the user. Separate multiple values with a comma, with no spaces between the values"
@@ -199,9 +201,9 @@ fr:
 
     REGISTRATION_FIELDS: "Champs d'inscription"
     REGISTRATION_FIELDS_HELP: "Add the fields that will be added to the user yaml file. Fields not listed here will not be added even if present in the registration form"
-    REGISTRATION_FIELD_KEY: "Field name"
+    REGISTRATION_FIELD_KEY: "Nom du champ"
 
-    REDIRECT_AFTER_LOGIN: "Redirect after login"
+    REDIRECT_AFTER_LOGIN: "Redirectaprès connexion"
     REDIRECT_AFTER_LOGIN_HELP: "Custom route to redirect after login"
     REDIRECT_AFTER_REGISTRATION: "Redirect after registration"
     REDIRECT_AFTER_REGISTRATION_HELP: "Custom route to redirect after the registration"
