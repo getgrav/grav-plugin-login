@@ -74,8 +74,6 @@ en:
     VALIDATE_PASSWORD1_AND_PASSWORD2: "Validate double entered password"
     VALIDATE_PASSWORD1_AND_PASSWORD2_HELP: "Validate and compare two different fields for the passwords, named `password1` and `password2`. Enable this if you have two password fields in the registration form"
 
-    VALIDATE_PASSWORD: "Validate password"
-
     SET_USER_DISABLED: "Set the user as disabled"
     SET_USER_DISABLED_HELP: "Best used along with the `Send activation email` email. Adds the user to Grav, but sets it as disabled"
     LOGIN_AFTER_REGISTRATION: "Login the user after registration"
@@ -180,8 +178,6 @@ fr:
 
     VALIDATE_PASSWORD1_AND_PASSWORD2: "Validate double entered password"
     VALIDATE_PASSWORD1_AND_PASSWORD2_HELP: "Validate and compare two different fields for the passwords, named `password1` and `password2`. Enable this if you have two password fields in the registration form"
-    
-    VALIDATE_PASSWORD: "Validation du mot de passe"
 
     SET_USER_DISABLED: "Définir l'utilisateur comme désactivé"
     SET_USER_DISABLED_HELP: "Best used along with the `Send activation email` email. Adds the user to Grav, but sets it as disabled"
@@ -211,7 +207,7 @@ fr:
     OPTIONS: Options
     EMAIL_VALIDATION_MESSAGE: "Doit-être une adresse e-mail valide"
     PASSWORD_VALIDATION_MESSAGE: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
- 
+
 hr:
   PLUGIN_LOGIN:
     ACCESS_DENIED: Pristup odbijen...
@@ -258,8 +254,6 @@ hr:
 
     VALIDATE_PASSWORD1_AND_PASSWORD2: "Validiraj duplo unesenu lozinku"
     VALIDATE_PASSWORD1_AND_PASSWORD2_HELP: "Validiraj i usporedi dva različčita polja za lozinke, imenovana `lozinka1` i `lozinka2`. Omogući ovo ako imaš dva polja za lozinke u formularu registracije"
-
-    VALIDATE_PASSWORD: "Validiraj lozinku"
 
     LOGIN_AFTER_REGISTRATION: "Ulogiraj korisnika nakon reegistracije"
     LOGIN_AFTER_REGISTRATION_HELP: "Ulogiraj korisnika odmah nakon registracije. Ako je potrebna email aktivacija, korisnik će biti ulogiran odmah nakon aktiviranja računa"

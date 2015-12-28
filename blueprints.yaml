@@ -176,17 +176,6 @@ form:
                   validate:
                       type: bool
 
-                user_registration.options.validate_password:
-                  type: toggle
-                  label: PLUGIN_LOGIN.VALIDATE_PASSWORD
-                  help: PLUGIN_LOGIN.VALIDATE_PASSWORD_HELP
-                  highlight: 1
-                  options:
-                      1: PLUGIN_ADMIN.YES
-                      0: PLUGIN_ADMIN.NO
-                  validate:
-                      type: bool
-
                 user_registration.options.set_user_disabled:
                   type: toggle
                   label: PLUGIN_LOGIN.SET_USER_DISABLED
