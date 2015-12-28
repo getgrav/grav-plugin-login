@@ -74,6 +74,8 @@ en:
     VALIDATE_PASSWORD1_AND_PASSWORD2: "Validate double entered password"
     VALIDATE_PASSWORD1_AND_PASSWORD2_HELP: "Validate and compare two different fields for the passwords, named `password1` and `password2`. Enable this if you have two password fields in the registration form"
 
+    VALIDATE_PASSWORD: "Validate password"
+
     SET_USER_DISABLED: "Set the user as disabled"
     SET_USER_DISABLED_HELP: "Best used along with the `Send activation email` email. Adds the user to Grav, but sets it as disabled"
     LOGIN_AFTER_REGISTRATION: "Login the user after registration"
