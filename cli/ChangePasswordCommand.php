@@ -6,10 +6,7 @@ use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Helper;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Yaml\Parser;
-use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * Class CleanCommand
