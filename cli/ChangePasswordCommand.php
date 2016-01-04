@@ -41,7 +41,7 @@ class ChangePasswordCommand extends ConsoleCommand
                 InputOption::VALUE_REQUIRED,
                 "The password. Note that this option is not recommended because the password will be visible by users listing the processes. You should also make sure the password respects Grav's password policy."
             )
-            ->setDescription('Creates a new user')
+            ->setDescription('Changes a User Password')
             ->setHelp('The <info>change-password</info> changes the password of the specified user. (User must exist)')
         ;
     }
