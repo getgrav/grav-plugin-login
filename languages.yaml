@@ -153,7 +153,7 @@ fr:
 
     USERNAME_NOT_VALID: "Le nom d'utilisateur doit comporter entre 3 et 16 caractères et peut être composé de lettres minuscules, de chiffres et de tirets de soulignement (underscores) et des traits d'union. Les lettres majuscules, les espaces et les caractères spéciaux ne sont pas autorisés."
     USERNAME_NOT_AVAILABLE: "Le nom d'utilisateur %s existe déjà, veuillez en choisir un autre."
-    PASSWORD_NOT_VALID: "Le mot de passe doit être composé d'au moins un chiffre, une majuscule et minuscule et au moins 8 caractères ou plus."
+    PASSWORD_NOT_VALID: "Le mot de passe doit-être composé d'au moins un chiffre, une majuscule et une minuscule, et au moins 8 caractères"
     PASSWORDS_DO_NOT_MATCH: "Les mots de passe sont différents. Réessayez de saisir le même mot de passe deux fois."
 
     EMAIL_NOT_CONFIGURED: "L'e-mail n'est pas configuré"
@@ -182,7 +182,7 @@ fr:
     SET_USER_DISABLED: "Définir l'utilisateur comme désactivé"
     SET_USER_DISABLED_HELP: "Best used along with the `Send activation email` email. Adds the user to Grav, but sets it as disabled"
     LOGIN_AFTER_REGISTRATION: "Connecte l'utilisateur après son inscription"
-    LOGIN_AFTER_REGISTRATION_HELP: "Immediately login the user after the registration. If email activation is required, the user will be logged in immediately after activating the account"
+    LOGIN_AFTER_REGISTRATION_HELP: "Identifier immédiatement l'utilisateur après l'inscription. Si l'email d'activation est demandé, l'utilisateur sera connecté immédiatement après l'activation du compte"
     SEND_ACTIVATION_EMAIL:  "Envoyer un e-mail d'activation"
     SEND_ACTIVATION_EMAIL_HELP: "Sends an email to the user to activate his account. Enable the `Set the user as disabled` option when using this feature, so the user will be set as disabled and an email will be sent to activate the account"
     SEND_NOTIFICATION_EMAIL: "Envoyer un e-mail de notification"
@@ -201,12 +201,12 @@ fr:
 
     REDIRECT_AFTER_LOGIN: "Redirection après connexion"
     REDIRECT_AFTER_LOGIN_HELP: "Custom route to redirect after login"
-    REDIRECT_AFTER_REGISTRATION: "Redirection après inscraption"
+    REDIRECT_AFTER_REGISTRATION: "Redirection après inscription"
     REDIRECT_AFTER_REGISTRATION_HELP: "Custom route to redirect after the registration"
 
     OPTIONS: Options
     EMAIL_VALIDATION_MESSAGE: "Doit-être une adresse e-mail valide"
-    PASSWORD_VALIDATION_MESSAGE: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+    PASSWORD_VALIDATION_MESSAGE: "Le mot de passe doit-être composé d'au moins un chiffre, une majuscule et une minuscule, et au moins 8 caractères"
 
 hr:
   PLUGIN_LOGIN:
