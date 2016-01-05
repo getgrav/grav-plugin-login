@@ -66,7 +66,7 @@ class ChangePasswordCommand extends ConsoleCommand
 
         if (!$this->options['user']) {
             // Get username and validate
-            $question = new Question('Enter a <yellow>username</yellow>: ', 'admin');
+            $question = new Question('Enter a <yellow>username</yellow>: ');
             $question->setValidator(function ($value) {
                 return $this->validate('user', $value);
             });
