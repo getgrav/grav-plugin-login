@@ -1,3 +1,12 @@
+# v1.3.0
+## 01/06/2016
+
+1. [](#new)
+    * Added a new CLI command to change a user's password
+    * Added a new CLI command to edit the user state
+1. [](#improved)
+    * Improved french translation
+
 # v1.2.1
 ## 12/18/2015
 
