@@ -25,7 +25,6 @@ user_registration:
 
   options:
     validate_password1_and_password2: true
-    validate_password: false
     set_user_disabled: false
     login_after_registration: true
     send_activation_email: false
