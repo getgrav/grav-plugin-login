@@ -33,7 +33,7 @@ form:
 
             enabled:
               type: hidden
-              label: PLUGIN_LOGIN.PLUGIN_STATUS
+              label: PLUGIN_ADMIN.PLUGIN_STATUS
               highlight: 1
               default: 1
               options:
@@ -74,8 +74,8 @@ form:
               default: 0
               help: "Check for parent access rules if no rules are defined"
               options:
-                1: Enabled
-                0: Disabled
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
               validate:
                 type: bool
 

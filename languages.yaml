@@ -21,7 +21,6 @@ en:
     OAUTH_PROVIDER_NOT_SUPPORTED: OAuth provider "%s" is not supported
     OR: or
 
-    PLUGIN_STATUS: Plugin status
     BUILTIN_CSS: Use built in CSS
     BUILTIN_CSS_HELP: Include the CSS provided by the admin plugin
     ROUTE: Login path
@@ -126,7 +125,6 @@ fr:
     OAUTH_PROVIDER_NOT_SUPPORTED: Le fournisseur OAuth "%s" n'est pas pris en charge
     OR: ou
 
-    PLUGIN_STATUS: Statut du plugin
     BUILTIN_CSS: Utiliser les CSS intégrés
     BUILTIN_CSS_HELP: Utiliser les CSS fournis dans le plugin d'administration
     ROUTE: Chemin de connexion
@@ -227,7 +225,6 @@ hr:
     OAUTH_PROVIDER_NOT_SUPPORTED: OAuth provider "%s" nije podržan
     OR: ili
 
-    PLUGIN_STATUS: Plugin status
     BUILTIN_CSS: Koristi ugrađeni CSS
     BUILTIN_CSS_HELP: Uključi CSS koji dolazi sa admin pluginom
     ROUTE: Putanja prijave
@@ -297,7 +294,6 @@ hu:
     OAUTH_PROVIDER_NOT_SUPPORTED: A(z) "%s" OAuth szolgáltató nem használható
     OR: vagy
 
-    PLUGIN_STATUS: Plugin állapota
     BUILTIN_CSS: Beépített CSS használata
     BUILTIN_CSS_HELP: Az admin plugin által biztosított CSS beillesztése
     ROUTE: Belépés útvonala
