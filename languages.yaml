@@ -189,18 +189,18 @@ fr:
     SEND_WELCOME_EMAIL_HELP: "Envoyer un e-mail à un nouvel utilisateur enregistré."
 
     DEFAULT_VALUES: "Valeurs par défaut"
-    DEFAULT_VALUES_HELP: "List of field names and values associated, that will be added to the user profile (yaml file) by default, without being configurable by the user. Separate multiple values with a comma, with no spaces between the values"
+    DEFAULT_VALUES_HELP: "Liste des noms et valeurs associés pour les champs. Ils seront ajoutés au profil utilisateur par défaut (fichier yaml), sans pouvoir être configurables par l'utilisateur. Séparez les différentes valeurs par une virgule, sans espaces entre les valeurs."
     ADDITIONAL_PARAM_KEY: "Paramètre"
     ADDITIONAL_PARAM_VALUE: "Valeur"
 
     REGISTRATION_FIELDS: "Champs d'inscription"
-    REGISTRATION_FIELDS_HELP: "Add the fields that will be added to the user yaml file. Fields not listed here will not be added even if present in the registration form"
+    REGISTRATION_FIELDS_HELP: "Ajouter les champs qui seront ajoutés au fichier yaml de l'utilisateur. Les champs non listés ne seront pas ajoutés même s'ils sont présent sur le formulaire d'inscription"
     REGISTRATION_FIELD_KEY: "Nom du champ"
 
     REDIRECT_AFTER_LOGIN: "Redirection après connexion"
-    REDIRECT_AFTER_LOGIN_HELP: "Custom route to redirect after login"
+    REDIRECT_AFTER_LOGIN_HELP: "Chemin personnalisé de redirection après la connexion"
     REDIRECT_AFTER_REGISTRATION: "Redirection après inscription"
-    REDIRECT_AFTER_REGISTRATION_HELP: "Custom route to redirect after the registration"
+    REDIRECT_AFTER_REGISTRATION_HELP: "Chemin personnalisé de redirection après l'inscription"
 
     OPTIONS: Options
     EMAIL_VALIDATION_MESSAGE: "Doit-être une adresse e-mail valide"
