@@ -54,11 +54,7 @@ class Controller implements ControllerInterface
     {
         $this->grav = $grav;
         $this->action = $action;
-        if(!isset($this->grav['login'])){
-            require_once __DIR__ . '/login.php';
-            $this->grav['login'] = new Login($this->grav);
-        }
-        $this->login = $this->grav['login'];
+        $this->login = isset($this->grav['login'])?$this->grav['login']:'';
         $this->post = $this->getPost($post);
 
         $this->rememberMe();
