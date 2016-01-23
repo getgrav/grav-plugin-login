@@ -129,7 +129,7 @@ class LoginPlugin extends Plugin
         
                 
         //Initialize Login Object
-        require_once __DIR__ . '/classes/login.php';
+        require_once __DIR__ . '/classes/Login.php';
         $this->login = new Login($this->grav);
         
         //Store Login Object in Grav
