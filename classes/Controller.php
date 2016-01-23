@@ -54,6 +54,11 @@ class Controller implements ControllerInterface
     {
         $this->grav = $grav;
         $this->action = $action;
+        if(!isset($this->grav['login'])){
+            require_once __DIR__ . '/login.php';
+            $this->grav['login'] = new Login($this->grav);
+        }
+        $this->login = $this->grav['login'];
         $this->post = $this->getPost($post);
 
         $this->rememberMe();
@@ -80,7 +85,7 @@ class Controller implements ControllerInterface
         try {
             $success = call_user_func(array($this, $method));
         } catch (\RuntimeException $e) {
-            $this->setMessage($e->getMessage());
+            $this->login->setMessage($e->getMessage());
         }
 
         if (!$this->redirect && isset($redirect)) {

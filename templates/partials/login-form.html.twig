@@ -6,35 +6,11 @@
     {% include 'partials/messages.html.twig' %}
 
     <form method="post" action="{{ uri.url ~ page.header.form.action}}">
-        {% if oauth.enabled %}
-            <div class="form-oauth button-group">
-                {# Create hidden duplicate of submit button to designate it as default #}
-                <input type="submit" name="task" value="login.login" tabindex="-1" />
-
-                {# Show OAuth authentication providers #}
-                <p>{{ 'PLUGIN_LOGIN.OAUTH_CONNECT_MESSAGE'|t }}
-                {% if oauth.providers|count > 4 %}
-                    {{ 'PLUGIN_LOGIN.OR'|t }} <label for="oauth-input">{{ 'PLUGIN_LOGIN.OAUTH_CONNECT_MESSAGE_EXTRA'|t }}</label></p>
-                    <input type="checkbox" id="oauth-input" />
-                    <ul class="oauth-provider-extra">
-                        {% for provider,credentials in oauth.providers[4:] %}
-                            {% set icon = icons[provider]|default(provider|lower) %}
-                            <li><button name="oauth" value="{{ provider }}" type="submit" class="button {{ provider|lower }}" href="{{ base_url_relative }}/login/oauth{{ config.system.param_sep }}{{ provider }}" title="{{ 'PLUGIN_LOGIN.OAUTH_LOGIN'|t(provider|ucwords) }}"><i class="fa fa-{{ icon }}"></i> {{ provider|ucwords }}</button></li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    </p>
-                {% endif %}
-
-                <ul class="oauth-provider">
-                    {% for provider,credentials in oauth.providers[:4] %}
-                        {% set icon = icons[provider]|default(provider|lower) %}
-                        <li><button name="oauth" value="{{ provider }}" type="submit" class="button {{ provider|lower }}" href="{{ base_url_relative }}/login/oauth{{ config.system.param_sep }}{{ provider }}" title="{{ 'PLUGIN_LOGIN.OAUTH_LOGIN'|t(provider|ucwords) }}"><i class="fa fa-{{ icon }}"></i> {{ provider|ucwords }}</button></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <span class="delimiter">{{ 'PLUGIN_LOGIN.OR'|t }}</span>
-            <p>{{ 'PLUGIN_LOGIN.OAUTH_SIGNIN'|t }}</p>
+        {% if grav.twig.plugins_hooked_loginPage %}
+            {% for label in grav.twig.plugins_hooked_loginPage %}
+                
+                {% include label %}
+            {% endfor %}
         {% endif %}
 
         {% for field in page.header.form.fields %}

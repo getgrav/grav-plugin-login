@@ -25,15 +25,15 @@ class LoginController extends Controller
     {
         $t = $this->grav['language'];
         if ($this->authenticate($this->post)) {
-            $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
+            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
             $referrer = $this->grav['uri']->referrer('/');
             $this->setRedirect($referrer);
         } else {
             $user = $this->grav['user'];
             if ($user->username) {
-                $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'));
+                $this->login->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'));
             } else {
-                $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'));
+                $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'));
             }
         }
 
