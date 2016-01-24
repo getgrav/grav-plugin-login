@@ -4,6 +4,7 @@ form:
     -
       name: username
       type: text
+      id: username
       placeholder: "Choose a username"
       validate:
         required: true
@@ -13,6 +14,7 @@ form:
     -
       name: email
       type: email
+      id: email
       placeholder: "Enter your email"
       validate:
         required: true
@@ -21,6 +23,7 @@ form:
     -
       name: password1
       type: password
+      id: password1
       label: Enter a password
       validate:
         required: true
@@ -30,6 +33,7 @@ form:
     -
       name: password2
       type: password
+      id: password2
       label: Enter the password again
       validate:
         required: true

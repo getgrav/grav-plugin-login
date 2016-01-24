@@ -5,6 +5,7 @@ form:
     fields:
         - name: username
           type: text
+          id: username
           placeholder: Username
           autofocus: true
 ---
