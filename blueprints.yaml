@@ -239,7 +239,7 @@ form:
             oauth.enabled:
               type: toggle
               label: PLUGIN_LOGIN.OAUTH_ENABLE
-              highlight: 0
+              highlight: 1
               default: 0
               options:
                 1: PLUGIN_ADMIN.ENABLED
@@ -250,7 +250,7 @@ form:
             oauth.user.autocreate:
               type: toggle
               label: PLUGIN_LOGIN.OAUTH_USER_AUTOCREATE
-              highlight: 0
+              highlight: 1
               default: 0
               options:
                 1: PLUGIN_ADMIN.ENABLED
