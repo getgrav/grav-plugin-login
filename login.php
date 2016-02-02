@@ -480,10 +480,13 @@ class LoginPlugin extends Plugin
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
 
+        /** @var User $user */
+        $user = $this->grav['user'];
+
         $extension = $this->grav['uri']->extension();
         $extension = $extension ?: 'html';
 
-        if (!$this->authenticated) {
+        if (!$user->authenticated) {
             $twig->template = "login." . $extension . ".twig";
 
             $providers = [];
