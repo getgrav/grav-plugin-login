@@ -212,9 +212,9 @@ class LoginController extends Controller
             if ($user->exists()) {
                 if (!empty($form['username']) && !empty($form['password'])) {
                     // Authenticate user.
-                    $result = $user->authenticate($form['password']);
+                    $user->authenticated = $user->authenticate($form['password']);
 
-                    if ($result) {
+                    if ($user->authenticated) {
                         $this->grav['session']->user = $user;
 
                         unset($this->grav['user']);
@@ -234,7 +234,9 @@ class LoginController extends Controller
         }
 
         // Authorize against user ACL
-        $user->authenticated = $user->authorize('site.login');
+        $user_authorized = $user->authorize('site.login');
+        $user->authenticated = ($user->authenticated && $user_authorized);
+
         return $user->authenticated;
     }
 }
