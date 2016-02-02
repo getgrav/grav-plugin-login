@@ -437,7 +437,7 @@ class LoginPlugin extends Plugin
         $l = $this->grav['language'];
 
         // Reset page with login page.
-        if (!$user->authenticated || !$this->authenticated) {
+        if (!$user->authenticated) {
             $page = new Page;
 
             // Get the admin Login page is needed, else teh default
@@ -486,9 +486,11 @@ class LoginPlugin extends Plugin
         $extension = $this->grav['uri']->extension();
         $extension = $extension ?: 'html';
 
-        if (!$user->authenticated) {
+        if (!$this->authenticated) {
             $twig->template = "login." . $extension . ".twig";
+        }
 
+        if (!$this->authenticated || !$user->authenticated) {
             $providers = [];
             foreach ($this->config->get('plugins.login.oauth.providers') as $provider => $options) {
                 if ($options['enabled'] && isset($options['credentials'])) {
