@@ -437,7 +437,7 @@ class LoginPlugin extends Plugin
         $l = $this->grav['language'];
 
         // Reset page with login page.
-        if (!$user->authenticated) {
+        if (!$user->authenticated || !$this->authenticated) {
             $page = new Page;
 
             // Get the admin Login page is needed, else teh default
