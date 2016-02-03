@@ -31,9 +31,9 @@ class LoginController extends Controller
         } else {
             $user = $this->grav['user'];
             if ($user->username) {
-                $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'));
+                $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             } else {
-                $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'));
+                $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
             }
         }
 

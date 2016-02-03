@@ -80,7 +80,7 @@ class Controller implements ControllerInterface
         try {
             $success = call_user_func(array($this, $method));
         } catch (\RuntimeException $e) {
-            $this->setMessage($e->getMessage());
+            $this->setMessage($e->getMessage(), 'error');
         }
 
         if (!$this->redirect && isset($redirect)) {
