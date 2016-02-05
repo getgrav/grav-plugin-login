@@ -102,7 +102,7 @@ class OAuthLoginController extends Controller
         }
 
         if (!$this->service || empty($config)) {
-            $this->setMessage($t->translate(['PLUGIN_LOGIN.OAUTH_PROVIDER_NOT_SUPPORTED', $this->action]));
+            $this->setMessage($t->translate(['PLUGIN_LOGIN.OAUTH_PROVIDER_NOT_SUPPORTED', $this->action]), 'error');
             return true;
         }
 
@@ -113,14 +113,14 @@ class OAuthLoginController extends Controller
             if ($authenticated) {
                 $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
             } else {
-                $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'));
+                $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             }
 
             // Redirect to current URI
             $referrer = $this->grav['uri']->url(true);
             $this->setRedirect($referrer);
         } elseif (!$this->grav['session']->oauth) {
-            $this->setMessage($t->translate(['PLUGIN_LOGIN.OAUTH_PROVIDER_NOT_SUPPORTED', $this->action]));
+            $this->setMessage($t->translate(['PLUGIN_LOGIN.OAUTH_PROVIDER_NOT_SUPPORTED', $this->action]), 'error');
         }
 
         return true;
@@ -363,9 +363,7 @@ class OAuthLoginController extends Controller
         $user->set('lang', $data['lang']);
 
         // Set access rights
-        $user->join('access',
-            $this->grav['config']->get('plugins.login.oauth.user.access', [])
-        );
+        $user->set('access', $this->grav['config']->get('plugins.login.oauth.user.access', []));
 
         // Authorize OAuth user to access page(s)
         $user->authenticated = $user->authorize('site.login');

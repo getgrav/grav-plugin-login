@@ -23,15 +23,21 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 
 ### Commands
 
-| `bin/plugin login newuser`       | (Supports Interactive Questionnaire)                            |
-|-----------------------------------|-----------------------------------------------------------------|
-| [ -u, --user=USER ]               | The username.                                                   |
-| [ -p, --password=PASSWORD ]       | The password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
-| [ -e, --email=EMAIL ]             | The user email address.                                         |
-| [ -P, --permissions=PERMISSIONS ] | The user permissions. It can be either `a` for Admin access only, `s` for Site access only and `b` for both Admin and Site access. |
-| [ -N, --fullname=FULLNAME ]       | The user full name                                              |
-| [ -t, --title=TITLE ]             | The title of the user. Usually used as a subtext. Example: Admin, Collaborator, Developer |
-| [ -s, --state=STATE ]             | The state of the account. Either `enabled` (default) or `disabled` |
+| Command       | Arguments                            | Explination                |
+|---------------|--------------------------------------|----------------------------|
+|`newuser`|Aliases: `add-user`, `new-user`|Creates a new user (creates file in `user/accounts/`)
+|| [ -u, --user=USER ]               | The username.                                                   |
+|| [ -p, --password=PASSWORD ]       | The password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
+|| [ -e, --email=EMAIL ]             | The user email address.                                         |
+|| [ -P, --permissions=PERMISSIONS ] | The user permissions. It can be either `a` for Admin access only, `s` for Site access only and `b` for both Admin and Site access. |
+|| [ -N, --fullname=FULLNAME ]       | The user full name                                              |
+|| [ -t, --title=TITLE ]             | The title of the user. Usually used as a subtext. Example: Admin, Collaborator, Developer |
+|| [ -s, --state=STATE ]             | The state of the account. Either `enabled` (default) or `disabled` |
+|||
+|`changepass`|Aliases: `newpass`, `passwd`|Changes password of the specified user (User file must exist)
+|| [ -u, --user=USER ]               | The username.                                                   |
+|| [ -p, --password=PASSWORD ]       | The new password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
+
 
 ### CLI Example
 ```
@@ -95,7 +101,7 @@ access:
 Users who have any of the listed ACL roles enabled will have access to the page.
 Others will be forwarded to login screen.
 
-Because the admin user contains an `admin.login: true` reference he will be able to login to the secured page because that is one of the conditions defined in the page header. You are free to create any specific set of ACL rules you like.  Your user account must simply contain those same rules if you wish th user to have access.
+Because the admin user contains an `admin.login: true` reference he will be able to login to the secured page because that is one of the conditions defined in the page header. You are free to create any specific set of ACL rules you like.  Your user account must simply contain those same rules if you wish the user to have access.
 
 ## Create Private Areas
 
