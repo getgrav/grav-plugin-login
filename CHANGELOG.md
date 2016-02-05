@@ -1,5 +1,5 @@
 # v1.3.1
-## 02/xx/2016
+## 02/05/2016
 
 1. [](#new)
     * Add translations for Username and Password (placeholders are not translated)
