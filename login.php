@@ -480,12 +480,17 @@ class LoginPlugin extends Plugin
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
 
+        /** @var User $user */
+        $user = $this->grav['user'];
+
         $extension = $this->grav['uri']->extension();
         $extension = $extension ?: 'html';
 
         if (!$this->authenticated) {
             $twig->template = "login." . $extension . ".twig";
+        }
 
+        if (!$this->authenticated || !$user->authenticated) {
             $providers = [];
             foreach ($this->config->get('plugins.login.oauth.providers') as $provider => $options) {
                 if ($options['enabled'] && isset($options['credentials'])) {

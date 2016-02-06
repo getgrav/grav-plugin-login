@@ -80,7 +80,7 @@ class Controller implements ControllerInterface
         try {
             $success = call_user_func(array($this, $method));
         } catch (\RuntimeException $e) {
-            $this->setMessage($e->getMessage());
+            $this->setMessage($e->getMessage(), 'error');
         }
 
         if (!$this->redirect && isset($redirect)) {
@@ -95,11 +95,10 @@ class Controller implements ControllerInterface
      */
     public function redirect()
     {
-        $redirect = $this->grav['config']->get('plugins.login.redirect');
-        if ($redirect) {
-            $this->grav->redirect($redirect, $this->redirectCode);
-        } else if ($this->redirect) {
+        if ($this->redirect) {
             $this->grav->redirect($this->redirect, $this->redirectCode);
+        } else if ($redirect = $this->grav['config']->get('plugins.login.redirect')) {
+            $this->grav->redirect($redirect, $this->redirectCode);
         }
     }
 
