@@ -101,7 +101,7 @@ access:
 Users who have any of the listed ACL roles enabled will have access to the page.
 Others will be forwarded to login screen.
 
-Because the admin user contains an `admin.login: true` reference he will be able to login to the secured page because that is one of the conditions defined in the page header. You are free to create any specific set of ACL rules you like.  Your user account must simply contain those same rules if you wish th user to have access.
+Because the admin user contains an `admin.login: true` reference he will be able to login to the secured page because that is one of the conditions defined in the page header. You are free to create any specific set of ACL rules you like.  Your user account must simply contain those same rules if you wish the user to have access.
 
 ## Create Private Areas
 

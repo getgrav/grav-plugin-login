@@ -466,6 +466,9 @@ class LoginPlugin extends Plugin
         
         $this->grav->fireEvent('onLoginPage');
 
+        /** @var User $user */
+        $user = $this->grav['user'];
+
         $extension = $this->grav['uri']->extension();
         $extension = $extension ?: 'html';
 

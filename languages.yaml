@@ -1,5 +1,8 @@
 en:
   PLUGIN_LOGIN:
+    USERNAME: Username
+    PASSWORD: Password
+    
     ACCESS_DENIED: Access denied...
     LOGIN_FAILED: Login failed...
     LOGIN_SUCCESSFUL: You have been successfully logged in.
@@ -104,6 +107,8 @@ en:
 
 fr:
   PLUGIN_LOGIN:
+    USERNAME: "Nom d'utilisateur"
+    PASSWORD: "Mot de passe"
     ACCESS_DENIED: Accès refusé...
     LOGIN_FAILED: Échec de la connexion...
     LOGIN_SUCCESSFUL: Vous vous êtes connecté avec succès.

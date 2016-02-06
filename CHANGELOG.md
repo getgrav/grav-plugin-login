@@ -1,3 +1,16 @@
+# v1.3.1
+## 02/05/2016
+
+1. [](#new)
+    * Add translations for Username and Password (placeholders are not translated)
+1. [](#improved)
+    * Improve registration, forgot, reset and login forms accessibility by setting the id attribute
+    * Improved french translation
+    * Add the correct message type when raising a form processing error
+1. [](#bugfix)
+    * Show the correct error message when the user is not authorized to view a page
+    * Fix showing the OAuth links in the login form 
+
 # v1.3.0
 ## 01/06/2016
 
