@@ -1,22 +1,32 @@
 <?php
-namespace Grav\Plugin;
+namespace Grav\Plugin\Login;
 
 use Grav\Common\Grav;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
+use Grav\Common\Utils;
 use Grav\Plugin\Login\Utils as LoginUtils;
-
+use RocketTheme\Toolbox\Session\Message;
+/**
+ * Class Login
+ * @package Grav\Plugin
+ */
 class Login
 {
     public $grav;
-    
+
     public $user;
-    
+
     protected $config;
-    
+
     protected $uri;
-    
-    
+
+
+    /**
+     * Login constructor.
+     *
+     * @param Grav $grav
+     */
     public function __construct(Grav $grav)
     {
         $this->grav = $grav;
@@ -24,10 +34,10 @@ class Login
         //$this->route = $route;
         $this->session = $this->grav['session'];
         $this->user = $this->grav['user'];
-        
+
         $this->uri = $this->grav['uri'];
     }
-    
+
     /**
      * Add message into the session queue.
      *
@@ -40,7 +50,7 @@ class Login
         $messages = $this->grav['messages'];
         $messages->add($msg, $type);
     }
-    
+
     /**
      * Fetch and delete messages from the session queue.
      *
@@ -55,7 +65,7 @@ class Login
 
         return $messages->fetch($type);
     }
-    
+
     /**
      * Authenticate user.
      *
@@ -85,7 +95,8 @@ class Login
                     /** @var Grav $grav */
                     $grav = $this->grav;
 
-                    $this->setMessage($this->grav['language']->translate('PLUGIN_ADMIN.LOGIN_LOGGED_IN', [$this->user->language]), 'info');
+                    $this->setMessage($this->grav['language']->translate('PLUGIN_ADMIN.LOGIN_LOGGED_IN',
+                        [$this->user->language]), 'info');
 
                     $redirect_route = $this->uri->route();
                     $grav->redirect($redirect_route);
@@ -115,7 +126,7 @@ class Login
 
         return false;
     }
-    
+
     /**
      * Create a new user file
      *
@@ -128,13 +139,15 @@ class Login
         // Create user object and save it
         $user = new User($data);
         $username = $data['username'];
-        $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT, true, true));
+        $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT,
+            true, true));
         $user->file($file);
         $user->save();
         $user = User::load($username);
 
-        if ($data['state'] == 'enabled' &&
-            $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
+        if ($data['state'] == 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration',
+                false)
+        ) {
 
             //Login user
             $this->grav['session']->user = $user;
@@ -154,14 +167,17 @@ class Login
             }
         }
 
-        if ($redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false)) {
+        $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false);
+        if ($redirect) {
             $this->grav->redirect($redirect);
         }
     }
-    
-    
+
+
     /**
      * Handle the email to notificate the user account creation to the site admin.
+     *
+     * @param $user
      *
      * @return bool True if the action was performed.
      */
@@ -174,7 +190,12 @@ class Login
         $sitename = $this->grav['config']->get('site.title', 'Website');
 
         $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT', $sitename]);
-        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY', $sitename, $user->username, $user->email]);
+        $content = $this->grav['language']->translate([
+            'PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY',
+            $sitename,
+            $user->username,
+            $user->email
+        ]);
         $to = $this->grav['config']->get('plugins.email.from');
 
         if (empty($to)) {
@@ -192,6 +213,8 @@ class Login
 
     /**
      * Handle the email to welcome the new user
+     *
+     * @param $user
      *
      * @return bool True if the action was performed.
      */
@@ -219,6 +242,8 @@ class Login
     /**
      * Handle the email to activate the user account.
      *
+     * @param User $user
+     *
      * @return bool True if the action was performed.
      */
     protected function sendActivationEmail($user)
@@ -235,10 +260,15 @@ class Login
         $param_sep = $this->grav['config']->get('system.param_sep', ':');
         $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('user-activation');
 
-        $sitename = $this->grav['config']->get('site.title', 'Website');
+        $site_name = $this->grav['config']->get('site.title', 'Website');
 
-        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $sitename]);
-        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY', $user->username, $activation_link, $sitename]);
+        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $site_name]);
+        $content = $this->grav['language']->translate([
+            'PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY',
+            $user->username,
+            $activation_link,
+            $site_name
+        ]);
         $to = $user->email;
 
         $sent = LoginUtils::sendEmail($subject, $content, $to);
