@@ -22,34 +22,22 @@ use RocketTheme\Toolbox\Session\Message;
  */
 class LoginPlugin extends Plugin
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $route;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $route_register;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $route_forgot;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     protected $authenticated = true;
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     protected $authorized = true;
 
-    /**
-     * @var bool
-     */
+    /** @var Login */
     protected $login;
 
     /**

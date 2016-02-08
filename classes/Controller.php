@@ -306,7 +306,7 @@ class Controller
             $user = User::load($username);
             if ($user->exists()) {
                 if (!empty($form['username']) && !empty($form['password'])) {
-                    // Authenticate user.
+                    // Authenticate user
                     $user->authenticated = $user->authenticate($form['password']);
 
                     if ($user->authenticated) {
@@ -315,8 +315,7 @@ class Controller
                         unset($this->grav['user']);
                         $this->grav['user'] = $user;
 
-                        // If the user wants to be remembered, create
-                        // Rememberme cookie
+                        // If the user wants to be remembered, create Rememberme cookie
                         if (!empty($form['rememberme'])) {
                             $this->rememberMe->createCookie($form['username']);
                         } else {

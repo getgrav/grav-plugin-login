@@ -1,26 +1,32 @@
 <?php
 namespace Grav\Plugin\Login;
 
+use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
+use Grav\Common\Uri;
 use Grav\Common\Utils;
 use Grav\Plugin\Login\Utils as LoginUtils;
 use RocketTheme\Toolbox\Session\Message;
+
 /**
  * Class Login
  * @package Grav\Plugin
  */
 class Login
 {
-    public $grav;
+    /** @var Grav */
+    protected $grav;
 
-    public $user;
+    /** @var User */
+    protected $user;
 
+    /** @var Config */
     protected $config;
 
+    /** @var Uri */
     protected $uri;
-
 
     /**
      * Login constructor.
@@ -130,7 +136,7 @@ class Login
     /**
      * Create a new user file
      *
-     * @param object $data
+     * @param array $data
      *
      * @return bool
      */
