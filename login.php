@@ -79,7 +79,7 @@ class LoginPlugin extends Plugin
             throw new \Exception('Login Plugin failed to load. Composer dependencies not met.');
         }
         require_once $autoload;
-
+        
         // Define session message service.
         $this->grav['messages'] = function ($c) {
             $session = $c['session'];
@@ -90,7 +90,7 @@ class LoginPlugin extends Plugin
 
             return $session->messages;
         };
-
+        
         // Define current user service.
         $this->grav['user'] = function ($c) {
             $session = $c['session'];
@@ -126,15 +126,14 @@ class LoginPlugin extends Plugin
 
             return $session->user;
         };
-
-        // Manage OAuth login
-        $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
-        if (!$task && isset($_POST['oauth']) || (!empty($_GET) && $session->oauth)) {
-            $this->oauthController();
-        }
-
-        // Aborted OAuth authentication (invalidate it)
-        unset($session->oauth);
+        
+                
+        //Initialize Login Object
+        require_once __DIR__ . '/classes/Login.php';
+        $this->login = new Login($this->grav);
+        
+        //Store Login Object in Grav
+        $this->grav['login'] = $this->login;
 
         $admin_route = $this->config->get('plugins.admin.route');
 
@@ -301,10 +300,10 @@ class LoginPlugin extends Plugin
                     $messages->add($message, 'info');
 
                     if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
-                        $this->sendWelcomeEmail($user);
+                        $this->login->sendWelcomeEmail($user);
                     }
                     if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
-                        $this->sendNotificationEmail($user);
+                        $this->login->sendNotificationEmail($user);
                     }
 
                     if ($this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
@@ -368,21 +367,6 @@ class LoginPlugin extends Plugin
         $controller->redirect();
     }
 
-    /**
-     * Initialize OAuth login controller
-     */
-    public function oauthController()
-    {
-        /** @var Uri $uri */
-        $uri = $this->grav['uri'];
-        $oauth = !empty($_POST['oauth']) ? $_POST['oauth'] : $uri->param('oauth');
-        $oauth = $oauth ?: $this->grav['session']->oauth;
-        $post = !empty($_POST) ? $_POST : [];
-
-        $controller = new Login\OAuthLoginController($this->grav, $oauth, $post);
-        $controller->execute();
-        $controller->redirect();
-    }
 
     /**
      * Authorize Page
@@ -479,6 +463,8 @@ class LoginPlugin extends Plugin
     {
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
+        
+        $this->grav->fireEvent('onLoginPage');
 
         /** @var User $user */
         $user = $this->grav['user'];
@@ -488,19 +474,6 @@ class LoginPlugin extends Plugin
 
         if (!$this->authenticated) {
             $twig->template = "login." . $extension . ".twig";
-        }
-
-        if (!$this->authenticated || !$user->authenticated) {
-            $providers = [];
-            foreach ($this->config->get('plugins.login.oauth.providers') as $provider => $options) {
-                if ($options['enabled'] && isset($options['credentials'])) {
-                    $providers[$provider] = $options['credentials'];
-                }
-            }
-            $twig->twig_vars['oauth'] = [
-                'enabled' => $this->config->get('plugins.login.oauth.enabled'),
-                'providers' => $providers
-            ];
         }
 
         // add CSS for frontend if required
@@ -549,6 +522,7 @@ class LoginPlugin extends Plugin
 
                 $data = [];
                 $username = $form->value('username');
+                $data['username'] = $username;
 
                 if (file_exists($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT))) {
                     $this->grav->fireEvent('onFormValidationError',
@@ -596,138 +570,16 @@ class LoginPlugin extends Plugin
                     unset($data['password2']);
                 }
 
-                // Don't store the username: that is part of the filename
-                unset($data['username']);
 
                 if ($this->config->get('plugins.login.user_registration.options.set_user_disabled', false)) {
                     $data['state'] = 'disabled';
                 } else {
                     $data['state'] = 'enabled';
                 }
-
-                // Create user object and save it
-                $user = new User($data);
-                $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT, true, true));
-                $user->file($file);
-                $user->save();
-                $user = User::load($username);
-
-                if ($data['state'] == 'enabled' &&
-                    $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-
-                    //Login user
-                    $this->grav['session']->user = $user;
-                    unset($this->grav['user']);
-                    $this->grav['user'] = $user;
-                    $user->authenticated = $user->authorize('site.login');
-                }
-
-                if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
-                    $this->sendActivationEmail($user);
-                } else {
-                    if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
-                        $this->sendWelcomeEmail($user);
-                    }
-                    if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
-                        $this->sendNotificationEmail($user);
-                    }
-                }
-
-                if ($redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false)) {
-                    $this->grav->redirect($redirect);
-                }
-
+                
+                $this->login->register($data);
                 break;
         }
     }
 
-    /**
-     * Handle the email to notificate the user account creation to the site admin.
-     *
-     * @return bool True if the action was performed.
-     */
-    protected function sendNotificationEmail($user)
-    {
-        if (empty($user->email)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
-        }
-
-        $sitename = $this->grav['config']->get('site.title', 'Website');
-
-        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT', $sitename]);
-        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY', $sitename, $user->username, $user->email]);
-        $to = $this->grav['config']->get('plugins.email.from');
-
-        if (empty($to)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
-        }
-
-        $sent = LoginUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
-        }
-
-        return true;
-    }
-
-    /**
-     * Handle the email to welcome the new user
-     *
-     * @return bool True if the action was performed.
-     */
-    protected function sendWelcomeEmail($user)
-    {
-        if (empty($user->email)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
-        }
-
-        $sitename = $this->grav['config']->get('site.title', 'Website');
-
-        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT', $sitename]);
-        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY', $user->username, $sitename]);
-        $to = $user->email;
-
-        $sent = LoginUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
-        }
-
-        return true;
-    }
-
-    /**
-     * Handle the email to activate the user account.
-     *
-     * @return bool True if the action was performed.
-     */
-    protected function sendActivationEmail($user)
-    {
-        if (empty($user->email)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
-        }
-
-        $token = md5(uniqid(mt_rand(), true));
-        $expire = time() + 604800; // next week
-        $user->activation_token = $token . '::' . $expire;
-        $user->save();
-
-        $param_sep = $this->grav['config']->get('system.param_sep', ':');
-        $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('user-activation');
-
-        $sitename = $this->grav['config']->get('site.title', 'Website');
-
-        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $sitename]);
-        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY', $user->username, $activation_link, $sitename]);
-        $to = $user->email;
-
-        $sent = LoginUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
-        }
-
-        return true;
-    }
 }
