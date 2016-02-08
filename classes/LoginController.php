@@ -1,14 +1,15 @@
 <?php
 namespace Grav\Plugin\Login;
 
-use Grav\Common\Grav;
+use Grav\Common\Language\Language;
 use Grav\Common\User\User;
-use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\Utils;
 use Grav\Plugin\Login\Utils as LoginUtils;
 
-use RocketTheme\Toolbox\Session\Message;
-
+/**
+ * Class LoginController
+ * @package Grav\Plugin\Login
+ */
 class LoginController extends Controller
 {
     /**
@@ -82,18 +83,22 @@ class LoginController extends Controller
         if (!isset($this->grav['Email'])) {
             $messages->add($language->translate('PLUGIN_ADMIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
             $this->setRedirect('/');
+
             return true;
         }
 
         if (!$user || !$user->exists()) {
             $messages->add($language->translate(['PLUGIN_ADMIN.FORGOT_USERNAME_DOES_NOT_EXIST', $username]), 'error');
             $this->setRedirect('/forgot');
+
             return true;
         }
 
         if (empty($user->email)) {
-            $messages->add($language->translate(['PLUGIN_ADMIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $username]), 'error');
+            $messages->add($language->translate(['PLUGIN_ADMIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $username]),
+                'error');
             $this->setRedirect('/forgot');
+
             return true;
         }
 
@@ -114,6 +119,7 @@ class LoginController extends Controller
         if (empty($from)) {
             $messages->add($language->translate('PLUGIN_ADMIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
             $this->setRedirect('/forgot');
+
             return true;
         }
 
@@ -131,6 +137,7 @@ class LoginController extends Controller
         }
 
         $this->setRedirect('/');
+
         return true;
     }
 
@@ -158,6 +165,7 @@ class LoginController extends Controller
                     if (time() > $expire) {
                         $messages->add($language->translate('PLUGIN_ADMIN.RESET_LINK_EXPIRED'), 'error');
                         $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+
                         return true;
                     }
 
@@ -171,12 +179,14 @@ class LoginController extends Controller
 
                     $messages->add($language->translate('PLUGIN_ADMIN.RESET_PASSWORD_RESET'), 'info');
                     $this->grav->redirect('/');
+
                     return true;
                 }
             }
 
             $messages->add($language->translate('PLUGIN_ADMIN.RESET_INVALID_LINK'), 'error');
             $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+
             return true;
 
         } else {
@@ -186,6 +196,7 @@ class LoginController extends Controller
             if (empty($user) || empty($token)) {
                 $messages->add($language->translate('PLUGIN_ADMIN.RESET_INVALID_LINK'), 'error');
                 $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+
                 return true;
             }
         }
@@ -197,6 +208,7 @@ class LoginController extends Controller
      * Authenticate user.
      *
      * @param  array $form Form fields.
+     *
      * @return bool
      */
     protected function authenticate($form)

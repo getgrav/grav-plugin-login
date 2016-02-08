@@ -2,13 +2,18 @@
 
 namespace Grav\Plugin\Login;
 
+use Grav\Common\Config\Config;
 use Grav\Common\Grav;
-use Grav\Common\Utils;
 use Grav\Plugin\Login\RememberMe;
 
 use Birke\Rememberme\Cookie;
+use RocketTheme\Toolbox\Session\Message;
 
-class Controller implements ControllerInterface
+/**
+ * Class Controller
+ * @package Grav\Plugin\Login
+ */
+class Controller
 {
     /**
      * @var \Grav\Common\Grav
@@ -54,7 +59,7 @@ class Controller implements ControllerInterface
     {
         $this->grav = $grav;
         $this->action = $action;
-        $this->login = isset($this->grav['login'])?$this->grav['login']:'';
+        $this->login = isset($this->grav['login']) ? $this->grav['login'] : '';
         $this->post = $this->getPost($post);
 
         $this->rememberMe();
@@ -79,7 +84,7 @@ class Controller implements ControllerInterface
         }
 
         try {
-            $success = call_user_func(array($this, $method));
+            $success = call_user_func([$this, $method]);
         } catch (\RuntimeException $e) {
             $this->setMessage($e->getMessage(), 'error');
         }
@@ -98,21 +103,24 @@ class Controller implements ControllerInterface
     {
         if ($this->redirect) {
             $this->grav->redirect($this->redirect, $this->redirectCode);
-        } else if ($redirect = $this->grav['config']->get('plugins.login.redirect')) {
-            $this->grav->redirect($redirect, $this->redirectCode);
+        } else {
+            $redirect = $this->grav['config']->get('plugins.login.redirect');
+            if ($redirect) {
+                $this->grav->redirect($redirect, $this->redirectCode);
+            }
         }
     }
 
     /**
      * Set redirect.
      *
-     * @param $path
+     * @param     $path
      * @param int $code
      */
     public function setRedirect($path, $code = 303)
     {
         $this->redirect = $path;
-        $this->code = $code;
+        $this->redirectCode = $code;
     }
 
     /**
@@ -131,9 +139,9 @@ class Controller implements ControllerInterface
     /**
      * Gets and sets the RememberMe class
      *
-     * @param  mixed            $var    A rememberMe instance to set
+     * @param  mixed $var A rememberMe instance to set
      *
-     * @return Authenticator            Returns the current rememberMe instance
+     * @return RememberMe\RememberMe Returns the current rememberMe instance
      */
     public function rememberMe($var = null)
     {
@@ -168,6 +176,7 @@ class Controller implements ControllerInterface
      * Prepare and return POST data.
      *
      * @param array $post
+     *
      * @return array
      */
     protected function &getPost($post)
@@ -179,6 +188,7 @@ class Controller implements ControllerInterface
             $post = array_merge_recursive($post, $this->jsonDecode($post['_json']));
             unset($post['_json']);
         }
+
         return $post;
     }
 
@@ -186,6 +196,7 @@ class Controller implements ControllerInterface
      * Recursively JSON decode data.
      *
      * @param  array $data
+     *
      * @return array
      */
     protected function jsonDecode(array $data)
@@ -197,6 +208,7 @@ class Controller implements ControllerInterface
                 $value = json_decode($value, true);
             }
         }
+
         return $data;
     }
 }

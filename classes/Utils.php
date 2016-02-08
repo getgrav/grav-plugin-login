@@ -4,11 +4,16 @@ namespace Grav\Plugin\Login;
 
 use Grav\Common\Grav;
 
+/**
+ * Class Utils
+ * @package Grav\Plugin\Login
+ */
 class Utils
 {
     /**
      * Handle sending an email.
      *
+     * @param        $subject
      * @param string $content
      * @param string $to
      *
