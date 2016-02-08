@@ -11,6 +11,8 @@ use Grav\Common\Twig\Twig;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
+use Grav\Plugin\Login\Login;
+use Grav\Plugin\Login\Controller;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
 
@@ -109,7 +111,7 @@ class LoginPlugin extends Plugin
                 $session->user = new User;
 
                 if ($c['config']->get('plugins.login.rememberme.enabled')) {
-                    $controller = new Login\Controller($c, '');
+                    $controller = new Controller($c, '');
                     $rememberMe = $controller->rememberMe();
 
                     // If we can present the correct tokens from the cookie, we are logged in
@@ -137,10 +139,8 @@ class LoginPlugin extends Plugin
             return $session->user;
         };
 
-
         //Initialize Login Object
-        require_once __DIR__ . '/classes/Login.php';
-        $this->login = new \Grav\Plugin\Login\Login($this->grav);
+        $this->login = new Login($this->grav);
 
         //Store Login Object in Grav
         $this->grav['login'] = $this->login;
@@ -387,7 +387,7 @@ class LoginPlugin extends Plugin
             }
         }
 
-        $controller = new Login\LoginController($this->grav, $task, $post);
+        $controller = new Controller($this->grav, $task, $post);
         $controller->execute();
         $controller->redirect();
     }
