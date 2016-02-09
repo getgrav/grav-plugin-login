@@ -81,7 +81,7 @@ form:
 
             rememberme:
               type: section
-              title: PLUGIN_LOGIN.SESSION
+              title: PLUGIN_LOGIN.REMEMBER_ME
 
               fields:
                 rememberme.enabled:
@@ -98,11 +98,12 @@ form:
                 rememberme.timeout:
                   type: text
                   size: small
+                  default: 604800
                   label: PLUGIN_ADMIN.TIMEOUT
-                  help: PLUGIN_ADMIN.TIMEOUT_HELP
+                  help: PLUGIN_LOGIN.TIMEOUT_HELP
                   validate:
                       type: number
-                      min: 1
+                      min: 604800
 
                 rememberme.name:
                   type: text

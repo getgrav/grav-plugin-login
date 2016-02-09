@@ -386,6 +386,7 @@ class Controller
         if ($var !== null) {
             $this->rememberMe = $var;
         }
+
         if (!$this->rememberMe) {
             /** @var Config $config */
             $config = $this->grav['config'];

@@ -9,7 +9,6 @@ en:
     BTN_LOGOUT: Logout
     BTN_FORGOT: Forgot
     BTN_REGISTER: Register
-    SESSION: "&ldquo;Remember Me&rdquo;-Session"
     REMEMBER_ME: Remember Me
     REMEMBER_ME_HELP: "Sets a persistent cookie on your browser to allow persistent-login authentication between sessions."
     REMEMBER_ME_STOLEN_COOKIE: "Someone else has used your login information to access this page! All sessions were logged out. Please log in with your credentials and check your data."
@@ -64,6 +63,7 @@ en:
     OPTIONS: Options
     EMAIL_VALIDATION_MESSAGE: "Must be a valid email address"
     PASSWORD_VALIDATION_MESSAGE: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+    TIMEOUT_HELP: "Sets the session timeout in seconds when Remember Me is enabled and checked by the user. Minimum is 604800 which means 1 week"
 
 fr:
   PLUGIN_LOGIN:
@@ -76,7 +76,6 @@ fr:
     BTN_LOGOUT: Déconnexion
     BTN_FORGOT: Mot de passe oublié
     BTN_REGISTER: S'enregister
-    SESSION: "&ldquo;Se souvenir de moi&rdquo; - Session"
     REMEMBER_ME: Se souvenir de moi
     REMEMBER_ME_HELP: "Définit un cookie sur votre navigateur pour permettant l'authentification par connexion persistante entre les sessions."
     REMEMBER_ME_STOLEN_COOKIE: "Quelqu'un d'autre a utilisé vos informations de connexion pour accéder à cette page ! Toutes les sessions ont été déconnectées. Veuillez vous connecter avec vos identifiants et vérifier vos données."
@@ -186,7 +185,6 @@ hu:
     BTN_LOGOUT: Kilépés
     BTN_FORGOT: Elfelejtettem
     BTN_REGISTER: Regisztráció
-    SESSION: "Munkamenet Megjegyzése"
     REMEMBER_ME: Jegyezz Meg
     REMEMBER_ME_HELP: "Elhelyezünk egy hosszú lejáratú sütit a böngésződben, hogy belépve maradhass két munkamenet között."
     REMEMBER_ME_STOLEN_COOKIE: "Valaki a belépési adataid felhasználásával látogatta meg ezt az oldalt! Minden munkamenetet kiléptettünk. Kérlek, jelentkezz be ismét és ellenőrizd az adataidat."
