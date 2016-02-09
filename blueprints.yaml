@@ -160,6 +160,30 @@ form:
                   placeholder_key: PLUGIN_LOGIN.ADDITIONAL_PARAM_KEY
                   placeholder_value: PLUGIN_LOGIN.ADDITIONAL_PARAM_VALUE
 
+            access_levels:
+                title: PLUGIN_ADMIN.ACCESS_LEVELS
+                type: section
+                security: admin.super
+
+                fields:
+                    user_registration.groups:
+                        type: selectize
+                        size: large
+                        label: PLUGIN_ADMIN.GROUPS
+                        '@data-options': '\Grav\User\Groups::groups'
+                        classes: fancy
+                        help: PLUGIN_LOGIN.GROUPS_HELP
+                        validate:
+                            type: commalist
+
+                    user_registration.access.site:
+                        type: array
+                        label: PLUGIN_ADMIN.SITE_ACCESS
+                        help: PLUGIN_LOGIN.SITE_ACCESS_HELP
+                        multiple: false
+                        validate:
+                            type: array
+
             options:
               type: section
               title: PLUGIN_LOGIN.OPTIONS

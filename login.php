@@ -13,6 +13,7 @@ use Grav\Common\Utils;
 use Grav\Common\Uri;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\Controller;
+use Grav\Plugin\Form;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
 
@@ -506,6 +507,101 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Process the user registration, triggered by a registration form
+     *
+     * @param Form $form
+     */
+    private function processUserRegistration($form)
+    {
+        if (!$this->config->get('plugins.login.enabled')) {
+        throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
+        }
+
+        if (!$this->config->get('plugins.login.user_registration.enabled')) {
+            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
+        }
+
+        $data = [];
+        $username = $form->value('username');
+        $data['username'] = $username;
+
+        if (file_exists($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT))) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $this->grav['language']->translate([
+                    'PLUGIN_LOGIN.USERNAME_NOT_AVAILABLE',
+                    $username
+                ])
+            ]));
+            $event->stopPropagation();
+
+            return;
+        }
+
+        if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
+            false)
+        ) {
+            if ($form->value('password1') != $form->value('password2')) {
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $this->grav['language']->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH')
+                ]));
+                $event->stopPropagation();
+
+                return;
+            }
+            $data['password'] = $form->value('password1');
+        }
+
+        $fields = $this->config->get('plugins.login.user_registration.fields', []);
+
+        foreach ($fields as $field) {
+            // Process value of field if set in the page process.register_user
+            $default_values = $this->config->get('plugins.login.user_registration.default_values');
+            if ($default_values) {
+                foreach ($default_values as $key => $param) {
+                    $values = explode(',', $param);
+
+                    if ($key == $field) {
+                        $data[$field] = $values;
+                    }
+                }
+            }
+
+            if (!isset($data[$field]) && $form->value($field)) {
+                $data[$field] = $form->value($field);
+            }
+        }
+
+
+        $groups = $this->config->get('plugins.login.user_registration.groups', []);
+
+        if (count($groups) > 0) {
+            $data['groups'] = $groups;
+        }
+
+        $access = $this->config->get('plugins.login.user_registration.access.site', []);
+        if (count($access) > 0) {
+            $data['access']['site'] = $access;
+        }
+
+        if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
+            false)
+        ) {
+            unset($data['password1']);
+            unset($data['password2']);
+        }
+
+        if ($this->config->get('plugins.login.user_registration.options.set_user_disabled', false)) {
+            $data['state'] = 'disabled';
+        } else {
+            $data['state'] = 'enabled';
+        }
+
+        $this->login->register($data);
+    }
+
+    /**
      * Process a registration form. Handles the following actions:
      *
      * - register_user: registers a user
@@ -516,87 +612,10 @@ class LoginPlugin extends Plugin
     {
         $form = $event['form'];
         $action = $event['action'];
-        $params = $event['params'];
 
         switch ($action) {
-
             case 'register_user':
-
-                if (!$this->config->get('plugins.login.enabled')) {
-                    throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
-                }
-
-                if (!$this->config->get('plugins.login.user_registration.enabled')) {
-                    throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
-                }
-
-                $data = [];
-                $username = $form->value('username');
-                $data['username'] = $username;
-
-                if (file_exists($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT))) {
-                    $this->grav->fireEvent('onFormValidationError', new Event([
-                            'form'    => $form,
-                            'message' => $this->grav['language']->translate([
-                                'PLUGIN_LOGIN.USERNAME_NOT_AVAILABLE',
-                                $username
-                            ])
-                        ]));
-                    $event->stopPropagation();
-
-                    return;
-                }
-
-                if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
-                    false)
-                ) {
-                    if ($form->value('password1') != $form->value('password2')) {
-                        $this->grav->fireEvent('onFormValidationError', new Event([
-                                'form'    => $form,
-                                'message' => $this->grav['language']->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH')
-                            ]));
-                        $event->stopPropagation();
-
-                        return;
-                    }
-                    $data['password'] = $form->value('password1');
-                }
-
-                $fields = $this->config->get('plugins.login.user_registration.fields', []);
-
-                foreach ($fields as $field) {
-                    // Process value of field if set in the page process.register_user
-                    $default_values = $this->config->get('plugins.login.user_registration.default_values');
-                    if ($default_values) {
-                        foreach ($default_values as $key => $param) {
-                            $values = explode(',', $param);
-
-                            if ($key == $field) {
-                                $data[$field] = $values;
-                            }
-                        }
-                    }
-
-                    if (!isset($data[$field]) && $form->value($field)) {
-                        $data[$field] = $form->value($field);
-                    }
-                }
-
-                if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
-                    false)
-                ) {
-                    unset($data['password1']);
-                    unset($data['password2']);
-                }
-
-
-                if ($this->config->get('plugins.login.user_registration.options.set_user_disabled', false)) {
-                    $data['state'] = 'disabled';
-                } else {
-                    $data['state'] = 'enabled';
-                }
-
-                $this->login->register($data);
+                $this->processUserRegistration($form);
                 break;
         }
     }
