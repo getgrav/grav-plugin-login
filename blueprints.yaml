@@ -61,7 +61,7 @@ form:
               help: PLUGIN_LOGIN.ROUTE_HELP
               placeholder: "/my-custom-login"
 
-            redirect:
+            redirect_after_login:
               type: text
               label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP

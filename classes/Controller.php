@@ -116,8 +116,11 @@ class Controller
         $t = $this->grav['language'];
         if ($this->authenticate($this->post)) {
             $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
-            $referrer = $this->grav['uri']->referrer('/');
-            $this->setRedirect($referrer);
+            $redirect = $this->grav['uri']->referrer('/');
+            if (!$referrer) {
+                $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
+            }
+            $this->setRedirect($redirect);
         } else {
             $user = $this->grav['user'];
             if ($user->username) {
@@ -347,11 +350,6 @@ class Controller
     {
         if ($this->redirect) {
             $this->grav->redirect($this->redirect, $this->redirectCode);
-        } else {
-            $redirect = $this->grav['config']->get('plugins.login.redirect');
-            if ($redirect) {
-                $this->grav->redirect($redirect, $this->redirectCode);
-            }
         }
     }
 
