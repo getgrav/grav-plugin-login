@@ -5,6 +5,7 @@ namespace Grav\Plugin\Login;
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Plugin\Login\RememberMe;
+use Grav\Plugin\Login\Login;
 use Grav\Common\Language\Language;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
@@ -53,6 +54,11 @@ class Controller
      * @var \Birke\Rememberme\Authenticator
      */
     protected $rememberMe;
+
+    /**
+     * @var Login
+     */
+    protected $login;
 
     /**
      * @param Grav   $grav

@@ -154,18 +154,16 @@ class Login
             $data['access']['site'] = $access;
         }
 
-        // Create user object and save it
-        $user = new User($data);
         $username = $data['username'];
         $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT,
             true, true));
 
+        // Create user object and save it
+        $user = new User($data);
         $user->file($file);
         $user->save();
-        $user = User::load($username);
 
-        if (isset($data['state']) && $data['state'] == 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)
-        ) {
+        if (isset($data['state']) && $data['state'] == 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
             //Login user
             $this->grav['session']->user = $user;
             unset($this->grav['user']);
