@@ -17,11 +17,10 @@ user_registration:
     - 'email'
     - 'fullname'
     - 'title'
-    - 'access'
-    - 'state'
 
-  additional_params:
-    access: 'site.login'
+  access:
+    site:
+      login: 'true'
 
   options:
     validate_password1_and_password2: true
