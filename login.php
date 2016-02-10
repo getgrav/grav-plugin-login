@@ -389,6 +389,9 @@ class LoginPlugin extends Plugin
     {
         /** @var User $user */
         $user = $this->grav['user'];
+        if (!$user->get('access')) {
+            $user = User::load($user->get('username'));
+        }
 
         /** @var Page $page */
         $page = $this->grav['page'];
