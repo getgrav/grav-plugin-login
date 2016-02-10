@@ -159,12 +159,12 @@ class Login
         $username = $data['username'];
         $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT,
             true, true));
+
         $user->file($file);
         $user->save();
         $user = User::load($username);
 
-        if ($data['state'] == 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration',
-                false)
+        if (isset($data['state']) && $data['state'] == 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)
         ) {
             //Login user
             $this->grav['session']->user = $user;
