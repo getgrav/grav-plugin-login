@@ -441,6 +441,8 @@ class LoginPlugin extends Plugin
         if (!$user->authenticated) {
             $page = new Page;
 
+            $this->grav['session']->redirect_after_login = $this->grav['uri']->path();
+
             // Get the admin Login page is needed, else teh default
             if ($this->isAdmin()) {
                 $login_file = $this->grav['locator']->findResource("plugins://admin/pages/admin/login.md");

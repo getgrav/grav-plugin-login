@@ -116,9 +116,10 @@ class Controller
         $t = $this->grav['language'];
         if ($this->authenticate($this->post)) {
             $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
-            $redirect = $this->grav['uri']->referrer('/');
-            if (!$referrer) {
-                $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
+
+            $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
+            if (!$redirect) {
+                $redirect = $this->grav['uri']->referrer('/');
             }
             $this->setRedirect($redirect);
         } else {
