@@ -573,18 +573,6 @@ class LoginPlugin extends Plugin
             }
         }
 
-
-        $groups = $this->config->get('plugins.login.user_registration.groups', []);
-
-        if (count($groups) > 0) {
-            $data['groups'] = $groups;
-        }
-
-        $access = $this->config->get('plugins.login.user_registration.access.site', []);
-        if (count($access) > 0) {
-            $data['access']['site'] = $access;
-        }
-
         if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
             false)
         ) {
@@ -598,7 +586,23 @@ class LoginPlugin extends Plugin
             $data['state'] = 'enabled';
         }
 
-        $this->login->register($data);
+        $user = $this->login->register($data);
+
+        if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
+            $this->sendActivationEmail($user);
+        } else {
+            if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
+                $this->sendWelcomeEmail($user);
+            }
+            if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
+                $this->sendNotificationEmail($user);
+            }
+        }
+
+        $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false);
+        if ($redirect) {
+            $this->grav->redirect($redirect);
+        }
     }
 
     /**

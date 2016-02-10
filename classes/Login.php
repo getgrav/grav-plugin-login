@@ -138,10 +138,22 @@ class Login
      *
      * @param array $data
      *
-     * @return bool
+     * @return User
      */
     public function register($data)
     {
+        //Add new user ACL settings
+        $groups = $this->config->get('plugins.login.user_registration.groups', []);
+
+        if (count($groups) > 0) {
+            $data['groups'] = $groups;
+        }
+
+        $access = $this->config->get('plugins.login.user_registration.access.site', []);
+        if (count($access) > 0) {
+            $data['access']['site'] = $access;
+        }
+
         // Create user object and save it
         $user = new User($data);
         $username = $data['username'];
@@ -154,7 +166,6 @@ class Login
         if ($data['state'] == 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration',
                 false)
         ) {
-
             //Login user
             $this->grav['session']->user = $user;
             unset($this->grav['user']);
@@ -162,21 +173,7 @@ class Login
             $user->authenticated = $user->authorize('site.login');
         }
 
-        if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
-            $this->sendActivationEmail($user);
-        } else {
-            if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
-                $this->sendWelcomeEmail($user);
-            }
-            if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
-                $this->sendNotificationEmail($user);
-            }
-        }
-
-        $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false);
-        if ($redirect) {
-            $this->grav->redirect($redirect);
-        }
+        return $user;
     }
 
 
