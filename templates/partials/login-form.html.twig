@@ -1,40 +1,54 @@
 {% set icons = {'Microsoft': 'windows'} %}
 
 <section id="grav-login">
-    {{ content }}
+    {% if page.template == 'login' %}
+        {{ content }}
+    {% endif %}
 
     {% include 'partials/messages.html.twig' %}
 
-    <form method="post" action="{{ uri.url ~ page.header.form.action}}">
-        {% if grav.twig.plugins_hooked_loginPage %}
-            {% for label in grav.twig.plugins_hooked_loginPage %}
-                
-                {% include label %}
+    {% if page.template == 'login' %}
+
+        <form method="post" action="{{ uri.url ~ page.header.form.action}}">
+            {% if grav.twig.plugins_hooked_loginPage %}
+                {% for label in grav.twig.plugins_hooked_loginPage %}
+
+                    {% include label %}
+                {% endfor %}
+            {% endif %}
+
+            {% for field in page.header.form.fields %}
+                {% if field.type %}
+                    <div>
+                        {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
+                    </div>
+                {% endif %}
             {% endfor %}
+            <div class="form-actions secondary-accent">
+                {% if config.plugins.login.rememberme.enabled %}
+                    <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
+                        <div class="form-input-wrapper">
+                            <input type="checkbox" value="1" name="rememberme" id="#rememberme">
+                            <label class="inline" for="#rememberme" title="{{ 'PLUGIN_LOGIN.REMEMBER_ME_HELP'|t }}">{{ 'PLUGIN_LOGIN.REMEMBER_ME'|t }}</label>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <a class="button secondary" href="{{ base_url_relative }}{{ config.plugins.login.route_forgot }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
+
+                <button type="submit" class="button primary" name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
+            </div>
+
+            {{ nonce_field('login-form', 'login-form-nonce') }}
+        </form>
+
+    {% else %}
+
+        {% if grav.user.username %}
+            <hr>
+            <a class="button logout" href="{{ uri.addNonce(uri.url ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce') }}">Logout</a>
         {% endif %}
 
-        {% for field in page.header.form.fields %}
-            {% if field.type %}
-                <div>
-                    {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
-                </div>
-            {% endif %}
-        {% endfor %}
-        <div class="form-actions secondary-accent">
-            {% if config.plugins.login.rememberme.enabled %}
-                <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
-                    <div class="form-input-wrapper">
-                        <input type="checkbox" value="1" name="rememberme" id="#rememberme">
-                        <label class="inline" for="#rememberme" title="{{ 'PLUGIN_LOGIN.REMEMBER_ME_HELP'|t }}">{{ 'PLUGIN_LOGIN.REMEMBER_ME'|t }}</label>
-                    </div>
-                </div>
-            {% endif %}
+    {% endif %}
 
-            <a class="button secondary" href="{{ base_url_relative }}{{ config.plugins.login.route_forgot }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
-
-            <button type="submit" class="button primary" name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
-        </div>
-
-        {{ nonce_field('login-form', 'login-form-nonce') }}
-    </form>
 </section>
