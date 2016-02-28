@@ -9,7 +9,7 @@
 
     {% if page.template == 'login' %}
 
-        <form method="post" action="{{ uri.url ~ page.header.form.action}}">
+        <form method="post" action="{{ base_url_relative ~ uri.path }}">
             {% if grav.twig.plugins_hooked_loginPage %}
                 {% for label in grav.twig.plugins_hooked_loginPage %}
 
@@ -46,7 +46,7 @@
 
         {% if grav.user.username %}
             <hr>
-            <a class="button logout" href="{{ uri.addNonce(uri.url ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce') }}">Logout</a>
+            <a class="button logout" href="{{ uri.addNonce(base_url_relative ~ uri.path ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce') }}">Logout</a>
         {% endif %}
 
     {% endif %}
