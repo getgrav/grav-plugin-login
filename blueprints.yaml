@@ -23,6 +23,7 @@ form:
     tabs:
       type: tabs
       active: 1
+      class: subtle
 
       fields:
         login:
