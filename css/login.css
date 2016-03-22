@@ -1,3 +1,13 @@
+@import url(//fonts.googleapis.com/css?family=Montserrat:400|Raleway:300,400,600|Inconsolata);
+
+*, *::before, *::after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 #grav-login {
     max-width: 30rem;
     margin: 5rem auto;
@@ -6,6 +16,8 @@
     border-radius: 4px;
     padding: 1rem 3rem 3rem 3rem;
     text-align: center;
+    font-family: "Raleway", "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+    line-height: 1.7;
 }
 
 #grav-login .form-actions {
@@ -18,7 +30,7 @@
     right: 5px;
 }
 
-.alert.info {
+#grav-login .error {
     color: #c00;
 }
 
@@ -28,12 +40,74 @@
     padding: 0;
     text-align: center;
 }
+
+#grav-login h1 {
+    font-size: 3.2rem;
+    text-align: center;
+    letter-spacing: -3px;
+}
+
+#grav-login h1, h2, h3, h4, h5, h6 {
+    font-family: "Montserrat", "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+    font-weight: 400;
+    margin: 0.85rem 0 1.7rem 0;
+    text-rendering: optimizeLegibility;
+}
+
+#grav-login input[type="checkbox"] {
+    box-sizing: border-box;
+    padding: 0;
+    display: inline;
+    margin-right: 0.425rem;
+    width: auto;
+}
+
+#grav-login input {
+    color: inherit;
+    font: inherit;
+    -webkit-transition: border-color;
+    -moz-transition: border-color;
+    transition: border-color;
+    border-radius: 0.1875rem;
+    margin-bottom: 0.85rem;
+    padding: 0.425rem 0.425rem;
+    border: 1px solid #ddd;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    line-height: normal;
+    width: 100%;
+}
+
+#grav-login label {
+    font-weight: 600;
+}
+
 #grav-login .form-actions p {
     margin-bottom: 0;
 }
 
 #grav-login .button {
     vertical-align: middle;
+    background: #fff;
+    color: #1BB3E9;
+    border: 1px solid #1BB3E9;
+    border-radius: 3px;
+    font-family: "Raleway", "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+    line-height: 1.7;
+    font-size: inherit;
+    font-variant: inherit;
+    font-weight: inherit;
+    display: inline-block;
+    padding: 7px 20px;
+    text-decoration: none;
+    text-align: center;
+}
+
+#grav-login .button:hover {
+    background: #1BB3E9;
+    color: #fff;
+}
+#grav-login .button:active {
+    box-shadow: 0 1px 0 #118ab5;
 }
 
 #grav-login .delimiter {
@@ -74,4 +148,5 @@
 #grav-login .rememberme label {
     font-weight: inherit;
     display: inline;
+    margin-bottom: 0.425rem;
 }

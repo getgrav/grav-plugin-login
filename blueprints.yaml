@@ -80,6 +80,24 @@ form:
               validate:
                 type: bool
 
+            alt_extend.enabled:
+              type: toggle
+              label: PLUGIN_LOGIN.ALT_EXTEND
+              highlight: 1
+              default: 0
+              help: PLUGIN_LOGIN.ALT_EXTEND_HELP
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
+            alt_extend.template:
+              type: text
+              label: PLUGIN_LOGIN.ALT_EXTEND_TEMPLATE
+              default: partials/login-plain.html.twig
+              help: PLUGIN_LOGIN.ALT_EXTEND_TEMPLATE_HELP
+
             rememberme:
               type: section
               title: PLUGIN_LOGIN.REMEMBER_ME
@@ -111,6 +129,29 @@ form:
                   size: small
                   label: PLUGIN_ADMIN.NAME
                   help: PLUGIN_ADMIN.SESSION_NAME_HELP
+
+            site_wide:
+              type: section
+              title: PLUGIN_LOGIN.SITE_WIDE
+
+              fields:
+                site_wide.enabled:
+                  type: toggle
+                  label: PLUGIN_LOGIN.SITE_WIDE_ENABLED
+                  highlight: 1
+                  default: 0
+                  help: PLUGIN_LOGIN.SITE_WIDE_ENABLED_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
+                site_wide.acl:
+                  type: text
+                  label: PLUGIN_LOGIN.SITE_WIDE_ACL
+                  default: site.login
+                  help: PLUGIN_LOGIN.SITE_WIDE_ACL_HELP
 
         registration:
           type: tab

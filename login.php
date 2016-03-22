@@ -417,6 +417,11 @@ class LoginPlugin extends Plugin
             }
         }
 
+        // If site-wide ACL is enabled, require login
+        if ($config->get('site_wide.enabled')) {
+            $rules[$config->get('site_wide.acl')] = true;
+        }
+
         // Continue to the page if it has no ACL rules.
         if (!$rules) {
             return;
