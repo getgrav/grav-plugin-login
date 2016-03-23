@@ -206,7 +206,7 @@ hu:
 
 de:
   PLUGIN_LOGIN:
-    USERNAME: Nutzername
+    USERNAME: Benutzername
     PASSWORD: Passwort
     ACCESS_DENIED: Zugang verweigert
     LOGIN_FAILED: Login fehlgeschlagen...
