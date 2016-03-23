@@ -211,9 +211,9 @@ de:
     ACCESS_DENIED: Zugang verweigert
     LOGIN_FAILED: Login fehlgeschlagen...
     LOGIN_SUCCESSFUL: Du wurdest erfolgreich eingeloggt.
-    BTN_LOGIN: Einloggen
+    BTN_LOGIN: Anmelden
     BTN_LOGOUT: Ausloggen
-    BTN_FORGOT: Vergessen
+    BTN_FORGOT: Passwort vergessen
     BTN_REGISTER: Registrieren
     REMEMBER_ME: Angemeldet bleiben
     REMEMBER_ME_HELP: "Speichert einen Cookie im Browser, welcher eine fortwährende Anmeldung sicherstellt."
