@@ -206,12 +206,12 @@ hu:
 
 de:
   PLUGIN_LOGIN:
-    USERNAME: Nutzername
+    USERNAME: Benutzername
     PASSWORD: Passwort
     ACCESS_DENIED: Zugang verweigert
     LOGIN_FAILED: Login fehlgeschlagen...
     LOGIN_SUCCESSFUL: Du wurdest erfolgreich eingeloggt.
-    BTN_LOGIN: Einloggen
+    BTN_LOGIN: Anmelden
     BTN_LOGOUT: Ausloggen
     BTN_FORGOT: Vergessen
     BTN_REGISTER: Registrieren
