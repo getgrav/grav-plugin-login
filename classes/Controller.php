@@ -5,6 +5,7 @@ namespace Grav\Plugin\Login;
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Plugin\Login\RememberMe;
+use Grav\Plugin\Login\Login;
 use Grav\Common\Language\Language;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
@@ -53,6 +54,11 @@ class Controller
      * @var \Birke\Rememberme\Authenticator
      */
     protected $rememberMe;
+
+    /**
+     * @var Login
+     */
+    protected $login;
 
     /**
      * @param Grav   $grav
@@ -110,8 +116,12 @@ class Controller
         $t = $this->grav['language'];
         if ($this->authenticate($this->post)) {
             $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
-            $referrer = $this->grav['uri']->referrer('/');
-            $this->setRedirect($referrer);
+
+            $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
+            if (!$redirect) {
+                $redirect = $this->grav['uri']->referrer('/');
+            }
+            $this->setRedirect($redirect);
         } else {
             $user = $this->grav['user'];
             if ($user->username) {
@@ -341,11 +351,6 @@ class Controller
     {
         if ($this->redirect) {
             $this->grav->redirect($this->redirect, $this->redirectCode);
-        } else {
-            $redirect = $this->grav['config']->get('plugins.login.redirect');
-            if ($redirect) {
-                $this->grav->redirect($redirect, $this->redirectCode);
-            }
         }
     }
 
@@ -386,6 +391,7 @@ class Controller
         if ($var !== null) {
             $this->rememberMe = $var;
         }
+
         if (!$this->rememberMe) {
             /** @var Config $config */
             $config = $this->grav['config'];

@@ -12,6 +12,15 @@ These are available via GPM, and because the plugin has dependencies you just ne
 $ bin/gpm install login
 ```
 
+# Changes in version 2.0 (STILL TO BE RELEASED)
+
+The Login Plugin 2.0 has the following changes compared to 1.0:
+
+- OAuth has been separated to its own plugin, needs to be installed separately and configured. The users account filename format has changed too, to fix an issue that involved people with the same name on a service.
+- The `redirect` option has been changed to `redirect_after_login`.
+- The Remember Me session minimum length is now 1 week.
+- Removed the option to login from oauth without creating the corresponding user file under `user/accounts/`.
+
 # Creating Users
 
 You can either use the built-in CLI capabilities, or you create a user manually by creating a new YAML file in your `user/acounts` folder.
