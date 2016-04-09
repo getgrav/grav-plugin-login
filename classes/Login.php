@@ -101,7 +101,7 @@ class Login
                     /** @var Grav $grav */
                     $grav = $this->grav;
 
-                    $this->setMessage($this->grav['language']->translate('PLUGIN_ADMIN.LOGIN_LOGGED_IN',
+                    $this->setMessage($this->grav['language']->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
                         [$this->user->language]), 'info');
 
                     $redirect_route = $this->uri->route();

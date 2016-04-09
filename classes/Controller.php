@@ -164,21 +164,21 @@ class Controller
         $messages = $this->grav['messages'];
 
         if (!isset($this->grav['Email'])) {
-            $messages->add($language->translate('PLUGIN_ADMIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
             $this->setRedirect('/');
 
             return true;
         }
 
         if (!$user || !$user->exists()) {
-            $messages->add($language->translate(['PLUGIN_ADMIN.FORGOT_USERNAME_DOES_NOT_EXIST', $username]), 'error');
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $username]), 'error');
             $this->setRedirect('/forgot');
 
             return true;
         }
 
         if (empty($user->email)) {
-            $messages->add($language->translate(['PLUGIN_ADMIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $username]),
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $username]),
                 'error');
             $this->setRedirect('/forgot');
 
@@ -200,7 +200,7 @@ class Controller
         $from = $this->grav['config']->get('plugins.email.from');
 
         if (empty($from)) {
-            $messages->add($language->translate('PLUGIN_ADMIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
             $this->setRedirect('/forgot');
 
             return true;
@@ -208,15 +208,15 @@ class Controller
 
         $to = $user->email;
 
-        $subject = $language->translate(['PLUGIN_ADMIN.FORGOT_EMAIL_SUBJECT', $sitename]);
-        $content = $language->translate(['PLUGIN_ADMIN.FORGOT_EMAIL_BODY', $fullname, $reset_link, $author, $sitename]);
+        $subject = $language->translate(['PLUGIN_LOGIN.FORGOT_EMAIL_SUBJECT', $sitename]);
+        $content = $language->translate(['PLUGIN_LOGIN.FORGOT_EMAIL_BODY', $fullname, $reset_link, $author, $sitename]);
 
         $sent = LoginUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
-            $messages->add($language->translate('PLUGIN_ADMIN.FORGOT_FAILED_TO_EMAIL'), 'error');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
         } else {
-            $messages->add($language->translate(['PLUGIN_ADMIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL', $to]), 'info');
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL', $to]), 'info');
         }
 
         $this->setRedirect('/');
@@ -246,7 +246,7 @@ class Controller
 
                 if ($good_token === $token) {
                     if (time() > $expire) {
-                        $messages->add($language->translate('PLUGIN_ADMIN.RESET_LINK_EXPIRED'), 'error');
+                        $messages->add($language->translate('PLUGIN_LOGIN.RESET_LINK_EXPIRED'), 'error');
                         $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
 
                         return true;
@@ -260,14 +260,14 @@ class Controller
                     $user->filter();
                     $user->save();
 
-                    $messages->add($language->translate('PLUGIN_ADMIN.RESET_PASSWORD_RESET'), 'info');
+                    $messages->add($language->translate('PLUGIN_LOGIN.RESET_PASSWORD_RESET'), 'info');
                     $this->grav->redirect('/');
 
                     return true;
                 }
             }
 
-            $messages->add($language->translate('PLUGIN_ADMIN.RESET_INVALID_LINK'), 'error');
+            $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
             $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
@@ -277,7 +277,7 @@ class Controller
             $token = $this->grav['uri']->param('token');
 
             if (empty($user) || empty($token)) {
-                $messages->add($language->translate('PLUGIN_ADMIN.RESET_INVALID_LINK'), 'error');
+                $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
                 $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
 
                 return true;
