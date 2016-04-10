@@ -34,3 +34,11 @@ rememberme:
   enabled: true
   timeout: 1800                        # Timeout in seconds
   name: grav-rememberme                # Name prefix of the session cookie
+
+alt_extend:
+  enabled: false
+  template: 'partials/login-base.html.twig'
+
+site_wide:
+  enabled: false
+  acl: 'site.login'

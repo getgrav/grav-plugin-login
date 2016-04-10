@@ -1,4 +1,4 @@
-{% extends 'partials/base.html.twig' %}
+{% extends config.plugins.login.alt_extend.enabled ? config.plugins.login.alt_extend.template : 'partials/base.html.twig' %}
 
 {% block content %}
     {% include 'partials/login-form.html.twig' %}
