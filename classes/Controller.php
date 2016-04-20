@@ -113,6 +113,7 @@ class Controller
      */
     public function taskLogin()
     {
+        /** @var Language $t */
         $t = $this->grav['language'];
         if ($this->authenticate($this->post)) {
             $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
