@@ -104,7 +104,7 @@ form:
                   help: PLUGIN_LOGIN.TIMEOUT_HELP
                   validate:
                       type: number
-                      min: 604800
+                      min: 1
 
                 rememberme.name:
                   type: text

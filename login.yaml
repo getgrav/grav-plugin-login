@@ -32,5 +32,5 @@ user_registration:
 
 rememberme:
   enabled: true
-  timeout: 1800                        # Timeout in seconds
+  timeout: 604800                      # Timeout in seconds. Defaults to 1 week
   name: grav-rememberme                # Name prefix of the session cookie
