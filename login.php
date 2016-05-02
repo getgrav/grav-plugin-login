@@ -516,7 +516,7 @@ class LoginPlugin extends Plugin
      *
      * @param Form $form
      */
-    private function processUserRegistration($form)
+    private function processUserRegistration($form, Event $event)
     {
         if (!$this->config->get('plugins.login.enabled')) {
         throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
@@ -594,13 +594,13 @@ class LoginPlugin extends Plugin
         $user = $this->login->register($data);
 
         if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
-            $this->sendActivationEmail($user);
+            $this->login->sendActivationEmail($user);
         } else {
             if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
-                $this->sendWelcomeEmail($user);
+                $this->login->sendWelcomeEmail($user);
             }
             if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
-                $this->sendNotificationEmail($user);
+                $this->login->sendNotificationEmail($user);
             }
         }
 
@@ -624,7 +624,7 @@ class LoginPlugin extends Plugin
 
         switch ($action) {
             case 'register_user':
-                $this->processUserRegistration($form);
+                $this->processUserRegistration($form, $event);
                 break;
         }
     }

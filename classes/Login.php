@@ -247,7 +247,7 @@ class Login
      *
      * @return bool True if the action was performed.
      */
-    protected function sendActivationEmail($user)
+    public function sendActivationEmail($user)
     {
         if (empty($user->email)) {
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
