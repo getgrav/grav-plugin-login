@@ -1,3 +1,13 @@
+# v2.0.0-beta.2
+## 05/02/2016
+
+1. [](#improved)
+    * Improved the login form page once logged in
+    * Translate welcome and logout strings
+1. [](#bugfix)
+    * Fixed logging out on the homepage
+    * Fixed an issue in processing user registration
+    
 # v2.0.0-beta.1
 ## 04/20/2016
 
