@@ -79,6 +79,7 @@ en:
     TIMEOUT_HELP: "Sets the session timeout in seconds when Remember Me is enabled and checked by the user. Minimum is 604800 which means 1 week"
     GROUPS_HELP: "List of groups the new registered user will be part of, if any"
     SITE_ACCESS_HELP: "List of site access levels the new registered user will have. Example: `login` -> `true` "
+    WELCOME: "Welcome"
 
 fr:
   PLUGIN_LOGIN:
