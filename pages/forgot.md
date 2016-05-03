@@ -8,6 +8,10 @@ form:
           id: username
           placeholder: Username
           autofocus: true
+          validate:
+            required: true
+            message: PLUGIN_LOGIN.USERNAME_NOT_VALID
+            pattern: '^[a-z0-9_-]{3,16}$'
 ---
 
 

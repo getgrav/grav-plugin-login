@@ -3,7 +3,7 @@
 
     {% include 'partials/messages.html.twig' %}
 
-    <form method="post" action="{{ uri.url ~ page.header.form.action}}">
+    <form method="post" action="{{ base_url_relative ~ uri.path }}">
         {% for field in page.header.form.fields %}
             {% if field.type %}
                 <div>
@@ -12,7 +12,7 @@
             {% endif %}
         {% endfor %}
         <div class="form-actions secondary-accent">
-            <button type="submit" class="button primary" name="task" value="login.forgot"><i class="fa fa-paper-plane"></i> {{ "PLUGIN_ADMIN.LOGIN_BTN_SEND_INSTRUCTIONS"|t }}</button>
+            <button type="submit" class="button primary" name="task" value="login.forgot"><i class="fa fa-paper-plane"></i> {{ "PLUGIN_LOGIN.BTN_SEND_INSTRUCTIONS"|t }}</button>
         </div>
 
         {{ nonce_field('forgot-form', 'forgot-form-nonce') }}
