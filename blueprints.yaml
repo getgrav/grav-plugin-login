@@ -1,5 +1,5 @@
 name: Login
-version: 2.0.0-beta.1
+version: 2.0.0-beta.2
 testing: true
 description: Enables user authentication and login screen.
 icon: sign-in

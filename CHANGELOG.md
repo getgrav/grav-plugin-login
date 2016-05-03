@@ -1,5 +1,5 @@
 # v2.0.0-beta.2
-## 05/02/2016
+## 05/03/2016
 
 1. [](#improved)
     * Improved the login form page once logged in
