@@ -83,10 +83,57 @@ en:
     REDIRECT_AFTER_ACTIVATION: "Redirect after the user activation"
     REDIRECT_AFTER_ACTIVATION_HELP: "Used if the user is required to activate the account via email. Once activated, this route will be shown"
 
+de:
+  PLUGIN_LOGIN:
+    USERNAME: Benutzername
+    PASSWORD: Passwort
+    ACCESS_DENIED: Zugang verweigert
+    LOGIN_FAILED: Login fehlgeschlagen...
+    LOGIN_SUCCESSFUL: Du wurdest erfolgreich eingeloggt.
+    BTN_LOGIN: Anmelden
+    BTN_LOGOUT: Ausloggen
+    BTN_FORGOT: Vergessen
+    BTN_REGISTER: Registrieren
+    REMEMBER_ME: Angemeldet bleiben
+    REMEMBER_ME_HELP: "Speichert einen Cookie im Browser, welcher eine fortwährende Anmeldung sicherstellt."
+    BUILTIN_CSS: "Nutze das integrierte CSS"
+    BUILTIN_CSS_HELP: "Nutze das CSS, welches vom Admin Plugin bereitgestellt werden"
+    ROUTE: "Anmeldepfad"
+    ROUTE_REGISTER: "Registrierungspfad"
+    USERNAME_NOT_AVAILABLE: "Der Nutzername %s existiert bereits, bitte wähle einen Anderen"
+    EMAIL_NOT_CONFIGURED: "E-Mail ist nicht konfiguriert"
+    USER_NEEDS_EMAIL_FIELD: "Der Nutzer benötigt ein E-Mail Feld"
+    EMAIL_SENDING_FAILURE: "Ein Fehler ist beim senden der E-Mail aufgetreten"
+    ACTIVATION_EMAIL_SUBJECT: "Aktiviere dein Account auf %s"
+    ACTIVATION_EMAIL_BODY: "Hi %s, click %s to activate your account on %s"
+    WELCOME_EMAIL_SUBJECT: "Willkommen zu %s"
+    WELCOME_EMAIL_BODY: "Hi %s, willkommen zu %s!"
+    NOTIFICATION_EMAIL_SUBJECT: "Neuer Nutzer auf %s"
+    NOTIFICATION_EMAIL_BODY: "Hi, ein neuer Nutzer hat sich auf %s registriert. Nutzername: %s, E-Mail: %s"
+    EMAIL_FOOTER: "GetGrav.org"
+    ACTIVATION_LINK_EXPIRED: "Aktivierungslink ist abgelaufen"
+    USER_ACTIVATED_SUCCESSFULLY: "Nutzer erfolgreich aktiviert"
+    INVALID_REQUEST: "Ungültige Anfrage"
+    USER_REGISTRATION: "Nutzer Registrierung"
+    USER_REGISTRATION_ENABLED_HELP: "Aktiviere die Nutzer Registrierung"
+    VALIDATE_PASSWORD1_AND_PASSWORD2: "Überprüfe das doppelt eingegebene Passwort"
+    SEND_ACTIVATION_EMAIL:  "Aktivierungs E-Mail senden"
+    SEND_NOTIFICATION_EMAIL: "Benachtichtigungs E-Mail senden"
+    SEND_WELCOME_EMAIL: "Sende eine Willkommens E-Mail"
+    DEFAULT_VALUES: "Standard Werte"
+    ADDITIONAL_PARAM_KEY: "Parameter"
+    ADDITIONAL_PARAM_VALUE: "Wert"
+    REGISTRATION_FIELDS: "Registrierungsfelder"
+    REGISTRATION_FIELD_KEY: "Feldname"
+    REDIRECT_AFTER_LOGIN: "Umleitung nach Login"
+    REDIRECT_AFTER_REGISTRATION: "Umleitung nach Registrierung"
+    OPTIONS: Optionen
+    EMAIL_VALIDATION_MESSAGE: "Muss eine gültige E-Mail Adresse sein"
+
 fr:
   PLUGIN_LOGIN:
-    USERNAME: "Nom d'utilisateur"
-    PASSWORD: "Mot de passe"
+    USERNAME: Nom d'utilisateur
+    PASSWORD: Mot de passe
     ACCESS_DENIED: Accès refusé...
     LOGIN_FAILED: Échec de la connexion...
     LOGIN_SUCCESSFUL: Vous vous êtes connecté avec succès.
@@ -94,18 +141,31 @@ fr:
     BTN_LOGOUT: Déconnexion
     BTN_FORGOT: Mot de passe oublié
     BTN_REGISTER: S'enregister
+    BTN_RESET: "Réinitialiser le mot de passe"
+    BTN_SEND_INSTRUCTIONS: "Envoyer les instructions de Réinitialisation"
+    RESET_LINK_EXPIRED: "Le lien de réinitialisation a expiré, veuillez réessayer"
+    RESET_PASSWORD_RESET: "Le mot de passe a été réinitialisé"
+    RESET_INVALID_LINK: "Le lien de réinitialisation utilisé n'est pas valide, veuillez réessayer"
+    FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL: "Les instructions pour la réinitialisation de votre mot de passe ont été envoyées par e-mail à %s"
+    FORGOT_FAILED_TO_EMAIL: "Impossible d'envoyer les instructions, veuillez réessayer ultérieurement"
+    FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL: "Impossible de réinitialiser le mot de passe pour %s, aucune adresse e-mail n'a été paramétrée"
+    FORGOT_USERNAME_DOES_NOT_EXIST: "L'utilisateur avec le nom d'utilisateur <b>%s</b> n'existe pas"
+    FORGOT_EMAIL_NOT_CONFIGURED: "Impossible de réinitialiser le mot de passe. Ce site n'est pas configuré pour envoyer des e-mails"
+    FORGOT_EMAIL_SUBJECT: "Demande de réinitialisation de mot de passe %s"
+    FORGOT_EMAIL_BODY: "<h1>Réinitialisation de mot de passe</h1><p>%1$s,</p><p>Une demande a été faite sur <b>%4$s</b> pour la réinitialisation de votre mot de passe.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Cliquez ici pour réinitialiser votre mot de passe</a><br /><br /></p><p>Vous pouvez également copier l'URL suivante dans la barre d'adresse de votre navigateur :</p> <p>%2$s</p><p><br />Cordialement,<br /><br />%3$s</p>"
+    SESSION: "Session - &ldquo;Se souvenir de moi&rdquo;"
     REMEMBER_ME: Se souvenir de moi
-    REMEMBER_ME_HELP: "Définit un cookie sur votre navigateur pour permettant l'authentification par connexion persistante entre les sessions."
+    REMEMBER_ME_HELP: "Définit un cookie persistant sur votre navigateur autorisant l'authentification par connexion persistante entre les sessions."
     REMEMBER_ME_STOLEN_COOKIE: "Quelqu'un d'autre a utilisé vos informations de connexion pour accéder à cette page ! Toutes les sessions ont été déconnectées. Veuillez vous connecter avec vos identifiants et vérifier vos données."
     BUILTIN_CSS: Utiliser les CSS intégrés
     BUILTIN_CSS_HELP: Utiliser les CSS fournis dans le plugin d'administration
     ROUTE: Chemin de connexion
     ROUTE_HELP: Chemin personnalisé vers une page de connexion personnalisée proposée par votre thème
-    ROUTE_REGISTER: "Chemin vers l'inscription"
-    ROUTE_REGISTER_HELP: "Chemin vers la page d'inscription. A définir si vous souhaitez utiliser la page d'inscription intégrée. Laisser vide si vous disposez de votre propre formulaire d'inscription."
+    ROUTE_REGISTER: Chemin vers l'inscription
+    ROUTE_REGISTER_HELP: Chemin vers la page d'inscription. A définir si vous souhaitez utiliser la page d'inscription intégrée. Laisser vide si vous disposez de votre propre formulaire d'inscription.
     USERNAME_NOT_VALID: "Le nom d'utilisateur doit comporter entre 3 et 16 caractères et peut être composé de lettres minuscules, de chiffres et de tirets de soulignement (underscores) et des traits d'union. Les lettres majuscules, les espaces et les caractères spéciaux ne sont pas autorisés."
     USERNAME_NOT_AVAILABLE: "Le nom d'utilisateur %s existe déjà, veuillez en choisir un autre."
-    PASSWORD_NOT_VALID: "Le mot de passe doit-être composé d'au moins un chiffre, une majuscule et une minuscule, et au moins 8 caractères"
+    PASSWORD_NOT_VALID: "Le mot de passe doit contenir au moins un chiffre, une majuscule et une minuscule et être composé d'au moins 8 caractères"
     PASSWORDS_DO_NOT_MATCH: "Les mots de passe sont différents. Réessayez de saisir le même mot de passe deux fois."
     EMAIL_NOT_CONFIGURED: "L'e-mail n'est pas configuré"
     USER_NEEDS_EMAIL_FIELD: "L'utilisateur a besoin d'un champ pour e-mail"
@@ -151,6 +211,7 @@ fr:
     TIMEOUT_HELP: "Définit le délai d'expiration de la session en secondes lorsque 'Se souvenir de moi' est activé et coché par l'utilisateur. Minimum de 604800 ce qui correspond à 1 semaine."
     GROUPS_HELP: "Liste des groupes auxquels le nouvel utilisateur enregistré fera partie, le cas échéant."
     SITE_ACCESS_HELP: "Liste des niveaux d'accès au site attribués au nouvel utilisateur enregistré. Exemple : `login` -> `true` "
+    WELCOME: "Bienvenue"
 
 hr:
   PLUGIN_LOGIN:
@@ -219,50 +280,3 @@ hu:
     USERNAME_NOT_AVAILABLE: "%s nevű felhasználó már létezik, kérlek válassz más felhasználónevet"
     PASSWORD_NOT_VALID: "A jelszónak tartalmaznia kell legalább egy számot, egy kisbetűt és egy nagybetűt, valamint legalább 8 karakter hosszú kell, hogy legyen"
     PASSWORDS_DO_NOT_MATCH: "A két jelszó nem egyezik meg. Győzödj meg róla, hogy azonos legyen a kettő"
-
-de:
-  PLUGIN_LOGIN:
-    USERNAME: Benutzername
-    PASSWORD: Passwort
-    ACCESS_DENIED: Zugang verweigert
-    LOGIN_FAILED: Login fehlgeschlagen...
-    LOGIN_SUCCESSFUL: Du wurdest erfolgreich eingeloggt.
-    BTN_LOGIN: Anmelden
-    BTN_LOGOUT: Ausloggen
-    BTN_FORGOT: Vergessen
-    BTN_REGISTER: Registrieren
-    REMEMBER_ME: Angemeldet bleiben
-    REMEMBER_ME_HELP: "Speichert einen Cookie im Browser, welcher eine fortwährende Anmeldung sicherstellt."
-    BUILTIN_CSS: "Nutze das integrierte CSS"
-    BUILTIN_CSS_HELP: "Nutze das CSS, welches vom Admin Plugin bereitgestellt werden"
-    ROUTE: "Anmeldepfad"
-    ROUTE_REGISTER: "Registrierungspfad"
-    USERNAME_NOT_AVAILABLE: "Der Nutzername %s existiert bereits, bitte wähle einen Anderen"
-    EMAIL_NOT_CONFIGURED: "E-Mail ist nicht konfiguriert"
-    USER_NEEDS_EMAIL_FIELD: "Der Nutzer benötigt ein E-Mail Feld"
-    EMAIL_SENDING_FAILURE: "Ein Fehler ist beim senden der E-Mail aufgetreten"
-    ACTIVATION_EMAIL_SUBJECT: "Aktiviere dein Account auf %s"
-    ACTIVATION_EMAIL_BODY: "Hi %s, click <a href=\"%s\">here</a> to activate your account on %s"
-    WELCOME_EMAIL_SUBJECT: "Willkommen zu %s"
-    WELCOME_EMAIL_BODY: "Hi %s, willkommen zu %s!"
-    NOTIFICATION_EMAIL_SUBJECT: "Neuer Nutzer auf %s"
-    NOTIFICATION_EMAIL_BODY: "Hi, ein neuer Nutzer hat sich auf %s registriert. Nutzername: %s, E-Mail: %s"
-    EMAIL_FOOTER: "GetGrav.org"
-    ACTIVATION_LINK_EXPIRED: "Aktivierungslink ist abgelaufen"
-    USER_ACTIVATED_SUCCESSFULLY: "Nutzer erfolgreich aktiviert"
-    INVALID_REQUEST: "Ungültige Anfrage"
-    USER_REGISTRATION: "Nutzer Registrierung"
-    USER_REGISTRATION_ENABLED_HELP: "Aktiviere die Nutzer Registrierung"
-    VALIDATE_PASSWORD1_AND_PASSWORD2: "Überprüfe das doppelt eingegebene Passwort"
-    SEND_ACTIVATION_EMAIL:  "Aktivierungs E-Mail senden"
-    SEND_NOTIFICATION_EMAIL: "Benachtichtigungs E-Mail senden"
-    SEND_WELCOME_EMAIL: "Sende eine Willkommens E-Mail"
-    DEFAULT_VALUES: "Standard Werte"
-    ADDITIONAL_PARAM_KEY: "Parameter"
-    ADDITIONAL_PARAM_VALUE: "Wert"
-    REGISTRATION_FIELDS: "Registrierungsfelder"
-    REGISTRATION_FIELD_KEY: "Feldname"
-    REDIRECT_AFTER_LOGIN: "Umleitung nach Login"
-    REDIRECT_AFTER_REGISTRATION: "Umleitung nach Registrierung"
-    OPTIONS: Optionen
-    EMAIL_VALIDATION_MESSAGE: "Muss eine gültige E-Mail Adresse sein"
