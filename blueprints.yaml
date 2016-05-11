@@ -140,7 +140,13 @@ form:
               type: text
               label: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION
               help: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION_HELP
-              placeholder: "/my-page"
+              placeholder: "/page-to-show-after-registration"
+
+            user_registration.redirect_after_activation:
+              type: text
+              label: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION
+              help: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION_HELP
+              placeholder: "/page-to-show-after-activation"
 
             registration_fields:
               type: section

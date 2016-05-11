@@ -39,7 +39,7 @@ en:
     USER_NEEDS_EMAIL_FIELD: "The user needs an email field"
     EMAIL_SENDING_FAILURE: "An error occurred while sending the email"
     ACTIVATION_EMAIL_SUBJECT: "Activate your account on %s"
-    ACTIVATION_EMAIL_BODY: "Hi %s, click %s to activate your account on %s"
+    ACTIVATION_EMAIL_BODY: "Hi %s, click <a href=\"%s\">here</a> to activate your account on %s"
     WELCOME_EMAIL_SUBJECT: "Welcome to %s"
     WELCOME_EMAIL_BODY: "Hi %s, welcome to %s!"
     NOTIFICATION_EMAIL_SUBJECT: "New user on %s"
@@ -80,6 +80,8 @@ en:
     GROUPS_HELP: "List of groups the new registered user will be part of, if any"
     SITE_ACCESS_HELP: "List of site access levels the new registered user will have. Example: `login` -> `true` "
     WELCOME: "Welcome"
+    REDIRECT_AFTER_ACTIVATION: "Redirect after the user activation"
+    REDIRECT_AFTER_ACTIVATION_HELP: "Used if the user is required to activate the account via email. Once activated, this route will be shown"
 
 fr:
   PLUGIN_LOGIN:
@@ -109,7 +111,7 @@ fr:
     USER_NEEDS_EMAIL_FIELD: "L'utilisateur a besoin d'un champ pour e-mail"
     EMAIL_SENDING_FAILURE: "Une erreur est survenue lors de l'envoi de l'e-mail."
     ACTIVATION_EMAIL_SUBJECT: "Activer votre compte sur %s"
-    ACTIVATION_EMAIL_BODY: "Bonjour %s, cliquez sur %s pour activer votre compte sur %s"
+    ACTIVATION_EMAIL_BODY: "Bonjour %s, <a href=\"%s\">cliquez</a> pour activer votre compte sur %s"
     WELCOME_EMAIL_SUBJECT: "Bienvenue sur %s"
     WELCOME_EMAIL_BODY: "Bonjour %s, bienvenue sur %s!"
     NOTIFICATION_EMAIL_SUBJECT: "Nouvel utilisateur sur %s"
@@ -240,7 +242,7 @@ de:
     USER_NEEDS_EMAIL_FIELD: "Der Nutzer benötigt ein E-Mail Feld"
     EMAIL_SENDING_FAILURE: "Ein Fehler ist beim senden der E-Mail aufgetreten"
     ACTIVATION_EMAIL_SUBJECT: "Aktiviere dein Account auf %s"
-    ACTIVATION_EMAIL_BODY: "Hi %s, click %s to activate your account on %s"
+    ACTIVATION_EMAIL_BODY: "Hi %s, click <a href=\"%s\">here</a> to activate your account on %s"
     WELCOME_EMAIL_SUBJECT: "Willkommen zu %s"
     WELCOME_EMAIL_BODY: "Hi %s, willkommen zu %s!"
     NOTIFICATION_EMAIL_SUBJECT: "Neuer Nutzer auf %s"
