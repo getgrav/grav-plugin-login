@@ -212,6 +212,8 @@ fr:
     GROUPS_HELP: "Liste des groupes auxquels le nouvel utilisateur enregistré fera partie, le cas échéant."
     SITE_ACCESS_HELP: "Liste des niveaux d'accès au site attribués au nouvel utilisateur enregistré. Exemple : `login` -> `true` "
     WELCOME: "Bienvenue"
+    REDIRECT_AFTER_ACTIVATION: "Redirection après l’activation de l’utilisateur"
+    REDIRECT_AFTER_ACTIVATION_HELP: "Utilisé s'il est nécessaire pour l’utilisateur d'activer le compte par e-mail. Une fois activé, ce chemin s’affichera"
 
 hr:
   PLUGIN_LOGIN:
