@@ -183,7 +183,7 @@ class Controller
 
         if (!$user || !$user->exists()) {
             $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $username]), 'error');
-            $this->setRedirect('/forgot');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
         }
