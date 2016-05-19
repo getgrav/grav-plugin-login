@@ -405,7 +405,8 @@ class Controller
 
             // Hardening cookies with user-agent and random salt or
             // fallback to use system based cache key
-            $data = $_SERVER['HTTP_USER_AGENT'] . $config->get('security.salt', $this->grav['cache']->getKey());
+            $server_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
+            $data = $server_agent . $config->get('security.salt', $this->grav['cache']->getKey());
             $this->rememberMe->setSalt(hash('sha512', $data));
 
             // Set cookie with correct base path of Grav install
