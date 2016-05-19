@@ -39,7 +39,7 @@ en:
     USER_NEEDS_EMAIL_FIELD: "The user needs an email field"
     EMAIL_SENDING_FAILURE: "An error occurred while sending the email"
     ACTIVATION_EMAIL_SUBJECT: "Activate your account on %s"
-    ACTIVATION_EMAIL_BODY: "Hi %s, click %s to activate your account on %s"
+    ACTIVATION_EMAIL_BODY: "Hi %s, click <a href=\"%s\">here</a> to activate your account on %s"
     WELCOME_EMAIL_SUBJECT: "Welcome to %s"
     WELCOME_EMAIL_BODY: "Hi %s, welcome to %s!"
     NOTIFICATION_EMAIL_SUBJECT: "New user on %s"
@@ -80,7 +80,9 @@ en:
     GROUPS_HELP: "List of groups the new registered user will be part of, if any"
     SITE_ACCESS_HELP: "List of site access levels the new registered user will have. Example: `login` -> `true` "
     WELCOME: "Welcome"
-    
+    REDIRECT_AFTER_ACTIVATION: "Redirect after the user activation"
+    REDIRECT_AFTER_ACTIVATION_HELP: "Used if the user is required to activate the account via email. Once activated, this route will be shown"
+
 de:
   PLUGIN_LOGIN:
     USERNAME: Benutzername
@@ -151,7 +153,7 @@ fr:
     FORGOT_EMAIL_NOT_CONFIGURED: "Impossible de réinitialiser le mot de passe. Ce site n'est pas configuré pour envoyer des e-mails"
     FORGOT_EMAIL_SUBJECT: "Demande de réinitialisation de mot de passe %s"
     FORGOT_EMAIL_BODY: "<h1>Réinitialisation de mot de passe</h1><p>%1$s,</p><p>Une demande a été faite sur <b>%4$s</b> pour la réinitialisation de votre mot de passe.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Cliquez ici pour réinitialiser votre mot de passe</a><br /><br /></p><p>Vous pouvez également copier l'URL suivante dans la barre d'adresse de votre navigateur :</p> <p>%2$s</p><p><br />Cordialement,<br /><br />%3$s</p>"
-    SESSION: "Session - &ldquo;Se souvenir de moi&rdquo;"    
+    SESSION: "Session - &ldquo;Se souvenir de moi&rdquo;"
     REMEMBER_ME: Se souvenir de moi
     REMEMBER_ME_HELP: "Définit un cookie persistant sur votre navigateur autorisant l'authentification par connexion persistante entre les sessions."
     REMEMBER_ME_STOLEN_COOKIE: "Quelqu'un d'autre a utilisé vos informations de connexion pour accéder à cette page ! Toutes les sessions ont été déconnectées. Veuillez vous connecter avec vos identifiants et vérifier vos données."
@@ -169,7 +171,7 @@ fr:
     USER_NEEDS_EMAIL_FIELD: "L'utilisateur a besoin d'un champ pour e-mail"
     EMAIL_SENDING_FAILURE: "Une erreur est survenue lors de l'envoi de l'e-mail."
     ACTIVATION_EMAIL_SUBJECT: "Activer votre compte sur %s"
-    ACTIVATION_EMAIL_BODY: "Bonjour %s, cliquez sur %s pour activer votre compte sur %s"
+    ACTIVATION_EMAIL_BODY: "Bonjour %s, <a href=\"%s\">cliquez</a> pour activer votre compte sur %s"
     WELCOME_EMAIL_SUBJECT: "Bienvenue sur %s"
     WELCOME_EMAIL_BODY: "Bonjour %s, bienvenue sur %s!"
     NOTIFICATION_EMAIL_SUBJECT: "Nouvel utilisateur sur %s"
@@ -210,6 +212,8 @@ fr:
     GROUPS_HELP: "Liste des groupes auxquels le nouvel utilisateur enregistré fera partie, le cas échéant."
     SITE_ACCESS_HELP: "Liste des niveaux d'accès au site attribués au nouvel utilisateur enregistré. Exemple : `login` -> `true` "
     WELCOME: "Bienvenue"
+    REDIRECT_AFTER_ACTIVATION: "Redirection après l’activation de l’utilisateur"
+    REDIRECT_AFTER_ACTIVATION_HELP: "Utilisé s'il est nécessaire pour l’utilisateur d'activer le compte par e-mail. Une fois activé, ce chemin s’affichera"
 
 hr:
   PLUGIN_LOGIN:

@@ -317,11 +317,11 @@ class LoginPlugin extends Plugin
             } else {
                 $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
                 $messages->add($message, 'error');
-
             }
         }
 
-        $this->grav->redirect('/');
+        $redirect_route = $this->config->get('plugins.login.user_registration.redirect_after_activation', '/');
+        $this->grav->redirect($redirect_route);
     }
 
     /**
