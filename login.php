@@ -202,7 +202,7 @@ class LoginPlugin extends Plugin
         $page = $pages->dispatch($route);
 
         if (!$page) {
-            // Only add login page if it hasn't already been defined.
+            // Only add forgot page if it hasn't already been defined.
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . "/pages/forgot.md"));
             $page->slug(basename($route));
