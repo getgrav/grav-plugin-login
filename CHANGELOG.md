@@ -1,3 +1,13 @@
+# v2.0.0-beta.3
+## 05/23/2016
+
+1. [](#improved)
+    * Added a redirect after activation
+    * Changed hardcoded redirect routes to config-based
+1. [](#bugfix)
+    * Fix a redirect issue #74
+    * Don't error if missing a HTTP_USER_AGENT browser string
+    
 # v2.0.0-beta.2
 ## 05/03/2016
 
