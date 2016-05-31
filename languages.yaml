@@ -82,6 +82,7 @@ en:
     WELCOME: "Welcome"
     REDIRECT_AFTER_ACTIVATION: "Redirect after the user activation"
     REDIRECT_AFTER_ACTIVATION_HELP: "Used if the user is required to activate the account via email. Once activated, this route will be shown"
+    REGISTRATION_DISABLED: "Registration disabled"
 
 de:
   PLUGIN_LOGIN:

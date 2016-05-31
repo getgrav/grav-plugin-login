@@ -160,9 +160,14 @@ class LoginPlugin extends Plugin
         }
 
         if ($uri->path() == $this->config->get('plugins.login.route_register')) {
-            $this->enable([
-                'onPagesInitialized' => ['addRegisterPage', 0],
-            ]);
+            if ($this->config->get('plugins.login.user_registration.enabled')) {
+                $this->enable([
+                    'onPagesInitialized' => ['addRegisterPage', 0],
+                ]);
+            } else {
+                throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.REGISTRATION_DISABLED'), 404);
+            }
+
         }
 
         if ($uri->path() == $this->config->get('plugins.login.route_activate')) {
