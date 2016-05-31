@@ -21,6 +21,9 @@ form:
 
         - name: token
           type: hidden
+
+process:
+    twig: true
 ---
 
 # Password Reset
