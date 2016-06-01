@@ -1,3 +1,12 @@
+# v2.0.0-rc.1
+## 06/01/2016
+
+1. [](#improved)
+    * French updated
+1. [](#bugfix)
+    * Enable twig processing in a page #75
+    * Deny access to registration when user registration is disabled #72
+
 # v2.0.0-beta.3
 ## 05/23/2016
 
@@ -7,7 +16,7 @@
 1. [](#bugfix)
     * Fix a redirect issue #74
     * Don't error if missing a HTTP_USER_AGENT browser string
-    
+
 # v2.0.0-beta.2
 ## 05/03/2016
 
@@ -17,7 +26,7 @@
 1. [](#bugfix)
     * Fixed logging out on the homepage
     * Fixed an issue in processing user registration
-    
+
 # v2.0.0-beta.1
 ## 04/20/2016
 
@@ -45,7 +54,7 @@
     * Add the correct message type when raising a form processing error
 1. [](#bugfix)
     * Show the correct error message when the user is not authorized to view a page
-    * Fix showing the OAuth links in the login form 
+    * Fix showing the OAuth links in the login form
 
 # v1.3.0
 ## 01/06/2016
@@ -96,7 +105,7 @@
     * Check page exists so as not to fail hard
     * Fix for static Inflector references #17
 
-    
+
 # v1.0.1
 ## 11/23/2015
 
@@ -170,7 +179,7 @@
     * Add the correct message type when raising a form processing error
 1. [](#bugfix)
     * Show the correct error message when the user is not authorized to view a page
-    * Fix showing the OAuth links in the login form 
+    * Fix showing the OAuth links in the login form
 
 # v1.3.0
 ## 01/06/2016
@@ -221,7 +230,7 @@
     * Check page exists so as not to fail hard
     * Fix for static Inflector references #17
 
-    
+
 # v1.0.1
 ## 11/23/2015
 
