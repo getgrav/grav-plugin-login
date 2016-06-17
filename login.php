@@ -344,7 +344,7 @@ class LoginPlugin extends Plugin
             if ($task == 'login') {
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
-                        'info');
+                        'error');
                     $this->authenticated = false;
                     $twig = $this->grav['twig'];
                     $twig->twig_vars['notAuthorized'] = true;
@@ -363,7 +363,7 @@ class LoginPlugin extends Plugin
                                 'forgot-form')
                         ) {
                             $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
-                                'info');
+                                'error');
 
                             return;
                         }
@@ -372,8 +372,8 @@ class LoginPlugin extends Plugin
                             if (!isset($post['reset-form-nonce']) || !Utils::verifyNonce($post['reset-form-nonce'],
                                     'reset-form')
                             ) {
-                                //$this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
-                                //return;
+                                $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
+                                return;
                             }
                         }
                     }
@@ -462,7 +462,7 @@ class LoginPlugin extends Plugin
             unset($this->grav['page']);
             $this->grav['page'] = $page;
         } else {
-            $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+            $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             $this->authenticated = false;
 
             $twig = $this->grav['twig'];
