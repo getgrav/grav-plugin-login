@@ -7,6 +7,7 @@ route_forgot: /forgot_password
 route_reset: /reset_password
 redirect_after_login:
 parent_acl: false
+protect_protected_page_media: false
 
 user_registration:
   enabled: true

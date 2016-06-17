@@ -53,6 +53,7 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'  => ['loginController', 0],
             'onTask.login.reset'   => ['loginController', 0],
             'onPageInitialized'    => ['authorizePage', 0],
+            'onPageFallBackUrl' => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'  => ['onTwigSiteVariables', -100000],
             'onFormProcessed'      => ['onFormProcessed', 0]
@@ -386,6 +387,18 @@ class LoginPlugin extends Plugin
         $controller->redirect();
     }
 
+    /**
+     * Authorize the Page fallback url (page media accessed through the page route)
+     */
+    public function authorizeFallBackUrl()
+    {
+        if ($this->config->get('plugins.login.protect_protected_page_media', false)) {
+            $page_url = dirname($this->grav['uri']->path());
+            $page = $this->grav['pages']->find($page_url);
+            $this->grav['page'] = $page;
+            $this->authorizePage();
+        }
+    }
 
     /**
      * Authorize Page

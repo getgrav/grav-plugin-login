@@ -83,6 +83,8 @@ en:
     REDIRECT_AFTER_ACTIVATION: "Redirect after the user activation"
     REDIRECT_AFTER_ACTIVATION_HELP: "Used if the user is required to activate the account via email. Once activated, this route will be shown"
     REGISTRATION_DISABLED: "Registration disabled"
+    PROTECT_PROTECTED_PAGE_ASSETS_LABEL: "Protect protected page assets"
+    PROTECT_PROTECTED_PAGE_ASSETS_HELP: "If enabled, media of a login protected page is login protected as well and cannot be seen unless logged in"
 
 de:
   PLUGIN_LOGIN:
