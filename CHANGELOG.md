@@ -1,3 +1,11 @@
+# v2.0.0-rc.2
+## 06/17/2016
+
+1. [](#new)
+    * Add an option to login protect a login-protected page media accessed through the page route [#45](https://github.com/getgrav/grav-plugin-login/issues/45)
+1. [](#bugfix)
+    * Correctly show an error message when the reset password form does not provide the correct nonce
+
 # v2.0.0-rc.1
 ## 06/01/2016
 
