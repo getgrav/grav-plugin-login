@@ -342,43 +342,39 @@ class LoginPlugin extends Plugin
         $post = !empty($_POST) ? $_POST : [];
 
         if (method_exists('Grav\Common\Utils', 'getNonce')) {
-            if ($task == 'login') {
-                if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
-                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
-                        'error');
-                    $this->authenticated = false;
-                    $twig = $this->grav['twig'];
-                    $twig->twig_vars['notAuthorized'] = true;
+            switch ($task) {
+                case 'login':
+                    if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+                        $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
+                            'info');
+                        $this->authenticated = false;
+                        $twig = $this->grav['twig'];
+                        $twig->twig_vars['notAuthorized'] = true;
 
-                    return;
-                }
-            } else {
-                if ($task == 'logout') {
+                        return;
+                    }
+                    break;
+
+                case 'logout':
                     $nonce = $this->grav['uri']->param('logout-nonce');
                     if (!isset($nonce) || !Utils::verifyNonce($nonce, 'logout-form')) {
                         return;
                     }
-                } else {
-                    if ($task == 'forgot') {
-                        if (!isset($post['forgot-form-nonce']) || !Utils::verifyNonce($post['forgot-form-nonce'],
-                                'forgot-form')
-                        ) {
-                            $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
-                                'error');
+                    break;
 
-                            return;
-                        }
-                    } else {
-                        if ($task == 'reset') {
-                            if (!isset($post['reset-form-nonce']) || !Utils::verifyNonce($post['reset-form-nonce'],
-                                    'reset-form')
-                            ) {
-                                $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
-                                return;
-                            }
-                        }
+                case 'forgot':
+                    if (!isset($post['forgot-form-nonce']) || !Utils::verifyNonce($post['forgot-form-nonce'], 'forgot-form')) {
+                        $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'info');
+                        return;
                     }
-                }
+                    break;
+
+                case 'reset':
+                    if(!isset($post['reset-form-nonce']) || !Utils::verifyNonce($post['reset-form-nonce'], 'reset-form')) {
+                        //$this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+                        //return;
+                    }
+                    break;
             }
         }
 
