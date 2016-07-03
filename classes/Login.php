@@ -155,7 +155,7 @@ class Login
         }
 
         $username = $data['username'];
-        $file = CompiledYamlFile::instance($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT,
+        $file = CompiledYamlFile::instance($this->grav['locator']->findResource('account://' . $username . YAML_EXT,
             true, true));
 
         // Create user object and save it

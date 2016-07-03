@@ -97,7 +97,7 @@ class ChangePasswordCommand extends ConsoleCommand
         $username = strtolower($username);
         
         // Grab the account file and read in the information before setting the file (prevent setting erase)
-        $oldUserFile = CompiledYamlFile::instance(self::getGrav()['locator']->findResource('user://accounts/' . $username . YAML_EXT, true, true));
+        $oldUserFile = CompiledYamlFile::instance(self::getGrav()['locator']->findResource('account://' . $username . YAML_EXT, true, true));
         $oldData = $oldUserFile->content();
         
         //Set the password feild to new password
@@ -105,7 +105,7 @@ class ChangePasswordCommand extends ConsoleCommand
         
         // Create user object and save it using oldData (with updated password)
         $user = new User($oldData);
-        $file = CompiledYamlFile::instance(self::getGrav()['locator']->findResource('user://accounts/' . $username . YAML_EXT, true, true));
+        $file = CompiledYamlFile::instance(self::getGrav()['locator']->findResource('account://' . $username . YAML_EXT, true, true));
         $user->file($file);
         $user->save();
 
@@ -137,7 +137,7 @@ class ChangePasswordCommand extends ConsoleCommand
                 if (!preg_match('/^[a-z0-9_-]{3,16}$/', $value)) {
                     throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
                 }
-                if (!file_exists(self::getGrav()['locator']->findResource('user://accounts/' . $value . YAML_EXT))) {
+                if (!file_exists(self::getGrav()['locator']->findResource('account://' . $value . YAML_EXT))) {
                     throw new \RuntimeException('Username "' . $value . '" does not exist, please pick another username');
                 }
 
