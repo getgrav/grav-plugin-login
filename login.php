@@ -544,7 +544,7 @@ class LoginPlugin extends Plugin
         $username = $form->value('username');
         $data['username'] = $username;
 
-        if (file_exists($this->grav['locator']->findResource('user://accounts/' . $username . YAML_EXT))) {
+        if (file_exists($this->grav['locator']->findResource('account://' . $username . YAML_EXT))) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
                 'message' => $this->grav['language']->translate([
