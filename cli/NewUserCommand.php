@@ -4,6 +4,7 @@ namespace Grav\Plugin\Console;
 use Grav\Console\ConsoleCommand;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
+use Grav\Common\Grav;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -207,7 +208,7 @@ class NewUserCommand extends ConsoleCommand
 
         // Create user object and save it
         $user = new User($data);
-        $file = CompiledYamlFile::instance(self::getGrav()['locator']->findResource('user://accounts/' . $username . YAML_EXT, true, true));
+        $file = CompiledYamlFile::instance(Grav::instance()['locator']->findResource('account://' . $username . YAML_EXT, true, true));
         $user->file($file);
         $user->save();
 
@@ -239,7 +240,7 @@ class NewUserCommand extends ConsoleCommand
                 if (!preg_match('/^[a-z0-9_-]{3,16}$/', $value)) {
                     throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
                 }
-                if (file_exists(self::getGrav()['locator']->findResource('user://accounts/' . $value . YAML_EXT))) {
+                if (file_exists(Grav::instance()['locator']->findResource('account://' . $value . YAML_EXT))) {
                     throw new \RuntimeException('Username "' . $value . '" already exists, please pick another username');
                 }
 

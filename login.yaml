@@ -5,8 +5,9 @@ route_register: false
 route_activate: /activate_user
 route_forgot: /forgot_password
 route_reset: /reset_password
-redirect:
+redirect_after_login:
 parent_acl: false
+protect_protected_page_media: false
 
 user_registration:
   enabled: true
@@ -17,11 +18,10 @@ user_registration:
     - 'email'
     - 'fullname'
     - 'title'
-    - 'access'
-    - 'state'
 
-  additional_params:
-    access: 'site.login'
+  access:
+    site:
+      login: 'true'
 
   options:
     validate_password1_and_password2: true
@@ -33,39 +33,5 @@ user_registration:
 
 rememberme:
   enabled: true
-  timeout: 1800                        # Timeout in seconds
+  timeout: 604800                      # Timeout in seconds. Defaults to 1 week
   name: grav-rememberme                # Name prefix of the session cookie
-
-oauth:
-  enabled: false
-
-  user:
-    autocreate: false
-    access:
-      site:
-        login: true
-
-  providers:
-    Facebook:
-      enabled: false
-      credentials:
-        key:
-        secret:
-
-    Google:
-      enabled: false
-      credentials:
-        key:
-        secret:
-
-    GitHub:
-      enabled: false
-      credentials:
-        key:
-        secret:
-
-    Twitter:
-      enabled: false
-      credentials:
-        key:
-        secret:

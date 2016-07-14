@@ -3,7 +3,7 @@
 
     {% include 'partials/messages.html.twig' %}
 
-    <form method="post" action="{{ uri.url ~ page.header.form.action}}">
+    <form method="post" action="{{ base_url_relative ~ uri.path }}">
         {% for field in page.header.form.fields %}
             {% set value = attribute(grav.twig.twig_vars, field.name) is defined ? attribute(grav.twig.twig_vars, field.name) : null %}
 
@@ -14,7 +14,7 @@
             {% endif %}
         {% endfor %}
         <div class="form-actions secondary-accent">
-            <button type="submit" class="button primary" name="task" value="login.reset"><i class="fa fa-key"></i> {{ "PLUGIN_ADMIN.LOGIN_BTN_RESET"|t }}</button>
+            <button type="submit" class="button primary" name="task" value="login.reset"><i class="fa fa-key"></i> {{ "PLUGIN_LOGIN.BTN_RESET"|t }}</button>
         </div>
 
         {{ nonce_field('reset-form', 'reset-form-nonce') }}
