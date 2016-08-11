@@ -1,10 +1,16 @@
+# v2.0.1
+## 08/10/2016
+
+1. [](#improved)
+    * Added Romanian
+
 # v2.0.0
 ## 07/14/2016
 
 1. [](#improved)
     * Optimized nonce creation
     * Point account path to core's account stream [#85](https://github.com/getgrav/grav-plugin-login/issues/85)
-    
+
 # v2.0.0-rc.2
 ## 06/21/2016
 
