@@ -1,5 +1,5 @@
 <section id="grav-login">
-    {{ content }}
+    {{ content|raw }}
 
     {% include 'partials/messages.html.twig' %}
 
@@ -17,7 +17,7 @@
             <button type="submit" class="button primary" name="task" value="login.reset"><i class="fa fa-key"></i> {{ "PLUGIN_LOGIN.BTN_RESET"|t }}</button>
         </div>
 
-        {{ nonce_field('reset-form', 'reset-form-nonce') }}
+        {{ nonce_field('reset-form', 'reset-form-nonce')|raw }}
     </form>
 </section>
 
