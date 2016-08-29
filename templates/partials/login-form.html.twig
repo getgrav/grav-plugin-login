@@ -1,5 +1,3 @@
-{% set icons = {'Microsoft': 'windows'} %}
-
 <section id="grav-login">
     {% include 'partials/messages.html.twig' %}
 
@@ -9,7 +7,7 @@
             <h4>{{ 'PLUGIN_LOGIN.WELCOME'|t }} <strong>{{ grav.user.fullname ?: grav.user.username }}</strong></h4>
             <hr>
             <a class="button logout" href="{{ uri.addNonce(base_url_relative ~ uri.path ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce') }}">{{ 'PLUGIN_LOGIN.BTN_LOGOUT'|t }}</a>
-        
+
         {% else %}
             {{ content|raw }}
 
