@@ -3,6 +3,7 @@
 
 1. [](#improved)
     * Added support for Grav's autoescape twig setting
+    * Dropped unused variable reference
 
 # v2.0.1
 ## 08/10/2016
