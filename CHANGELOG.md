@@ -4,6 +4,8 @@
 1. [](#improved)
     * Added support for Grav's autoescape twig setting
     * Dropped unused variable reference
+    * Moved Email Utils to Email plugin
+    * Updated vendor libraries
 
 # v2.0.1
 ## 08/10/2016
