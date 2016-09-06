@@ -6,6 +6,7 @@
     * Dropped unused variable reference
     * Moved Email Utils to Email plugin
     * Updated vendor libraries
+    * Allow explicitly showing the login page on pages that are not the Login form template [#11](https://github.com/getgrav/grav-plugin-maintenance/issues/11)
 
 # v2.0.1
 ## 08/10/2016
