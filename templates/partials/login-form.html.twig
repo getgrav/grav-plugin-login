@@ -1,17 +1,15 @@
-{% set icons = {'Microsoft': 'windows'} %}
-
 <section id="grav-login">
     {% include 'partials/messages.html.twig' %}
 
-    {% if page.template == 'login' %}
+    {% if page.template == 'login' or show_login_form %}
 
         {% if grav.user.username %}
             <h4>{{ 'PLUGIN_LOGIN.WELCOME'|t }} <strong>{{ grav.user.fullname ?: grav.user.username }}</strong></h4>
             <hr>
             <a class="button logout" href="{{ uri.addNonce(base_url_relative ~ uri.path ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce') }}">{{ 'PLUGIN_LOGIN.BTN_LOGOUT'|t }}</a>
-        
+
         {% else %}
-            {{ content }}
+            {{ content|raw }}
 
             <form method="post" action="{{ base_url_relative ~ uri.path }}">
                 {% if grav.twig.plugins_hooked_loginPage %}
@@ -42,7 +40,7 @@
                     <button type="submit" class="button primary" name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
                 </div>
 
-                {{ nonce_field('login-form', 'login-form-nonce') }}
+                {{ nonce_field('login-form', 'login-form-nonce')|raw }}
             </form>
 
         {% endif %}

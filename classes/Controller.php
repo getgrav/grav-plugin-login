@@ -5,11 +5,10 @@ namespace Grav\Plugin\Login;
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Plugin\Login\RememberMe;
-use Grav\Plugin\Login\Login;
 use Grav\Common\Language\Language;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
-use Grav\Plugin\Login\Utils as LoginUtils;
+use Grav\Plugin\Email\Utils as EmailUtils;
 
 use Birke\Rememberme\Cookie;
 use RocketTheme\Toolbox\Session\Message;
@@ -222,7 +221,7 @@ class Controller
         $subject = $language->translate(['PLUGIN_LOGIN.FORGOT_EMAIL_SUBJECT', $sitename]);
         $content = $language->translate(['PLUGIN_LOGIN.FORGOT_EMAIL_BODY', $fullname, $reset_link, $author, $sitename]);
 
-        $sent = LoginUtils::sendEmail($subject, $content, $to);
+        $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
