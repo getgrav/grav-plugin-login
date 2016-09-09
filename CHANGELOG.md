@@ -1,3 +1,9 @@
+# v2.1.1
+## 09/08/2016
+
+1. [](#improved)
+    * Use better detection for admin allowing multi-site setup with subfolders
+
 # v2.1.0
 ## 09/07/2016
 

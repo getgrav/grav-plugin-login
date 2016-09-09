@@ -47,7 +47,7 @@ class LoginPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPluginsInitialized' => ['initialize', 10000],
+            'onPluginsInitialized' => [['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'   => ['loginController', 0],
             'onTask.login.forgot'  => ['loginController', 0],
             'onTask.login.logout'  => ['loginController', 0],
@@ -63,11 +63,8 @@ class LoginPlugin extends Plugin
     /**
      * Initialize login plugin if path matches.
      */
-    public function initialize()
+    public function initializeSession()
     {
-        /** @var Uri $uri */
-        $uri = $this->grav['uri'];
-
         // Check to ensure sessions are enabled.
         if ($this->grav['config']->get('system.session.enabled') === false) {
             throw new \RuntimeException('The Login plugin requires "system.session" to be enabled');
@@ -128,6 +125,15 @@ class LoginPlugin extends Plugin
 
             return $session->user;
         };
+    }
+
+    /**
+     * Initialize login plugin if path matches.
+     */
+    public function initializeLogin()
+    {
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
 
         //Initialize Login Object
         $this->login = new Login($this->grav);
@@ -135,13 +141,12 @@ class LoginPlugin extends Plugin
         //Store Login Object in Grav
         $this->grav['login'] = $this->login;
 
-        $admin_route = $this->config->get('plugins.admin.route');
-
-        // Register route to login page if it has been set.
-        if ($uri->path() != $admin_route && substr($uri->path(), 0, strlen($admin_route) + 1) != ($admin_route . '/')) {
+        // Admin has its own login; make sure we're not in admin.
+        if (!isset($this->grav['admin'])) {
             $this->route = $this->config->get('plugins.login.route');
         }
 
+        // Register route to login page if it has been set.
         if ($this->route && $this->route == $uri->path()) {
             $this->enable([
                 'onPagesInitialized' => ['addLoginPage', 0],
