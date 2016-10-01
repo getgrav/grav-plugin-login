@@ -7,7 +7,7 @@ use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
-use Grav\Plugin\Login\Utils as LoginUtils;
+use Grav\Plugin\Email\Utils as EmailUtils;
 use RocketTheme\Toolbox\Session\Message;
 
 /**
@@ -203,7 +203,7 @@ class Login
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
         }
 
-        $sent = LoginUtils::sendEmail($subject, $content, $to);
+        $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
@@ -231,7 +231,7 @@ class Login
         $content = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY', $user->username, $sitename]);
         $to = $user->email;
 
-        $sent = LoginUtils::sendEmail($subject, $content, $to);
+        $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
@@ -272,7 +272,7 @@ class Login
         ]);
         $to = $user->email;
 
-        $sent = LoginUtils::sendEmail($subject, $content, $to);
+        $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
             throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));

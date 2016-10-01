@@ -1,3 +1,9 @@
+# v2.1.2
+## 10/01/2016
+
+1. [](#bugfix)
+    * Fixed an old reference to `LoginUtils` and replaced with new `EmailUtils`
+
 # v2.1.1
 ## 09/08/2016
 
