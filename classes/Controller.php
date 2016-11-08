@@ -166,8 +166,8 @@ class Controller
         $param_sep = $this->grav['config']->get('system.param_sep', ':');
         $data = $this->post;
 
-        $username = isset($data['username']) ? $data['username'] : '';
-        $user = !empty($username) ? User::load($username) : null;
+        $email = isset($data['email']) ? $data['email'] : '';
+        $user = !empty($email) ? User::find($email, ['email']) : null;
 
         /** @var Language $l */
         $language = $this->grav['language'];
@@ -181,14 +181,14 @@ class Controller
         }
 
         if (!$user || !$user->exists()) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $username]), 'error');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_USERNAME_NOT_FOUND'), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
         }
 
         if (empty($user->email)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $username]),
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $email]),
                 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
 
@@ -202,9 +202,9 @@ class Controller
         $user->save();
 
         $author = $this->grav['config']->get('site.author.name', '');
-        $fullname = $user->fullname ?: $username;
+        $fullname = $user->fullname ?: $user->username;
 
-        $reset_link = $this->grav['base_url_absolute'] . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
+        $reset_link = $this->grav['base_url_absolute'] . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
 
         $sitename = $this->grav['config']->get('site.title', 'Website');
         $from = $this->grav['config']->get('plugins.email.from');
@@ -247,7 +247,7 @@ class Controller
 
         if (isset($data['password'])) {
             $username = isset($data['username']) ? $data['username'] : null;
-            $user = !empty($username) ? User::load($username) : null;
+            $user = !empty($username) ? User::find($username) : null;
             $password = isset($data['password']) ? $data['password'] : null;
             $token = isset($data['token']) ? $data['token'] : null;
 
@@ -313,7 +313,7 @@ class Controller
             $username = isset($form['username']) ? $form['username'] : $this->rememberMe->login();
 
             // Normal login process
-            $user = User::load($username);
+            $user = User::find($username);
             if ($user->exists()) {
                 if (!empty($form['username']) && !empty($form['password'])) {
                     // Authenticate user

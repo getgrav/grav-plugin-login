@@ -11,7 +11,7 @@ form:
           type: text
           id: username
           placeholder: Username
-          label: PLUGIN_LOGIN.USERNAME
+          label: PLUGIN_LOGIN.USERNAME_EMAIL
           autofocus: true
 
         - name: password

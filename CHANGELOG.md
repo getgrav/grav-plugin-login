@@ -1,3 +1,10 @@
+# v2.2.0
+## xx/xx/2016
+
+1. [](#new)
+    * Allow login via `username` or `email`
+    * Only allow password recovery via `email` address
+
 # v2.1.2
 ## 10/01/2016
 

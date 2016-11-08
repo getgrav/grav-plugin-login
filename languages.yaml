@@ -1,6 +1,8 @@
 en:
   PLUGIN_LOGIN:
     USERNAME: Username
+    EMAIL: Email
+    USERNAME_EMAIL: Username/Email
     PASSWORD: Password
     ACCESS_DENIED: Access denied...
     LOGIN_FAILED: Login failed...
@@ -18,6 +20,7 @@ en:
     FORGOT_FAILED_TO_EMAIL: "Failed to email instructions, please try again later"
     FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL: "Cannot reset password for %s, no email address is set"
     FORGOT_USERNAME_DOES_NOT_EXIST: "User with username <b>%s</b> does not exist"
+    FORGOT_USERNAME_NOT_FOUND: "A user with that email address cannot be found..."
     FORGOT_EMAIL_NOT_CONFIGURED: "Cannot reset password. This site is not configured to send emails"
     FORGOT_EMAIL_SUBJECT: "%s Password Reset Request"
     FORGOT_EMAIL_BODY: "<h1>Password Reset</h1><p>Dear %1$s,</p><p>A request was made on <b>%4$s</b> to reset your password.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Click this to reset your password</a><br /><br /></p><p>Alternatively, copy the following URL into your browser's address bar:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Kind regards,<br /><br />%3$s</p>"
