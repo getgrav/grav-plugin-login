@@ -1,5 +1,5 @@
-# v2.2.0
-## xx/xx/2016
+# v2.2.0-rc.1
+## 11/09/2016
 
 1. [](#new)
     * Allow login via `username` or `email`
