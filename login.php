@@ -77,17 +77,6 @@ class LoginPlugin extends Plugin
         }
         require_once $autoload;
 
-        // Define session message service.
-        $this->grav['messages'] = function ($c) {
-            $session = $c['session'];
-
-            if (!isset($session->messages)) {
-                $session->messages = new Message;
-            }
-
-            return $session->messages;
-        };
-
         // Define current user service.
         $this->grav['user'] = function ($c) {
             /** @var Grav $c */
