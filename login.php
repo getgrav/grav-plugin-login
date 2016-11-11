@@ -432,8 +432,16 @@ class LoginPlugin extends Plugin
 
         // Continue to the page if user is authorized to access the page.
         foreach ($rules as $rule => $value) {
-            if ($user->authorize($rule) == $value) {
-                return;
+            if (is_array($value)) {
+                foreach ($value as $nested_rule => $nested_value) {
+                    if ($user->authorize($rule . '.' . $nested_rule) == $nested_value) {
+                        return;
+                    }
+                }
+            } else {
+                if ($user->authorize($rule) == $value) {
+                    return;
+                }
             }
         }
 
