@@ -3,6 +3,8 @@
 
 1. [](#new)
     * Allow to set permissions using nested array syntax [#96](https://github.com/getgrav/grav-plugin-login/issues/96)
+1. [](#bugfix)
+    * Fix registration form, fields were not visible [#97](https://github.com/getgrav/grav-plugin-login/issues/97)
 
 # v2.2.0-rc.1
 ## 11/09/2016

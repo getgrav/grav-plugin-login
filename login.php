@@ -255,6 +255,9 @@ class LoginPlugin extends Plugin
         $page->template('form');
         $page->slug(basename($route));
 
+        $twig = $this->grav['twig'];
+        $twig->twig_vars['form'] = $page->header()->form;
+
         $pages->addPage($page, $route);
     }
 
