@@ -3,6 +3,8 @@
 
 1. [](#new)
     * Allow to set permissions using nested array syntax [#96](https://github.com/getgrav/grav-plugin-login/issues/96)
+1. [](#improved)
+    * Use the same feedback message when resetting the password if the email exists or not. Remove email in the message as we now recover via email, useless
 1. [](#bugfix)
     * Fix registration form, fields were not visible [#97](https://github.com/getgrav/grav-plugin-login/issues/97)
 

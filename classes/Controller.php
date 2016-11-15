@@ -181,7 +181,7 @@ class Controller
         }
 
         if (!$user || !$user->exists()) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_USERNAME_NOT_FOUND'), 'error');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
             $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
@@ -226,7 +226,7 @@ class Controller
         if ($sent < 1) {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
         } else {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL', $to]), 'info');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
         }
 
         $this->setRedirect('/');
