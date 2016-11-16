@@ -320,21 +320,31 @@ class Controller
                     $user->authenticated = $user->authenticate($form['password']);
 
                     if ($user->authenticated) {
-                        $this->grav['session']->user = $user;
 
-                        unset($this->grav['user']);
-                        $this->grav['user'] = $user;
+                        // Authorize against user ACL
+                        $user_authorized = $user->authorize('site.login');
 
-                        // If the user wants to be remembered, create Rememberme cookie
-                        if (!empty($form['rememberme'])) {
-                            $this->rememberMe->createCookie($form['username']);
-                        } else {
-                            $this->rememberMe->clearCookie();
-                            $this->rememberMe->getStorage()->cleanAllTriplets($user->get('username'));
+                        if ($user_authorized) {
+                            $this->grav['session']->user = $user;
+
+                            unset($this->grav['user']);
+                            $this->grav['user'] = $user;
+
+                            // If the user wants to be remembered, create Rememberme cookie
+                            if (!empty($form['rememberme'])) {
+                                $this->rememberMe->createCookie($form['username']);
+                            } else {
+                                $this->rememberMe->clearCookie();
+                                $this->rememberMe->getStorage()->cleanAllTriplets($user->get('username'));
+                            }
                         }
+
                     }
                 }
             }
+        } else {
+            // Authorize against user ACL
+            $user_authorized = $user->authorize('site.login');
         }
 
         // Authorize against user ACL

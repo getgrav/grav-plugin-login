@@ -7,6 +7,7 @@
     * Use the same feedback message when resetting the password if the email exists or not. Remove email in the message as we now recover via email, useless
 1. [](#bugfix)
     * Fix registration form, fields were not visible [#97](https://github.com/getgrav/grav-plugin-login/issues/97)
+    * Do not initialize the user session if the user exists but has no `site.login` permission
 
 # v2.2.0-rc.1
 ## 11/09/2016
