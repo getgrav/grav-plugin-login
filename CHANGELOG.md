@@ -1,5 +1,5 @@
-# v2.x.x
-## 11/xx/2016
+# v2.2.0-rc.2
+## 11/17/2016
 
 1. [](#new)
     * Allow to set permissions using nested array syntax [#96](https://github.com/getgrav/grav-plugin-login/issues/96)
