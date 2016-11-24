@@ -1,5 +1,6 @@
 ---
 form:
+  name: register
   fields:
     -
       name: username
