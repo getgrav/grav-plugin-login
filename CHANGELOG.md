@@ -1,3 +1,9 @@
+# v2.2.0-rc.3
+## 11/26/2016
+
+1. [](#improved)
+    * Added some validity checks in teh reset password form
+
 # v2.2.0-rc.2
 ## 11/17/2016
 
