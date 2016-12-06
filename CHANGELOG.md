@@ -3,6 +3,8 @@
 
 1. [](#improved)
     * Added some validity checks in teh reset password form
+1. [](#bugfix)
+    * Correctly redirect to the last page visited after login, unless `redirect_after_login` is defined
 
 # v2.2.0-rc.2
 ## 11/17/2016
