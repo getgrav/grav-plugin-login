@@ -1,6 +1,8 @@
 ---
 title: Login
 
+login_redirect_here: false
+
 form:
     name: login
     action:

@@ -182,6 +182,7 @@ Add the following content to your registration form page:
 ```
 ---
 form:
+  
   fields:
     -
       name: username
