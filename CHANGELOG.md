@@ -1,8 +1,14 @@
+# v2.2.0-rc.4
+## 12/04/2016
+
+1. [](#improved)
+    * Improved logic for redirect after login to not include login-related pages.
+
 # v2.2.0-rc.3
 ## 11/26/2016
 
 1. [](#improved)
-    * Added some validity checks in teh reset password form
+    * Added some validity checks in the reset password form
 1. [](#bugfix)
     * Correctly redirect to the last page visited after login, unless `redirect_after_login` is defined
 
