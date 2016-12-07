@@ -25,8 +25,9 @@
                         </div>
                     {% endif %}
                 {% endfor %}
+
                 <div class="form-actions secondary-accent">
-                    {% if config.plugins.login.rememberme.enabled %}
+                    {% if config.plugins.login.rememberme.enabled and page.header.form.login.rememberme ?? true %}
                         <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
                             <div class="form-input-wrapper">
                                 <input type="checkbox" value="1" name="rememberme" id="#rememberme">
@@ -35,7 +36,9 @@
                         </div>
                     {% endif %}
 
+                    {% if page.header.form.login.forgot_button ?? true %}
                     <a class="button secondary" href="{{ base_url_relative }}{{ config.plugins.login.route_forgot }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
+                    {% endif %}
 
                     <button type="submit" class="button primary" name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
                 </div>

@@ -1,8 +1,15 @@
+# v2.2.0-rc.4
+## XX/XX/2016
+
+1. [](#improved)
+    * Added support for hiding `Remember me` checkbox and and `Forgot` button (for Offline functionality)
+
+
 # v2.2.0-rc.3
 ## 11/26/2016
 
 1. [](#improved)
-    * Added some validity checks in teh reset password form
+    * Added some validity checks in the reset password form
 
 # v2.2.0-rc.2
 ## 11/17/2016
