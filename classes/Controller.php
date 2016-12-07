@@ -119,7 +119,7 @@ class Controller
 
             $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
             if (!$redirect) {
-                $redirect = $this->grav['uri']->referrer('/');
+                $redirect = $this->grav['session']->saved_redirect ?: $this->grav['uri']->referrer('/');
             }
             $this->setRedirect($redirect);
         } else {

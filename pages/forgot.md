@@ -1,7 +1,10 @@
 ---
 title: Forgot password
 
+login_redirect_here: false
+
 form:
+
     fields:
         - name: email
           type: text
