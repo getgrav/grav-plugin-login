@@ -1,5 +1,5 @@
 # v2.2.0-rc.5
-## XX/XX/2016
+## 12/07/2016
 
 1. [](#improved)
     * Added support for hiding `Remember me` checkbox and and `Forgot` button (for Offline functionality)
