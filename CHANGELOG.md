@@ -3,7 +3,9 @@
 
 1. [](#improved)
     * Added support for hiding `Remember me` checkbox and and `Forgot` button (for Offline functionality)
-
+1. [](#bugfix)
+    * Fixed redirect issue in admin plugin
+    
 # v2.2.0-rc.4
 ## 12/04/2016
 

@@ -202,7 +202,7 @@ class LoginPlugin extends Plugin
         }
 
         if (!in_array($current_route, $invalid_redirect_routes) && $allowed) {
-            $this->grav['session']->saved_redirect = $this->grav['uri']->path() . $this->grav['uri']->params();
+            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . $this->grav['uri']->params();
         }
     }
 
@@ -494,7 +494,7 @@ class LoginPlugin extends Plugin
         if (!$user->authenticated) {
             $page = new Page;
 
-            $this->grav['session']->redirect_after_login = $this->grav['uri']->path();
+            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . $this->grav['uri']->params();
 
             // Get the admin Login page is needed, else teh default
             if ($this->isAdmin()) {
