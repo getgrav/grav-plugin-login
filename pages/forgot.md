@@ -1,20 +1,21 @@
 ---
 title: Forgot password
 
+login_redirect_here: false
+
 form:
+
     fields:
-        - name: username
+        - name: email
           type: text
-          id: username
-          placeholder: Username
+          label: PLUGIN_LOGIN.EMAIL
           autofocus: true
           validate:
             required: true
-            message: PLUGIN_LOGIN.USERNAME_NOT_VALID
-            pattern: '^[a-z0-9_-]{3,16}$'
+            type: email
 ---
 
 
 # Recover your password
 
-Enter your username to recover your password
+Enter your email to recover your password

@@ -53,7 +53,7 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'  => ['loginController', 0],
             'onTask.login.reset'   => ['loginController', 0],
             'onPageInitialized'    => ['authorizePage', 0],
-            'onPageFallBackUrl' => ['authorizeFallBackUrl', 0],
+            'onPageFallBackUrl'    => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'  => ['onTwigSiteVariables', -100000],
             'onFormProcessed'      => ['onFormProcessed', 0]
@@ -76,17 +76,6 @@ class LoginPlugin extends Plugin
             throw new \Exception('Login Plugin failed to load. Composer dependencies not met.');
         }
         require_once $autoload;
-
-        // Define session message service.
-        $this->grav['messages'] = function ($c) {
-            $session = $c['session'];
-
-            if (!isset($session->messages)) {
-                $session->messages = new Message;
-            }
-
-            return $session->messages;
-        };
 
         // Define current user service.
         $this->grav['user'] = function ($c) {
@@ -151,18 +140,21 @@ class LoginPlugin extends Plugin
             $this->enable([
                 'onPagesInitialized' => ['addLoginPage', 0],
             ]);
+            return;
         }
 
         if ($uri->path() == $this->config->get('plugins.login.route_forgot')) {
             $this->enable([
                 'onPagesInitialized' => ['addForgotPage', 0],
             ]);
+            return;
         }
 
         if ($uri->path() == $this->config->get('plugins.login.route_reset')) {
             $this->enable([
                 'onPagesInitialized' => ['addResetPage', 0],
             ]);
+            return;
         }
 
         if ($uri->path() == $this->config->get('plugins.login.route_register')) {
@@ -173,6 +165,7 @@ class LoginPlugin extends Plugin
             } else {
                 throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.REGISTRATION_DISABLED'), 404);
             }
+            return;
 
         }
 
@@ -180,6 +173,36 @@ class LoginPlugin extends Plugin
             $this->enable([
                 'onPagesInitialized' => ['handleUserActivation', 0],
             ]);
+            return;
+        }
+
+        // If not a known login-related page type...
+        $this->enable([
+            'onOutputGenerated'    => ['onOutputGenerated', 0]
+        ]);
+
+
+    }
+
+    public function onOutputGenerated()
+    {
+        $invalid_redirect_routes = [
+            $this->config->get('plugins.login.route') ?: '/login',
+            $this->config->get('plugins.login.route_register') ?: '/register',
+            $this->config->get('plugins.login.route_activate') ?: '/activate_user',
+            $this->config->get('plugins.login.route_forgot') ?: '/forgot_password',
+            $this->config->get('plugins.login.route_reset') ?: '/reset_password',
+        ];
+        $current_route = $this->grav['uri']->route();
+        $allowed = true;
+
+        $header = $this->grav['page']->header();
+        if (isset($header->login_redirect_here) && $header->login_redirect_here == false) {
+            $allowed = false;
+        }
+
+        if (!in_array($current_route, $invalid_redirect_routes) && $allowed) {
+            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . $this->grav['uri']->params();
         }
     }
 
@@ -265,6 +288,9 @@ class LoginPlugin extends Plugin
         $page->init(new \SplFileInfo(__DIR__ . "/pages/register.md"));
         $page->template('form');
         $page->slug(basename($route));
+
+        $twig = $this->grav['twig'];
+        $twig->twig_vars['form'] = $page->header()->form;
 
         $pages->addPage($page, $route);
     }
@@ -443,8 +469,16 @@ class LoginPlugin extends Plugin
 
         // Continue to the page if user is authorized to access the page.
         foreach ($rules as $rule => $value) {
-            if ($user->authorize($rule) == $value) {
-                return;
+            if (is_array($value)) {
+                foreach ($value as $nested_rule => $nested_value) {
+                    if ($user->authorize($rule . '.' . $nested_rule) == $nested_value) {
+                        return;
+                    }
+                }
+            } else {
+                if ($user->authorize($rule) == $value) {
+                    return;
+                }
             }
         }
 
@@ -460,7 +494,7 @@ class LoginPlugin extends Plugin
         if (!$user->authenticated) {
             $page = new Page;
 
-            $this->grav['session']->redirect_after_login = $this->grav['uri']->path();
+            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . $this->grav['uri']->params();
 
             // Get the admin Login page is needed, else teh default
             if ($this->isAdmin()) {

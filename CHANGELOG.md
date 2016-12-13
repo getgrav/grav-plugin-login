@@ -1,3 +1,49 @@
+# v2.2.0
+## 12/13/2016
+
+1. [](#new)
+    * RC released as stable
+
+# v2.2.0-rc.5
+## 12/07/2016
+
+1. [](#improved)
+    * Added support for hiding `Remember me` checkbox and and `Forgot` button (for Offline functionality)
+1. [](#bugfix)
+    * Fixed redirect issue in admin plugin
+    
+# v2.2.0-rc.4
+## 12/04/2016
+
+1. [](#improved)
+    * Improved logic for redirect after login to not include login-related pages.
+
+# v2.2.0-rc.3
+## 11/26/2016
+
+1. [](#improved)
+    * Added some validity checks in the reset password form
+1. [](#bugfix)
+    * Correctly redirect to the last page visited after login, unless `redirect_after_login` is defined
+
+# v2.2.0-rc.2
+## 11/17/2016
+
+1. [](#new)
+    * Allow to set permissions using nested array syntax [#96](https://github.com/getgrav/grav-plugin-login/issues/96)
+1. [](#improved)
+    * Use the same feedback message when resetting the password if the email exists or not. Remove email in the message as we now recover via email, useless
+1. [](#bugfix)
+    * Fix registration form, fields were not visible [#97](https://github.com/getgrav/grav-plugin-login/issues/97)
+    * Do not initialize the user session if the user exists but has no `site.login` permission
+
+# v2.2.0-rc.1
+## 11/09/2016
+
+1. [](#new)
+    * Allow login via `username` or `email`
+    * Only allow password recovery via `email` address
+
 # v2.1.2
 ## 10/01/2016
 

@@ -119,7 +119,7 @@ class Controller
 
             $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
             if (!$redirect) {
-                $redirect = $this->grav['uri']->referrer('/');
+                $redirect = $this->grav['session']->redirect_after_login ?: $this->grav['uri']->referrer('/');
             }
             $this->setRedirect($redirect);
         } else {
@@ -166,8 +166,8 @@ class Controller
         $param_sep = $this->grav['config']->get('system.param_sep', ':');
         $data = $this->post;
 
-        $username = isset($data['username']) ? $data['username'] : '';
-        $user = !empty($username) ? User::load($username) : null;
+        $email = isset($data['email']) ? $data['email'] : '';
+        $user = !empty($email) ? User::find($email, ['email']) : null;
 
         /** @var Language $l */
         $language = $this->grav['language'];
@@ -181,14 +181,14 @@ class Controller
         }
 
         if (!$user || !$user->exists()) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $username]), 'error');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
             $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
         }
 
         if (empty($user->email)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $username]),
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $email]),
                 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
 
@@ -202,9 +202,9 @@ class Controller
         $user->save();
 
         $author = $this->grav['config']->get('site.author.name', '');
-        $fullname = $user->fullname ?: $username;
+        $fullname = $user->fullname ?: $user->username;
 
-        $reset_link = $this->grav['base_url_absolute'] . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
+        $reset_link = $this->grav['base_url_absolute'] . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
 
         $sitename = $this->grav['config']->get('site.title', 'Website');
         $from = $this->grav['config']->get('plugins.email.from');
@@ -226,7 +226,7 @@ class Controller
         if ($sent < 1) {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
         } else {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL', $to]), 'info');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
         }
 
         $this->setRedirect('/');
@@ -247,7 +247,7 @@ class Controller
 
         if (isset($data['password'])) {
             $username = isset($data['username']) ? $data['username'] : null;
-            $user = !empty($username) ? User::load($username) : null;
+            $user = !empty($username) ? User::find($username) : null;
             $password = isset($data['password']) ? $data['password'] : null;
             $token = isset($data['token']) ? $data['token'] : null;
 
@@ -313,28 +313,38 @@ class Controller
             $username = isset($form['username']) ? $form['username'] : $this->rememberMe->login();
 
             // Normal login process
-            $user = User::load($username);
+            $user = User::find($username);
             if ($user->exists()) {
                 if (!empty($form['username']) && !empty($form['password'])) {
                     // Authenticate user
                     $user->authenticated = $user->authenticate($form['password']);
 
                     if ($user->authenticated) {
-                        $this->grav['session']->user = $user;
 
-                        unset($this->grav['user']);
-                        $this->grav['user'] = $user;
+                        // Authorize against user ACL
+                        $user_authorized = $user->authorize('site.login');
 
-                        // If the user wants to be remembered, create Rememberme cookie
-                        if (!empty($form['rememberme'])) {
-                            $this->rememberMe->createCookie($form['username']);
-                        } else {
-                            $this->rememberMe->clearCookie();
-                            $this->rememberMe->getStorage()->cleanAllTriplets($user->get('username'));
+                        if ($user_authorized) {
+                            $this->grav['session']->user = $user;
+
+                            unset($this->grav['user']);
+                            $this->grav['user'] = $user;
+
+                            // If the user wants to be remembered, create Rememberme cookie
+                            if (!empty($form['rememberme'])) {
+                                $this->rememberMe->createCookie($form['username']);
+                            } else {
+                                $this->rememberMe->clearCookie();
+                                $this->rememberMe->getStorage()->cleanAllTriplets($user->get('username'));
+                            }
                         }
+
                     }
                 }
             }
+        } else {
+            // Authorize against user ACL
+            $user_authorized = $user->authorize('site.login');
         }
 
         // Authorize against user ACL
