@@ -1,3 +1,10 @@
+# v2.2.1
+## 01/24/2017
+
+1. [](#bugfix)
+    * Fix login form/status templates displaying user as logged in even if he's not authenticated
+    * Use email validation instead of text validation in the forgot password form [https://github.com/gantry/gantry5/issues/1813](https://github.com/gantry/gantry5/issues/1813)
+
 # v2.2.0
 ## 12/13/2016
 
@@ -11,7 +18,7 @@
     * Added support for hiding `Remember me` checkbox and and `Forgot` button (for Offline functionality)
 1. [](#bugfix)
     * Fixed redirect issue in admin plugin
-    
+
 # v2.2.0-rc.4
 ## 12/04/2016
 

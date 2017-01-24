@@ -7,7 +7,7 @@ form:
 
     fields:
         - name: email
-          type: text
+          type: email
           label: PLUGIN_LOGIN.EMAIL
           autofocus: true
           validate:
