@@ -1,5 +1,5 @@
 # v2.2.1
-## xx/xx/2017
+## 01/24/2017
 
 1. [](#bugfix)
     * Fix login form/status templates displaying user as logged in even if he's not authenticated
