@@ -334,7 +334,7 @@ Add
         - name: g-recaptcha-response
           label: Captcha
           type: captcha
-          recatpcha_site_key: aeio43kdk3idko3k4ikd4
+          recaptcha_site_key: aeio43kdk3idko3k4ikd4
           recaptcha_not_validated: 'Captcha not valid!'
           validate:
             required: true
