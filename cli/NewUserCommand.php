@@ -235,9 +235,12 @@ class NewUserCommand extends ConsoleCommand
      */
     protected function validate($type, $value, $extra = '')
     {
+        $username_regex = '/' . Grav::instance()['config']->get('system.username_regex') . '/';
+        $pwd_regex      = '/' . Grav::instance()['config']->get('system.pwd_regex') . '/';
+
         switch ($type) {
             case 'user':
-                if (!preg_match('/^[a-z0-9_-]{3,16}$/', $value)) {
+                if (!preg_match($username_regex, $value)) {
                     throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
                 }
                 if (file_exists(Grav::instance()['locator']->findResource('account://' . $value . YAML_EXT))) {
@@ -247,7 +250,7 @@ class NewUserCommand extends ConsoleCommand
                 break;
 
             case 'password1':
-                if (!preg_match('/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/', $value)) {
+                if (!preg_match($pwd_regex, $value)) {
                     throw new \RuntimeException('Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters');
                 }
 
