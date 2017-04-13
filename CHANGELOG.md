@@ -1,3 +1,10 @@
+# v2.3.0
+## 04/xx/2017
+
+1. [](#improved)
+    * Use new system configuration entries for username and password format
+    * Use initialized form object in Twig templates rather than array from page.header
+
 # v2.2.1
 ## 01/24/2017
 
