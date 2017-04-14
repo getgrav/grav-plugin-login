@@ -4,7 +4,9 @@
 1. [](#improved)
     * Use new system configuration entries for username and password format
     * Use initialized form object in Twig templates rather than array from page.header
-
+1. [](#bugfix)
+    * Set cookie path to `/` if `base_url_relative` is empty [#102](https://github.com/getgrav/grav-plugin-login/issues/102)
+    
 # v2.2.1
 ## 01/24/2017
 
