@@ -194,28 +194,36 @@ class Controller
 
             return true;
         }
+        
+        $from = $this->grav['config']->get('plugins.email.from');
+        
+        if (empty($from)) {
+        	$messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
+        	$this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
+        
+        	return true;
+        }
+        
+        if ($this->isUserPasswordResetLimited($user, intval($this->grav['config']->get('plugins.login.max_resets_per_hour', 0)))) {
+        	$messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $username]), 'error');
+        	$this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
+        
+        	return true;
+        }
 
         $token = md5(uniqid(mt_rand(), true));
         $expire = time() + 604800; // next week
-
+       
         $user->reset = $token . '::' . $expire;
         $user->save();
-
+        
         $author = $this->grav['config']->get('site.author.name', '');
         $fullname = $user->fullname ?: $user->username;
 
         $reset_link = $this->grav['base_url_absolute'] . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
 
         $sitename = $this->grav['config']->get('site.title', 'Website');
-        $from = $this->grav['config']->get('plugins.email.from');
-
-        if (empty($from)) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
-            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
-
-            return true;
-        }
-
+      
         $to = $user->email;
 
         $subject = $language->translate(['PLUGIN_LOGIN.FORGOT_EMAIL_SUBJECT', $sitename]);
@@ -465,5 +473,36 @@ class Controller
         }
 
         return $data;
+    }
+    
+    /**
+     * Check if user may use password reset funtionaly.
+     *
+     * @param  User $user
+     * @param  integer $max_resets_per_hour
+     *
+     * @return boolean
+     */
+    protected function isUserPasswordResetLimited(User $user, $max_resets_per_hour) {
+    	if ($max_resets_per_hour > 0) {
+    		if (!isset($user->resets)) {
+    			$user->resets = array();
+    		}
+    		//remove older than 1 hour attempts
+    		$actual_resets = array();
+    		foreach ($user->resets as $reset) {
+    			if ($reset > (time() - 3600)) {
+    				$actual_resets[] = $reset;
+    			}
+    		}
+    		 
+    		if (count($actual_resets) >= $max_resets_per_hour) {
+    			return true;
+    		}
+    		$actual_resets[] = time(); // current reset
+    		$user->resets = $actual_resets;
+    		
+    	}
+    	return false;
     }
 }

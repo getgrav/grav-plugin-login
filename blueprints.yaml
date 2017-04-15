@@ -274,3 +274,20 @@ form:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
                   validate:
+                  
+        forgot:
+          type: tab
+          title: PLUGIN_LOGIN.BTN_FORGOT
+
+          fields:
+
+            max_resets_per_hour:
+              type: text
+              label: PLUGIN_LOGIN.MAX_RESETS_PER_HOUR
+              help: PLUGIN_LOGIN.MAX_RESETS_PER_HOUR_HELP
+              highlight: 1
+              default: 0
+              validate:
+                type: number
+                min: 0
+

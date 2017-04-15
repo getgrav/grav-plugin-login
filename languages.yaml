@@ -88,7 +88,10 @@ en:
     USE_PARENT_ACL_HELP: "Check for parent access rules if no rules are defined"
     PROTECT_PROTECTED_PAGE_MEDIA_LABEL: "Protect a login-protected page media"
     PROTECT_PROTECTED_PAGE_MEDIA_HELP: "If enabled, media of a login protected page is login protected as well and cannot be seen unless logged in"
-
+    MAX_RESETS_PER_HOUR: "Max password resets per hour"
+    MAX_RESETS_PER_HOUR_HELP: "Flood protection setting. 0 - not limited" 
+    FORGOT_CANNOT_RESET_IT_IS_BLOCKED: "Cannot reset password for %s, password reset functionality temporarily blocked, please try later (maximum in 1 hour)"
+ 
 de:
   PLUGIN_LOGIN:
     USERNAME: Benutzername
