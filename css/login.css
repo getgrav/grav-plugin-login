@@ -19,7 +19,11 @@
 }
 
 .alert.info {
-    color: #c00;
+    color: #27ae60;
+}
+
+.alert.error {
+    color: #e74c3c;
 }
 
 #grav-login p {
