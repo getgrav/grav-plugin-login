@@ -362,6 +362,26 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Add Profile page
+     */
+    public function addProfilePage()
+    {
+        $route = $this->config->get('plugins.login.route_profile');
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            // Only add forgot page if it hasn't already been defined.
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . "/pages/profile.md"));
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+    }
+
+    /**
      * Initialize login controller
      */
     public function loginController()
@@ -664,6 +684,27 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Save user profile information
+     *
+     * @param $form
+     * @param $event
+     * @return bool
+     */
+    private function processUserProfile($form, $event)
+    {
+
+        $user = $this->grav['user'];
+        $user->merge($form->getData()->toArray());
+
+        try {
+            $user->save();
+        } catch (\Exception $e) {
+            $form->setMessage($e->getMessage(), 'error');
+            return false;
+        }
+    }
+
+    /**
      * Process a registration form. Handles the following actions:
      *
      * - register_user: registers a user
@@ -678,6 +719,9 @@ class LoginPlugin extends Plugin
         switch ($action) {
             case 'register_user':
                 $this->processUserRegistration($form, $event);
+                break;
+            case 'update_user':
+                $this->processUserProfile($form, $event);
                 break;
         }
     }
