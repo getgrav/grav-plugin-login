@@ -273,4 +273,44 @@ form:
                   options:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
-                  validate:
+
+        Security:
+          type: tab
+          title: PLUGIN_LOGIN.SECURITY_TAB
+
+          fields:
+            max_pw_resets_count:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_RESETS_COUNT
+              help: PLUGIN_LOGIN.MAX_RESETS_COUNT_HELP
+              validate:
+                type: number
+                min: 0
+
+            max_pw_resets_interval:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_RESETS_INTERVAL
+              help: PLUGIN_LOGIN.MAX_RESETS_INTERVAL_HELP
+              validate:
+                type: number
+                min: 1
+
+            max_login_count:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_LOGINS_COUNT
+              help: PLUGIN_LOGIN.MAX_LOGINS_COUNT_HELP
+              validate:
+                type: number
+                min: 0
+
+            max_login_interval:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL
+              help: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL_HELP
+              validate:
+                type: number
+                min: 1
