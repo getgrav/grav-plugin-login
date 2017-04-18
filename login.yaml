@@ -37,7 +37,7 @@ rememberme:
   timeout: 604800                      # Timeout in seconds. Defaults to 1 week
   name: grav-rememberme                # Name prefix of the session cookie
 
-max_pw_resets_count: 2
+max_pw_resets_count: 0
 max_pw_resets_interval: 60
-max_login_count: 5
+max_login_count: 0
 max_login_interval: 2
