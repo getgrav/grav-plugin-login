@@ -284,6 +284,7 @@ form:
               size: x-small
               label: PLUGIN_LOGIN.MAX_RESETS_COUNT
               help: PLUGIN_LOGIN.MAX_RESETS_COUNT_HELP
+              append: PLUGIN_LOGIN.RESETS
               validate:
                 type: number
                 min: 0
@@ -293,6 +294,7 @@ form:
               size: x-small
               label: PLUGIN_LOGIN.MAX_RESETS_INTERVAL
               help: PLUGIN_LOGIN.MAX_RESETS_INTERVAL_HELP
+              append: PLUGIN_LOGIN.SECONDS
               validate:
                 type: number
                 min: 1
@@ -302,6 +304,7 @@ form:
               size: x-small
               label: PLUGIN_LOGIN.MAX_LOGINS_COUNT
               help: PLUGIN_LOGIN.MAX_LOGINS_COUNT_HELP
+              append: PLUGIN_LOGIN.ATTEMPTS
               validate:
                 type: number
                 min: 0
@@ -311,6 +314,7 @@ form:
               size: x-small
               label: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL
               help: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL_HELP
+              append: PLUGIN_LOGIN.SECONDS
               validate:
                 type: number
                 min: 1
