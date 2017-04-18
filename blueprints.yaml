@@ -69,6 +69,24 @@ form:
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
               placeholder: "/my-page"
 
+            route_forgot:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_FORGOT
+              placeholder: "/forgot_password"
+
+            route_reset:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_RESET
+              placeholder: "/reset_password"
+
+            route_profile:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_PROFILE
+              placeholder: "/user_profile"
+
             parent_acl:
               type: toggle
               label: PLUGIN_LOGIN.USE_PARENT_ACL_LABEL

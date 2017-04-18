@@ -99,9 +99,12 @@ en:
     MAX_LOGINS_INTERVAL: "Max logins interval"
     MAX_LOGINS_INTERVAL_HELP: "The time interval for the login count value"
     TOO_MANY_LOGIN_ATTEMPTS: "Too many failed login attempted in the configured time (%s minutes)"
-    SECONDS: seconds
-    RESETS: resets
-    ATTEMPTS: attempts
+    SECONDS: "seconds"
+    RESETS: "resets"
+    ATTEMPTS: "attempts"
+    ROUTE_FORGOT: "Forgot password route"
+    ROUTE_RESET: "Reset password route"
+    ROUTE_PROFILE: "User profile route"
 
 de:
   PLUGIN_LOGIN:
