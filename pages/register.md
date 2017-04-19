@@ -12,7 +12,7 @@ form:
       validate:
         required: true
         message: PLUGIN_LOGIN.USERNAME_NOT_VALID
-        pattern: '^[a-z0-9_-]{3,16}$'
+        config-pattern@: system.username_regex
 
     -
       name: email
@@ -31,7 +31,7 @@ form:
       validate:
         required: true
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
-        pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}'
+        config-pattern@: system.pwd_regex
 
     -
       name: password2
@@ -41,7 +41,7 @@ form:
       validate:
         required: true
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
-        pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}'
+        config-pattern@: system.pwd_regex
 
   buttons:
       -

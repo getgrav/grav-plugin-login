@@ -5,7 +5,7 @@
     {% include 'partials/messages.html.twig' %}
 
     <form method="post" action="{{ base_url_relative ~ uri.path }}">
-        {% for field in page.header.form.fields %}
+        {% for field in form.fields %}
             {% set value = attribute(grav.twig.twig_vars, field.name) is defined ? attribute(grav.twig.twig_vars, field.name) : null %}
 
             {% if field.type %}

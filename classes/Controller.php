@@ -114,8 +114,25 @@ class Controller
     {
         /** @var Language $t */
         $t = $this->grav['language'];
+
+        /** @var User $user */
+        $user = $this->grav['user'];
+
+        $count = $this->grav['config']->get('plugins.login.max_login_count', 5);
+        $interval =$this->grav['config']->get('plugins.login.max_login_interval', 10);
+
+        if ($this->isUserRateLimited($user, 'login_attempts', $count, $interval)) {
+            $this->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
+
+            return true;
+        }
+
+
         if ($this->authenticate($this->post)) {
             $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
+
+            $this->resetRateLimit($user, 'login_attempts');
 
             $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
             if (!$redirect) {
@@ -123,7 +140,6 @@ class Controller
             }
             $this->setRedirect($redirect);
         } else {
-            $user = $this->grav['user'];
             if ($user->username) {
                 $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             } else {
@@ -175,14 +191,14 @@ class Controller
 
         if (!isset($this->grav['Email'])) {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
-            $this->setRedirect('/');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
 
             return true;
         }
 
         if (!$user || !$user->exists()) {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
-            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
 
             return true;
         }
@@ -190,7 +206,26 @@ class Controller
         if (empty($user->email)) {
             $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $email]),
                 'error');
-            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
+
+            return true;
+        }
+
+        $from = $this->grav['config']->get('plugins.email.from');
+
+        if (empty($from)) {
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
+
+            return true;
+        }
+
+        $count = $this->grav['config']->get('plugins.login.max_pw_resets_count', 0);
+        $interval =$this->grav['config']->get('plugins.login.max_pw_resets_interval', 2);
+
+        if ($this->isUserRateLimited($user, 'pw_resets', $count, $interval)) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $email, $interval]), 'error');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
             return true;
         }
@@ -207,14 +242,6 @@ class Controller
         $reset_link = $this->grav['base_url_absolute'] . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
 
         $sitename = $this->grav['config']->get('site.title', 'Website');
-        $from = $this->grav['config']->get('plugins.email.from');
-
-        if (empty($from)) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
-            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot'));
-
-            return true;
-        }
 
         $to = $user->email;
 
@@ -229,7 +256,7 @@ class Controller
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
         }
 
-        $this->setRedirect('/');
+        $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
         return true;
     }
@@ -257,7 +284,7 @@ class Controller
                 if ($good_token === $token) {
                     if (time() > $expire) {
                         $messages->add($language->translate('PLUGIN_LOGIN.RESET_LINK_EXPIRED'), 'error');
-                        $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+                        $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
 
                         return true;
                     }
@@ -271,7 +298,7 @@ class Controller
                     $user->save();
 
                     $messages->add($language->translate('PLUGIN_LOGIN.RESET_PASSWORD_RESET'), 'info');
-                    $this->grav->redirect('/');
+                    $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
                     return true;
                 }
@@ -342,9 +369,6 @@ class Controller
                     }
                 }
             }
-        } else {
-            // Authorize against user ACL
-            $user_authorized = $user->authorize('site.login');
         }
 
         // Authorize against user ACL
@@ -420,7 +444,7 @@ class Controller
 
             // Set cookie with correct base path of Grav install
             $cookie = new Cookie();
-            $cookie->setPath($this->grav['base_url_relative']);
+            $cookie->setPath($this->grav['base_url_relative'] ?: '/');
             $this->rememberMe->setCookie($cookie);
         }
 
@@ -465,5 +489,50 @@ class Controller
         }
 
         return $data;
+    }
+
+
+    /**
+     * Check if user may use password reset functionality.
+     *
+     * @param  User $user
+     * @param $field
+     * @param $count
+     * @param $interval
+     * @return bool
+     */
+    protected function isUserRateLimited(User $user, $field, $count, $interval)
+    {
+        if ($count > 0) {
+            if (!isset($user->$field)) {
+                $user->$field = array();
+            }
+            //remove older than 1 hour attempts
+            $actual_resets = array();
+            foreach ($user->$field as $reset) {
+                if ($reset > (time() - $interval * 60)) {
+                    $actual_resets[] = $reset;
+                }
+            }
+
+            if (count($actual_resets) >= $count) {
+                return true;
+            }
+            $actual_resets[] = time(); // current reset
+            $user->$field = $actual_resets;
+
+        }
+        return false;
+    }
+
+    /**
+     * Reset the rate limit counter
+     *
+     * @param User $user
+     * @param $field
+     */
+    protected function resetRateLimit(User $user, $field)
+    {
+        $user->$field = [];
     }
 }

@@ -208,7 +208,7 @@ form:
       validate:
         required: true
         message: PLUGIN_LOGIN.USERNAME_NOT_VALID
-        pattern: '^[a-z0-9_-]{3,16}$'
+        config-pattern@: system.username_regex
 
     -
       name: email
@@ -224,7 +224,7 @@ form:
       validate:
         required: true
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
-        pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}'
+        config-pattern@: system.pwd_regex
 
     -
       name: password2
@@ -233,7 +233,7 @@ form:
       validate:
         required: true
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
-        pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}'
+        config-pattern@: system.pwd_regex
 
   buttons:
       -
@@ -334,7 +334,7 @@ Add
         - name: g-recaptcha-response
           label: Captcha
           type: captcha
-          recatpcha_site_key: aeio43kdk3idko3k4ikd4
+          recaptcha_site_key: aeio43kdk3idko3k4ikd4
           recaptcha_not_validated: 'Captcha not valid!'
           validate:
             required: true

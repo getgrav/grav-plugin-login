@@ -88,6 +88,23 @@ en:
     USE_PARENT_ACL_HELP: "Check for parent access rules if no rules are defined"
     PROTECT_PROTECTED_PAGE_MEDIA_LABEL: "Protect a login-protected page media"
     PROTECT_PROTECTED_PAGE_MEDIA_HELP: "If enabled, media of a login protected page is login protected as well and cannot be seen unless logged in"
+    SECURITY_TAB: "Security"
+    MAX_RESETS_COUNT: "Max password resets count"
+    MAX_RESETS_COUNT_HELP: "Password reset flood protection setting (0 - not limited)"
+    MAX_RESETS_INTERVAL: "Max password resets interval"
+    MAX_RESETS_INTERVAL_HELP: "The time interval for the max password resets count value"
+    FORGOT_CANNOT_RESET_IT_IS_BLOCKED: "Cannot reset password for %s, password reset functionality temporarily blocked, please try later (maximum %s minutes)"
+    MAX_LOGINS_COUNT: "Max logins count"
+    MAX_LOGINS_COUNT_HELP: "Flood protection setting (0 - not limited)"
+    MAX_LOGINS_INTERVAL: "Max logins interval"
+    MAX_LOGINS_INTERVAL_HELP: "The time interval for the login count value"
+    TOO_MANY_LOGIN_ATTEMPTS: "Too many failed login attempted in the configured time (%s minutes)"
+    SECONDS: "seconds"
+    RESETS: "resets"
+    ATTEMPTS: "attempts"
+    ROUTE_FORGOT: "Forgot password route"
+    ROUTE_RESET: "Reset password route"
+    ROUTE_PROFILE: "User profile route"
 
 de:
   PLUGIN_LOGIN:

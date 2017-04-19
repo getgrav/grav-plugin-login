@@ -1,3 +1,19 @@
+# v2.3.0
+## 04/19/2017
+
+1. [](#new)
+    * Added new built-in profile page support
+    * Added optional flood protection for password resets and login attempts [#91](https://github.com/getgrav/grav-plugin-login/issues/91)
+1. [](#improved)
+    * Use new system configuration entries for username and password format
+    * Use initialized form object in Twig templates rather than array from page.header
+    * Improved alert styling in login templates
+    * Added `appends` for number field
+    * Added missing `route` options in admin options (blueprints)
+1. [](#bugfix)
+    * Set cookie path to `/` if `base_url_relative` is empty [#102](https://github.com/getgrav/grav-plugin-login/issues/102)
+    * Fixed some redirect logic
+    
 # v2.2.1
 ## 01/24/2017
 

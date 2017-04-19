@@ -20,7 +20,7 @@ form:
           validate:
             required: true
             message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
-            pattern: '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}'
+            config-pattern@: system.pwd_regex
 
         - name: token
           type: hidden

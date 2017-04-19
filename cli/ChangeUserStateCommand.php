@@ -131,9 +131,11 @@ class ChangeUserStateCommand extends ConsoleCommand
      */
     protected function validate($type, $value, $extra = '')
     {
+        $username_regex = '/' . Grav::instance()['config']->get('system.username_regex') . '/';
+
         switch ($type) {
             case 'user':
-                if (!preg_match('/^[a-z0-9_-]{3,16}$/', $value)) {
+                if (!preg_match($username_regex, $value)) {
                     throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
                 }
                 if (!file_exists(self::getGrav()['locator']->findResource('account://' . $value . YAML_EXT))) {

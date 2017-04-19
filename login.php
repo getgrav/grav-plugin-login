@@ -52,6 +52,7 @@ class LoginPlugin extends Plugin
             'onTask.login.forgot'  => ['loginController', 0],
             'onTask.login.logout'  => ['loginController', 0],
             'onTask.login.reset'   => ['loginController', 0],
+            'onPagesInitialized'   => ['storeReferrerPage', 0],
             'onPageInitialized'    => ['authorizePage', 0],
             'onPageFallBackUrl'    => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
@@ -166,7 +167,6 @@ class LoginPlugin extends Plugin
                 throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.REGISTRATION_DISABLED'), 404);
             }
             return;
-
         }
 
         if ($uri->path() == $this->config->get('plugins.login.route_activate')) {
@@ -176,15 +176,15 @@ class LoginPlugin extends Plugin
             return;
         }
 
-        // If not a known login-related page type...
-        $this->enable([
-            'onOutputGenerated'    => ['onOutputGenerated', 0]
-        ]);
-
-
+        if ($uri->path() == $this->config->get('plugins.login.route_profile')) {
+            $this->enable([
+                'onPagesInitialized' => ['addProfilePage', 0],
+            ]);
+            return;
+        }
     }
 
-    public function onOutputGenerated()
+    public function storeReferrerPage()
     {
         $invalid_redirect_routes = [
             $this->config->get('plugins.login.route') ?: '/login',
@@ -194,15 +194,24 @@ class LoginPlugin extends Plugin
             $this->config->get('plugins.login.route_reset') ?: '/reset_password',
         ];
         $current_route = $this->grav['uri']->route();
-        $allowed = true;
 
-        $header = $this->grav['page']->header();
-        if (isset($header->login_redirect_here) && $header->login_redirect_here == false) {
-            $allowed = false;
-        }
 
-        if (!in_array($current_route, $invalid_redirect_routes) && $allowed) {
-            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . $this->grav['uri']->params();
+        if (!in_array($current_route, $invalid_redirect_routes)) {
+
+            $allowed = true;
+            $page = $this->grav['pages']->dispatch($current_route);
+
+            if ($page) {
+                $header = $page->header();
+                if (isset($header->login_redirect_here) && $header->login_redirect_here == false) {
+                    $allowed = false;
+                }
+
+                if ($allowed && $page->routable()) {
+                    $this->grav['session']->redirect_after_login = $page->route() . $this->grav['uri']->params() ?: '';
+                }
+            }
+
         }
     }
 
@@ -283,16 +292,16 @@ class LoginPlugin extends Plugin
 
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
 
-        $page = new Page;
-        $page->init(new \SplFileInfo(__DIR__ . "/pages/register.md"));
-        $page->template('form');
-        $page->slug(basename($route));
+        if (!$page) {
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . "/pages/register.md"));
+            $page->template('form');
+            $page->slug(basename($route));
 
-        $twig = $this->grav['twig'];
-        $twig->twig_vars['form'] = $page->header()->form;
-
-        $pages->addPage($page, $route);
+            $pages->addPage($page, $route);
+        }
     }
 
     /**
@@ -359,6 +368,26 @@ class LoginPlugin extends Plugin
 
         $redirect_route = $this->config->get('plugins.login.user_registration.redirect_after_activation', '/');
         $this->grav->redirect($redirect_route);
+    }
+
+    /**
+     * Add Profile page
+     */
+    public function addProfilePage()
+    {
+        $route = $this->config->get('plugins.login.route_profile');
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            // Only add forgot page if it hasn't already been defined.
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . "/pages/profile.md"));
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
     }
 
     /**
@@ -494,7 +523,7 @@ class LoginPlugin extends Plugin
         if (!$user->authenticated) {
             $page = new Page;
 
-            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . $this->grav['uri']->params();
+//            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
             // Get the admin Login page is needed, else teh default
             if ($this->isAdmin()) {
@@ -664,6 +693,27 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Save user profile information
+     *
+     * @param $form
+     * @param $event
+     * @return bool
+     */
+    private function processUserProfile($form, $event)
+    {
+
+        $user = $this->grav['user'];
+        $user->merge($form->getData()->toArray());
+
+        try {
+            $user->save();
+        } catch (\Exception $e) {
+            $form->setMessage($e->getMessage(), 'error');
+            return false;
+        }
+    }
+
+    /**
      * Process a registration form. Handles the following actions:
      *
      * - register_user: registers a user
@@ -678,6 +728,9 @@ class LoginPlugin extends Plugin
         switch ($action) {
             case 'register_user':
                 $this->processUserRegistration($form, $event);
+                break;
+            case 'update_user':
+                $this->processUserProfile($form, $event);
                 break;
         }
     }

@@ -4,7 +4,7 @@
     {% include 'partials/messages.html.twig' %}
 
     <form method="post" action="{{ base_url_relative ~ uri.path }}">
-        {% for field in page.header.form.fields %}
+        {% for field in form.fields %}
             {% if field.type %}
                 <div>
                     {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
