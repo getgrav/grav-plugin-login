@@ -1,5 +1,5 @@
 # v2.3.0
-## 04/xx/2017
+## 04/19/2017
 
 1. [](#new)
     * Added new built-in profile page support
