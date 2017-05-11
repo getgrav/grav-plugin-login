@@ -102,9 +102,11 @@ en:
     SECONDS: "seconds"
     RESETS: "resets"
     ATTEMPTS: "attempts"
+    ROUTES: "Routes"
     ROUTE_FORGOT: "Forgot password route"
     ROUTE_RESET: "Reset password route"
     ROUTE_PROFILE: "User profile route"
+    ROUTE_ACTIVATE: "User activation route"
 
 de:
   PLUGIN_LOGIN:

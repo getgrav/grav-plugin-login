@@ -1,3 +1,9 @@
+# v2.3.1
+## xx/xx/2017
+
+1. [](#improved)
+    * Added routes to the Admin blueprints
+
 # v2.3.0
 ## 04/19/2017
 
