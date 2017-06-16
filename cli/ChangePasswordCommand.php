@@ -2,6 +2,7 @@
 namespace Grav\Plugin\Console;
 
 use Grav\Console\ConsoleCommand;
+use Grav\Common\Grav;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
 use Symfony\Component\Console\Input\InputOption;
