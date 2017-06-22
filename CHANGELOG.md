@@ -1,3 +1,9 @@
+# v2.3.2
+## 06/22/2017
+
+1. [](#bugfix)
+    * Grav plugin cli error on password change [#120](https://github.com/getgrav/grav-plugin-login/issues/120)
+
 # v2.3.1
 ## 05/16/2017
 
