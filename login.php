@@ -41,6 +41,8 @@ class LoginPlugin extends Plugin
     /** @var Login */
     protected $login;
 
+    protected $redirect_to_login;
+
     /**
      * @return array
      */
@@ -135,6 +137,8 @@ class LoginPlugin extends Plugin
         if (!isset($this->grav['admin'])) {
             $this->route = $this->config->get('plugins.login.route');
         }
+
+        $this->redirect_to_login = $this->config->get('plugins.login.redirect_to_login');
 
         // Register route to login page if it has been set.
         if ($this->route && $this->route == $uri->path()) {
@@ -512,7 +516,7 @@ class LoginPlugin extends Plugin
         }
 
         // User is not logged in; redirect to login page.
-        if ($this->route && !$user->authenticated) {
+        if ($this->redirect_to_login && $this->route && !$user->authenticated) {
             $this->grav->redirect($this->route, 302);
         }
 
@@ -521,21 +525,25 @@ class LoginPlugin extends Plugin
 
         // Reset page with login page.
         if (!$user->authenticated) {
-            $page = new Page;
 
-//            $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
-
-            // Get the admin Login page is needed, else teh default
-            if ($this->isAdmin()) {
-                $login_file = $this->grav['locator']->findResource("plugins://admin/pages/admin/login.md");
-                $page->init(new \SplFileInfo($login_file));
+            if ($this->route) {
+                $page = $this->grav['pages']->dispatch($this->route);
             } else {
-                $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
+                $page = new Page;
+                // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
+
+                // Get the admin Login page is needed, else teh default
+                if ($this->isAdmin()) {
+                    $login_file = $this->grav['locator']->findResource("plugins://admin/pages/admin/login.md");
+                    $page->init(new \SplFileInfo($login_file));
+                } else {
+                    $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
+                }
+
+                $page->slug(basename($this->route));
             }
 
-            $page->slug(basename($this->route));
             $this->authenticated = false;
-
             unset($this->grav['page']);
             $this->grav['page'] = $page;
         } else {

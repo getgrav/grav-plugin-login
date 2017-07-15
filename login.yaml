@@ -1,6 +1,7 @@
 enabled: true
 built_in_css: true
 route:
+redirect_to_login: true
 redirect_after_login:
 route_activate: /activate_user
 route_forgot: /forgot_password

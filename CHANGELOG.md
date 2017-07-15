@@ -1,3 +1,9 @@
+# v2.3.3
+## xx/xx/2017
+
+1. [](#new)
+    * Added the ability to have a custom route for login page, but not redirect
+
 # v2.3.2
 ## 06/22/2017
 
