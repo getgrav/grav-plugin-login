@@ -528,7 +528,9 @@ class LoginPlugin extends Plugin
 
             if ($this->route) {
                 $page = $this->grav['pages']->dispatch($this->route);
-            } else {
+            }
+
+            if (!$page) {
                 $page = new Page;
                 // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
