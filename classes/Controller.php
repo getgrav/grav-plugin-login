@@ -1,16 +1,20 @@
 <?php
-
+/**
+ * @package    Grav.Plugin.Login
+ *
+ * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @license    MIT License; see LICENSE file for details.
+ */
 namespace Grav\Plugin\Login;
 
+use Birke\Rememberme\Cookie;
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
-use Grav\Plugin\Login\RememberMe;
 use Grav\Common\Language\Language;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
-
-use Birke\Rememberme\Cookie;
+use Grav\Plugin\Login\RememberMe;
 use RocketTheme\Toolbox\Session\Message;
 
 /**
@@ -50,7 +54,7 @@ class Controller
     protected $prefix = 'task';
 
     /**
-     * @var \Birke\Rememberme\Authenticator
+     * @var RememberMe\RememberMe
      */
     protected $rememberMe;
 
@@ -278,7 +282,7 @@ class Controller
             $password = isset($data['password']) ? $data['password'] : null;
             $token = isset($data['token']) ? $data['token'] : null;
 
-            if (!empty($user) && $user->exists() && !empty($user->reset)) {
+            if ($user && !empty($user->reset) && $user->exists()) {
                 list($good_token, $expire) = explode('::', $user->reset);
 
                 if ($good_token === $token) {
@@ -309,16 +313,16 @@ class Controller
 
             return true;
 
-        } else {
-            $user = $this->grav['uri']->param('user');
-            $token = $this->grav['uri']->param('token');
+        }
 
-            if (empty($user) || empty($token)) {
-                $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
-                $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+        $user = $this->grav['uri']->param('user');
+        $token = $this->grav['uri']->param('token');
 
-                return true;
-            }
+        if (!$user || !$token) {
+            $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
+            $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+
+            return true;
         }
 
         return true;
@@ -341,31 +345,28 @@ class Controller
 
             // Normal login process
             $user = User::find($username);
-            if ($user->exists()) {
-                if (!empty($form['username']) && !empty($form['password'])) {
-                    // Authenticate user
-                    $user->authenticated = $user->authenticate($form['password']);
+            if ($user->exists() && !empty($form['username']) && !empty($form['password'])) {
+                // Authenticate user
+                $user->authenticated = $user->authenticate($form['password']);
 
-                    if ($user->authenticated) {
+                if ($user->authenticated) {
 
-                        // Authorize against user ACL
-                        $user_authorized = $user->authorize('site.login');
+                    // Authorize against user ACL
+                    $user_authorized = $user->authorize('site.login');
 
-                        if ($user_authorized) {
-                            $this->grav['session']->user = $user;
+                    if ($user_authorized) {
+                        $this->grav['session']->user = $user;
 
-                            unset($this->grav['user']);
-                            $this->grav['user'] = $user;
+                        unset($this->grav['user']);
+                        $this->grav['user'] = $user;
 
-                            // If the user wants to be remembered, create Rememberme cookie
-                            if (!empty($form['rememberme'])) {
-                                $this->rememberMe->createCookie($form['username']);
-                            } else {
-                                $this->rememberMe->clearCookie();
-                                $this->rememberMe->getStorage()->cleanAllTriplets($user->get('username'));
-                            }
+                        // If the user wants to be remembered, create Rememberme cookie
+                        if (!empty($form['rememberme'])) {
+                            $this->rememberMe->createCookie($form['username']);
+                        } else {
+                            $this->rememberMe->clearCookie();
+                            $this->rememberMe->getStorage()->cleanAllTriplets($user->get('username'));
                         }
-
                     }
                 }
             }
@@ -458,7 +459,7 @@ class Controller
      *
      * @return array
      */
-    protected function &getPost($post)
+    protected function &getPost(array $post)
     {
         unset($post[$this->prefix]);
 
@@ -504,12 +505,12 @@ class Controller
     protected function isUserRateLimited(User $user, $field, $count, $interval)
     {
         if ($count > 0) {
-            if (!isset($user->$field)) {
-                $user->$field = array();
+            if (!isset($user->{$field})) {
+                $user->{$field} = array();
             }
             //remove older than 1 hour attempts
             $actual_resets = array();
-            foreach ($user->$field as $reset) {
+            foreach ($user->{$field} as $reset) {
                 if ($reset > (time() - $interval * 60)) {
                     $actual_resets[] = $reset;
                 }
@@ -519,7 +520,7 @@ class Controller
                 return true;
             }
             $actual_resets[] = time(); // current reset
-            $user->$field = $actual_resets;
+            $user->{$field} = $actual_resets;
 
         }
         return false;
@@ -533,6 +534,6 @@ class Controller
      */
     protected function resetRateLimit(User $user, $field)
     {
-        $user->$field = [];
+        $user->{$field} = [];
     }
 }

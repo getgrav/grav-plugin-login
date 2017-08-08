@@ -1,7 +1,13 @@
 <?php
+/**
+ * @package    Grav.Plugin.Login
+ *
+ * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @license    MIT License; see LICENSE file for details.
+ */
 namespace Grav\Plugin;
 
-use Grav\Plugin\Admin;
+use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
@@ -13,7 +19,6 @@ use Grav\Common\Utils;
 use Grav\Common\Uri;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\Controller;
-use Grav\Plugin\Form;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
 
@@ -68,8 +73,11 @@ class LoginPlugin extends Plugin
      */
     public function initializeSession()
     {
+        /** @var Config $config */
+        $config = $this->grav['config'];
+
         // Check to ensure sessions are enabled.
-        if ($this->grav['config']->get('system.session.enabled') === false) {
+        if (!$config->get('system.session.enabled')) {
             throw new \RuntimeException('The Login plugin requires "system.session" to be enabled');
         }
 
@@ -138,31 +146,32 @@ class LoginPlugin extends Plugin
             $this->route = $this->config->get('plugins.login.route');
         }
 
+        $path = $uri->path();
         $this->redirect_to_login = $this->config->get('plugins.login.redirect_to_login');
 
         // Register route to login page if it has been set.
-        if ($this->route && $this->route == $uri->path()) {
+        if ($this->route && $this->route === $path) {
             $this->enable([
                 'onPagesInitialized' => ['addLoginPage', 0],
             ]);
             return;
         }
 
-        if ($uri->path() == $this->config->get('plugins.login.route_forgot')) {
+        if ($path === $this->config->get('plugins.login.route_forgot')) {
             $this->enable([
                 'onPagesInitialized' => ['addForgotPage', 0],
             ]);
             return;
         }
 
-        if ($uri->path() == $this->config->get('plugins.login.route_reset')) {
+        if ($path === $this->config->get('plugins.login.route_reset')) {
             $this->enable([
                 'onPagesInitialized' => ['addResetPage', 0],
             ]);
             return;
         }
 
-        if ($uri->path() == $this->config->get('plugins.login.route_register')) {
+        if ($path === $this->config->get('plugins.login.route_register')) {
             if ($this->config->get('plugins.login.user_registration.enabled')) {
                 $this->enable([
                     'onPagesInitialized' => ['addRegisterPage', 0],
@@ -173,14 +182,14 @@ class LoginPlugin extends Plugin
             return;
         }
 
-        if ($uri->path() == $this->config->get('plugins.login.route_activate')) {
+        if ($path === $this->config->get('plugins.login.route_activate')) {
             $this->enable([
                 'onPagesInitialized' => ['handleUserActivation', 0],
             ]);
             return;
         }
 
-        if ($uri->path() == $this->config->get('plugins.login.route_profile')) {
+        if ($path === $this->config->get('plugins.login.route_profile')) {
             $this->enable([
                 'onPagesInitialized' => ['addProfilePage', 0],
             ]);
@@ -203,11 +212,13 @@ class LoginPlugin extends Plugin
         if (!in_array($current_route, $invalid_redirect_routes)) {
 
             $allowed = true;
+
+            /** @var Page $page */
             $page = $this->grav['pages']->dispatch($current_route);
 
             if ($page) {
                 $header = $page->header();
-                if (isset($header->login_redirect_here) && $header->login_redirect_here == false) {
+                if (isset($header->login_redirect_here) && $header->login_redirect_here === false) {
                     $allowed = false;
                 }
 
@@ -322,7 +333,7 @@ class LoginPlugin extends Plugin
         $username = $uri->param('username');
 
         $nonce = $uri->param('nonce');
-        if (!isset($nonce) || !Utils::verifyNonce($nonce, 'user-activation')) {
+        if ($nonce === null || !Utils::verifyNonce($nonce, 'user-activation')) {
             $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
             $messages->add($message, 'error');
             $this->grav->redirect('/');
@@ -434,7 +445,7 @@ class LoginPlugin extends Plugin
                     break;
 
                 case 'reset':
-                    if(!isset($post['reset-form-nonce']) || !Utils::verifyNonce($post['reset-form-nonce'], 'reset-form')) {
+                    if (!isset($post['reset-form-nonce']) || !Utils::verifyNonce($post['reset-form-nonce'], 'reset-form')) {
                         //$this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
                         //return;
                     }
@@ -589,7 +600,7 @@ class LoginPlugin extends Plugin
 
         $task = $this->grav['uri']->param('task');
         $task = substr($task, strlen('login.'));
-        if ($task == 'reset') {
+        if ($task === 'reset') {
             $username = $this->grav['uri']->param('user');
             $token = $this->grav['uri']->param('token');
 
@@ -636,7 +647,7 @@ class LoginPlugin extends Plugin
         if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
             false)
         ) {
-            if ($form->value('password1') != $form->value('password2')) {
+            if ($form->value('password1') !== $form->value('password2')) {
                 $this->grav->fireEvent('onFormValidationError', new Event([
                     'form'    => $form,
                     'message' => $this->grav['language']->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH')
@@ -703,13 +714,12 @@ class LoginPlugin extends Plugin
     /**
      * Save user profile information
      *
-     * @param $form
-     * @param $event
+     * @param Form $form
+     * @param Event $event
      * @return bool
      */
-    private function processUserProfile($form, $event)
+    private function processUserProfile($form, Event $event)
     {
-
         $user = $this->grav['user'];
         $user->merge($form->getData()->toArray());
 
@@ -719,6 +729,8 @@ class LoginPlugin extends Plugin
             $form->setMessage($e->getMessage(), 'error');
             return false;
         }
+
+        return true;
     }
 
     /**
@@ -742,5 +754,4 @@ class LoginPlugin extends Plugin
                 break;
         }
     }
-
 }
