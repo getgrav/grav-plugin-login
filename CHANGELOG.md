@@ -3,8 +3,8 @@
 
 1. [](#new)
     * Added the ability to have a custom route for login page, but not redirect
-1. [](#improved)
-    * Improved login JSON response
+1. [](#bugfix)
+    * Fixed login JSON response in case if login fails
 
 # v2.3.2
 ## 06/22/2017
