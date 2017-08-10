@@ -324,6 +324,9 @@ class Controller
      */
     protected function authenticate($form)
     {
+        // Remove login nonce.
+        $form = array_diff_key($form, ['login-form-nonce' => true]);
+
         return $this->login->login($form, ['remember_me' => true])->authenticated;
     }
 
