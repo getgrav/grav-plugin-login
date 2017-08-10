@@ -12,6 +12,18 @@ These are available via GPM, and because the plugin has dependencies you just ne
 $ bin/gpm install login
 ```
 
+# Changes in version 2.4
+
+Added new `$grav['login']->login()` and `$grav['login']->logout()` functions for you to use.
+
+They use following events which can be hooked by plugins:
+
+* `onUserLoginAuthenticate` Allows plugins to include their own authentication methods.
+* `onUserLoginAuthorize`    Allows plugins to block user from being logged in.
+* `onUserLoginFailure`      Allows plugins to include their own logic when user authentication failed.
+* `onUserLogin`             Allows plugins to include their own logic when user logs in.
+* `onUserLogout`            Allows plugins to include their own logic when user logs out.
+
 # Changes in version 2.0
 
 The Login Plugin 2.0 has the following changes compared to 1.0:

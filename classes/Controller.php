@@ -7,14 +7,11 @@
  */
 namespace Grav\Plugin\Login;
 
-use Birke\Rememberme\Cookie;
-use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
-use Grav\Plugin\Login\RememberMe;
 use RocketTheme\Toolbox\Session\Message;
 
 /**
@@ -24,7 +21,7 @@ use RocketTheme\Toolbox\Session\Message;
 class Controller
 {
     /**
-     * @var \Grav\Common\Grav
+     * @var Grav
      */
     public $grav;
 
@@ -72,7 +69,7 @@ class Controller
     {
         $this->grav = $grav;
         $this->action = $action;
-        $this->login = isset($this->grav['login']) ? $this->grav['login'] : '';
+        $this->login = $this->grav['login'];
         $this->post = $this->getPost($post);
 
         $this->rememberMe();
@@ -123,32 +120,30 @@ class Controller
         $user = $this->grav['user'];
 
         $count = $this->grav['config']->get('plugins.login.max_login_count', 5);
-        $interval =$this->grav['config']->get('plugins.login.max_login_interval', 10);
+        $interval = $this->grav['config']->get('plugins.login.max_login_interval', 10);
 
-        if ($this->isUserRateLimited($user, 'login_attempts', $count, $interval)) {
+        if ($this->login->isUserRateLimited($user, 'login_attempts', $count, $interval)) {
             $this->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
             return true;
         }
 
-
+        // TODO: The following logic has really never worked as the user object may be changed during the login progress!
         if ($this->authenticate($this->post)) {
             $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
 
-            $this->resetRateLimit($user, 'login_attempts');
+            $this->login->resetRateLimit($user, 'login_attempts');
 
             $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
             if (!$redirect) {
                 $redirect = $this->grav['session']->redirect_after_login ?: $this->grav['uri']->referrer('/');
             }
             $this->setRedirect($redirect);
+        } elseif ($user->username) {
+            $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
         } else {
-            if ($user->username) {
-                $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
-            } else {
-                $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
-            }
+            $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
         }
 
         return true;
@@ -161,16 +156,8 @@ class Controller
      */
     public function taskLogout()
     {
-        /** @var User $user */
-        $user = $this->grav['user'];
+        $this->login->logout(['remember_me' => true]);
 
-        if (!$this->rememberMe->login()) {
-            $credentials = $user->get('username');
-            $this->rememberMe->getStorage()->cleanAllTriplets($credentials);
-        }
-        $this->rememberMe->clearCookie();
-
-        $this->grav['session']->invalidate()->start();
         $this->setRedirect('/');
 
         return true;
@@ -189,7 +176,7 @@ class Controller
         $email = isset($data['email']) ? $data['email'] : '';
         $user = !empty($email) ? User::find($email, ['email']) : null;
 
-        /** @var Language $l */
+        /** @var Language $language */
         $language = $this->grav['language'];
         $messages = $this->grav['messages'];
 
@@ -227,7 +214,7 @@ class Controller
         $count = $this->grav['config']->get('plugins.login.max_pw_resets_count', 0);
         $interval =$this->grav['config']->get('plugins.login.max_pw_resets_interval', 2);
 
-        if ($this->isUserRateLimited($user, 'pw_resets', $count, $interval)) {
+        if ($this->login->isUserRateLimited($user, 'pw_resets', $count, $interval)) {
             $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $email, $interval]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
@@ -337,46 +324,7 @@ class Controller
      */
     protected function authenticate($form)
     {
-        /** @var User $user */
-        $user = $this->grav['user'];
-
-        if (!$user->authenticated) {
-            $username = isset($form['username']) ? $form['username'] : $this->rememberMe->login();
-
-            // Normal login process
-            $user = User::find($username);
-            if ($user->exists() && !empty($form['username']) && !empty($form['password'])) {
-                // Authenticate user
-                $user->authenticated = $user->authenticate($form['password']);
-
-                if ($user->authenticated) {
-
-                    // Authorize against user ACL
-                    $user_authorized = $user->authorize('site.login');
-
-                    if ($user_authorized) {
-                        $this->grav['session']->user = $user;
-
-                        unset($this->grav['user']);
-                        $this->grav['user'] = $user;
-
-                        // If the user wants to be remembered, create Rememberme cookie
-                        if (!empty($form['rememberme'])) {
-                            $this->rememberMe->createCookie($form['username']);
-                        } else {
-                            $this->rememberMe->clearCookie();
-                            $this->rememberMe->getStorage()->cleanAllTriplets($user->get('username'));
-                        }
-                    }
-                }
-            }
-        }
-
-        // Authorize against user ACL
-        $user_authorized = $user->authorize('site.login');
-        $user->authenticated = ($user->authenticated && $user_authorized);
-
-        return $user->authenticated;
+        return $this->login->login($form, ['remember_me' => true])->authenticated;
     }
 
     /**
@@ -423,31 +371,7 @@ class Controller
      */
     public function rememberMe($var = null)
     {
-        if ($var !== null) {
-            $this->rememberMe = $var;
-        }
-
-        if (!$this->rememberMe) {
-            /** @var Config $config */
-            $config = $this->grav['config'];
-
-            // Setup storage for RememberMe cookies
-            $storage = new RememberMe\TokenStorage();
-            $this->rememberMe = new RememberMe\RememberMe($storage);
-            $this->rememberMe->setCookieName($config->get('plugins.login.rememberme.name'));
-            $this->rememberMe->setExpireTime($config->get('plugins.login.rememberme.timeout'));
-
-            // Hardening cookies with user-agent and random salt or
-            // fallback to use system based cache key
-            $server_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
-            $data = $server_agent . $config->get('security.salt', $this->grav['cache']->getKey());
-            $this->rememberMe->setSalt(hash('sha512', $data));
-
-            // Set cookie with correct base path of Grav install
-            $cookie = new Cookie();
-            $cookie->setPath($this->grav['base_url_relative'] ?: '/');
-            $this->rememberMe->setCookie($cookie);
-        }
+        $this->rememberMe = $this->login->rememberMe($var);
 
         return $this->rememberMe;
     }
@@ -504,26 +428,7 @@ class Controller
      */
     protected function isUserRateLimited(User $user, $field, $count, $interval)
     {
-        if ($count > 0) {
-            if (!isset($user->{$field})) {
-                $user->{$field} = array();
-            }
-            //remove older than 1 hour attempts
-            $actual_resets = array();
-            foreach ($user->{$field} as $reset) {
-                if ($reset > (time() - $interval * 60)) {
-                    $actual_resets[] = $reset;
-                }
-            }
-
-            if (count($actual_resets) >= $count) {
-                return true;
-            }
-            $actual_resets[] = time(); // current reset
-            $user->{$field} = $actual_resets;
-
-        }
-        return false;
+        return $this->login->isUserRateLimited($user, $field, $count, $interval);
     }
 
     /**
@@ -534,6 +439,6 @@ class Controller
      */
     protected function resetRateLimit(User $user, $field)
     {
-        $user->{$field} = [];
+        $this->login->resetRateLimit($user, $field);
     }
 }

@@ -7,7 +7,6 @@
  */
 namespace Grav\Plugin;
 
-use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
@@ -17,8 +16,10 @@ use Grav\Common\Twig\Twig;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
+use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\Controller;
+use Grav\Plugin\Login\RememberMe\RememberMe;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
 
@@ -54,30 +55,32 @@ class LoginPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
-            'onPluginsInitialized' => [['initializeSession', 10000], ['initializeLogin', 1000]],
-            'onTask.login.login'   => ['loginController', 0],
-            'onTask.login.forgot'  => ['loginController', 0],
-            'onTask.login.logout'  => ['loginController', 0],
-            'onTask.login.reset'   => ['loginController', 0],
-            'onPagesInitialized'   => ['storeReferrerPage', 0],
-            'onPageInitialized'    => ['authorizePage', 0],
-            'onPageFallBackUrl'    => ['authorizeFallBackUrl', 0],
-            'onTwigTemplatePaths'  => ['onTwigTemplatePaths', 0],
-            'onTwigSiteVariables'  => ['onTwigSiteVariables', -100000],
-            'onFormProcessed'      => ['onFormProcessed', 0]
+            'onPluginsInitialized'      => [['initializeSession', 10000], ['initializeLogin', 1000]],
+            'onTask.login.login'        => ['loginController', 0],
+            'onTask.login.forgot'       => ['loginController', 0],
+            'onTask.login.logout'       => ['loginController', 0],
+            'onTask.login.reset'        => ['loginController', 0],
+            'onPagesInitialized'        => ['storeReferrerPage', 0],
+            'onPageInitialized'         => ['authorizePage', 0],
+            'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
+            'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
+            'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
+            'onFormProcessed'           => ['onFormProcessed', 0],
+            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
+            'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
+            'onUserLoginFailure'        => ['userLoginFailure', 0],
+            'onUserLogin'               => ['userLogin', 0],
+            'onUserLogout'              => ['userLogout', 0],
         ];
     }
 
     /**
-     * Initialize login plugin if path matches.
+     * [onPluginsInitialized] Initialize login plugin if path matches.
      */
     public function initializeSession()
     {
-        /** @var Config $config */
-        $config = $this->grav['config'];
-
         // Check to ensure sessions are enabled.
-        if (!$config->get('system.session.enabled')) {
+        if (!$this->config->get('system.session.enabled')) {
             throw new \RuntimeException('The Login plugin requires "system.session" to be enabled');
         }
 
@@ -88,39 +91,17 @@ class LoginPlugin extends Plugin
         }
         require_once $autoload;
 
-        // Define current user service.
-        $this->grav['user'] = function ($c) {
-            /** @var Grav $c */
+        // Define login service.
+        $this->grav['login'] = function (Grav $c) {
+            return new Login($c);
+        };
 
+        // Define current user service.
+        $this->grav['user'] = function (Grav $c) {
             $session = $c['session'];
 
-            if (!isset($session->user)) {
-                $session->user = new User;
-
-                if ($c['config']->get('plugins.login.rememberme.enabled')) {
-                    $controller = new Controller($c, '');
-                    $rememberMe = $controller->rememberMe();
-
-                    // If we can present the correct tokens from the cookie, we are logged in
-                    $username = $rememberMe->login();
-                    if ($username) {
-                        // Normal login process
-                        $user = User::load($username);
-                        if ($user->exists()) {
-                            // There is a chance that an attacker has stolen
-                            // the login token, so we store the fact that
-                            // the user was logged in via RememberMe
-                            // (instead of login form)
-                            $session->remember_me = $rememberMe;
-                            $session->user = $user;
-                        }
-                    }
-
-                    // Check if the token was invalid
-                    if ($rememberMe->loginTokenWasInvalid()) {
-                        $controller->setMessage($c['language']->translate('PLUGIN_LOGIN.REMEMBER_ME_STOLEN_COOKIE'));
-                    }
-                }
+            if (empty($session->user)) {
+                $session->user = $c['login']->login(['username' => ''], ['remember_me' => true, 'remember_me_login' => true]);
             }
 
             return $session->user;
@@ -128,18 +109,14 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Initialize login plugin if path matches.
+     * [onPluginsInitialized] Initialize login plugin if path matches.
      */
     public function initializeLogin()
     {
+        $this->login = $this->grav['login'];
+
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
-
-        //Initialize Login Object
-        $this->login = new Login($this->grav);
-
-        //Store Login Object in Grav
-        $this->grav['login'] = $this->login;
 
         // Admin has its own login; make sure we're not in admin.
         if (!isset($this->grav['admin'])) {
@@ -197,6 +174,9 @@ class LoginPlugin extends Plugin
         }
     }
 
+    /**
+     * [onPagesInitialized]
+     */
     public function storeReferrerPage()
     {
         $invalid_redirect_routes = [
@@ -209,8 +189,7 @@ class LoginPlugin extends Plugin
         $current_route = $this->grav['uri']->route();
 
 
-        if (!in_array($current_route, $invalid_redirect_routes)) {
-
+        if (!in_array($current_route, $invalid_redirect_routes, true)) {
             $allowed = true;
 
             /** @var Page $page */
@@ -226,7 +205,6 @@ class LoginPlugin extends Plugin
                     $this->grav['session']->redirect_after_login = $page->route() . $this->grav['uri']->params() ?: '';
                 }
             }
-
         }
     }
 
@@ -472,7 +450,7 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Authorize Page
+     * [onPageInitialized] Authorize Page
      */
     public function authorizePage()
     {
@@ -568,7 +546,7 @@ class LoginPlugin extends Plugin
 
 
     /**
-     * Add twig paths to plugin templates.
+     * [onTwigTemplatePaths] Add twig paths to plugin templates.
      */
     public function onTwigTemplatePaths()
     {
@@ -577,7 +555,7 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Set all twig variables for generating output.
+     * [onTwigSiteVariables] Set all twig variables for generating output.
      */
     public function onTwigSiteVariables()
     {
@@ -619,12 +597,14 @@ class LoginPlugin extends Plugin
      */
     private function processUserRegistration($form, Event $event)
     {
+        $language = $this->grav['language'];
+
         if (!$this->config->get('plugins.login.enabled')) {
-        throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
+        throw new \RuntimeException($language->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
         }
 
         if (!$this->config->get('plugins.login.user_registration.enabled')) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
+            throw new \RuntimeException($language->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
         }
 
         $data = [];
@@ -634,7 +614,7 @@ class LoginPlugin extends Plugin
         if (file_exists($this->grav['locator']->findResource('account://' . $username . YAML_EXT))) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
-                'message' => $this->grav['language']->translate([
+                'message' => $language->translate([
                     'PLUGIN_LOGIN.USERNAME_NOT_AVAILABLE',
                     $username
                 ])
@@ -650,7 +630,7 @@ class LoginPlugin extends Plugin
             if ($form->value('password1') !== $form->value('password2')) {
                 $this->grav->fireEvent('onFormValidationError', new Event([
                     'form'    => $form,
-                    'message' => $this->grav['language']->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH')
+                    'message' => $language->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH')
                 ]));
                 $event->stopPropagation();
 
@@ -734,9 +714,10 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Process a registration form. Handles the following actions:
+     * [onFormProcessed] Process a registration form. Handles the following actions:
      *
      * - register_user: registers a user
+     * - update_user: updates user profile
      *
      * @param Event $event
      */
@@ -752,6 +733,135 @@ class LoginPlugin extends Plugin
             case 'update_user':
                 $this->processUserProfile($form, $event);
                 break;
+        }
+    }
+
+    public function userLoginAuthenticateByRememberMe(UserLoginEvent $event)
+    {
+        // Check that we're logging in with remember me.
+        if ($this->isAdmin() || empty($event->options['remember_me']) || empty($event->options['remember_me_login'])) {
+            return;
+        }
+
+        // Only use remember me if user isn't set and feature is enabled.
+        if (!$event->user->exists() && $this->grav['config']->get('plugins.login.rememberme.enabled')) {
+            /** @var RememberMe $rememberMe */
+            $rememberMe = $this->grav['login']->rememberMe();
+            $username = $rememberMe->login();
+
+            if ($rememberMe->loginTokenWasInvalid()) {
+                // Token was invalid. We will display error page as this was likely an attack.
+                throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.REMEMBER_ME_STOLEN_COOKIE'), 403);
+            }
+
+            if ($username === false) {
+                // User has not been remembered, there is no point of continuing.
+                $event->status = $event::AUTHENTICATION_FAILURE;
+                $event->stopPropagation();
+
+                return;
+            }
+
+            // Allow remember me to work with different login methods.
+            $event->credentials['username'] = $username;
+            $event->user = User::load($username);
+        }
+    }
+
+    public function userLoginAuthenticateByEmail(UserLoginEvent $event)
+    {
+        if (!$event->user->exists() && $event->credentials['username']) {
+            $event->user = User::find($event->credentials['username']);
+        }
+    }
+
+    public function userLoginAuthenticate(UserLoginEvent $event)
+    {
+        $user = $event->user;
+        $credentials = $event->credentials;
+
+        if (!$user->exists()) {
+            // Never let non-existing users to pass the authentication.
+            // Higher level plugins may override this behavior by stopping propagation.
+            $event->status = $event::AUTHENTICATION_FAILURE;
+            $event->stopPropagation();
+
+            return;
+        }
+
+        // Never let empty password to pass the authentication.
+        // Higher level plugins may override this behavior by stopping propagation.
+        if (empty($credentials['password'])) {
+            $event->status = $event::AUTHENTICATION_FAILURE;
+            $event->stopPropagation();
+
+            return;
+        }
+
+        // Try default user authentication. Stop propagation if authentication succeeds.
+        if ($user->authenticate($credentials['password'])) {
+            $event->status = $event::AUTHENTICATION_SUCCESS;
+            $event->stopPropagation();
+
+            return;
+        }
+
+        // If authentication fails, lower level event handlers may still be able to authenticate user.
+    }
+
+    public function userLoginAuthorize(UserLoginEvent $event)
+    {
+        // Always block access if authorize defaulting to site.login fails.
+        foreach ((array)$event->authorize as $authorize) {
+            if (!$event->user->authorize($authorize)) {
+                $event->status = $event::AUTHORIZATION_DENIED;
+                $event->stopPropagation();
+
+                return;
+            }
+        }
+    }
+
+    public function userLoginFailure(UserLoginEvent $event)
+    {
+        $this->grav['session']->user = $event->user = User::load('', false);
+    }
+
+    public function userLogin(UserLoginEvent $event)
+    {
+        $session = $this->grav['session'];
+        $session->user = $event->user;
+
+        if (!empty($event->options['remember_me'])) {
+            /** @var Login $login */
+            $login = $this->grav['login'];
+
+            $session->remember_me = !empty($event->options['remember_me_login']);
+
+            // If the user wants to be remembered, create Rememberme cookie.
+            $username = $event->user->get('username');
+            if (!empty($event->credentials['rememberme'])) {
+                $login->rememberMe()->createCookie($username);
+            } else {
+                $login->rememberMe()->getStorage()->cleanAllTriplets($username);
+                $login->rememberMe()->clearCookie();
+            }
+        }
+    }
+
+    public function userLogout(UserLoginEvent $event)
+    {
+        $this->grav['session']->invalidate()->start();
+        $this->grav['session']->user = $event->user = User::load('', false);
+
+        if (!empty($event->options['remember_me'])) {
+            /** @var Login $login */
+            $login = $this->grav['login'];
+
+            if (!$login->rememberMe()->login()) {
+                $login->rememberMe()->getStorage()->cleanAllTriplets($event->user->get('username'));
+            }
+            $login->rememberMe()->clearCookie();
         }
     }
 }
