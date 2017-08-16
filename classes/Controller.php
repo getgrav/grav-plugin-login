@@ -73,7 +73,7 @@ class Controller
         $this->grav = $grav;
         $this->action = $action;
         $this->login = isset($this->grav['login']) ? $this->grav['login'] : '';
-        $this->post = $this->getPost($post);
+        $this->post = $post ? $this->getPost($post) : [];
 
         $this->rememberMe();
     }
