@@ -54,10 +54,15 @@ class UserLoginEvent extends Event
      */
     const AUTHORIZATION_DENIED = 16;
 
+    /**
+     * UserLoginEvent constructor.
+     * @param array $items
+     */
     public function __construct(array $items = [])
     {
-        $defaults = [
-            'credentials' => ['username' => '', 'password' => ''],
+        $items += [
+            'credentials' =>
+                (isset($items['credentials']) ? (array)$items['credentials'] : []) + ['username' => '', 'password' => ''],
             'options' => [],
             'authorize' => 'site.login',
             'status' => static::AUTHENTICATION_UNDEFINED,
@@ -65,10 +70,168 @@ class UserLoginEvent extends Event
             'message' => ''
         ];
 
-        parent::__construct(array_replace_recursive($defaults, $items));
+        parent::__construct($items);
 
-        if (!isset($this['user'])) {
-            $this['user'] = User::load($this['credentials']['username'], false);
+        if (!$this->offsetExists('user')) {
+            $this->offsetSet('user', User::load($this['credentials']['username'], false));
         }
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatus()
+    {
+        return (int)$this->offsetGet('status');
+    }
+
+    /**
+     * @param int $status
+     * @return $this
+     */
+    public function setStatus($status)
+    {
+        $this->offsetSet('status', (int)$status);
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCredentials()
+    {
+        return $this->offsetGet('credentials') + ['username' => '', 'password' => ''];
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function getCredential($name)
+    {
+        return isset($this->items['credentials'][$name]) ? $this->items['credentials'][$name] : null;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return $this
+     */
+    public function setCredential($name, $value)
+    {
+        $this->items['credentials'][$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions()
+    {
+        return $this->offsetGet('options');
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function getOption($name)
+    {
+        return isset($this->items['options'][$name]) ? $this->items['options'][$name] : null;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return $this
+     */
+    public function setOption($name, $value)
+    {
+        $this->items['options'][$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @return User
+     */
+    public function getUser()
+    {
+        return $this->offsetGet('user');
+    }
+
+    /**
+     * @param User $user
+     * @return $this
+     */
+    public function setUser(User $user)
+    {
+        $this->offsetSet('user', $user);
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAuthorize()
+    {
+        return (array)$this->offsetGet('authorize');
+    }
+
+    /**
+     * @param string $message
+     * @return $this
+     */
+    public function setMessage($message)
+    {
+        $this->items['message'] = (string)$message;
+
+        return $this;
+    }
+
+    /**
+     * Magic setter method
+     *
+     * @param mixed $offset Asset name value
+     * @param mixed $value  Asset value
+     */
+    public function __set($offset, $value)
+    {
+        $this->offsetSet($offset, $value);
+    }
+
+    /**
+     * Magic getter method
+     *
+     * @param  mixed $offset Asset name value
+     * @return mixed         Asset value
+     */
+    public function __get($offset)
+    {
+        return $this->offsetGet($offset);
+    }
+
+    /**
+     * Magic method to determine if the attribute is set
+     *
+     * @param  mixed   $offset Asset name value
+     * @return boolean         True if the value is set
+     */
+    public function __isset($offset)
+    {
+        return $this->offsetExists($offset);
+    }
+
+    /**
+     * Magic method to unset the attribute
+     *
+     * @param mixed $offset The name value to unset
+     */
+    public function __unset($offset)
+    {
+        $this->offsetUnset($offset);
     }
 }

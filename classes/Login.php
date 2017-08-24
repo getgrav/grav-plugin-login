@@ -81,27 +81,27 @@ class Login
         $grav->fireEvent('onUserLoginAuthenticate', $event);
 
         // Allow plugins to prevent login after successful authentication.
-        if ($event->status === UserLoginEvent::AUTHENTICATION_SUCCESS) {
+        if ($event['status'] === UserLoginEvent::AUTHENTICATION_SUCCESS) {
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLoginAuthorize', $event);
         }
 
-        if ($event->status !== UserLoginEvent::AUTHENTICATION_SUCCESS) {
+        if ($event['status'] !== UserLoginEvent::AUTHENTICATION_SUCCESS) {
             // Allow plugins to log errors or do other tasks on failure.
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLoginFailure', $event);
 
-            $event->user->authenticated = false;
+            $event->getUser()->authenticated = false;
 
         } else {
             // User has been logged in, let plugins know.
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLogin', $event);
 
-            $event->user->authenticated = true;
+            $event->getUser()->authenticated = true;
         }
 
-        $user = $event->user;
+        $user = $event->getUser();
         $user->def('language', 'en');
 
         return $user;
@@ -128,9 +128,10 @@ class Login
         // Logout the user.
         $grav->fireEvent('onUserLogout', $event);
 
-        $event->user->authenticated = false;
+        $user = $event->getUser();
+        $user->authenticated = false;
 
-        return $event->user;
+        return $user;
     }
 
     /**
