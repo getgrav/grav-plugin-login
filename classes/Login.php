@@ -231,6 +231,7 @@ class Login
      * @param User $user
      *
      * @return bool True if the action was performed.
+     * @throws \RuntimeException
      */
     public function sendNotificationEmail(User $user)
     {
@@ -268,6 +269,7 @@ class Login
      * @param User $user
      *
      * @return bool True if the action was performed.
+     * @throws \RuntimeException
      */
     public function sendWelcomeEmail(User $user)
     {
@@ -296,6 +298,7 @@ class Login
      * @param User $user
      *
      * @return bool True if the action was performed.
+     * @throws \RuntimeException
      */
     public function sendActivationEmail(User $user)
     {
@@ -337,6 +340,7 @@ class Login
      * @param  mixed $var A rememberMe instance to set
      *
      * @return RememberMe Returns the current rememberMe instance
+     * @throws \InvalidArgumentException
      */
     public function rememberMe($var = null)
     {

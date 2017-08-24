@@ -67,9 +67,8 @@ class UserLoginEvent extends Event
 
         parent::__construct(array_replace_recursive($defaults, $items));
 
-        if (!isset($this->user)) {
-            $username = $this->credentials['username'];
-            $this->user = User::load($username, false);
+        if (!isset($this['user'])) {
+            $this['user'] = User::load($this['credentials']['username'], false);
         }
     }
 }

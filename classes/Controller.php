@@ -77,6 +77,7 @@ class Controller
 
     /**
      * Performs an action.
+     * @throws \RuntimeException
      */
     public function execute()
     {
@@ -256,6 +257,7 @@ class Controller
      * Handle the reset password action.
      *
      * @return bool True if the action was performed.
+     * @throws \Exception
      */
     public function taskReset()
     {
@@ -280,8 +282,7 @@ class Controller
                         return true;
                     }
 
-                    unset($user->hashed_password);
-                    unset($user->reset);
+                    unset($user->hashed_password, $user->reset);
                     $user->password = $password;
 
                     $user->validate();

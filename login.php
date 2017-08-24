@@ -76,6 +76,7 @@ class LoginPlugin extends Plugin
 
     /**
      * [onPluginsInitialized] Initialize login plugin if path matches.
+     * @throws \RuntimeException
      */
     public function initializeSession()
     {
@@ -87,7 +88,7 @@ class LoginPlugin extends Plugin
         // Autoload classes
         $autoload = __DIR__ . '/vendor/autoload.php';
         if (!is_file($autoload)) {
-            throw new \Exception('Login Plugin failed to load. Composer dependencies not met.');
+            throw new \RuntimeException('Login Plugin failed to load. Composer dependencies not met.');
         }
         require_once $autoload;
 
@@ -110,6 +111,7 @@ class LoginPlugin extends Plugin
 
     /**
      * [onPluginsInitialized] Initialize login plugin if path matches.
+     * @throws \RuntimeException
      */
     public function initializeLogin()
     {
@@ -186,7 +188,10 @@ class LoginPlugin extends Plugin
             $this->config->get('plugins.login.route_forgot') ?: '/forgot_password',
             $this->config->get('plugins.login.route_reset') ?: '/reset_password',
         ];
-        $current_route = $this->grav['uri']->route();
+
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        $current_route = $uri->route();
 
 
         if (!in_array($current_route, $invalid_redirect_routes, true)) {
@@ -202,7 +207,7 @@ class LoginPlugin extends Plugin
                 }
 
                 if ($allowed && $page->routable()) {
-                    $this->grav['session']->redirect_after_login = $page->route() . $this->grav['uri']->params() ?: '';
+                    $this->grav['session']->redirect_after_login = $page->route() . ($uri->params() ?: '');
                 }
             }
         }
@@ -210,6 +215,7 @@ class LoginPlugin extends Plugin
 
     /**
      * Add Login page
+     * @throws \Exception
      */
     public function addLoginPage()
     {
@@ -229,6 +235,7 @@ class LoginPlugin extends Plugin
 
     /**
      * Add Login page
+     * @throws \Exception
      */
     public function addForgotPage()
     {
@@ -249,6 +256,7 @@ class LoginPlugin extends Plugin
 
     /**
      * Add Reset page
+     * @throws \Exception
      */
     public function addResetPage()
     {
@@ -269,7 +277,7 @@ class LoginPlugin extends Plugin
         if (!$page) {
             // Only add login page if it hasn't already been defined.
             $page = new Page;
-            $page->init(new \SplFileInfo(__DIR__ . "/pages/reset.md"));
+            $page->init(new \SplFileInfo(__DIR__ . '/pages/reset.md'));
             $page->slug(basename($route));
 
             $pages->addPage($page, $route);
@@ -278,6 +286,7 @@ class LoginPlugin extends Plugin
 
     /**
      * Add Register page
+     * @throws \Exception
      */
     public function addRegisterPage()
     {
@@ -322,7 +331,7 @@ class LoginPlugin extends Plugin
         $token = $uri->param('token');
         $user = User::load($username);
 
-        if (!$user->activation_token) {
+        if (empty($user->activation_token)) {
             $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
             $messages->add($message, 'error');
         } else {
@@ -365,6 +374,7 @@ class LoginPlugin extends Plugin
 
     /**
      * Add Profile page
+     * @throws \Exception
      */
     public function addProfilePage()
     {
@@ -491,29 +501,36 @@ class LoginPlugin extends Plugin
 
         // Continue to the page if user is authorized to access the page.
         foreach ($rules as $rule => $value) {
-            if (is_array($value)) {
-                foreach ($value as $nested_rule => $nested_value) {
-                    if ($user->authorize($rule . '.' . $nested_rule) == $nested_value) {
-                        return;
-                    }
+            if (!is_array($value)) {
+                if ($user->authorize($rule) === (bool)$value) {
+                    return;
                 }
             } else {
-                if ($user->authorize($rule) == $value) {
-                    return;
+                /** @var array $value */
+                foreach ($value as $nested_rule => $nested_value) {
+                    if ($user->authorize("{$rule}.{$nested_rule}") === (bool)$nested_value) {
+                        return;
+                    }
                 }
             }
         }
 
         // User is not logged in; redirect to login page.
         if ($this->redirect_to_login && $this->route && !$user->authenticated) {
-            $this->grav->redirect($this->route, 302);
+            /** @var Uri $uri */
+            $uri = $this->grav['uri'];
+
+            if ($uri->extension() !== 'json') {
+                $extension = $uri->extension();
+                $this->grav->redirect($this->route. ($extension ? '.' . $extension : ''), 302);
+            }
         }
 
         /** @var Language $l */
         $l = $this->grav['language'];
 
         // Reset page with login page.
-        if (!$user->authenticated) {
+        if (empty($user->authenticated)) {
 
             if ($this->route) {
                 $page = $this->grav['pages']->dispatch($this->route);
@@ -568,7 +585,7 @@ class LoginPlugin extends Plugin
         $extension = $extension ?: 'html';
 
         if (!$this->authenticated) {
-            $twig->template = "login." . $extension . ".twig";
+            $twig->template = "login.{$extension}.twig";
         }
 
         // add CSS for frontend if required
@@ -594,6 +611,7 @@ class LoginPlugin extends Plugin
      * Process the user registration, triggered by a registration form
      *
      * @param Form $form
+     * @throws \RuntimeException
      */
     private function processUserRegistration($form, Event $event)
     {
@@ -639,16 +657,16 @@ class LoginPlugin extends Plugin
             $data['password'] = $form->value('password1');
         }
 
-        $fields = $this->config->get('plugins.login.user_registration.fields', []);
+        $fields = (array)$this->config->get('plugins.login.user_registration.fields', []);
 
         foreach ($fields as $field) {
             // Process value of field if set in the page process.register_user
-            $default_values = $this->config->get('plugins.login.user_registration.default_values');
+            $default_values = (array)$this->config->get('plugins.login.user_registration.default_values');
             if ($default_values) {
                 foreach ($default_values as $key => $param) {
                     $values = explode(',', $param);
 
-                    if ($key == $field) {
+                    if ($key === $field) {
                         $data[$field] = $values;
                     }
                 }
@@ -662,8 +680,7 @@ class LoginPlugin extends Plugin
         if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
             false)
         ) {
-            unset($data['password1']);
-            unset($data['password2']);
+            unset($data['password1'], $data['password2']);
         }
 
         if ($this->config->get('plugins.login.user_registration.options.set_user_disabled', false)) {
@@ -720,6 +737,7 @@ class LoginPlugin extends Plugin
      * - update_user: updates user profile
      *
      * @param Event $event
+     * @throws \RuntimeException
      */
     public function onFormProcessed(Event $event)
     {
@@ -736,10 +754,14 @@ class LoginPlugin extends Plugin
         }
     }
 
+    /**
+     * @param UserLoginEvent $event
+     * @throws \RuntimeException
+     */
     public function userLoginAuthenticateByRememberMe(UserLoginEvent $event)
     {
         // Check that we're logging in with remember me.
-        if ($this->isAdmin() || empty($event->options['remember_me']) || empty($event->options['remember_me_login'])) {
+        if (empty($event->options['remember_me']) || empty($event->options['remember_me_login']) || $this->isAdmin()) {
             return;
         }
 
@@ -770,7 +792,7 @@ class LoginPlugin extends Plugin
 
     public function userLoginAuthenticateByEmail(UserLoginEvent $event)
     {
-        if (!$event->user->exists() && $event->credentials['username']) {
+        if ($event->credentials['username'] && !$event->user->exists()) {
             $event->user = User::find($event->credentials['username']);
         }
     }
