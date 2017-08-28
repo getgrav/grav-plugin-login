@@ -3,8 +3,10 @@
 
 1. [](#new)
     * Added the ability to have a custom route for login page, but not redirect
+1. [](#improved)
+    * Moved rate-limiting logic to the Login class
 1. [](#bugfix)
-    * Fixed login JSON response in case if login fails
+    * Fixed login JSON response in case of login failure
 
 # v2.3.2
 ## 06/22/2017
