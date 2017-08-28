@@ -291,4 +291,37 @@ class Login
 
         return true;
     }
+
+    /**
+     * Check if user may use password reset functionality.
+     *
+     * @param  User $user
+     * @param $field
+     * @param $count
+     * @param $interval
+     * @return bool
+     */
+    public function isUserRateLimited(User $user, $field, $count, $interval)
+    {
+        if ($count > 0) {
+            if (!isset($user->{$field})) {
+                $user->{$field} = array();
+            }
+            //remove older than 1 hour attempts
+            $actual_resets = array();
+            foreach ($user->{$field} as $reset) {
+                if ($reset > (time() - $interval * 60)) {
+                    $actual_resets[] = $reset;
+                }
+            }
+
+            if (count($actual_resets) >= $count) {
+                return true;
+            }
+            $actual_resets[] = time(); // current reset
+            $user->{$field} = $actual_resets;
+
+        }
+        return false;
+    }
 }

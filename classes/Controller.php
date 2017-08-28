@@ -125,7 +125,7 @@ class Controller
         $count = $this->grav['config']->get('plugins.login.max_login_count', 5);
         $interval =$this->grav['config']->get('plugins.login.max_login_interval', 10);
 
-        if ($this->isUserRateLimited($user, 'login_attempts', $count, $interval)) {
+        if ($this->login->isUserRateLimited($user, 'login_attempts', $count, $interval)) {
             $this->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
@@ -227,7 +227,7 @@ class Controller
         $count = $this->grav['config']->get('plugins.login.max_pw_resets_count', 0);
         $interval =$this->grav['config']->get('plugins.login.max_pw_resets_interval', 2);
 
-        if ($this->isUserRateLimited($user, 'pw_resets', $count, $interval)) {
+        if ($this->login->isUserRateLimited($user, 'pw_resets', $count, $interval)) {
             $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $email, $interval]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
@@ -492,39 +492,6 @@ class Controller
         return $data;
     }
 
-
-    /**
-     * Check if user may use password reset functionality.
-     *
-     * @param  User $user
-     * @param $field
-     * @param $count
-     * @param $interval
-     * @return bool
-     */
-    protected function isUserRateLimited(User $user, $field, $count, $interval)
-    {
-        if ($count > 0) {
-            if (!isset($user->{$field})) {
-                $user->{$field} = array();
-            }
-            //remove older than 1 hour attempts
-            $actual_resets = array();
-            foreach ($user->{$field} as $reset) {
-                if ($reset > (time() - $interval * 60)) {
-                    $actual_resets[] = $reset;
-                }
-            }
-
-            if (count($actual_resets) >= $count) {
-                return true;
-            }
-            $actual_resets[] = time(); // current reset
-            $user->{$field} = $actual_resets;
-
-        }
-        return false;
-    }
 
     /**
      * Reset the rate limit counter
