@@ -5,8 +5,10 @@
     * Added the ability to have a custom route for login page, but not redirect
     * Added `$grav['login']->login()` and `$grav['login']->logout()` functions with event hooks
     * Added events `onUserLoginAuthenticate`, `onUserLoginAuthorize`, `onUserLoginFailure`, `onUserLogin`, `onUserLogout`
+1. [](#improved)
+    * Moved rate-limiting logic to the Login class
 1. [](#bugfix)
-    * Fixed login JSON response in case if login fails
+    * Fixed login JSON response in case of login failure
 
 # v2.3.2
 ## 06/22/2017
