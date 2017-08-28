@@ -82,6 +82,9 @@ class Login
 
         // Allow plugins to prevent login after successful authentication.
         if ($event['status'] === UserLoginEvent::AUTHENTICATION_SUCCESS) {
+
+            $event->getUser()->authenticated = true;
+
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLoginAuthorize', $event);
         }
@@ -91,14 +94,15 @@ class Login
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLoginFailure', $event);
 
-            $event->getUser()->authenticated = false;
+            $event->getUser()->authorized = false;
 
         } else {
             // User has been logged in, let plugins know.
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLogin', $event);
 
-            $event->getUser()->authenticated = true;
+            $event->getUser()->authorized = true;
+
         }
 
         $user = $event->getUser();
