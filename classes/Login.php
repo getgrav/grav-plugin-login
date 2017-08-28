@@ -324,4 +324,15 @@ class Login
         }
         return false;
     }
+
+    /**
+     * Reset the rate limit counter
+     *
+     * @param User $user
+     * @param $field
+     */
+    public function resetRateLimit(User $user, $field)
+    {
+        $user->{$field} = [];
+    }
 }

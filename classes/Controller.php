@@ -136,7 +136,7 @@ class Controller
         if ($this->authenticate($this->post)) {
             $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
 
-            $this->resetRateLimit($user, 'login_attempts');
+            $this->login->resetRateLimit($user, 'login_attempts');
 
             $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
             if (!$redirect) {
@@ -492,15 +492,4 @@ class Controller
         return $data;
     }
 
-
-    /**
-     * Reset the rate limit counter
-     *
-     * @param User $user
-     * @param $field
-     */
-    protected function resetRateLimit(User $user, $field)
-    {
-        $user->{$field} = [];
-    }
 }
