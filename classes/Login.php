@@ -179,7 +179,7 @@ class Login
             $this->session->user = $user;
             unset($this->grav['user']);
             $this->grav['user'] = $user;
-            $user->authenticated = $user->authorize('site.login');
+            $user->authorized = $user->authorize('site.login');
         }
 
         return $user;
@@ -335,4 +335,5 @@ class Login
     {
         $user->{$field} = [];
     }
+
 }
