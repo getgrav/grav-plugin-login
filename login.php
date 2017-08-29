@@ -372,7 +372,7 @@ class LoginPlugin extends Plugin
                         $this->grav['session']->user = $user;
                         unset($this->grav['user']);
                         $this->grav['user'] = $user;
-                        $user->athenticated = true;
+                        $user->authenticated = true;
                         $user->authorized = $user->authorize('site.login');
                     }
                 }
