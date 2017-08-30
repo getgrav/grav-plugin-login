@@ -360,7 +360,8 @@ class LoginPlugin extends Plugin
                         $this->grav['session']->user = $user;
                         unset($this->grav['user']);
                         $this->grav['user'] = $user;
-                        $user->authenticated = $user->authorize('site.login');
+                        $user->authenticated = true;
+                        $user->authorized = $user->authorize('site.login');
                     }
                 }
             } else {
@@ -410,7 +411,7 @@ class LoginPlugin extends Plugin
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
                         'info');
-                    $this->authenticated = false;
+                    $this->authorized = false;
                     $twig = $this->grav['twig'];
                     $twig->twig_vars['notAuthorized'] = true;
 
