@@ -108,7 +108,7 @@ en:
     ROUTE_PROFILE: "User profile route"
     ROUTE_ACTIVATE: "User activation route"
     LOGGED_OUT: "You have been successfully logged out..."
-    PAGE_RESTRICTED: "Access to this page is restricted, please login..."
+    PAGE_RESTRICTED: "Access is restricted, please login..."
 
 
 de:

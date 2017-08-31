@@ -410,7 +410,7 @@ class LoginPlugin extends Plugin
             case 'login':
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
-                        'info');
+                        'warning');
                     $this->authorized = false;
                     $twig = $this->grav['twig'];
                     $twig->twig_vars['notAuthorized'] = true;
@@ -428,7 +428,7 @@ class LoginPlugin extends Plugin
 
             case 'forgot':
                 if (!isset($post['forgot-form-nonce']) || !Utils::verifyNonce($post['forgot-form-nonce'], 'forgot-form')) {
-                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'info');
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'warning');
                     return;
                 }
                 break;
@@ -517,8 +517,6 @@ class LoginPlugin extends Plugin
 
         /** @var Language $l */
         $l = $this->grav['language'];
-
-        $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.PAGE_RESTRICTED'), 'error');
 
         // User is not logged in; redirect to login page.
         if ($this->redirect_to_login && $this->route && !$user->authenticated) {

@@ -132,7 +132,7 @@ class Controller
 
         // TODO: The following logic has really never worked as the user object may be changed during the login progress!
         if ($this->authenticate($this->post)) {
-            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'));
+            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'), 'info');
 
             $this->login->resetRateLimit($user, 'login_attempts');
 
