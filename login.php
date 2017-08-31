@@ -884,5 +884,8 @@ class LoginPlugin extends Plugin
 
         $this->grav['session']->invalidate()->start();
         $this->grav['session']->user = User::load('', false);
+
+        $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.LOGGED_OUT'),
+            'info');
     }
 }

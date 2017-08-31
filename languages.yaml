@@ -107,6 +107,7 @@ en:
     ROUTE_RESET: "Reset password route"
     ROUTE_PROFILE: "User profile route"
     ROUTE_ACTIVATE: "User activation route"
+    LOGGED_OUT: "You have been successfully logged out"
 
 de:
   PLUGIN_LOGIN:
