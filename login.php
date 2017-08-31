@@ -515,6 +515,11 @@ class LoginPlugin extends Plugin
             }
         }
 
+        /** @var Language $l */
+        $l = $this->grav['language'];
+
+        $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.PAGE_RESTRICTED'), 'error');
+
         // User is not logged in; redirect to login page.
         if ($this->redirect_to_login && $this->route && !$user->authenticated) {
             /** @var Uri $uri */
@@ -526,8 +531,10 @@ class LoginPlugin extends Plugin
             }
         }
 
-        /** @var Language $l */
-        $l = $this->grav['language'];
+
+
+        /** @var Twig $twig */
+        $twig = $this->grav['twig'];
 
         // Reset page with login page.
         if (empty($user->authenticated)) {
@@ -552,11 +559,10 @@ class LoginPlugin extends Plugin
             $this->authenticated = false;
             unset($this->grav['page']);
             $this->grav['page'] = $page;
+            $twig->twig_vars['form'] = new Form($page);
         } else {
             $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             $this->authenticated = false;
-
-            $twig = $this->grav['twig'];
             $twig->twig_vars['notAuthorized'] = true;
         }
     }
