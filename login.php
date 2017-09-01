@@ -307,6 +307,52 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Add Profile page
+     * @throws \Exception
+     */
+    public function addProfilePage()
+    {
+        $route = $this->config->get('plugins.login.route_profile');
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            // Only add forgot page if it hasn't already been defined.
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . '/pages/profile.md'));
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+    }
+
+    /**
+     * Set Unauthorized page
+     * @throws \Exception
+     */
+    public function setUnauthorizedPage()
+    {
+        $route = $this->config->get('plugins.login.route_unauthorized');
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . '/pages/unauthorized.md'));
+            $page->template('default');
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+
+        unset($this->grav['page']);
+        $this->grav['page'] = $page;
+    }
+
+    /**
      * Handle user activation
      * @throws \RuntimeException
      */
@@ -375,27 +421,6 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Add Profile page
-     * @throws \Exception
-     */
-    public function addProfilePage()
-    {
-        $route = $this->config->get('plugins.login.route_profile');
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
-
-        if (!$page) {
-            // Only add forgot page if it hasn't already been defined.
-            $page = new Page;
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/profile.md'));
-            $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
-        }
-    }
-
-    /**
      * Initialize login controller
      */
     public function loginController()
@@ -428,7 +453,7 @@ class LoginPlugin extends Plugin
 
             case 'forgot':
                 if (!isset($post['forgot-form-nonce']) || !Utils::verifyNonce($post['forgot-form-nonce'], 'forgot-form')) {
-                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'warning');
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'error');
                     return;
                 }
                 break;
@@ -560,8 +585,10 @@ class LoginPlugin extends Plugin
             $twig->twig_vars['form'] = new Form($page);
         } else {
             $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
-            $this->authenticated = false;
+            $this->authorized = false;
             $twig->twig_vars['notAuthorized'] = true;
+
+            $this->setUnauthorizedPage();
         }
     }
 
@@ -583,7 +610,7 @@ class LoginPlugin extends Plugin
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
 
-        $this->grav->fireEvent('onLoginPage');
+//        $this->grav->fireEvent('onLoginPage');
 
         $extension = $this->grav['uri']->extension();
         $extension = $extension ?: 'html';

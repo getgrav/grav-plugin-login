@@ -143,6 +143,7 @@ class Controller
             $this->setRedirect($redirect);
         } elseif ($user->username) {
             $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
         } else {
             $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
         }
