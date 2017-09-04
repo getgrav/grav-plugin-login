@@ -94,14 +94,14 @@ class Login
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLoginFailure', $event);
 
-            $event->getUser()->authorized = false;
+            $event->getUser()->authenticated = false;
 
         } else {
             // User has been logged in, let plugins know.
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLogin', $event);
 
-            $event->getUser()->authorized = true;
+            $event->getUser()->authenticated = true;
 
         }
 
