@@ -36,7 +36,6 @@ class TokenStorage implements StorageInterface
      * Constructor
      *
      * @param string    $path   Path to storage directory
-     * @throws \InvalidArgumentException
      */
     public function __construct($path = 'cache://rememberme')
     {
@@ -79,7 +78,7 @@ class TokenStorage implements StorageInterface
         }
 
         list($expire, $tokens) = $this->driver->fetch($id);
-        if (isset($tokens[$persistentToken]) && $tokens[$persistentToken] === $token) {
+        if (isset($tokens[$persistentToken]) && $tokens[$persistentToken] == $token) {
             return self::TRIPLET_FOUND;
         }
 

@@ -6,13 +6,12 @@
         {% if grav.user.authenticated %}
             <h4>{{ 'PLUGIN_LOGIN.WELCOME'|t }} <strong>{{ grav.user.fullname ?: grav.user.username }}</strong></h4>
             <hr>
-
             <a class="button logout" href="{{ uri.addNonce(base_url_relative ~ uri.path ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce') }}">{{ 'PLUGIN_LOGIN.BTN_LOGOUT'|t }}</a>
 
         {% else %}
             {{ content|raw }}
 
-            <form method="post" action="{{ base_url_relative ~ uri.path }}" class="{{ form_outer_classes }}">
+            <form method="post" action="{{ base_url_relative ~ uri.path }}">
                 {% if grav.twig.plugins_hooked_loginPage %}
                     {% for label in grav.twig.plugins_hooked_loginPage %}
                         {% include label %}
@@ -21,11 +20,13 @@
 
                 {% for field in form.fields %}
                     {% if field.type %}
-                        {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
+                        <div>
+                            {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
+                        </div>
                     {% endif %}
                 {% endfor %}
 
-                <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
+                <div class="form-actions secondary-accent">
                     {% if config.plugins.login.rememberme.enabled and page.header.form.login.rememberme ?? true %}
                         <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
                             <div class="form-input-wrapper">
@@ -36,10 +37,10 @@
                     {% endif %}
 
                     {% if page.header.form.login.forgot_button ?? true %}
-                    <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative }}{{ config.plugins.login.route_forgot }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
+                    <a class="button secondary" href="{{ base_url_relative }}{{ config.plugins.login.route_forgot }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
                     {% endif %}
 
-                    <button class="{{ form_button_classes ?: 'button primary' }}" type="submit"  name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
+                    <button type="submit" class="button primary" name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
                 </div>
 
                 {{ nonce_field('login-form', 'login-form-nonce')|raw }}

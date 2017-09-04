@@ -4,35 +4,39 @@ login_redirect_here: false
 form:
 
   fields:
-    fullname:
+    -
+      name: username
       type: text
-      validate:
-        required: true
-
-
-    username:
-      type: text
+      id: username
+      placeholder: "Choose a username"
       validate:
         required: true
         message: PLUGIN_LOGIN.USERNAME_NOT_VALID
         config-pattern@: system.username_regex
 
-    email:
+    -
+      name: email
       type: email
+      id: email
+      placeholder: "Enter your email"
       validate:
         required: true
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
 
-    password1:
+    -
+      name: password1
       type: password
+      id: password1
       label: Enter a password
       validate:
         required: true
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
         config-pattern@: system.pwd_regex
 
-    password2:
+    -
+      name: password2
       type: password
+      id: password2
       label: Enter the password again
       validate:
         required: true
@@ -49,8 +53,7 @@ form:
 
   process:
       register_user: true
+      message: "You are logged in"
 ---
 
 # Register
-
-Create a new user account by entering all the required fields below:
