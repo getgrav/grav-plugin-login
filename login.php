@@ -325,6 +325,8 @@ class LoginPlugin extends Plugin
 
             $pages->addPage($page, $route);
         }
+
+        $this->storeReferrerPage();
     }
 
     /**
