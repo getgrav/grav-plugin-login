@@ -438,7 +438,7 @@ class LoginPlugin extends Plugin
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
                         'warning');
-                    $this->authorized = false;
+                    $this->authenticated = false;
                     $twig = $this->grav['twig'];
                     $twig->twig_vars['notAuthorized'] = true;
 
@@ -491,6 +491,10 @@ class LoginPlugin extends Plugin
      */
     public function authorizePage()
     {
+        if (!$this->authenticated) {
+            return;
+        }
+
         /** @var User $user */
         $user = $this->grav['user'];
         if (!$user->get('access')) {
@@ -555,7 +559,6 @@ class LoginPlugin extends Plugin
                 $this->grav->redirect($this->route. ($extension ? '.' . $extension : ''), 302);
             }
         }
-
 
 
         /** @var Twig $twig */
