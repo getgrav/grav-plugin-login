@@ -86,65 +86,6 @@ class Login
     }
 
     /**
-     * Authenticate user.
-     *
-     * @param  array $form Form fields.
-     *
-     * @return bool
-     */
-    public function authenticate($form)
-    {
-        if (!$this->user->authenticated && isset($form['username'], $form['password'])) {
-            $user = User::load($form['username']);
-
-            //default to english if language not set
-            if (empty($user->language)) {
-                $user->set('language', 'en');
-            }
-
-            if ($user->exists()) {
-                $user->authenticated = true;
-
-                // Authenticate user.
-                $result = $user->authenticate($form['password']);
-
-                if ($result) {
-                    $this->user = $this->session->user = $user;
-
-                    /** @var Grav $grav */
-                    $grav = $this->grav;
-
-                    $this->setMessage($this->language->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
-                        [$this->user->language]), 'info');
-
-                    $redirect_route = $this->uri->route();
-                    $grav->redirect($redirect_route);
-                }
-            }
-        }
-
-        return $this->authorize();
-    }
-
-    /**
-     * Checks user authorisation to the action.
-     *
-     * @param  string $action
-     *
-     * @return bool
-     */
-    public function authorize($action = 'admin.login')
-    {
-        foreach ((array)$action as $a) {
-            if ($this->user->authorize($a)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Create a new user file
      *
      * @param array $data
