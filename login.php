@@ -461,7 +461,7 @@ class LoginPlugin extends Plugin
                 case 'logout':
                     $nonce = $this->grav['uri']->param('logout-nonce');
                     if (!isset($nonce) || !Utils::verifyNonce($nonce, 'logout-form')) {
-                        return;
+//                        return;
                     }
                     break;
 
@@ -617,7 +617,7 @@ class LoginPlugin extends Plugin
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
 
-        $this->grav->fireEvent('onLoginPage');
+//        $this->grav->fireEvent('onLoginPage');
 
         $extension = $this->grav['uri']->extension();
         $extension = $extension ?: 'html';
