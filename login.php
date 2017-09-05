@@ -409,6 +409,31 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Set Unauthorized page
+     * @throws \Exception
+     */
+    public function setUnauthorizedPage()
+    {
+        $route = $this->config->get('plugins.login.route_unauthorized');
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . '/pages/unauthorized.md'));
+            $page->template('default');
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+
+        unset($this->grav['page']);
+        $this->grav['page'] = $page;
+    }
+
+    /**
      * Initialize login controller
      */
     public function loginController()
@@ -567,9 +592,10 @@ class LoginPlugin extends Plugin
             $twig->twig_vars['form'] = new Form($page);
         } else {
             $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
-            $this->authenticated = false;
-
+            $this->authorized = false;
             $twig->twig_vars['notAuthorized'] = true;
+
+            $this->setUnauthorizedPage();
         }
     }
 
