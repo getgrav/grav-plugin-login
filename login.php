@@ -863,7 +863,7 @@ class LoginPlugin extends Plugin
             return;
         }
 
-        // If authentication fails, lower level event handlers may still be able to authenticate user.
+        // If authentication status is undefined, lower level event handlers may still be able to authenticate user.
     }
 
     public function userLoginAuthorize(UserLoginEvent $event)

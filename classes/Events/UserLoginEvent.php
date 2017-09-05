@@ -50,9 +50,14 @@ class UserLoginEvent extends Event
     const AUTHORIZATION_EXPIRED = 8;
 
     /**
+     * onUserAuthorizeLogin is delayed until user has performed extra action(s).
+     */
+    const AUTHORIZATION_DELAYED = 16;
+
+    /**
      * onUserAuthorizeLogin fails for other reasons.
      */
-    const AUTHORIZATION_DENIED = 16;
+    const AUTHORIZATION_DENIED = 32;
 
     /**
      * UserLoginEvent constructor.
@@ -77,6 +82,20 @@ class UserLoginEvent extends Event
         }
     }
 
+    public function isSuccess()
+    {
+        $status = $this->offsetGet('status');
+        $failure = static::AUTHENTICATION_FAILURE | static::AUTHENTICATION_CANCELLED | static::AUTHORIZATION_EXPIRED
+            | static::AUTHORIZATION_DENIED;
+
+        return ($status & static::AUTHENTICATION_SUCCESS) && !($status & $failure);
+    }
+
+    public function isDelayed()
+    {
+        return $this->isSuccess() && ($this->offsetGet('status') & static::AUTHORIZATION_DELAYED);
+    }
+
     /**
      * @return int
      */
@@ -91,7 +110,7 @@ class UserLoginEvent extends Event
      */
     public function setStatus($status)
     {
-        $this->offsetSet('status', (int)$status);
+        $this->offsetSet('status', $this->offsetGet('status') | (int)$status);
 
         return $this;
     }
