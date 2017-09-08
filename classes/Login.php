@@ -1,9 +1,17 @@
 <?php
+/**
+ * @package    Grav.Plugin.Login
+ *
+ * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @license    MIT License; see LICENSE file for details.
+ */
 namespace Grav\Plugin\Login;
 
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\File\CompiledYamlFile;
+use Grav\Common\Language\Language;
+use Grav\Common\Session;
 use Grav\Common\User\User;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
@@ -19,11 +27,17 @@ class Login
     /** @var Grav */
     protected $grav;
 
-    /** @var User */
-    protected $user;
-
     /** @var Config */
     protected $config;
+
+    /** @var Language $language */
+    protected $language;
+
+    /** @var Session */
+    protected $session;
+
+    /** @var User */
+    protected $user;
 
     /** @var Uri */
     protected $uri;
@@ -37,10 +51,9 @@ class Login
     {
         $this->grav = $grav;
         $this->config = $this->grav['config'];
-        //$this->route = $route;
+        $this->language = $this->grav['language'];
         $this->session = $this->grav['session'];
         $this->user = $this->grav['user'];
-
         $this->uri = $this->grav['uri'];
     }
 
@@ -73,67 +86,6 @@ class Login
     }
 
     /**
-     * Authenticate user.
-     *
-     * @param  array $form Form fields.
-     *
-     * @return bool
-     */
-    public function authenticate($form)
-    {
-        if (!$this->user->authenticated && isset($form['username']) && isset($form['password'])) {
-            $user = User::load($form['username']);
-
-            //default to english if language not set
-            if (empty($user->language)) {
-                $user->set('language', 'en');
-            }
-
-            if ($user->exists()) {
-                $user->authenticated = true;
-
-                // Authenticate user.
-                $result = $user->authenticate($form['password']);
-
-                if ($result) {
-                    $this->user = $this->session->user = $user;
-
-                    /** @var Grav $grav */
-                    $grav = $this->grav;
-
-                    $this->setMessage($this->grav['language']->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
-                        [$this->user->language]), 'info');
-
-                    $redirect_route = $this->uri->route();
-                    $grav->redirect($redirect_route);
-                }
-            }
-        }
-
-        return $this->authorize();
-    }
-
-    /**
-     * Checks user authorisation to the action.
-     *
-     * @param  string $action
-     *
-     * @return bool
-     */
-    public function authorize($action = 'admin.login')
-    {
-        $action = (array)$action;
-
-        foreach ($action as $a) {
-            if ($this->user->authorize($a)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Create a new user file
      *
      * @param array $data
@@ -163,12 +115,12 @@ class Login
         $user->file($file);
         $user->save();
 
-        if (isset($data['state']) && $data['state'] == 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
+        if (isset($data['state']) && $data['state'] === 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
             //Login user
-            $this->grav['session']->user = $user;
+            $this->session->user = $user;
             unset($this->grav['user']);
             $this->grav['user'] = $user;
-            $user->authenticated = $user->authorize('site.login');
+            $user->authorized = $user->authorize('site.login');
         }
 
         return $user;
@@ -176,7 +128,7 @@ class Login
 
 
     /**
-     * Handle the email to notificate the user account creation to the site admin.
+     * Handle the email to notify the user account creation to the site admin.
      *
      * @param $user
      *
@@ -185,28 +137,28 @@ class Login
     public function sendNotificationEmail($user)
     {
         if (empty($user->email)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
-        $sitename = $this->grav['config']->get('site.title', 'Website');
+        $site_name = $this->config->get('site.title', 'Website');
 
-        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT', $sitename]);
-        $content = $this->grav['language']->translate([
+        $subject = $this->language->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT', $site_name]);
+        $content = $this->language->translate([
             'PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY',
-            $sitename,
+            $site_name,
             $user->username,
             $user->email
         ]);
-        $to = $this->grav['config']->get('plugins.email.from');
+        $to = $this->config->get('plugins.email.from');
 
         if (empty($to)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
         }
 
         $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
         return true;
@@ -222,19 +174,19 @@ class Login
     public function sendWelcomeEmail($user)
     {
         if (empty($user->email)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
-        $sitename = $this->grav['config']->get('site.title', 'Website');
+        $site_name = $this->config->get('site.title', 'Website');
 
-        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT', $sitename]);
-        $content = $this->grav['language']->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY', $user->username, $sitename]);
+        $subject = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT', $site_name]);
+        $content = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY', $user->username, $site_name]);
         $to = $user->email;
 
         $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
         return true;
@@ -250,7 +202,7 @@ class Login
     public function sendActivationEmail($user)
     {
         if (empty($user->email)) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
         $token = md5(uniqid(mt_rand(), true));
@@ -258,13 +210,13 @@ class Login
         $user->activation_token = $token . '::' . $expire;
         $user->save();
 
-        $param_sep = $this->grav['config']->get('system.param_sep', ':');
+        $param_sep = $this->config->get('system.param_sep', ':');
         $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('user-activation');
 
-        $site_name = $this->grav['config']->get('site.title', 'Website');
+        $site_name = $this->config->get('site.title', 'Website');
 
-        $subject = $this->grav['language']->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $site_name]);
-        $content = $this->grav['language']->translate([
+        $subject = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $site_name]);
+        $content = $this->language->translate([
             'PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY',
             $user->username,
             $activation_link,
@@ -275,9 +227,54 @@ class Login
         $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
-            throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
         return true;
     }
+
+    /**
+     * Check if user may use password reset functionality.
+     *
+     * @param  User $user
+     * @param $field
+     * @param $count
+     * @param $interval
+     * @return bool
+     */
+    public function isUserRateLimited(User $user, $field, $count, $interval)
+    {
+        if ($count > 0) {
+            if (!isset($user->{$field})) {
+                $user->{$field} = array();
+            }
+            //remove older than 1 hour attempts
+            $actual_resets = array();
+            foreach ($user->{$field} as $reset) {
+                if ($reset > (time() - $interval * 60)) {
+                    $actual_resets[] = $reset;
+                }
+            }
+
+            if (count($actual_resets) >= $count) {
+                return true;
+            }
+            $actual_resets[] = time(); // current reset
+            $user->{$field} = $actual_resets;
+
+        }
+        return false;
+    }
+
+    /**
+     * Reset the rate limit counter
+     *
+     * @param User $user
+     * @param $field
+     */
+    public function resetRateLimit(User $user, $field)
+    {
+        $user->{$field} = [];
+    }
+
 }

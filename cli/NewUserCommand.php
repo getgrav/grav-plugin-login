@@ -1,10 +1,18 @@
 <?php
+/**
+ * @package    Grav.Plugin.Login
+ *
+ * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @license    MIT License; see LICENSE file for details.
+ */
 namespace Grav\Plugin\Console;
 
+use Grav\Common\Config\Config;
 use Grav\Console\ConsoleCommand;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
 use Grav\Common\Grav;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -206,9 +214,12 @@ class NewUserCommand extends ConsoleCommand
         // Lowercase the username for the filename
         $username = strtolower($username);
 
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
         // Create user object and save it
         $user = new User($data);
-        $file = CompiledYamlFile::instance(Grav::instance()['locator']->findResource('account://' . $username . YAML_EXT, true, true));
+        $file = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
         $user->file($file);
         $user->save();
 
@@ -235,15 +246,22 @@ class NewUserCommand extends ConsoleCommand
      */
     protected function validate($type, $value, $extra = '')
     {
-        $username_regex = '/' . Grav::instance()['config']->get('system.username_regex') . '/';
-        $pwd_regex      = '/' . Grav::instance()['config']->get('system.pwd_regex') . '/';
+        /** @var Config $config */
+        $config = Grav::instance()['config'];
+
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
+
+        $username_regex = '/' . $config->get('system.username_regex') . '/';
+        $pwd_regex      = '/' . $config->get('system.pwd_regex') . '/';
 
         switch ($type) {
             case 'user':
                 if (!preg_match($username_regex, $value)) {
                     throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
                 }
-                if (file_exists(Grav::instance()['locator']->findResource('account://' . $value . YAML_EXT))) {
+                if (file_exists($locator->findResource('account://' . $value . YAML_EXT))) {
                     throw new \RuntimeException('Username "' . $value . '" already exists, please pick another username');
                 }
 
@@ -278,7 +296,7 @@ class NewUserCommand extends ConsoleCommand
                 break;
 
             case 'fullname':
-                if ($value === null || trim($value) == '') {
+                if ($value === null || trim($value) === '') {
                     throw new \RuntimeException('Fullname cannot be empty');
                 }
 

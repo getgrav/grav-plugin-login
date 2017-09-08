@@ -1,9 +1,18 @@
 <?php
+/**
+ * @package    Grav.Plugin.Login
+ *
+ * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @license    MIT License; see LICENSE file for details.
+ */
 namespace Grav\Plugin\Console;
 
+use Grav\Common\Config\Config;
+use Grav\Common\Grav;
 use Grav\Console\ConsoleCommand;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
+use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -95,16 +104,19 @@ class ChangeUserStateCommand extends ConsoleCommand
         // Lowercase the username for the filename
         $username = strtolower($username);
 
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
         // Grab the account file and read in the information before setting the file (prevent setting erase)
-        $oldUserFile = CompiledYamlFile::instance(self::getGrav()['locator']->findResource('account://' . $username . YAML_EXT, true, true));
-        $oldData = $oldUserFile->content();
+        $oldUserFile = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
+        $oldData = (array)$oldUserFile->content();
         
         //Set the state feild to new state
         $oldData['state'] = $data['state'];
         
         // Create user object and save it using oldData (with updated state)
         $user = new User($oldData);
-        $file = CompiledYamlFile::instance(self::getGrav()['locator']->findResource('account://' . $username . YAML_EXT, true, true));
+        $file = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
         $user->file($file);
         $user->save();
 
@@ -131,14 +143,20 @@ class ChangeUserStateCommand extends ConsoleCommand
      */
     protected function validate($type, $value, $extra = '')
     {
-        $username_regex = '/' . Grav::instance()['config']->get('system.username_regex') . '/';
+        /** @var Config $config */
+        $config = Grav::instance()['config'];
+
+        /** @var UniformResourceLocator $locator */
+        $locator = Grav::instance()['locator'];
+
+        $username_regex = '/' . $config->get('system.username_regex') . '/';
 
         switch ($type) {
             case 'user':
                 if (!preg_match($username_regex, $value)) {
                     throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
                 }
-                if (!file_exists(self::getGrav()['locator']->findResource('account://' . $value . YAML_EXT))) {
+                if (!file_exists($locator->findResource('account://' . $value . YAML_EXT))) {
                     throw new \RuntimeException('Username "' . $value . '" does not exist, please pick another username');
                 }
 
