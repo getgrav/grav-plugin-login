@@ -1,5 +1,5 @@
 # v2.4.0
-## xx/xx/2017
+## 09/07/2017
 
 1. [](#new)
     * Added the ability to have a custom route for login page, but not redirect
