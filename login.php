@@ -601,7 +601,7 @@ class LoginPlugin extends Plugin
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
 
-//        $this->grav->fireEvent('onLoginPage');
+        $this->grav->fireEvent('onLoginPage');
 
         $extension = $this->grav['uri']->extension();
         $extension = $extension ?: 'html';

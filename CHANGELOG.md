@@ -1,3 +1,9 @@
+# v2.4.1
+## 09/12/2017
+
+1. [](#bugfix)
+    * Fixed an issue with 3rd party login plugins [#130](https://github.com/getgrav/grav-plugin-login/issues/130)
+
 # v2.4.0
 ## 09/07/2017
 
