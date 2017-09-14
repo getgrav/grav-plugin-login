@@ -1,3 +1,9 @@
+# v2.4.2
+## xx/xx/2017
+
+1. [](#bugfix)
+    * Improved validation of email to support RFC5322 [Grav#1648](https://github.com/getgrav/grav/issues/1648)
+
 # v2.4.1
 ## 09/12/2017
 
