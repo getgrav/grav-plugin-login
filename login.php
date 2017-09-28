@@ -566,10 +566,6 @@ class LoginPlugin extends Plugin
                 $page = $this->grav['pages']->dispatch($this->route);
             } else {
 
-                if (!$page->route()) {
-                    $this->route = $page->parent()->route();
-                }
-
                 $page = new Page;
                 // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
@@ -580,7 +576,6 @@ class LoginPlugin extends Plugin
                 } else {
                     $page->init(new \SplFileInfo(__DIR__ . "/pages/login.md"));
                 }
-
 
                 $page->slug(basename($this->route));
             }
