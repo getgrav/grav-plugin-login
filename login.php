@@ -431,6 +431,13 @@ class LoginPlugin extends Plugin
 
         unset($this->grav['page']);
         $this->grav['page'] = $page;
+        
+        $uri_extension = $this->grav['uri']->extension();        
+        $supported_types = $this->config->get('media.types');
+
+        if (array_key_exists($uri_extension, $supported_types)) {
+            $this->grav->redirect('/', 302);
+        }
     }
 
     /**
