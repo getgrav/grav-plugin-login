@@ -1,5 +1,5 @@
 # v2.4.2
-## xx/xx/2017
+## 09/29/2017
 
 1. [](#bugfix)
     * Fixed issue with protected page media without access [#132](https://github.com/getgrav/grav-plugin-login/issues/132)
