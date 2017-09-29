@@ -282,7 +282,7 @@ class NewUserCommand extends ConsoleCommand
                 break;
 
             case 'email':
-                if (!preg_match('/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$/', $value)) {
+                if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     throw new \RuntimeException('Not a valid email address');
                 }
 

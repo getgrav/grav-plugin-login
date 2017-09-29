@@ -478,6 +478,7 @@ class LoginPlugin extends Plugin
         if ($this->config->get('plugins.login.protect_protected_page_media', false)) {
             $page_url = dirname($this->grav['uri']->path());
             $page = $this->grav['pages']->find($page_url);
+            unset($this->grav['page']);
             $this->grav['page'] = $page;
             $this->authorizePage();
         }
@@ -538,6 +539,15 @@ class LoginPlugin extends Plugin
             }
         }
 
+
+        // If this is not an HTML page request, simply throw a 403 error
+        $uri_extension = $this->grav['uri']->extension('html');
+        $supported_types = $this->config->get('media.types');
+        if ($uri_extension !== 'html' && array_key_exists($uri_extension, $supported_types)) {
+            header('HTTP/1.0 403 Forbidden');
+            exit;
+        }
+
         // User is not logged in; redirect to login page.
         if ($this->redirect_to_login && $this->route && !$user->authenticated) {
             $this->grav->redirect($this->route, 302);
@@ -555,6 +565,7 @@ class LoginPlugin extends Plugin
             if ($this->route) {
                 $page = $this->grav['pages']->dispatch($this->route);
             } else {
+
                 $page = new Page;
                 // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
