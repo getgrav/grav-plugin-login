@@ -869,8 +869,9 @@ class LoginPlugin extends Plugin
     public function userLoginAuthorize(UserLoginEvent $event)
     {
         // Always block access if authorize defaulting to site.login fails.
+        $user = $event->getUser();
         foreach ($event->getAuthorize() as $authorize) {
-            if (!$event->getUser()->authorize($authorize)) {
+            if (!$user->authorize($authorize)) {
                 $event->setStatus($event::AUTHORIZATION_DENIED);
                 $event->stopPropagation();
 
