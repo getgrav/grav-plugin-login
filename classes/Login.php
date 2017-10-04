@@ -80,29 +80,37 @@ class Login
         $event = new UserLoginEvent($eventOptions);
         $grav->fireEvent('onUserLoginAuthenticate', $event);
 
-        // Allow plugins to prevent login after successful authentication.
-        if ($event['status'] === UserLoginEvent::AUTHENTICATION_SUCCESS) {
+        if ($event->isSuccess()) {
 
-            $event->getUser()->authenticated = true;
+            // Make sure that event didn't mess up with the user authorization.
+            $user = $event->getUser();
+            $user->authenticated = true;
+            $user->authorized = false;
 
+            // Allow plugins to prevent login after successful authentication.
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLoginAuthorize', $event);
         }
 
-        if ($event['status'] !== UserLoginEvent::AUTHENTICATION_SUCCESS) {
-            // Allow plugins to log errors or do other tasks on failure.
-            $event = new UserLoginEvent($event->toArray());
-            $grav->fireEvent('onUserLoginFailure', $event);
-
-            $event->getUser()->authenticated = false;
-
-        } else {
+        if ($event->isSuccess()) {
             // User has been logged in, let plugins know.
             $event = new UserLoginEvent($event->toArray());
             $grav->fireEvent('onUserLogin', $event);
 
-            $event->getUser()->authenticated = true;
+            // Make sure that event didn't mess up with the user authorization.
+            $user = $event->getUser();
+            $user->authenticated = true;
+            $user->authorized = $event->isDelayed();
 
+        } else {
+            // Allow plugins to log errors or do other tasks on failure.
+            $event = new UserLoginEvent($event->toArray());
+            $grav->fireEvent('onUserLoginFailure', $event);
+
+            // Make sure that event didn't mess up with the user authorization.
+            $user = $event->getUser();
+            $user->authenticated = false;
+            $user->authorized = false;
         }
 
         $user = $event->getUser();

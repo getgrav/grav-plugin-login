@@ -863,14 +863,15 @@ class LoginPlugin extends Plugin
             return;
         }
 
-        // If authentication fails, lower level event handlers may still be able to authenticate user.
+        // If authentication status is undefined, lower level event handlers may still be able to authenticate user.
     }
 
     public function userLoginAuthorize(UserLoginEvent $event)
     {
         // Always block access if authorize defaulting to site.login fails.
+        $user = $event->getUser();
         foreach ($event->getAuthorize() as $authorize) {
-            if (!$event->getUser()->authorize($authorize)) {
+            if (!$user->authorize($authorize)) {
                 $event->setStatus($event::AUTHORIZATION_DENIED);
                 $event->stopPropagation();
 
