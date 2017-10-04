@@ -7,6 +7,7 @@
  */
 namespace Grav\Plugin\Login;
 
+use Birke\Rememberme\Cookie;
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\File\CompiledYamlFile;
@@ -16,6 +17,9 @@ use Grav\Common\User\User;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
+use Grav\Plugin\Login\Events\UserLoginEvent;
+use Grav\Plugin\Login\RememberMe\RememberMe;
+use Grav\Plugin\Login\RememberMe\TokenStorage;
 use RocketTheme\Toolbox\Session\Message;
 
 /**
@@ -36,11 +40,11 @@ class Login
     /** @var Session */
     protected $session;
 
-    /** @var User */
-    protected $user;
-
     /** @var Uri */
     protected $uri;
+
+    /** @var RememberMe */
+    protected $rememberMe;
 
     /**
      * Login constructor.
@@ -53,8 +57,85 @@ class Login
         $this->config = $this->grav['config'];
         $this->language = $this->grav['language'];
         $this->session = $this->grav['session'];
-        $this->user = $this->grav['user'];
         $this->uri = $this->grav['uri'];
+    }
+
+    /**
+     * Login user.
+     *
+     * @param array $credentials
+     * @param array $options
+     * @return User
+     */
+    public function login(array $credentials, array $options = [])
+    {
+        $grav = Grav::instance();
+
+        $eventOptions = [
+            'credentials' => $credentials,
+            'options' => $options
+        ];
+
+        // Attempt to authenticate the user.
+        $event = new UserLoginEvent($eventOptions);
+        $grav->fireEvent('onUserLoginAuthenticate', $event);
+
+        // Allow plugins to prevent login after successful authentication.
+        if ($event['status'] === UserLoginEvent::AUTHENTICATION_SUCCESS) {
+
+            $event->getUser()->authenticated = true;
+
+            $event = new UserLoginEvent($event->toArray());
+            $grav->fireEvent('onUserLoginAuthorize', $event);
+        }
+
+        if ($event['status'] !== UserLoginEvent::AUTHENTICATION_SUCCESS) {
+            // Allow plugins to log errors or do other tasks on failure.
+            $event = new UserLoginEvent($event->toArray());
+            $grav->fireEvent('onUserLoginFailure', $event);
+
+            $event->getUser()->authenticated = false;
+
+        } else {
+            // User has been logged in, let plugins know.
+            $event = new UserLoginEvent($event->toArray());
+            $grav->fireEvent('onUserLogin', $event);
+
+            $event->getUser()->authenticated = true;
+
+        }
+
+        $user = $event->getUser();
+        $user->def('language', 'en');
+
+        return $user;
+    }
+
+    /**
+     * Logout user.
+     *
+     * @param array $options
+     * @param User $user
+     * @return User
+     */
+    public function logout(array $options = [], User $user = null)
+    {
+        $grav = Grav::instance();
+
+        $eventOptions = [
+            'user' => $user ?: $grav['user'],
+            'options' => $options
+        ];
+
+        $event = new UserLoginEvent($eventOptions);
+
+        // Logout the user.
+        $grav->fireEvent('onUserLogout', $event);
+
+        $user = $event->getUser();
+        $user->authenticated = false;
+
+        return $user;
     }
 
     /**
@@ -88,60 +169,24 @@ class Login
     /**
      * Authenticate user.
      *
-     * @param  array $form Form fields.
+     * @param array $credentials Form fields.
+     * @param array $options
      *
      * @return bool
      */
-    public function authenticate($form)
+    public function authenticate($credentials, $options = ['remember_me' => true])
     {
-        if (!$this->user->authenticated && isset($form['username'], $form['password'])) {
-            $user = User::load($form['username']);
+        $user = $this->login($credentials, $options);
 
-            //default to english if language not set
-            if (empty($user->language)) {
-                $user->set('language', 'en');
-            }
+        if ($user->authenticated) {
+            $this->setMessage($this->language->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
+                [$user->language]), 'info');
 
-            if ($user->exists()) {
-                $user->authenticated = true;
-
-                // Authenticate user.
-                $result = $user->authenticate($form['password']);
-
-                if ($result) {
-                    $this->user = $this->session->user = $user;
-
-                    /** @var Grav $grav */
-                    $grav = $this->grav;
-
-                    $this->setMessage($this->language->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
-                        [$this->user->language]), 'info');
-
-                    $redirect_route = $this->uri->route();
-                    $grav->redirect($redirect_route);
-                }
-            }
+            $redirect_route = $this->uri->route();
+            $this->grav->redirect($redirect_route);
         }
 
-        return $this->authorize();
-    }
-
-    /**
-     * Checks user authorisation to the action.
-     *
-     * @param  string $action
-     *
-     * @return bool
-     */
-    public function authorize($action = 'admin.login')
-    {
-        foreach ((array)$action as $a) {
-            if ($this->user->authorize($a)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $user->authenticated;
     }
 
     /**
@@ -185,15 +230,15 @@ class Login
         return $user;
     }
 
-
     /**
      * Handle the email to notify the user account creation to the site admin.
      *
-     * @param $user
+     * @param User $user
      *
      * @return bool True if the action was performed.
+     * @throws \RuntimeException
      */
-    public function sendNotificationEmail($user)
+    public function sendNotificationEmail(User $user)
     {
         if (empty($user->email)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
@@ -226,11 +271,12 @@ class Login
     /**
      * Handle the email to welcome the new user
      *
-     * @param $user
+     * @param User $user
      *
      * @return bool True if the action was performed.
+     * @throws \RuntimeException
      */
-    public function sendWelcomeEmail($user)
+    public function sendWelcomeEmail(User $user)
     {
         if (empty($user->email)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
@@ -257,8 +303,9 @@ class Login
      * @param User $user
      *
      * @return bool True if the action was performed.
+     * @throws \RuntimeException
      */
-    public function sendActivationEmail($user)
+    public function sendActivationEmail(User $user)
     {
         if (empty($user->email)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
@@ -293,12 +340,51 @@ class Login
     }
 
     /**
+     * Gets and sets the RememberMe class
+     *
+     * @param  mixed $var A rememberMe instance to set
+     *
+     * @return RememberMe Returns the current rememberMe instance
+     * @throws \InvalidArgumentException
+     */
+    public function rememberMe($var = null)
+    {
+        if ($var !== null) {
+            $this->rememberMe = $var;
+        }
+
+        if (!$this->rememberMe) {
+            /** @var Config $config */
+            $config = $this->grav['config'];
+
+            // Setup storage for RememberMe cookies
+            $storage = new TokenStorage;
+            $this->rememberMe = new RememberMe($storage);
+            $this->rememberMe->setCookieName($config->get('plugins.login.rememberme.name'));
+            $this->rememberMe->setExpireTime($config->get('plugins.login.rememberme.timeout'));
+
+            // Hardening cookies with user-agent and random salt or
+            // fallback to use system based cache key
+            $server_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : 'unknown';
+            $data = $server_agent . $config->get('security.salt', $this->grav['cache']->getKey());
+            $this->rememberMe->setSalt(hash('sha512', $data));
+
+            // Set cookie with correct base path of Grav install
+            $cookie = new Cookie;
+            $cookie->setPath($this->grav['base_url_relative'] ?: '/');
+            $this->rememberMe->setCookie($cookie);
+        }
+
+        return $this->rememberMe;
+    }
+
+    /**
      * Check if user may use password reset functionality.
      *
-     * @param  User $user
-     * @param $field
-     * @param $count
-     * @param $interval
+     * @param User   $user
+     * @param string $field
+     * @param int    $count
+     * @param int    $interval
      * @return bool
      */
     public function isUserRateLimited(User $user, $field, $count, $interval)
@@ -326,14 +412,13 @@ class Login
     }
 
     /**
-     * Reset the rate limit counter
+     * Reset the rate limit counter.
      *
-     * @param User $user
-     * @param $field
+     * @param User   $user
+     * @param string $field
      */
     public function resetRateLimit(User $user, $field)
     {
         $user->{$field} = [];
     }
-
 }

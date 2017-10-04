@@ -1,16 +1,16 @@
 en:
   PLUGIN_LOGIN:
-    USERNAME: Username
-    EMAIL: Email
-    USERNAME_EMAIL: Username/Email
-    PASSWORD: Password
-    ACCESS_DENIED: Access denied...
-    LOGIN_FAILED: Login failed...
-    LOGIN_SUCCESSFUL: You have been successfully logged in.
-    BTN_LOGIN: Login
-    BTN_LOGOUT: Logout
-    BTN_FORGOT: Forgot
-    BTN_REGISTER: Register
+    USERNAME: "Username"
+    EMAIL: "Email"
+    USERNAME_EMAIL: "Username/Email"
+    PASSWORD: "Password"
+    ACCESS_DENIED: "Access denied..."
+    LOGIN_FAILED: "Login failed..."
+    LOGIN_SUCCESSFUL: "You have been successfully logged in."
+    BTN_LOGIN: "Login"
+    BTN_LOGOUT: "Logout"
+    BTN_FORGOT: "Forgot"
+    BTN_REGISTER: "Register"
     BTN_RESET: "Reset Password"
     BTN_SEND_INSTRUCTIONS: "Send Reset Instructions"
     RESET_LINK_EXPIRED: "Reset link has expired, please try again"
@@ -24,15 +24,15 @@ en:
     FORGOT_EMAIL_SUBJECT: "%s Password Reset Request"
     FORGOT_EMAIL_BODY: "<h1>Password Reset</h1><p>Dear %1$s,</p><p>A request was made on <b>%4$s</b> to reset your password.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Click this to reset your password</a><br /><br /></p><p>Alternatively, copy the following URL into your browser's address bar:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Kind regards,<br /><br />%3$s</p>"
     SESSION: "&ldquo;Remember Me&rdquo;-Session"
-    REMEMBER_ME: Remember Me
+    REMEMBER_ME: "Remember Me"
     REMEMBER_ME_HELP: "Sets a persistent cookie on your browser to allow persistent-login authentication between sessions."
     REMEMBER_ME_STOLEN_COOKIE: "Someone else has used your login information to access this page! All sessions were logged out. Please log in with your credentials and check your data."
-    BUILTIN_CSS: Use built in CSS
-    BUILTIN_CSS_HELP: Include the CSS provided by the admin plugin
-    ROUTE: Login path
-    ROUTE_HELP: Custom route to a custom login page that your theme provides
-    ROUTE_REGISTER: Registration path
-    ROUTE_REGISTER_HELP: Route to the registration page. Set this if you want to use the built-in registration page. Leave it empty if you have your own registration form
+    BUILTIN_CSS: "Use built in CSS"
+    BUILTIN_CSS_HELP: "Include the CSS provided by the admin plugin"
+    ROUTE: "Login path"
+    ROUTE_HELP: "Custom route to a custom login page that your theme provides"
+    ROUTE_REGISTER: "Registration path"
+    ROUTE_REGISTER_HELP: "Route to the registration page. Set this if you want to use the built-in registration page. Leave it empty if you have your own registration form"
     USERNAME_NOT_VALID: "Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed"
     USERNAME_NOT_AVAILABLE: "Username %s already exists, please pick another username"
     PASSWORD_NOT_VALID: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
@@ -74,7 +74,7 @@ en:
     REDIRECT_AFTER_LOGIN_HELP: "Custom route to redirect after login"
     REDIRECT_AFTER_REGISTRATION: "Redirect after registration"
     REDIRECT_AFTER_REGISTRATION_HELP: "Custom route to redirect after the registration"
-    OPTIONS: Options
+    OPTIONS: "Options"
     EMAIL_VALIDATION_MESSAGE: "Must be a valid email address"
     PASSWORD_VALIDATION_MESSAGE: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
     TIMEOUT_HELP: "Sets the session timeout in seconds when Remember Me is enabled and checked by the user. Minimum is 604800 which means 1 week"
@@ -107,6 +107,9 @@ en:
     ROUTE_RESET: "Reset password route"
     ROUTE_PROFILE: "User profile route"
     ROUTE_ACTIVATE: "User activation route"
+    LOGGED_OUT: "You have been successfully logged out..."
+    PAGE_RESTRICTED: "Access is restricted, please login..."
+
 
 de:
   PLUGIN_LOGIN:
