@@ -97,7 +97,7 @@ class Controller
         try {
             $success = call_user_func([$this, $method]);
         } catch (\RuntimeException $e) {
-            $this->setMessage($e->getMessage(), 'error');
+            $this->login->setMessage($e->getMessage(), 'error');
         }
 
         if (!$this->redirect && isset($redirect)) {
@@ -124,7 +124,7 @@ class Controller
         $interval = $this->grav['config']->get('plugins.login.max_login_interval', 10);
 
         if ($this->login->isUserRateLimited($user, 'login_attempts', $count, $interval)) {
-            $this->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
+            $this->login->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
             return true;
@@ -142,10 +142,10 @@ class Controller
             }
             $this->setRedirect($redirect);
         } elseif ($user->username) {
-            $this->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
+            $this->login->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
         } else {
-            $this->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
+            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
         }
 
         return true;
@@ -352,19 +352,6 @@ class Controller
     {
         $this->redirect = $path;
         $this->redirectCode = $code;
-    }
-
-    /**
-     * Add message into the session queue.
-     *
-     * @param string $msg
-     * @param string $type
-     */
-    public function setMessage($msg, $type = 'info')
-    {
-        /** @var Message $messages */
-        $messages = $this->grav['messages'];
-        $messages->add($msg, $type);
     }
 
     /**

@@ -114,12 +114,14 @@ en:
 de:
   PLUGIN_LOGIN:
     USERNAME: Benutzername
+    EMAIL: Email
+    USERNAME_EMAIL: Benutzername/Email
     PASSWORD: Passwort
     ACCESS_DENIED: Zugang verweigert
     LOGIN_FAILED: Login fehlgeschlagen...
     LOGIN_SUCCESSFUL: Du wurdest erfolgreich eingeloggt.
     BTN_LOGIN: Anmelden
-    BTN_LOGOUT: Ausloggen
+    BTN_LOGOUT: Abmelden
     BTN_FORGOT: Vergessen
     BTN_REGISTER: Registrieren
     REMEMBER_ME: Angemeldet bleiben
@@ -156,6 +158,7 @@ de:
     REDIRECT_AFTER_REGISTRATION: "Umleitung nach Registrierung"
     OPTIONS: Optionen
     EMAIL_VALIDATION_MESSAGE: "Muss eine gültige E-Mail Adresse sein"
+    WELCOME: "Willkommen"
 
 fr:
   PLUGIN_LOGIN:

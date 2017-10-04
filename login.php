@@ -307,54 +307,6 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Add Profile page
-     * @throws \Exception
-     */
-    public function addProfilePage()
-    {
-        $route = $this->config->get('plugins.login.route_profile');
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
-
-        if (!$page) {
-            // Only add forgot page if it hasn't already been defined.
-            $page = new Page;
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/profile.md'));
-            $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
-        }
-
-        $this->storeReferrerPage();
-    }
-
-    /**
-     * Set Unauthorized page
-     * @throws \Exception
-     */
-    public function setUnauthorizedPage()
-    {
-        $route = $this->config->get('plugins.login.route_unauthorized');
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
-
-        if (!$page) {
-            $page = new Page;
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/unauthorized.md'));
-            $page->template('default');
-            $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
-        }
-
-        unset($this->grav['page']);
-        $this->grav['page'] = $page;
-    }
-
-    /**
      * Handle user activation
      * @throws \RuntimeException
      */
@@ -423,6 +375,53 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Add Profile page
+     */
+    public function addProfilePage()
+    {
+        $route = $this->config->get('plugins.login.route_profile');
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            // Only add forgot page if it hasn't already been defined.
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . "/pages/profile.md"));
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+
+        $this->storeReferrerPage();
+    }
+
+    /**
+     * Set Unauthorized page
+     * @throws \Exception
+     */
+    public function setUnauthorizedPage()
+    {
+        $route = $this->config->get('plugins.login.route_unauthorized');
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->dispatch($route);
+
+        if (!$page) {
+            $page = new Page;
+            $page->init(new \SplFileInfo(__DIR__ . '/pages/unauthorized.md'));
+            $page->template('default');
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+
+        unset($this->grav['page']);
+        $this->grav['page'] = $page;
+    }
+
+    /**
      * Initialize login controller
      */
     public function loginController()
@@ -437,8 +436,8 @@ class LoginPlugin extends Plugin
             case 'login':
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
-                        'warning');
-                    $this->authenticated = false;
+                        'info');
+                    $this->authorized = false;
                     $twig = $this->grav['twig'];
                     $twig->twig_vars['notAuthorized'] = true;
 
@@ -446,24 +445,10 @@ class LoginPlugin extends Plugin
                 }
                 break;
 
-            case 'logout':
-                $nonce = $this->grav['uri']->param('logout-nonce');
-                if ($nonce === null || !Utils::verifyNonce($nonce, 'logout-form')) {
-                    return;
-                }
-                break;
-
             case 'forgot':
                 if (!isset($post['forgot-form-nonce']) || !Utils::verifyNonce($post['forgot-form-nonce'], 'forgot-form')) {
-                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'error');
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'info');
                     return;
-                }
-                break;
-
-            case 'reset':
-                if (!isset($post['reset-form-nonce']) || !Utils::verifyNonce($post['reset-form-nonce'], 'reset-form')) {
-                    //$this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
-                    //return;
                 }
                 break;
         }
@@ -481,6 +466,7 @@ class LoginPlugin extends Plugin
         if ($this->config->get('plugins.login.protect_protected_page_media', false)) {
             $page_url = dirname($this->grav['uri']->path());
             $page = $this->grav['pages']->find($page_url);
+            unset($this->grav['page']);
             $this->grav['page'] = $page;
             $this->authorizePage();
         }
@@ -532,34 +518,32 @@ class LoginPlugin extends Plugin
 
         // Continue to the page if user is authorized to access the page.
         foreach ($rules as $rule => $value) {
-            if (!is_array($value)) {
-                if ($user->authorize($rule) === (bool)$value) {
-                    return;
-                }
-            } else {
-                /** @var array $value */
+            if (is_array($value)) {
                 foreach ($value as $nested_rule => $nested_value) {
-                    if ($user->authorize("{$rule}.{$nested_rule}") === (bool)$nested_value) {
+                    if ($user->authorize($rule . '.' . $nested_rule) == $nested_value) {
                         return;
                     }
                 }
+            } else {
+                if ($user->authorize($rule) == $value) {
+                    return;
+                }
             }
         }
 
-        /** @var Language $l */
-        $l = $this->grav['language'];
+
+        // If this is not an HTML page request, simply throw a 403 error
+        $uri_extension = $this->grav['uri']->extension('html');
+        $supported_types = $this->config->get('media.types');
+        if ($uri_extension !== 'html' && array_key_exists($uri_extension, $supported_types)) {
+            header('HTTP/1.0 403 Forbidden');
+            exit;
+        }
 
         // User is not logged in; redirect to login page.
         if ($this->redirect_to_login && $this->route && !$user->authenticated) {
-            /** @var Uri $uri */
-            $uri = $this->grav['uri'];
-
-            if ($uri->extension() !== 'json') {
-                $extension = $uri->extension();
-                $this->grav->redirect($this->route. ($extension ? '.' . $extension : ''), 302);
-            }
+            $this->grav->redirect($this->route, 302);
         }
-
 
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
@@ -570,6 +554,7 @@ class LoginPlugin extends Plugin
             if ($this->route) {
                 $page = $this->grav['pages']->dispatch($this->route);
             } else {
+
                 $page = new Page;
                 // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
@@ -587,8 +572,11 @@ class LoginPlugin extends Plugin
             $this->authenticated = false;
             unset($this->grav['page']);
             $this->grav['page'] = $page;
+
             $twig->twig_vars['form'] = new Form($page);
         } else {
+            /** @var Language $l */
+            $l = $this->grav['language'];
             $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             $this->authorized = false;
             $twig->twig_vars['notAuthorized'] = true;

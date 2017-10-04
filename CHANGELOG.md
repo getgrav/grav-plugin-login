@@ -1,14 +1,40 @@
-# v2.4.0
+# v2.5.0
 ## mm/dd/2017
 
 1. [](#new)
-    * Added the ability to have a custom route for login page, but not redirect
     * Added `$grav['login']->login()` and `$grav['login']->logout()` functions with event hooks
     * Added events `onUserLoginAuthenticate`, `onUserLoginAuthorize`, `onUserLoginFailure`, `onUserLogin`, `onUserLogout`
+
+# v2.4.2
+## 09/29/2017
+
+1. [](#bugfix)
+    * Fixed issue with protected page media without access [#132](https://github.com/getgrav/grav-plugin-login/issues/132)
+    * Improved validation of email to support RFC5322 [Grav#1648](https://github.com/getgrav/grav/issues/1648)
+
+# v2.4.1
+## 09/12/2017
+
+1. [](#bugfix)
+    * Fixed an issue with 3rd party login plugins [#130](https://github.com/getgrav/grav-plugin-login/issues/130)
+
+# v2.4.0
+## 09/07/2017
+
+1. [](#new)
+    * Added the ability to have a custom route for login page, but not redirect
+    * Added a new `unauthorized.md` page that can be customized as needed
 1. [](#improved)
+    * Differentiated between `authenticated` and `authorized`
     * Moved rate-limiting logic to the Login class
+    * Much code cleanup and removing of cruft
+    * Updated vendor libraries
+    * Added Russian translation
 1. [](#bugfix)
     * Fixed login JSON response in case of login failure
+    * Fixed issue with profile form displaying on login page
+    * Store referrer page when trying to access Profile page
+    * Fixed error when logging out with an expired session
 
 # v2.3.2
 ## 06/22/2017
