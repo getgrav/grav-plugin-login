@@ -1,3 +1,9 @@
+# v2.4.3
+## mm/dd/2017
+
+1. [](#bugfix)
+    * Escape untrusted URLs in the template files
+
 # v2.4.2
 ## 09/29/2017
 
