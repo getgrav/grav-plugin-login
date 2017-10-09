@@ -52,6 +52,7 @@ class Controller
 
     /**
      * @var RememberMe\RememberMe
+     * @deprecated 2.0 Use $grav['login']->rememberMe() instead
      */
     protected $rememberMe;
 
@@ -355,20 +356,6 @@ class Controller
     }
 
     /**
-     * Gets and sets the RememberMe class
-     *
-     * @param  mixed $var A rememberMe instance to set
-     *
-     * @return RememberMe\RememberMe Returns the current rememberMe instance
-     */
-    public function rememberMe($var = null)
-    {
-        $this->rememberMe = $this->login->rememberMe($var);
-
-        return $this->rememberMe;
-    }
-
-    /**
      * Prepare and return POST data.
      *
      * @param array $post
@@ -408,6 +395,20 @@ class Controller
         return $data;
     }
 
+    /**
+     * Gets and sets the RememberMe class
+     *
+     * @param  mixed $var A rememberMe instance to set
+     *
+     * @return RememberMe\RememberMe Returns the current rememberMe instance
+     * @deprecated 2.0 Use $grav['login']->rememberMe() instead
+     */
+    public function rememberMe($var = null)
+    {
+        $this->rememberMe = $this->login->rememberMe($var);
+
+        return $this->rememberMe;
+    }
 
     /**
      * Check if user may use password reset functionality.
@@ -417,6 +418,7 @@ class Controller
      * @param $count
      * @param $interval
      * @return bool
+     * @deprecated 2.0 Use $grav['login']->isUserRateLimited() instead
      */
     protected function isUserRateLimited(User $user, $field, $count, $interval)
     {
@@ -428,6 +430,7 @@ class Controller
      *
      * @param User $user
      * @param $field
+     * @deprecated 2.0 Use $grav['login']->resetRateLimit() instead
      */
     protected function resetRateLimit(User $user, $field)
     {
