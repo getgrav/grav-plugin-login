@@ -1,5 +1,5 @@
 # v2.4.3
-## xx/xx/2017
+## 10/11/2017
 
 1. [](#bugfix)
     * Fix an issue when a user only has `groups` and no `access` defined [#134](https://github.com/getgrav/grav-plugin-login/issues/134)
