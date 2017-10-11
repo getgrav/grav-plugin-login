@@ -1,6 +1,6 @@
 <?php
 /**
- * @package    Grav.Plugin.Login
+ * @package    Grav\Plugin\Login
  *
  * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
@@ -25,7 +25,7 @@ use RocketTheme\Toolbox\Session\Message;
 
 /**
  * Class LoginPlugin
- * @package Grav\Plugin
+ * @package Grav\Plugin\Login
  */
 class LoginPlugin extends Plugin
 {
