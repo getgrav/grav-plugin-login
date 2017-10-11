@@ -19,6 +19,7 @@
                 {% endif %}
 
                 {% for field in form.fields %}
+                    {% set value = field.name == 'username' ? username : '' %}
                     {% if field.type %}
                         {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
                     {% endif %}

@@ -4,6 +4,8 @@
 1. [](#new)
     * Added `$grav['login']->login()` and `$grav['login']->logout()` functions with event hooks
     * Added events `onUserLoginAuthenticate`, `onUserLoginAuthorize`, `onUserLoginFailure`, `onUserLogin`, `onUserLogout`
+1. [](#improved)
+    * Remember entered username if login fails
 
 # v2.4.3
 ## mm/dd/2017
