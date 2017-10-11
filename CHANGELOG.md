@@ -1,7 +1,8 @@
 # v2.4.3
-## mm/dd/2017
+## xx/xx/2017
 
 1. [](#bugfix)
+    * Fix an issue when a user only has `groups` and no `access` defined [#134](https://github.com/getgrav/grav-plugin-login/issues/134)
     * Escape untrusted URLs in the template files
 
 # v2.4.2
