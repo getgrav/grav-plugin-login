@@ -617,7 +617,7 @@ class LoginPlugin extends Plugin
             $this->grav['assets']->add('plugin://login/css/login.css');
         }
 
-        $task = $this->grav['uri']->param('task') ?: isset($_POST['task']) ? $_POST['task'] : '';
+        $task = $this->grav['uri']->param('task') ?: (isset($_POST['task']) ? $_POST['task'] : '');
         $task = substr($task, strlen('login.'));
         if ($task === 'reset') {
             $username = $this->grav['uri']->param('user');
