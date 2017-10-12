@@ -483,7 +483,7 @@ class LoginPlugin extends Plugin
 
         /** @var User $user */
         $user = $this->grav['user'];
-        if (!$user->get('access')) {
+        if (!($user->get('access') || $user->get('groups'))) {
             $user = User::load($user->get('username'));
         }
 
