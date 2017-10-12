@@ -9,9 +9,9 @@ namespace Grav\Plugin\Login\RememberMe;
 
 use Grav\Common\Cache;
 use Grav\Common\Grav;
+use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\Cache\FilesystemCache;
 use Birke\Rememberme\Storage\StorageInterface;
-use Grav\Framework\Cache\Adapter\DoctrineCache;
 
 /**
  * Storage wrapper for Doctrine cache
@@ -23,7 +23,7 @@ use Grav\Framework\Cache\Adapter\DoctrineCache;
 class TokenStorage implements StorageInterface
 {
     /**
-     * @var DoctrineCache
+     * @var CacheProvider
      */
     protected $driver;
 
