@@ -122,9 +122,14 @@ class Controller
         $ipKey = Uri::ip();
 
         $rateLimiter = $this->login->getRateLimiter('login_attempts');
+
+        // Check if the current IP has been used in failed login attempts.
+        $attempts = count($rateLimiter->getAttempts($ipKey, 'ip'));
+
         $rateLimiter->registerRateLimitedAction($ipKey, 'ip')->registerRateLimitedAction($userKey);
 
-        if ($rateLimiter->isRateLimited($ipKey, 'ip') || $rateLimiter->isRateLimited($userKey)) {
+        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
+        if ($rateLimiter->isRateLimited($ipKey, 'ip') || ($attempts && $rateLimiter->isRateLimited($userKey))) {
             $this->login->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $rateLimiter->getInterval()]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 

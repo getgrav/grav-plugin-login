@@ -56,7 +56,19 @@ class RateLimiter
             return false;
         }
 
-        return $this->maxCount && count((array) $this->cache->get($type . $key, [])) > $this->maxCount;
+        return $this->maxCount && count($this->getAttempts($key, $type)) > $this->maxCount;
+    }
+
+    /**
+     *
+     *
+     * @param string $key
+     * @param string $type
+     * @return array
+     */
+    public function getAttempts($key, $type = 'username')
+    {
+        return (array) $this->cache->get($type . $key, []);
     }
 
     /**
