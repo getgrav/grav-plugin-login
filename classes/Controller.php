@@ -9,10 +9,10 @@ namespace Grav\Plugin\Login;
 
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
+use Grav\Common\Uri;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
-use RocketTheme\Toolbox\Session\Message;
 
 /**
  * Class Controller
@@ -118,35 +118,38 @@ class Controller
         /** @var Language $t */
         $t = $this->grav['language'];
 
-        /** @var User $user */
-        $user = $this->grav['user'];
+        $userKey = isset($this->post['username']) ? (string)$this->post['username'] : '';
+        $ipKey = Uri::ip();
 
-        $count = $this->grav['config']->get('plugins.login.max_login_count', 5);
-        $interval = $this->grav['config']->get('plugins.login.max_login_interval', 10);
+        $rateLimiter = $this->login->getRateLimiter('login_attempts');
+        $rateLimiter->registerRateLimitedAction($ipKey, 'ip')->registerRateLimitedAction($userKey);
 
-        if ($this->login->isUserRateLimited($user, 'login_attempts', $count, $interval)) {
-            $this->login->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
+        if ($rateLimiter->isRateLimited($ipKey, 'ip') || $rateLimiter->isRateLimited($userKey)) {
+            $this->login->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $rateLimiter->getInterval()]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
             return true;
         }
 
-        // TODO: The following logic has really never worked as the user object may be changed during the login progress!
         if ($this->authenticate($this->post)) {
-            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'), 'info');
+            $rateLimiter->resetRateLimit($ipKey, 'ip')->resetRateLimit($userKey);
 
-            $this->login->resetRateLimit($user, 'login_attempts');
+            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'), 'info');
 
             $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
             if (!$redirect) {
                 $redirect = $this->grav['session']->redirect_after_login ?: $this->grav['uri']->referrer('/');
             }
             $this->setRedirect($redirect);
-        } elseif ($user->username) {
-            $this->login->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
-            $this->setRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
         } else {
-            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
+            /** @var User $user */
+            $user = $this->grav['user'];
+            if ($user->username) {
+                $this->login->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
+                $this->setRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
+            } else {
+                $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
+            }
         }
 
         return true;
@@ -214,11 +217,12 @@ class Controller
             return true;
         }
 
-        $count = $this->grav['config']->get('plugins.login.max_pw_resets_count', 0);
-        $interval =$this->grav['config']->get('plugins.login.max_pw_resets_interval', 2);
+        $userKey = $user->username;
+        $rateLimiter = $this->login->getRateLimiter('pw_resets');
+        $rateLimiter->registerRateLimitedAction($userKey);
 
-        if ($this->login->isUserRateLimited($user, 'pw_resets', $count, $interval)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $email, $interval]), 'error');
+        if ($rateLimiter->isRateLimited($userKey)) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $email, $rateLimiter->getInterval()]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
             return true;
@@ -401,7 +405,7 @@ class Controller
      * @param  mixed $var A rememberMe instance to set
      *
      * @return RememberMe\RememberMe Returns the current rememberMe instance
-     * @deprecated 2.0 Use $grav['login']->rememberMe() instead
+     * @deprecated 3.0 Use $grav['login']->rememberMe() instead
      */
     public function rememberMe($var = null)
     {
@@ -418,7 +422,7 @@ class Controller
      * @param $count
      * @param $interval
      * @return bool
-     * @deprecated 2.0 Use $grav['login']->isUserRateLimited() instead
+     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     protected function isUserRateLimited(User $user, $field, $count, $interval)
     {
@@ -430,7 +434,7 @@ class Controller
      *
      * @param User $user
      * @param $field
-     * @deprecated 2.0 Use $grav['login']->resetRateLimit() instead
+     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     protected function resetRateLimit(User $user, $field)
     {

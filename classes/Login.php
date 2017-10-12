@@ -46,6 +46,9 @@ class Login
     /** @var RememberMe */
     protected $rememberMe;
 
+    /** @var RateLimiter[] */
+    protected $rateLimiters = [];
+
     /**
      * Login constructor.
      *
@@ -387,6 +390,31 @@ class Login
     }
 
     /**
+     * @param string $context
+     * @param int $maxCount
+     * @param int $interval
+     * @return RateLimiter
+     */
+    public function getRateLimiter($context, $maxCount = null, $interval = null)
+    {
+        if (!isset($this->rateLimiters[$context])) {
+            switch ($context) {
+                case 'login_attempts':
+                    $maxCount = $this->grav['config']->get('plugins.login.max_login_count', 5);
+                    $interval = $this->grav['config']->get('plugins.login.max_login_interval', 10);
+                    break;
+                case 'pw_resets':
+                    $maxCount = $this->grav['config']->get('plugins.login.max_pw_resets_count', 0);
+                    $interval = $this->grav['config']->get('plugins.login.max_pw_resets_interval', 2);
+                    break;
+            }
+            $this->rateLimiters[$context] = new RateLimiter($context, $maxCount, $interval);
+        }
+
+        return $this->rateLimiters[$context];
+    }
+
+    /**
      * Check if user may use password reset functionality.
      *
      * @param User   $user
@@ -394,6 +422,7 @@ class Login
      * @param int    $count
      * @param int    $interval
      * @return bool
+     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     public function isUserRateLimited(User $user, $field, $count, $interval)
     {
@@ -424,6 +453,7 @@ class Login
      *
      * @param User   $user
      * @param string $field
+     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     public function resetRateLimit(User $user, $field)
     {
