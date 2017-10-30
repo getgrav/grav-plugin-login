@@ -49,6 +49,8 @@ form:
 
   process:
       register_user: true
+      message: "Thanks for registering..."
+      reset: true
 ---
 
 # Register
