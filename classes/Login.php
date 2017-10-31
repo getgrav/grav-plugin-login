@@ -150,6 +150,21 @@ class Login
     }
 
     /**
+     * Get Current logged in user
+     *
+     * @return User
+     */
+    public function getUser()
+    {
+        /** @var User $user */
+        $user = $this->grav['user'];
+        if (!($user->get('access') || $user->get('groups'))) {
+            $user = User::load($user->get('username'));
+        }
+        return $user;
+    }
+
+    /**
      * Add message into the session queue.
      *
      * @param string $msg
@@ -445,6 +460,47 @@ class Login
             $user->{$field} = $actual_resets;
 
         }
+        return false;
+    }
+
+
+    public function isUserAuthorizedForPage($user, $page, $config = null)
+    {
+        $header = $page->header();
+        $rules = isset($header->access) ? (array)$header->access : [];
+
+        if ($config && $config->get('parent_acl')) {
+            // If page has no ACL rules, use its parent's rules
+            if (!$rules) {
+                $parent = $page->parent();
+                while (!$rules and $parent) {
+                    $header = $parent->header();
+                    $rules = isset($header->access) ? (array)$header->access : [];
+                    $parent = $parent->parent();
+                }
+            }
+        }
+
+        // Continue to the page if it has no ACL rules.
+        if (!$rules) {
+            return true;
+        }
+
+        // Continue to the page if user is authorized to access the page.
+        foreach ($rules as $rule => $value) {
+            if (is_array($value)) {
+                foreach ($value as $nested_rule => $nested_value) {
+                    if ($user->authorize($rule . '.' . $nested_rule) == $nested_value) {
+                        return true;
+                    }
+                }
+            } else {
+                if ($user->authorize($rule) == $value) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 

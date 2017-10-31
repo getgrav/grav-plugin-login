@@ -109,7 +109,8 @@ en:
     ROUTE_ACTIVATE: "User activation route"
     LOGGED_OUT: "You have been successfully logged out..."
     PAGE_RESTRICTED: "Access is restricted, please login..."
-
+    DYNAMIC_VISIBILITY: "Dynamic Page Visibility"
+    DYNAMIC_VISIBILITY_HELP: "Allows dynamic processing of page visibility base on access rules if login.visibility_requires_access is set to true on a page"
 
 de:
   PLUGIN_LOGIN:

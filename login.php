@@ -60,7 +60,7 @@ class LoginPlugin extends Plugin
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
-            'onPagesInitialized'        => ['storeReferrerPage', 0],
+            'onPagesInitialized'        => [['storeReferrerPage', 0], ['pageVisibility', 0]],
             'onPageInitialized'         => ['authorizePage', 0],
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
@@ -173,6 +173,31 @@ class LoginPlugin extends Plugin
                 'onPagesInitialized' => ['addProfilePage', 0],
             ]);
             return;
+        }
+    }
+
+    /**
+     * Optional ability to dynamically set visibility based on page access and page header
+     * that states `login.visibility_requires_access: true`
+     *
+     * @param Event $e
+     */
+    public function pageVisibility(Event $e)
+    {
+        if ($this->config->get('plugins.login.dynamic_page_visibility')) {
+            $pages = $e['pages'];
+            $user = $this->grav['login']->getUser();
+
+            foreach ($pages->instances() as $page) {
+                $header = $page->header();
+                if (isset($header->login['visibility_requires_access'])) {
+                    $config = $this->mergeConfig($page);
+                    $access = $this->grav['login']->isUserAuthorizedForPage($user, $page, $config);
+                    if ($access == false) {
+                        $page->visible(false);
+                    }
+                }
+            }
         }
     }
 
@@ -478,59 +503,18 @@ class LoginPlugin extends Plugin
     public function authorizePage()
     {
         if (!$this->authenticated) {
-            return;
+            return true;
         }
 
         /** @var User $user */
-        $user = $this->grav['user'];
-        if (!($user->get('access') || $user->get('groups'))) {
-            $user = User::load($user->get('username'));
-        }
+        $user = $this->grav['login']->getUser();
 
         /** @var Page $page */
         $page = $this->grav['page'];
 
-        if (!$page) {
-            return;
+        if (!$page || $this->grav['login']->isUserAuthorizedForPage($user, $page, $this->mergeConfig($page))) {
+            return true;
         }
-
-        $header = $page->header();
-        $rules = isset($header->access) ? (array)$header->access : [];
-
-        $config = $this->mergeConfig($page);
-
-        if ($config->get('parent_acl')) {
-            // If page has no ACL rules, use its parent's rules
-            if (!$rules) {
-                $parent = $page->parent();
-                while (!$rules and $parent) {
-                    $header = $parent->header();
-                    $rules = isset($header->access) ? (array)$header->access : [];
-                    $parent = $parent->parent();
-                }
-            }
-        }
-
-        // Continue to the page if it has no ACL rules.
-        if (!$rules) {
-            return;
-        }
-
-        // Continue to the page if user is authorized to access the page.
-        foreach ($rules as $rule => $value) {
-            if (is_array($value)) {
-                foreach ($value as $nested_rule => $nested_value) {
-                    if ($user->authorize($rule . '.' . $nested_rule) == $nested_value) {
-                        return;
-                    }
-                }
-            } else {
-                if ($user->authorize($rule) == $value) {
-                    return;
-                }
-            }
-        }
-
 
         // If this is not an HTML page request, simply throw a 403 error
         $uri_extension = $this->grav['uri']->extension('html');
@@ -584,7 +568,6 @@ class LoginPlugin extends Plugin
             $this->setUnauthorizedPage();
         }
     }
-
 
     /**
      * [onTwigTemplatePaths] Add twig paths to plugin templates.
