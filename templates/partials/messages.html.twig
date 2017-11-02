@@ -1,3 +1,16 @@
-{% for message in grav.messages.fetch %}
-<div class="{{ message.scope|e }} alert">{{ message.message|raw }}</div>
-{% endfor %}
+{% if grav.messages.all %}
+    <div id="messages">
+        {% for message in grav.messages.fetch %}
+
+            {% set scope = message.scope|e %}
+
+            {% set type_mapping = {'info':'green', 'error': 'red', 'warning': 'yellow'} %}
+            {% set type = type_mapping[scope] %}
+
+            {% set icon_mapping = {'info':'check', 'error': 'ban', 'warning': 'exclamation-triangle'} %}
+            {% set icon = icon_mapping[scope] %}
+
+            <div class="notices {{ type }} {{ scope }}"><p>{{ message.message|raw }}</p></div>
+        {% endfor %}
+    </div>
+{% endif %}

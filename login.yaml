@@ -9,6 +9,8 @@ route_reset: '/reset_password'
 route_profile: '/user_profile'
 route_register: '/user_register'
 route_unauthorized: '/user_unauthorized'
+
+dynamic_page_visibility: false
 parent_acl: false
 protect_protected_page_media: false
 

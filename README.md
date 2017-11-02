@@ -12,6 +12,18 @@ These are available via GPM, and because the plugin has dependencies you just ne
 $ bin/gpm install login
 ```
 
+# Changes in version 2.4
+
+Added new `$grav['login']->login()` and `$grav['login']->logout()` functions for you to use.
+
+They use following events which can be hooked by plugins:
+
+* `onUserLoginAuthenticate` Allows plugins to include their own authentication methods.
+* `onUserLoginAuthorize`    Allows plugins to block user from being logged in.
+* `onUserLoginFailure`      Allows plugins to include their own logic when user authentication failed.
+* `onUserLogin`             Allows plugins to include their own logic when user logs in.
+* `onUserLogout`            Allows plugins to include their own logic when user logs out.
+
 # Changes in version 2.0
 
 The Login Plugin 2.0 has the following changes compared to 1.0:
@@ -200,25 +212,27 @@ Add the following content to your registration form page:
 ```
 ---
 form:
-  
+
   fields:
-    -
-      name: username
+    fullname:
+      type: text
+      validate:
+        required: true
+
+    username:
       type: text
       validate:
         required: true
         message: PLUGIN_LOGIN.USERNAME_NOT_VALID
         config-pattern@: system.username_regex
 
-    -
-      name: email
-      type: text
+    email:
+      type: email
       validate:
         required: true
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
 
-    -
-      name: password1
+    password1:
       type: password
       label: Enter a password
       validate:
@@ -226,10 +240,9 @@ form:
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
         config-pattern@: system.pwd_regex
 
-    -
-      name: password2
+    password2:
       type: password
-      label: Repeat the password
+      label: Enter the password again
       validate:
         required: true
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
@@ -245,11 +258,13 @@ form:
 
   process:
       register_user: true
-      display: '/welcome'
-      message: "Welcome to my site!"
+      message: "Thanks for registering..."
+      reset: true      
 ---
 
-# Registration
+# Register
+
+Create a new user account by entering all the required fields below:
 ```
 
 This is a normal form. The only thing different from a contact form or another form that you might write on your site is the process field `register_user`, which takes care of processing the user registration.
