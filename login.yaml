@@ -32,6 +32,8 @@ user_registration:
     site:
       login: 'true'
 
+  redirect_after_registration: ''
+
   options:
     validate_password1_and_password2: true
     set_user_disabled: false
