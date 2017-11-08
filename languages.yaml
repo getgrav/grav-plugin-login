@@ -35,6 +35,7 @@ en:
     ROUTE_REGISTER_HELP: "Route to the registration page. Set this if you want to use the built-in registration page. Leave it empty if you have your own registration form"
     USERNAME_NOT_VALID: "Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed"
     USERNAME_NOT_AVAILABLE: "Username %s already exists, please pick another username"
+    EMAIL_NOT_AVAILABLE: "Email address %s already exists, please pick another email address"
     PASSWORD_NOT_VALID: "Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
     PASSWORDS_DO_NOT_MATCH: "Passwords do not match. Double-check you entered the same password twice"
     USER_NEEDS_EMAIL_FIELD: "The user needs an email field"

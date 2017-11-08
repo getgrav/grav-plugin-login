@@ -626,18 +626,17 @@ class LoginPlugin extends Plugin
         $language = $this->grav['language'];
 
         if (!$this->config->get('plugins.login.enabled')) {
-        throw new \RuntimeException($language->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
+            throw new \RuntimeException($language->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
         }
 
         if (!$this->config->get('plugins.login.user_registration.enabled')) {
             throw new \RuntimeException($language->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
         }
 
-        $data = [];
+        // Check for existing username
         $username = $form->value('username');
-        $data['username'] = $username;
-
-        if (file_exists($this->grav['locator']->findResource('account://' . $username . YAML_EXT))) {
+        $existing_username = User::find($username,['username']);
+        if ($existing_username->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
                 'message' => $language->translate([
@@ -646,10 +645,29 @@ class LoginPlugin extends Plugin
                 ])
             ]));
             $event->stopPropagation();
-
             return;
         }
 
+        // Check for existing email
+        $email    = $form->value('email');
+        $existing_email = User::find($email,['email']);
+        if ($existing_email->exists()) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate([
+                    'PLUGIN_LOGIN.EMAIL_NOT_AVAILABLE',
+                    $email
+                ])
+            ]));
+            $event->stopPropagation();
+            return;
+        }
+
+        $data = [];
+        $data['username'] = $username;
+
+
+        // if multiple password fields, check they match and set password field from it
         if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
             false)
         ) {
@@ -672,9 +690,13 @@ class LoginPlugin extends Plugin
             $default_values = (array)$this->config->get('plugins.login.user_registration.default_values');
             if ($default_values) {
                 foreach ($default_values as $key => $param) {
-                    $values = explode(',', $param);
 
                     if ($key === $field) {
+                        if (is_array($param)) {
+                            $values = explode(',', $param);
+                        } else {
+                            $values = $param;
+                        }
                         $data[$field] = $values;
                     }
                 }
@@ -685,18 +707,13 @@ class LoginPlugin extends Plugin
             }
         }
 
-        if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
-            false)
-        ) {
-            unset($data['password1'], $data['password2']);
-        }
-
         if ($this->config->get('plugins.login.user_registration.options.set_user_disabled', false)) {
             $data['state'] = 'disabled';
         } else {
             $data['state'] = 'enabled';
         }
 
+        $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data]));
         $user = $this->login->register($data);
 
         if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
@@ -709,6 +726,8 @@ class LoginPlugin extends Plugin
                 $this->login->sendNotificationEmail($user);
             }
         }
+
+        $this->grav->fireEvent('onUserLoginRegistered', new Event(['user' => $user]));
 
         $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false);
         if ($redirect) {

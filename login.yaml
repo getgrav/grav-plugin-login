@@ -23,6 +23,10 @@ user_registration:
     - 'email'
     - 'fullname'
     - 'title'
+    - 'level'
+
+  default_values:
+    level: Newbie
 
   access:
     site:
