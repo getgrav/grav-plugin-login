@@ -8,6 +8,8 @@
 1. [](#improved)
     * Remember entered username if login fails
     * Improved rate limiter to work without sessions and against distributed attacks
+1. [](#bugfix)
+    * Do not send nonce with activation link, email app can open the link in another browser
 
 # v2.4.3
 ## 10/11/2017

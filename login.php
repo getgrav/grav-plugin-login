@@ -66,7 +66,7 @@ class LoginPlugin extends Plugin
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
             'onFormProcessed'           => ['onFormProcessed', 0],
-            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
+            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
             'onUserLoginFailure'        => ['userLoginFailure', 0],
             'onUserLogin'               => ['userLogin', 0],
@@ -345,15 +345,6 @@ class LoginPlugin extends Plugin
 
         $username = $uri->param('username');
 
-        $nonce = $uri->param('nonce');
-        if ($nonce === null || !Utils::verifyNonce($nonce, 'user-activation')) {
-            $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
-            $messages->add($message, 'error');
-            $this->grav->redirect('/');
-
-            return;
-        }
-
         $token = $uri->param('token');
         $user = User::load($username);
 
@@ -361,7 +352,7 @@ class LoginPlugin extends Plugin
             $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
             $messages->add($message, 'error');
         } else {
-            list($good_token, $expire) = explode('::', $user->activation_token);
+            list($good_token, $expire) = explode('::', $user->activation_token, 2);
 
             if ($good_token === $token) {
                 if (time() > $expire) {
@@ -369,7 +360,9 @@ class LoginPlugin extends Plugin
                     $messages->add($message, 'error');
                 } else {
                     $user['state'] = 'enabled';
+                    unset($user['activation_token']);
                     $user->save();
+
                     $message = $this->grav['language']->translate('PLUGIN_LOGIN.USER_ACTIVATED_SUCCESSFULLY');
                     $messages->add($message, 'info');
 
@@ -381,12 +374,7 @@ class LoginPlugin extends Plugin
                     }
 
                     if ($this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-                        //Login user
-                        $this->grav['session']->user = $user;
-                        unset($this->grav['user']);
-                        $this->grav['user'] = $user;
-                        $user->authenticated = true;
-                        $user->authorized = $user->authorize('site.login');
+                        $this->login->login(['username' => $username], ['after_registration' => true]);
                     }
                 }
             } else {
@@ -729,6 +717,10 @@ class LoginPlugin extends Plugin
 
         $this->grav->fireEvent('onUserLoginRegistered', new Event(['user' => $user]));
 
+        if (isset($data['state']) && $data['state'] === 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
+            $this->login->login(['username' => $username], ['after_registration' => true]);
+        }
+
         $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false);
         if ($redirect) {
             $this->grav->redirect($redirect);
@@ -778,6 +770,21 @@ class LoginPlugin extends Plugin
                 $this->processUserProfile($form);
                 break;
         }
+    }
+
+    /**
+     * @param UserLoginEvent $event
+     * @throws \RuntimeException
+     */
+    public function userLoginAuthenticateByRegistration(UserLoginEvent $event)
+    {
+        // Check that we're logging in after registration.
+        if (!$event->getOption('after_registration') || $this->isAdmin()) {
+            return;
+        }
+
+        $event->setStatus($event::AUTHENTICATION_SUCCESS);
+        $event->stopPropagation();
     }
 
     /**

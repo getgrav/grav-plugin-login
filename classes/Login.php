@@ -245,14 +245,6 @@ class Login
         $user->file($file);
         $user->save();
 
-        if (isset($data['state']) && $data['state'] === 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-            //Login user
-            $this->session->user = $user;
-            unset($this->grav['user']);
-            $this->grav['user'] = $user;
-            $user->authorized = $user->authorize('site.login');
-        }
-
         return $user;
     }
 
@@ -343,7 +335,7 @@ class Login
         $user->save();
 
         $param_sep = $this->config->get('system.param_sep', ':');
-        $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('user-activation');
+        $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username;
 
         $site_name = $this->config->get('site.title', 'Website');
 
