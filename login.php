@@ -41,9 +41,6 @@ class LoginPlugin extends Plugin
     /** @var bool */
     protected $authenticated = true;
 
-    /** @var bool */
-    protected $authorized = true;
-
     /** @var Login */
     protected $login;
 
@@ -180,11 +177,14 @@ class LoginPlugin extends Plugin
      * Optional ability to dynamically set visibility based on page access and page header
      * that states `login.visibility_requires_access: true`
      *
+     * Note that this setting may be slow on large sites as it loads all pages into memory for each page load!
+     *
      * @param Event $e
      */
     public function pageVisibility(Event $e)
     {
         if ($this->config->get('plugins.login.dynamic_page_visibility')) {
+            /** @var Pages $pages */
             $pages = $e['pages'];
             $user = $this->grav['user'];
 
@@ -192,8 +192,8 @@ class LoginPlugin extends Plugin
                 $header = $page->header();
                 if (isset($header->login['visibility_requires_access'])) {
                     $config = $this->mergeConfig($page);
-                    $access = $this->grav['login']->isUserAuthorizedForPage($user, $page, $config);
-                    if ($access == false) {
+                    $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
+                    if ($access === false) {
                         $page->visible(false);
                     }
                 }
@@ -217,7 +217,6 @@ class LoginPlugin extends Plugin
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
         $current_route = $uri->route();
-
 
         if (!in_array($current_route, $invalid_redirect_routes, true)) {
             $allowed = true;
@@ -450,7 +449,6 @@ class LoginPlugin extends Plugin
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
                         'info');
-                    $this->authorized = false;
                     $twig = $this->grav['twig'];
                     $twig->twig_vars['notAuthorized'] = true;
 
@@ -491,7 +489,7 @@ class LoginPlugin extends Plugin
     public function authorizePage()
     {
         if (!$this->authenticated) {
-            return true;
+            return;
         }
 
         /** @var User $user */
@@ -501,7 +499,7 @@ class LoginPlugin extends Plugin
         $page = $this->grav['page'];
 
         if (!$page || $this->grav['login']->isUserAuthorizedForPage($user, $page, $this->mergeConfig($page))) {
-            return true;
+            return;
         }
 
         // If this is not an HTML page request, simply throw a 403 error
@@ -550,7 +548,6 @@ class LoginPlugin extends Plugin
             /** @var Language $l */
             $l = $this->grav['language'];
             $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
-            $this->authorized = false;
             $twig->twig_vars['notAuthorized'] = true;
 
             $this->setUnauthorizedPage();

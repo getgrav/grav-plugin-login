@@ -12,6 +12,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\Language\Language;
+use Grav\Common\Page\Page;
 use Grav\Common\Session;
 use Grav\Common\User\User;
 use Grav\Common\Uri;
@@ -407,46 +408,17 @@ class Login
     }
 
     /**
-     * Check if user may use password reset functionality.
-     *
-     * @param User   $user
-     * @param string $field
-     * @param int    $count
-     * @param int    $interval
+     * @param User $user
+     * @param Page $page
+     * @param Config|null $config
      * @return bool
-     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
-    public function isUserRateLimited(User $user, $field, $count, $interval)
-    {
-        if ($count > 0) {
-            if (!isset($user->{$field})) {
-                $user->{$field} = array();
-            }
-            //remove older than 1 hour attempts
-            $actual_resets = array();
-            foreach ($user->{$field} as $reset) {
-                if ($reset > (time() - $interval * 60)) {
-                    $actual_resets[] = $reset;
-                }
-            }
-
-            if (count($actual_resets) >= $count) {
-                return true;
-            }
-            $actual_resets[] = time(); // current reset
-            $user->{$field} = $actual_resets;
-
-        }
-        return false;
-    }
-
-
-    public function isUserAuthorizedForPage($user, $page, $config = null)
+    public function isUserAuthorizedForPage(User $user, Page $page, Config $config = null)
     {
         $header = $page->header();
         $rules = isset($header->access) ? (array)$header->access : [];
 
-        if ($config && $config->get('parent_acl')) {
+        if ($config !== null && $config->get('parent_acl')) {
             // If page has no ACL rules, use its parent's rules
             if (!$rules) {
                 $parent = $page->parent();
@@ -478,6 +450,40 @@ class Login
             }
         }
 
+        return false;
+    }
+
+    /**
+     * Check if user may use password reset functionality.
+     *
+     * @param User   $user
+     * @param string $field
+     * @param int    $count
+     * @param int    $interval
+     * @return bool
+     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
+     */
+    public function isUserRateLimited(User $user, $field, $count, $interval)
+    {
+        if ($count > 0) {
+            if (!isset($user->{$field})) {
+                $user->{$field} = array();
+            }
+            //remove older than 1 hour attempts
+            $actual_resets = array();
+            foreach ($user->{$field} as $reset) {
+                if ($reset > (time() - $interval * 60)) {
+                    $actual_resets[] = $reset;
+                }
+            }
+
+            if (count($actual_resets) >= $count) {
+                return true;
+            }
+            $actual_resets[] = time(); // current reset
+            $user->{$field} = $actual_resets;
+
+        }
         return false;
     }
 
