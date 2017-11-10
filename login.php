@@ -186,7 +186,7 @@ class LoginPlugin extends Plugin
     {
         if ($this->config->get('plugins.login.dynamic_page_visibility')) {
             $pages = $e['pages'];
-            $user = $this->grav['login']->getUser();
+            $user = $this->grav['user'];
 
             foreach ($pages->instances() as $page) {
                 $header = $page->header();
@@ -495,7 +495,7 @@ class LoginPlugin extends Plugin
         }
 
         /** @var User $user */
-        $user = $this->grav['login']->getUser();
+        $user = $this->grav['user'];
 
         /** @var Page $page */
         $page = $this->grav['page'];

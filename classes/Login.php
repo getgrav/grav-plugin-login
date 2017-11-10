@@ -150,21 +150,6 @@ class Login
     }
 
     /**
-     * Get Current logged in user
-     *
-     * @return User
-     */
-    public function getUser()
-    {
-        /** @var User $user */
-        $user = $this->grav['user'];
-        if (!($user->get('access') || $user->get('groups'))) {
-            $user = User::load($user->get('username'));
-        }
-        return $user;
-    }
-
-    /**
      * Add message into the session queue.
      *
      * @param string $msg
@@ -506,5 +491,17 @@ class Login
     public function resetRateLimit(User $user, $field)
     {
         $user->{$field} = [];
+    }
+
+    /**
+     * Get Current logged in user
+     *
+     * @return User
+     * @deprecated 3.0 Use $grav['user'] instead.
+     */
+    public function getUser()
+    {
+        /** @var User $user */
+        return $this->grav['user'];
     }
 }
