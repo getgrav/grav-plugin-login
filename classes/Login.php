@@ -9,6 +9,7 @@ namespace Grav\Plugin\Login;
 
 use Birke\Rememberme\Cookie;
 use Grav\Common\Config\Config;
+use Grav\Common\Data\Data;
 use Grav\Common\Grav;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\Language\Language;
@@ -16,7 +17,6 @@ use Grav\Common\Page\Page;
 use Grav\Common\Session;
 use Grav\Common\User\User;
 use Grav\Common\Uri;
-use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\RememberMe\RememberMe;
@@ -410,10 +410,10 @@ class Login
     /**
      * @param User $user
      * @param Page $page
-     * @param Config|null $config
+     * @param Data|null $config
      * @return bool
      */
-    public function isUserAuthorizedForPage(User $user, Page $page, Config $config = null)
+    public function isUserAuthorizedForPage(User $user, Page $page, $config = null)
     {
         $header = $page->header();
         $rules = isset($header->access) ? (array)$header->access : [];
