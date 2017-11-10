@@ -715,7 +715,7 @@ class LoginPlugin extends Plugin
         $this->grav->fireEvent('onUserLoginRegistered', new Event(['user' => $user]));
 
         if (isset($data['state']) && $data['state'] === 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-            $this->login->login(['username' => $username], ['after_registration' => true]);
+            $this->login->login(['username' => $username], ['after_registration' => true], ['user' => $user]);
         }
 
         $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false);

@@ -69,16 +69,17 @@ class Login
      *
      * @param array $credentials
      * @param array $options
+     * @param array $extra          Example: ['authorize' => 'site.login', 'user' => null], undefined variables gets set.
      * @return User
      */
-    public function login(array $credentials, array $options = [])
+    public function login(array $credentials, array $options = [], array $extra = [])
     {
         $grav = Grav::instance();
 
         $eventOptions = [
             'credentials' => $credentials,
             'options' => $options
-        ];
+        ] + $extra;
 
         // Attempt to authenticate the user.
         $event = new UserLoginEvent($eventOptions);

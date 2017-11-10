@@ -78,7 +78,7 @@ class UserLoginEvent extends Event
         parent::__construct($items);
 
         if (!$this->offsetExists('user')) {
-            $this->offsetSet('user', User::load($this['credentials']['username'], false));
+            $this->offsetSet('user', User::load($this['credentials']['username']));
         }
     }
 
