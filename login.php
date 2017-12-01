@@ -29,6 +29,8 @@ use RocketTheme\Toolbox\Session\Message;
  */
 class LoginPlugin extends Plugin
 {
+    const TMP_COOKIE_NAME = 'tmp-message';
+
     /** @var string */
     protected $route;
 
@@ -598,6 +600,12 @@ class LoginPlugin extends Plugin
         } elseif ($task === 'login') {
             $twig->twig_vars['username'] = isset($_POST['username']) ? $_POST['username'] : '';
         }
+
+        $flashData = $this->grav['session']->getFlashCookieObject(self::TMP_COOKIE_NAME);
+
+        if (isset($flashData->message)) {
+            $this->grav['messages']->add($flashData->message, $flashData->status);
+        }
     }
 
     /**
@@ -915,9 +923,7 @@ class LoginPlugin extends Plugin
         }
 
         $this->grav['session']->invalidate()->start();
-        $this->grav['session']->user = User::load('', false);
-
-        $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.LOGGED_OUT'),
-            'info');
+        $this->grav['session']->setFlashCookieObject(self::TMP_COOKIE_NAME, ['message' => $this->grav['language']->translate('PLUGIN_LOGIN.LOGGED_OUT'),
+            'status' => 'info']);
     }
 }
