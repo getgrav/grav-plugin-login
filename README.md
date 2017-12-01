@@ -334,7 +334,7 @@ Last important thing before the registration is correctly setup: make sure in th
 
 There are several options that can be configured when registering users via `user/plugins/login.yaml`, they are pretty self-explanatory:
 
-```
+```yaml
 user_registration:
   enabled: true                             # Enable User Registration Process
 
