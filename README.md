@@ -255,7 +255,7 @@ Also, your theme needs to implement forms. Use Antimatter or another form-compat
 
 Add the following content to your registration form page:
 
-```
+```yaml
 ---
 form:
 
@@ -307,6 +307,7 @@ form:
       message: "Thanks for registering..."
       reset: true      
 ---
+```
 
 # Registration of Users
 
