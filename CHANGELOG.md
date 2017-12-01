@@ -5,11 +5,12 @@
     * Added `$grav['login']->login()` and `$grav['login']->logout()` functions with event hooks
     * Added `$grav['login']->getRateLimiter($context)` function
     * Added events `onUserLoginAuthenticate`, `onUserLoginAuthorize`, `onUserLoginFailure`, `onUserLogin`, `onUserLogout`
-    * Use new `Session:get/setFlashCookieObject()` methods to maintain logout message
+    * Logout message is now maintained during session destruction
 1. [](#improved)
     * Remember entered username if login fails
     * Improved rate limiter to work without sessions and against distributed attacks
     * Removed `partials/messages.html.twig` and rely on new core version
+    * Moved languages from unified file into dedicated language file structure
 1. [](#bugfix)
     * Do not send nonce with activation link, email app can open the link in another browser
 
