@@ -8,6 +8,7 @@
 1. [](#improved)
     * Remember entered username if login fails
     * Improved rate limiter to work without sessions and against distributed attacks
+    * Removed `partials/messages.html.twig` and rely on new core version
 1. [](#bugfix)
     * Do not send nonce with activation link, email app can open the link in another browser
 
