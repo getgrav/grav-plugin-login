@@ -228,7 +228,8 @@ class Login
             'PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY',
             $site_name,
             $user->username,
-            $user->email
+            $user->email,
+            $this->grav['base_url_absolute'],
         ]);
         $to = $this->config->get('plugins.email.from');
 
@@ -260,9 +261,16 @@ class Login
         }
 
         $site_name = $this->config->get('site.title', 'Website');
+        $author = $this->grav['config']->get('site.author.name', '');
+        $fullname = $user->fullname ?: $user->username;
 
         $subject = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY', $user->username, $site_name]);
+        $content = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY',
+            $fullname,
+            $this->grav['base_url_absolute'],
+            $site_name,
+            $author
+        ]);
         $to = $user->email;
 
         $sent = EmailUtils::sendEmail($subject, $content, $to);
@@ -297,15 +305,19 @@ class Login
         $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username;
 
         $site_name = $this->config->get('site.title', 'Website');
+        $author = $this->grav['config']->get('site.author.name', '');
+        $fullname = $user->fullname ?: $user->username;
 
         $subject = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate([
-            'PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY',
-            $user->username,
+        $content = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY',
+            $fullname,
             $activation_link,
-            $site_name
+            $site_name,
+            $author
         ]);
         $to = $user->email;
+
+
 
         $sent = EmailUtils::sendEmail($subject, $content, $to);
 
@@ -483,4 +495,5 @@ class Login
         /** @var User $user */
         return $this->grav['user'];
     }
+
 }
