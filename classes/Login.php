@@ -152,34 +152,6 @@ class Login
     }
 
     /**
-     * Add message into the session queue.
-     *
-     * @param string $msg
-     * @param string $type
-     */
-    public function setMessage($msg, $type = 'info')
-    {
-        /** @var Message $messages */
-        $messages = $this->grav['messages'];
-        $messages->add($msg, $type);
-    }
-
-    /**
-     * Fetch and delete messages from the session queue.
-     *
-     * @param string $type
-     *
-     * @return array
-     */
-    public function messages($type = null)
-    {
-        /** @var Message $messages */
-        $messages = $this->grav['messages'];
-
-        return $messages->fetch($type);
-    }
-
-    /**
      * Authenticate user.
      *
      * @param array $credentials Form fields.
@@ -192,7 +164,7 @@ class Login
         $user = $this->login($credentials, $options);
 
         if ($user->authenticated) {
-            $this->setMessage($this->language->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
+            $this->grav['messages']->add($this->language->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
                 [$user->language]), 'info');
 
             $redirect_route = $this->uri->route();

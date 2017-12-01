@@ -82,6 +82,8 @@ class Controller
      */
     public function execute()
     {
+        $messages = $this->grav['messages'];
+
         // Set redirect if available.
         if (isset($this->post['_redirect'])) {
             $redirect = $this->post['_redirect'];
@@ -98,7 +100,7 @@ class Controller
         try {
             $success = call_user_func([$this, $method]);
         } catch (\RuntimeException $e) {
-            $this->login->setMessage($e->getMessage(), 'error');
+            $messages->add($e->getMessage(), 'error');
         }
 
         if (!$this->redirect && isset($redirect)) {
@@ -118,6 +120,8 @@ class Controller
         /** @var Language $t */
         $t = $this->grav['language'];
 
+        $messages = $this->grav['messages'];
+
         $userKey = isset($this->post['username']) ? (string)$this->post['username'] : '';
         $ipKey = Uri::ip();
 
@@ -130,7 +134,7 @@ class Controller
 
         // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
         if ($rateLimiter->isRateLimited($ipKey, 'ip') || ($attempts && $rateLimiter->isRateLimited($userKey))) {
-            $this->login->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $rateLimiter->getInterval()]), 'error');
+            $messages->add($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $rateLimiter->getInterval()]), 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
 
             return true;
@@ -139,7 +143,7 @@ class Controller
         if ($this->authenticate($this->post)) {
             $rateLimiter->resetRateLimit($ipKey, 'ip')->resetRateLimit($userKey);
 
-            $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'), 'info');
+            $messages->add($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'), 'info');
 
             $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
             if (!$redirect) {
@@ -150,10 +154,10 @@ class Controller
             /** @var User $user */
             $user = $this->grav['user'];
             if ($user->username) {
-                $this->login->setMessage($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
+                $messages->add($t->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
                 $this->setRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
             } else {
-                $this->login->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
+                $messages->add($t->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
             }
         }
 

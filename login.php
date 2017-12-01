@@ -617,6 +617,7 @@ class LoginPlugin extends Plugin
     private function processUserRegistration($form, Event $event)
     {
         $language = $this->grav['language'];
+        $messages = $this->grav['messages'];
 
         if (!$this->config->get('plugins.login.enabled')) {
             throw new \RuntimeException($language->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
@@ -709,8 +710,12 @@ class LoginPlugin extends Plugin
         $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data]));
         $user = $this->login->register($data);
 
+        $fullname = $user->fullname ?: $user->username;
+
         if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
             $this->login->sendActivationEmail($user);
+            $message = $language->translate(['PLUGIN_LOGIN.ACTIVATION_NOTICE_MSG', $fullname]);
+            $messages->add($message, 'info');
         } else {
             if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
                 $this->login->sendWelcomeEmail($user);
@@ -718,6 +723,8 @@ class LoginPlugin extends Plugin
             if ($this->config->get('plugins.login.user_registration.options.send_notification_email', false)) {
                 $this->login->sendNotificationEmail($user);
             }
+            $message = $language->translate(['PLUGIN_LOGIN.WELCOME_NOTICE_MSG', $fullname]);
+            $messages->add($message, 'info');
         }
 
         $this->grav->fireEvent('onUserLoginRegistered', new Event(['user' => $user]));

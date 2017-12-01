@@ -5,6 +5,7 @@
     * Added `$grav['login']->login()` and `$grav['login']->logout()` functions with event hooks
     * Added `$grav['login']->getRateLimiter($context)` function
     * Added events `onUserLoginAuthenticate`, `onUserLoginAuthorize`, `onUserLoginFailure`, `onUserLogin`, `onUserLogout`
+    * Use new `Session:get/setFlashCookieObject()` methods to maintain logout message
 1. [](#improved)
     * Remember entered username if login fails
     * Improved rate limiter to work without sessions and against distributed attacks
