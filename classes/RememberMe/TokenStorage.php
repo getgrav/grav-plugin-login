@@ -1,6 +1,6 @@
 <?php
 /**
- * @package    Grav.Plugin.Login
+ * @package    Grav\Plugin\Login
  *
  * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
@@ -9,9 +9,9 @@ namespace Grav\Plugin\Login\RememberMe;
 
 use Grav\Common\Cache;
 use Grav\Common\Grav;
+use Doctrine\Common\Cache\CacheProvider;
 use Doctrine\Common\Cache\FilesystemCache;
 use Birke\Rememberme\Storage\StorageInterface;
-use Grav\Framework\Cache\Adapter\DoctrineCache;
 
 /**
  * Storage wrapper for Doctrine cache
@@ -23,7 +23,7 @@ use Grav\Framework\Cache\Adapter\DoctrineCache;
 class TokenStorage implements StorageInterface
 {
     /**
-     * @var DoctrineCache
+     * @var CacheProvider
      */
     protected $driver;
 
@@ -36,6 +36,7 @@ class TokenStorage implements StorageInterface
      * Constructor
      *
      * @param string    $path   Path to storage directory
+     * @throws \InvalidArgumentException
      */
     public function __construct($path = 'cache://rememberme')
     {
@@ -78,7 +79,7 @@ class TokenStorage implements StorageInterface
         }
 
         list($expire, $tokens) = $this->driver->fetch($id);
-        if (isset($tokens[$persistentToken]) && $tokens[$persistentToken] == $token) {
+        if (isset($tokens[$persistentToken]) && $tokens[$persistentToken] === $token) {
             return self::TRIPLET_FOUND;
         }
 

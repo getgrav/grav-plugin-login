@@ -12,14 +12,42 @@ These are available via GPM, and because the plugin has dependencies you just ne
 $ bin/gpm install login
 ```
 
+# Changes in version 2.5
+
+Added new `$grav['login']->login()` and `$grav['login']->logout()` functions for you to use.
+
+They use following events which can be hooked by plugins:
+
+* `onUserLoginAuthenticate` Allows plugins to include their own authentication methods.
+* `onUserLoginAuthorize`    Allows plugins to block user from being logged in.
+* `onUserLoginFailure`      Allows plugins to include their own logic when user authentication failed.
+* `onUserLogin`             Allows plugins to include their own logic when user logs in.
+* `onUserLogout`            Allows plugins to include their own logic when user logs out.
+* `onUserLoginRegisterData` Allows plugins to include their own data to be added to the user object during registration.
+* `onUserLoginRegistered`   Allows plugins to hook into user registration just before the redirect.
+
+New Plugin options have been added for:
+
+* `dynamic_page_visibility` - Integrate access into page visibility so things can be shown or hidden in the menu
+
 # Changes in version 2.0
 
-The Login Plugin 2.0 has the following changes compared to 1.0:
+* OAuth has been separated to its own plugin, needs to be installed separately and configured. The users account filename format has changed too, to fix an issue that involved people with the same name on a service.
+* The `redirect` option has been changed to `redirect_after_login`.
+* The Remember Me session minimum length is now 1 week.
+* Removed the option to login from oauth without creating the corresponding user file under `user/accounts/`.
 
-- OAuth has been separated to its own plugin, needs to be installed separately and configured. The users account filename format has changed too, to fix an issue that involved people with the same name on a service.
-- The `redirect` option has been changed to `redirect_after_login`.
-- The Remember Me session minimum length is now 1 week.
-- Removed the option to login from oauth without creating the corresponding user file under `user/accounts/`.
+# Messages Output
+
+There is not a guaranteed way to display system messages including those added by the Login plugin, so in order to see messages you will need to make sure your theme has a method to output the messages.  This is done by adding a simple Twig include, and the best place to do this to ensure it's visible in all your pages, is to add it to the `partials/base.html.twig` (or whatever your base Twig template is called):
+
+```twig
+    {% block messages %}
+        {% include 'partials/messages.html.twig' ignore missing %}
+    {% endblock %}
+```
+
+A good location is probably to add this right above where your content is going to be output.
 
 # Creating Users
 
@@ -96,6 +124,36 @@ access:
 ```
 
 >> Note: the username is based on the name of the YAML file.
+
+# Default Configuration
+
+```yaml
+enabled: true                             # Enable the plugin
+built_in_css: true                        # Use built-in CSS
+route:                                    # Specific route for Login page (default is '/login')
+redirect_to_login: true                   # If you try to access a page you don't have access to, should you redirect to login route
+redirect_after_login:                     # Path to redirect to after a successful login (eg '/user_profile')
+route_activate: '/activate_user'          # Route for the user activation process
+route_forgot: '/forgot_password'          # Route for the forgot password process
+route_reset: '/reset_password'            # Route for the reset password process
+route_profile: '/user_profile'            # Route for the user profile page
+route_register: '/user_register'          # Route for the user registration page
+route_unauthorized: '/user_unauthorized'  # Route for a page to display if user is unauthorized
+
+dynamic_page_visibility: false            # Integrate access into page visibility so things can be shown or hidden in the menu
+parent_acl: false                         # Look to parent `access` rules for access requirements
+protect_protected_page_media: false       # Take `access` rules into account when directly accessing a page's media
+
+rememberme:
+  enabled: true                           # Enable 'remember me' functionality
+  timeout: 604800                         # Timeout in seconds. Defaults to 1 week
+  name: grav-rememberme                   # Name prefix of the session cookie
+
+max_pw_resets_count: 0                    # Number of password resets in a specific time frame (0 = unlimited)
+max_pw_resets_interval: 60                # Time in minutes to track password resets
+max_login_count: 0                        # Number of failed login attempts in a specific time frame (0 = unlimited)
+max_login_interval: 2                     # Time in minutes to track login attempts
+``` 
 
 # Usage
 
@@ -197,28 +255,30 @@ Also, your theme needs to implement forms. Use Antimatter or another form-compat
 
 Add the following content to your registration form page:
 
-```
+```yaml
 ---
 form:
-  
+
   fields:
-    -
-      name: username
+    fullname:
+      type: text
+      validate:
+        required: true
+
+    username:
       type: text
       validate:
         required: true
         message: PLUGIN_LOGIN.USERNAME_NOT_VALID
         config-pattern@: system.username_regex
 
-    -
-      name: email
-      type: text
+    email:
+      type: email
       validate:
         required: true
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
 
-    -
-      name: password1
+    password1:
       type: password
       label: Enter a password
       validate:
@@ -226,10 +286,9 @@ form:
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
         config-pattern@: system.pwd_regex
 
-    -
-      name: password2
+    password2:
       type: password
-      label: Repeat the password
+      label: Enter the password again
       validate:
         required: true
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
@@ -245,12 +304,14 @@ form:
 
   process:
       register_user: true
-      display: '/welcome'
-      message: "Welcome to my site!"
+      message: "Thanks for registering..."
+      reset: true      
 ---
-
-# Registration
 ```
+
+# Registration of Users
+
+Create a new user account by entering all the required fields below:
 
 This is a normal form. The only thing different from a contact form or another form that you might write on your site is the process field `register_user`, which takes care of processing the user registration.
 
@@ -268,6 +329,41 @@ to the form. And, in the Login plugin configuration we have by default enable th
 You can avoid having 2 fields for the password, which by the way is a recommended option, and just put a single `password` field.
 
 Last important thing before the registration is correctly setup: make sure in the Login plugin settings you have the user registration enabled, otherwise the registration will trigger an error, as by default user registration is DISABLED.
+
+
+# Registration Options
+
+There are several options that can be configured when registering users via `user/plugins/login.yaml`, they are pretty self-explanatory:
+
+```yaml
+user_registration:
+  enabled: true                             # Enable User Registration Process
+
+  fields:                                   # List of fields to validate and store during user registration
+    - 'username'                            # This should match up with your registration form definition
+    - 'password'
+    - 'email'
+    - 'fullname'
+    - 'title'
+    - 'level'
+
+  default_values:                           # Any default values for fields you would like to set
+    level: Newbie                           # Here the 'level' field will be pre-populated with 'Newbie' text
+
+  access:                                   # Default access to set for users created during registration     
+    site:
+      login: 'true'
+
+  redirect_after_registration: ''           # Route to redirect to after registration
+
+  options:
+    validate_password1_and_password2: true  # Ensure that password1 and password2 match during registration (allows you to have just 1 pw field or 2)
+    set_user_disabled: false                # Set this `true` if you want a user to activate their account via email
+    login_after_registration: true          # Automatically login after registration
+    send_activation_email: false            # Send an email that requires a special link to be clicked in order to activate the account
+    send_notification_email: false          # Send an email to the site administrator to indicate a user has registered
+    send_welcome_email: false               # Send a welcome email to the user (probably should not be used with `send_activation_email`
+```
 
 ## Sending an activation email
 
@@ -292,6 +388,17 @@ The content of the notification email is defined in the language file, strings `
 
 Note: if the activation email is enabled, the notification email to be sent upon the account activation action (when the user clicks the link to activate the account)
 
+## Default Access
+
+To control what access your users have upon registering you can edit the `user_registration.access:` attribute in the `user/plugins/login.yaml`.  The default is simply `site.login: true`:
+
+```
+user_registration:
+  access:
+    site:
+      login: 'true'
+```
+
 ## Adding your own fields
 
 If you want to add your own custom fields to the registration form, just add fields to the form like you would with any other form.
@@ -301,13 +408,13 @@ Then, to let the Login plugin add those fields to the user yaml file, you also n
 By default we have
 
 ```
+user_registration:
+  fields:
     - 'username'
     - 'password'
     - 'email'
     - 'fullname'
     - 'title'
-    - 'access'
-    - 'state'
 ```
 
 Add your own as you prefer, to build any custom registration form you can think of.
@@ -316,7 +423,13 @@ Add your own as you prefer, to build any custom registration form you can think 
 
 If you want to pre-fill a field, without showing it to the user in the form, you could set it as an hidden field. But the user could see it - and modify it via the browser dev tools.
 
-To add a field and make sure the user cannot modify it, add it to "Default values" list.
+To add a field and make sure the user cannot modify it, add it to "default_values" list:
+
+```
+user_registration:
+    default_values:
+        title: "Newbie User"
+```
 
 ## Login users directly after the registration
 

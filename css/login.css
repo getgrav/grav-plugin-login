@@ -79,3 +79,8 @@
     font-weight: inherit;
     display: inline;
 }
+
+.login-status {
+    white-space: nowrap;
+    vertical-align: middle;
+}
