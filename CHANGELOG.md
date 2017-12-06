@@ -1,5 +1,5 @@
 # v2.5.0
-## mm/dd/2017
+## 12/05/2017
 
 1. [](#new)
     * Added `$grav['login']->login()` and `$grav['login']->logout()` functions with event hooks
