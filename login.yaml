@@ -25,7 +25,7 @@ max_login_count: 0                          # Number of failed login attempts in
 max_login_interval: 2                       # Time in minutes to track login attempts
 
 user_registration:
-  enabled: true                             # Enable User Registration Process
+  enabled: false                            # Enable User Registration Process
 
   fields:                                   # List of fields to validate and store during user registration
     - 'username'                            # This should match up with your registration form definition
@@ -47,7 +47,7 @@ user_registration:
   options:
     validate_password1_and_password2: true  # Ensure that password1 and password2 match during registration (allows you to have just 1 pw field or 2)
     set_user_disabled: false                # Set this `true` if you want a user to activate their account via email
-    login_after_registration: true          # Automatically login after registration
+    login_after_registration: false         # Automatically login after registration
     send_activation_email: false            # Send an email that requires a special link to be clicked in order to activate the account
     send_notification_email: false          # Send an email to the site administrator to indicate a user has registered
     send_welcome_email: false               # Send a welcome email to the user (probably should not be used with `send_activation_email`

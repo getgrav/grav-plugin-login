@@ -12,6 +12,17 @@ These are available via GPM, and because the plugin has dependencies you just ne
 $ bin/gpm install login
 ```
 
+# Changes in version 2.6
+
+* User registration is now disabled by default.  If you were relying on it being activated, you need to manually enable it in your `user/config/plugins/login.yaml`:
+
+    ```
+    user_registration:
+      enabled: true 
+    ```
+* `login_after_registration` has also been changed to a default value of `false` for security purposes.
+
+
 # Changes in version 2.5
 
 Added new `$grav['login']->login()` and `$grav['login']->logout()` functions for you to use.
@@ -337,7 +348,7 @@ There are several options that can be configured when registering users via `use
 
 ```yaml
 user_registration:
-  enabled: true                             # Enable User Registration Process
+  enabled: false                            # Enable User Registration Process
 
   fields:                                   # List of fields to validate and store during user registration
     - 'username'                            # This should match up with your registration form definition
@@ -359,7 +370,7 @@ user_registration:
   options:
     validate_password1_and_password2: true  # Ensure that password1 and password2 match during registration (allows you to have just 1 pw field or 2)
     set_user_disabled: false                # Set this `true` if you want a user to activate their account via email
-    login_after_registration: true          # Automatically login after registration
+    login_after_registration: false         # Automatically login after registration
     send_activation_email: false            # Send an email that requires a special link to be clicked in order to activate the account
     send_notification_email: false          # Send an email to the site administrator to indicate a user has registered
     send_welcome_email: false               # Send a welcome email to the user (probably should not be used with `send_activation_email`
