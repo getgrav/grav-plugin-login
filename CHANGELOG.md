@@ -1,3 +1,11 @@
+# v2.6.0
+## 02/22/2018
+
+1. [](#improved)
+    * Disabled user registration by default. Enable it manually if you need it.
+    * Disabled user-login-on-registration by default. Enable it manually if you need it.
+    * Check for existing email addresses when updating User profile.
+
 # v2.5.0
 ## 12/05/2017
 
