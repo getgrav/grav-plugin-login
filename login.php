@@ -743,11 +743,43 @@ class LoginPlugin extends Plugin
      * Save user profile information
      *
      * @param Form $form
+     * @param Event $event
      * @return bool
      */
-    private function processUserProfile($form)
+    private function processUserProfile($form, Event $event)
     {
-        $user = $this->grav['user'];
+        $user     = $this->grav['user'];
+        $language = $this->grav['language'];
+
+        // Stop overloading of username
+        $username = $form->value('username');
+        if (isset($username)) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate([
+                    'PLUGIN_LOGIN.USERNAME_NOT_AVAILABLE',
+                    $username
+                ])
+            ]));
+            $event->stopPropagation();
+            return;
+        }
+
+        // Check for existing email
+        $email    = $form->value('email');
+        $existing_email = User::find($email,['email']);
+        if ($existing_email->exists()) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate([
+                    'PLUGIN_LOGIN.EMAIL_NOT_AVAILABLE',
+                    $email
+                ])
+            ]));
+            $event->stopPropagation();
+            return;
+        }
+
         $user->merge($form->getData()->toArray());
 
         try {
@@ -779,7 +811,7 @@ class LoginPlugin extends Plugin
                 $this->processUserRegistration($form, $event);
                 break;
             case 'update_user':
-                $this->processUserProfile($form);
+                $this->processUserProfile($form, $event);
                 break;
         }
     }
