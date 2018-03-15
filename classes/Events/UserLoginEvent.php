@@ -66,14 +66,14 @@ class UserLoginEvent extends Event
     public function __construct(array $items = [])
     {
         $items += [
-            'credentials' =>
-                (isset($items['credentials']) ? (array)$items['credentials'] : []) + ['username' => '', 'password' => ''],
+            'credentials' => [],
             'options' => [],
             'authorize' => 'site.login',
             'status' => static::AUTHENTICATION_UNDEFINED,
             'user' => null,
             'message' => ''
         ];
+        $items['credentials'] += ['username' => '', 'password' => ''];
 
         parent::__construct($items);
 
