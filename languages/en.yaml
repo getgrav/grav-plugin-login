@@ -74,6 +74,8 @@ PLUGIN_LOGIN:
   REGISTRATION_FIELD_KEY: "Field name"
   REDIRECT_AFTER_LOGIN: "Redirect after login"
   REDIRECT_AFTER_LOGIN_HELP: "Custom route to redirect after login"
+  REDIRECT_AFTER_LOGOUT: "Redirect after logout"
+  REDIRECT_AFTER_LOGOUT_HELP: "Custom route to redirect after logout"
   REDIRECT_AFTER_REGISTRATION: "Redirect after registration"
   REDIRECT_AFTER_REGISTRATION_HELP: "Custom route to redirect after the registration"
   OPTIONS: "Options"

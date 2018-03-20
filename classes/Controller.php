@@ -173,7 +173,8 @@ class Controller
     {
         $this->login->logout(['remember_me' => true]);
 
-        $this->setRedirect('/');
+        $redirect = $this->grav['config']->get('plugins.login.redirect_after_logout');
+        $this->setRedirect($redirect);
 
         return true;
     }
@@ -366,6 +367,14 @@ class Controller
     {
         $this->redirect = $path;
         $this->redirectCode = $code;
+    }
+
+    /**
+     * @return array Array containing [redirect, code].
+     */
+    public function getRedirect()
+    {
+        return [$this->redirect, $this->redirectCode];
     }
 
     /**

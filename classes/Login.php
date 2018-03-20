@@ -21,7 +21,6 @@ use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use Grav\Plugin\Login\RememberMe\TokenStorage;
-use RocketTheme\Toolbox\Session\Message;
 
 /**
  * Class Login

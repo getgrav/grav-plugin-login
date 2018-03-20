@@ -1,3 +1,9 @@
+# v2.6.2
+## mm/dd/2018
+
+1. [](#new)
+    * Added support for custom logout redirect
+    
 # v2.6.1
 ## 03/19/2018
 
