@@ -1,3 +1,9 @@
+# v2.6.1
+## 03/19/2018
+
+1. [](#improved)
+    * Fixed undefined index if login form didn't contain username/password
+
 # v2.6.0
 ## 02/22/2018
 
