@@ -1,5 +1,5 @@
 # v2.6.1
-## mm/dd/2018
+## 03/19/2018
 
 1. [](#improved)
     * Fixed undefined index if login form didn't contain username/password
