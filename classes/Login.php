@@ -66,10 +66,10 @@ class Login
     /**
      * Login user.
      *
-     * @param array $credentials
-     * @param array $options
-     * @param array $extra          Example: ['authorize' => 'site.login', 'user' => null], undefined variables gets set.
-     * @return User
+     * @param array $credentials    Login credentials, eg: ['username' => '', 'password' => '']
+     * @param array $options        Login options, eg: ['remember_me' => true]
+     * @param array $extra          Example: ['authorize' => 'site.login', 'user' => null], undefined variables get set.
+     * @return User|UserLoginEvent  Returns event if $extra['return_event'] is true.
      */
     public function login(array $credentials, array $options = [], array $extra = [])
     {
@@ -120,24 +120,29 @@ class Login
         $user = $event->getUser();
         $user->def('language', 'en');
 
-        return $user;
+        return !empty($event['return_event']) ? $event : $user;
     }
 
     /**
      * Logout user.
      *
-     * @param array $options
-     * @param User $user
-     * @return User
+     * @param array                 $options
+     * @param array|User            $extra      Array of: ['user' => $user, ...] or User object (deprecated).
+     * @return User|UserLoginEvent  Returns event if $extra['return_event'] is true.
      */
-    public function logout(array $options = [], User $user = null)
+    public function logout(array $options = [], $extra = [])
     {
         $grav = Grav::instance();
 
+        if ($extra instanceof User) {
+            $extra = ['user' => $extra];
+        } elseif (isset($extra['user'])) {
+            $extra['user'] = $grav['user'];
+        }
+
         $eventOptions = [
-            'user' => $user ?: $grav['user'],
             'options' => $options
-        ];
+        ] + $extra;
 
         $event = new UserLoginEvent($eventOptions);
 
@@ -147,7 +152,7 @@ class Login
         $user = $event->getUser();
         $user->authenticated = false;
 
-        return $user;
+        return !empty($event['return_event']) ? $event : $user;
     }
 
     /**
@@ -451,11 +456,11 @@ class Login
     {
         if ($count > 0) {
             if (!isset($user->{$field})) {
-                $user->{$field} = array();
+                $user->{$field} = [];
             }
-            //remove older than 1 hour attempts
-            $actual_resets = array();
-            foreach ($user->{$field} as $reset) {
+            //remove older than $interval x minute attempts
+            $actual_resets = [];
+            foreach ((array)$user->{$field} as $reset) {
                 if ($reset > (time() - $interval * 60)) {
                     $actual_resets[] = $reset;
                 }

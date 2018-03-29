@@ -3,6 +3,7 @@
 
 1. [](#new)
     * Added support for custom logout redirect
+    * Added support for `Login::login()` and `Login::logout()` to return `UserLoginEvent` instance instead of `User`
     
 # v2.6.1
 ## 03/19/2018
