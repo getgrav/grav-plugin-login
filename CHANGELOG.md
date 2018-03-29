@@ -2,8 +2,9 @@
 ## mm/dd/2018
 
 1. [](#new)
-    * Added support for custom logout redirect
+    * Added custom logout redirect configuration option
     * Added support for `Login::login()` and `Login::logout()` to return `UserLoginEvent` instance instead of `User`
+    * Added support for custom login messages and redirects set in `UserLoginEvent`
     
 # v2.6.1
 ## 03/19/2018

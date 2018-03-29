@@ -165,14 +165,30 @@ class Login
      */
     public function authenticate($credentials, $options = ['remember_me' => true])
     {
-        $user = $this->login($credentials, $options);
+        $event = $this->login($credentials, $options, ['return_event' => true]);
+        $user = $event['user'];
+
+        $redirect = $event->getRedirect();
+        $message = $event->getMessage();
+        $messageType = $event->getMessageType();
 
         if ($user->authenticated) {
-            $this->grav['messages']->add($this->language->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
-                [$user->language]), 'info');
+            if (!$message) {
+                $message = 'PLUGIN_LOGIN.LOGIN_SUCCESSFUL';
+                $messageType = 'info';
+            }
 
-            $redirect_route = $this->uri->route();
-            $this->grav->redirect($redirect_route);
+            if (!$redirect) {
+                $redirect = $this->uri->route();
+            }
+        }
+
+        if ($message) {
+            $this->grav['messages']->add($this->language->translate($message, [$user->language]), $messageType);
+        }
+
+        if ($redirect) {
+            $this->grav->redirect($redirect, $event->getRedirectCode());
         }
 
         return $user->authenticated;
@@ -450,7 +466,7 @@ class Login
      * @param int    $count
      * @param int    $interval
      * @return bool
-     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
+     * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     public function isUserRateLimited(User $user, $field, $count, $interval)
     {
@@ -481,7 +497,7 @@ class Login
      *
      * @param User   $user
      * @param string $field
-     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
+     * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     public function resetRateLimit(User $user, $field)
     {
@@ -492,7 +508,7 @@ class Login
      * Get Current logged in user
      *
      * @return User
-     * @deprecated 3.0 Use $grav['user'] instead.
+     * @deprecated 2.5.0 Use $grav['user'] instead.
      */
     public function getUser()
     {
