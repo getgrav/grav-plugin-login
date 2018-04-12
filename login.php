@@ -768,7 +768,7 @@ class LoginPlugin extends Plugin
         // Check for existing email
         $email    = $form->value('email');
         $existing_email = User::find($email,['email']);
-        if ($existing_email->exists()) {
+        if ($user->username != $existing_email->username && $existing_email->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
                 'message' => $language->translate([
