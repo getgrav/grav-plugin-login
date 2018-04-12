@@ -1,5 +1,5 @@
 name: Login
-version: 2.6.1
+version: 2.6.2
 description: Enables user authentication and login screen.
 icon: sign-in
 author:
@@ -67,6 +67,12 @@ form:
               label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
               placeholder: "/my-page"
+
+            redirect_after_logout:
+              type: text
+              label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT
+              help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT_HELP
+              placeholder: "/"
 
             route_forgot:
               type: text

@@ -21,7 +21,6 @@ use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use Grav\Plugin\Login\RememberMe\TokenStorage;
-use RocketTheme\Toolbox\Session\Message;
 
 /**
  * Class Login
@@ -67,10 +66,10 @@ class Login
     /**
      * Login user.
      *
-     * @param array $credentials
-     * @param array $options
-     * @param array $extra          Example: ['authorize' => 'site.login', 'user' => null], undefined variables gets set.
-     * @return User
+     * @param array $credentials    Login credentials, eg: ['username' => '', 'password' => '']
+     * @param array $options        Login options, eg: ['remember_me' => true]
+     * @param array $extra          Example: ['authorize' => 'site.login', 'user' => null], undefined variables get set.
+     * @return User|UserLoginEvent  Returns event if $extra['return_event'] is true.
      */
     public function login(array $credentials, array $options = [], array $extra = [])
     {
@@ -121,24 +120,29 @@ class Login
         $user = $event->getUser();
         $user->def('language', 'en');
 
-        return $user;
+        return !empty($event['return_event']) ? $event : $user;
     }
 
     /**
      * Logout user.
      *
-     * @param array $options
-     * @param User $user
-     * @return User
+     * @param array                 $options
+     * @param array|User            $extra      Array of: ['user' => $user, ...] or User object (deprecated).
+     * @return User|UserLoginEvent  Returns event if $extra['return_event'] is true.
      */
-    public function logout(array $options = [], User $user = null)
+    public function logout(array $options = [], $extra = [])
     {
         $grav = Grav::instance();
 
+        if ($extra instanceof User) {
+            $extra = ['user' => $extra];
+        } elseif (isset($extra['user'])) {
+            $extra['user'] = $grav['user'];
+        }
+
         $eventOptions = [
-            'user' => $user ?: $grav['user'],
             'options' => $options
-        ];
+        ] + $extra;
 
         $event = new UserLoginEvent($eventOptions);
 
@@ -148,7 +152,7 @@ class Login
         $user = $event->getUser();
         $user->authenticated = false;
 
-        return $user;
+        return !empty($event['return_event']) ? $event : $user;
     }
 
     /**
@@ -161,14 +165,30 @@ class Login
      */
     public function authenticate($credentials, $options = ['remember_me' => true])
     {
-        $user = $this->login($credentials, $options);
+        $event = $this->login($credentials, $options, ['return_event' => true]);
+        $user = $event['user'];
+
+        $redirect = $event->getRedirect();
+        $message = $event->getMessage();
+        $messageType = $event->getMessageType();
 
         if ($user->authenticated) {
-            $this->grav['messages']->add($this->language->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL',
-                [$user->language]), 'info');
+            if (!$message) {
+                $message = 'PLUGIN_LOGIN.LOGIN_SUCCESSFUL';
+                $messageType = 'info';
+            }
 
-            $redirect_route = $this->uri->route();
-            $this->grav->redirect($redirect_route);
+            if (!$redirect) {
+                $redirect = $this->uri->route();
+            }
+        }
+
+        if ($message) {
+            $this->grav['messages']->add($this->language->translate($message, [$user->language]), $messageType);
+        }
+
+        if ($redirect) {
+            $this->grav->redirect($redirect, $event->getRedirectCode());
         }
 
         return $user->authenticated;
@@ -446,17 +466,17 @@ class Login
      * @param int    $count
      * @param int    $interval
      * @return bool
-     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
+     * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     public function isUserRateLimited(User $user, $field, $count, $interval)
     {
         if ($count > 0) {
             if (!isset($user->{$field})) {
-                $user->{$field} = array();
+                $user->{$field} = [];
             }
-            //remove older than 1 hour attempts
-            $actual_resets = array();
-            foreach ($user->{$field} as $reset) {
+            //remove older than $interval x minute attempts
+            $actual_resets = [];
+            foreach ((array)$user->{$field} as $reset) {
                 if ($reset > (time() - $interval * 60)) {
                     $actual_resets[] = $reset;
                 }
@@ -477,7 +497,7 @@ class Login
      *
      * @param User   $user
      * @param string $field
-     * @deprecated 3.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
+     * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
     public function resetRateLimit(User $user, $field)
     {
@@ -488,7 +508,7 @@ class Login
      * Get Current logged in user
      *
      * @return User
-     * @deprecated 3.0 Use $grav['user'] instead.
+     * @deprecated 2.5.0 Use $grav['user'] instead.
      */
     public function getUser()
     {
