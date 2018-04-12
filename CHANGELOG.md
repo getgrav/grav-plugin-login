@@ -1,5 +1,5 @@
 # v2.6.2
-## mm/dd/2018
+## 04/12/2018
 
 1. [](#new)
     * Added custom logout redirect configuration option
