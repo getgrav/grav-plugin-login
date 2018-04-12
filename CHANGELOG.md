@@ -1,3 +1,9 @@
+# v2.6.3
+## 04/12/2018
+
+1. [](#bugfix)
+    * Fixed issue with saving profile and stating email has already exists
+
 # v2.6.2
 ## 04/12/2018
 
