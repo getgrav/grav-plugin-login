@@ -5,6 +5,8 @@
     * Added custom logout redirect configuration option
     * Added support for `Login::login()` and `Login::logout()` to return `UserLoginEvent` instance instead of `User`
     * Added support for custom login messages and redirects set in `UserLoginEvent`
+1. [](#bugfix)
+    * Fixed typo in activation email body [#151](https://github.com/getgrav/grav-plugin-login/issues/151) 
     
 # v2.6.1
 ## 03/19/2018
