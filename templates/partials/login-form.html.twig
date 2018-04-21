@@ -11,11 +11,10 @@
             {{ content|raw }}
 
             <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }}">
-                {% if grav.twig.plugins_hooked_loginPage %}
-                    {% for label in grav.twig.plugins_hooked_loginPage %}
-                        {% include label %}
-                    {% endfor %}
-                {% endif %}
+
+                {% for template in grav.login.getProviderLoginTemplates %}
+                    {% include template %}
+                {% endfor %}
 
                 {% for field in form.fields %}
                     {% set value = field.name == 'username' ? username : '' %}

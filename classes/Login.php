@@ -49,6 +49,9 @@ class Login
     /** @var RateLimiter[] */
     protected $rateLimiters = [];
 
+    /** @var array  */
+    protected $provider_login_templates = [];
+
     /**
      * Login constructor.
      *
@@ -514,6 +517,22 @@ class Login
     {
         /** @var User $user */
         return $this->grav['user'];
+    }
+
+    public function addProviderLoginTemplate($template)
+    {
+        $this->provider_login_templates[] = $template;
+    }
+
+    public function getProviderLoginTemplates()
+    {
+        // Handle the deprecated style of using a dynamic attribute on
+        if (isset($this->grav['twig']->plugins_hooked_loginPage)) {
+            $provider_templates = (array) $this->grav['twig']->plugins_hooked_loginPage;
+            $this->provider_login_templates += $provider_templates;
+        }
+
+        return $this->provider_login_templates;
     }
 
 }

@@ -1,3 +1,9 @@
+# v2.6.4
+## mm/dd/2018
+
+1. [](#improved)
+    * Added cleaner way for 3rd party providers to add twig templates to login form
+
 # v2.6.3
 ## 04/12/2018
 
