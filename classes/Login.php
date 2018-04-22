@@ -526,13 +526,15 @@ class Login
 
     public function getProviderLoginTemplates()
     {
+        $templates =  $this->provider_login_templates;
+
         // Handle the deprecated style of using a dynamic attribute on
         if (isset($this->grav['twig']->plugins_hooked_loginPage)) {
             $provider_templates = (array) $this->grav['twig']->plugins_hooked_loginPage;
-            $this->provider_login_templates += $provider_templates;
+            $templates = array_merge($provider_templates, $templates);
         }
 
-        return $this->provider_login_templates;
+        return $templates;
     }
 
 }
