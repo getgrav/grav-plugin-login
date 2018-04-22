@@ -3,6 +3,8 @@
 
 1. [](#improved)
     * Added cleaner way for 3rd party providers to add twig templates to login form
+1. [](#bugfix)
+    * Fixed missing login messages in some use cases
 
 # v2.6.3
 ## 04/12/2018

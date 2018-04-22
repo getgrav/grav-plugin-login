@@ -75,7 +75,7 @@ class UserLoginEvent extends Event
             'status' => static::AUTHENTICATION_UNDEFINED,
             'session' => null,
             'user' => null,
-            'message' => '',
+            'message' => null,
             'redirect' => null,
             'redirect_code' => 303
         ];
