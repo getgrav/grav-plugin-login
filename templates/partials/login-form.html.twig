@@ -10,11 +10,19 @@
         {% else %}
             {{ content|raw }}
 
-            <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }}">
+            {# NEW WAY OF INCLUDING 3RD PARTY LOGIN OPTIONS #}
+            {% for template in grav.login.getProviderLoginTemplates %}
+                {% include template %}
+            {% endfor %}
 
-                {% for template in grav.login.getProviderLoginTemplates %}
-                    {% include template %}
-                {% endfor %}
+            <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }}">        
+
+                {# OLD WAY OF INCLUDING 3RD PARTY LOGIN OPTIONS #}
+                {% if grav.twig.plugins_hooked_loginPage %}
+                    {% for label in grav.twig.plugins_hooked_loginPage %}
+                        {% include label %}
+                    {% endfor %}
+                {% endif %}
 
                 {% for field in form.fields %}
                     {% set value = field.name == 'username' ? username : '' %}

@@ -528,12 +528,6 @@ class Login
     {
         $templates =  $this->provider_login_templates;
 
-        // Handle the deprecated style of using a dynamic attribute on
-        if (isset($this->grav['twig']->plugins_hooked_loginPage)) {
-            $provider_templates = (array) $this->grav['twig']->plugins_hooked_loginPage;
-            $templates = array_merge($provider_templates, $templates);
-        }
-
         return $templates;
     }
 
