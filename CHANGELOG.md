@@ -3,6 +3,8 @@
 
 1. [](#improved)
     * Added cleaner way for 3rd party providers to add twig templates to login form
+1. [](#bugfix)
+    * Don't allow 3rd party accounts (with no password) to password reset    
 
 # v2.6.3
 ## 04/12/2018

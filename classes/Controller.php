@@ -245,6 +245,14 @@ class Controller
             return true;
         }
 
+        if (empty($user->password) && empty($user->hashed_password)) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_PASSWORD', $email]),
+                'error');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
+
+            return true;
+        }
+
         $from = $this->grav['config']->get('plugins.email.from');
 
         if (empty($from)) {

@@ -18,6 +18,7 @@ PLUGIN_LOGIN:
   FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL: "Instructions to reset your password have been sent via email"
   FORGOT_FAILED_TO_EMAIL: "Failed to email instructions, please try again later"
   FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL: "Cannot reset password for %s, no email address is set"
+  FORGOT_CANNOT_RESET_EMAIL_NO_PASSWORD: "Cannot reset password for %s, this email is associated with a remote account"
   FORGOT_USERNAME_DOES_NOT_EXIST: "User with username <b>%s</b> does not exist"
   FORGOT_EMAIL_NOT_CONFIGURED: "Cannot reset password. This site is not configured to send emails"
   FORGOT_EMAIL_SUBJECT: "%s Password Reset Request"
