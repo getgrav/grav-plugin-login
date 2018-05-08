@@ -116,3 +116,4 @@ PLUGIN_LOGIN:
   PAGE_RESTRICTED: "Access is restricted, please login..."
   DYNAMIC_VISIBILITY: "Dynamic Page Visibility"
   DYNAMIC_VISIBILITY_HELP: "Allows dynamic processing of page visibility base on access rules if login.visibility_requires_access is set to true on a page"
+  USER_IS_REMOTE_ONLY: "This user authenticated with a remote service, so profile cannot be saved"

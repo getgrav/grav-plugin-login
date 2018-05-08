@@ -748,8 +748,19 @@ class LoginPlugin extends Plugin
      */
     private function processUserProfile($form, Event $event)
     {
+        /** @var User $user */
         $user     = $this->grav['user'];
         $language = $this->grav['language'];
+
+        // Don't save if user doesn't exist
+        if (!$user->exists()) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.USER_IS_REMOTE_ONLY')
+            ]));
+            $event->stopPropagation();
+            return;
+        }
 
         // Stop overloading of username
         $username = $form->value('username');
