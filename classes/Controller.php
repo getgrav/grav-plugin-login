@@ -14,6 +14,7 @@ use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
+use Grav\Plugin\LoginPlugin;
 use RocketTheme\Toolbox\Session\Message;
 
 /**
@@ -253,6 +254,9 @@ class Controller
         if ($redirect) {
             $this->setRedirect($redirect, $event->getRedirectCode());
         }
+
+        $this->grav['session']->setFlashCookieObject(LoginPlugin::TMP_COOKIE_NAME, ['message' => $this->grav['language']->translate('PLUGIN_LOGIN.LOGGED_OUT'),
+            'status' => 'info']);
 
         return true;
     }

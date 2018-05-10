@@ -525,7 +525,6 @@ class LoginPlugin extends Plugin
 
         // Reset page with login page.
         if (!$authorized) {
-
             if ($this->route) {
                 $page = $this->grav['pages']->dispatch($this->route);
             } else {
@@ -935,7 +934,7 @@ class LoginPlugin extends Plugin
             }
         }
 
-        if ($user->twofa_enabled && $user->twofa_secret) {
+        if ($event->getOption('twofa') && $user->twofa_enabled && $user->twofa_secret) {
             $event->setStatus($event::AUTHORIZATION_DELAYED);
         }
     }
@@ -980,7 +979,5 @@ class LoginPlugin extends Plugin
         }
 
         $this->grav['session']->invalidate()->start();
-        $this->grav['session']->setFlashCookieObject(self::TMP_COOKIE_NAME, ['message' => $this->grav['language']->translate('PLUGIN_LOGIN.LOGGED_OUT'),
-            'status' => 'info']);
     }
 }
