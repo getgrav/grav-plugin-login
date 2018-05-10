@@ -1,6 +1,8 @@
-# v2.6.4
+# v2.7.0
 ## mm/dd/2018
 
+1. [](#new)
+    * Added support for 2FA authentication
 1. [](#improved)
     * Added cleaner way for 3rd party providers to add twig templates to login form
 1. [](#bugfix)

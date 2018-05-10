@@ -21,6 +21,7 @@ use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use Grav\Plugin\Login\RememberMe\TokenStorage;
+use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
 
 /**
  * Class Login
@@ -45,6 +46,9 @@ class Login
 
     /** @var RememberMe */
     protected $rememberMe;
+
+    /** @var TwoFactorAuth */
+    protected $twoFa;
 
     /** @var RateLimiter[] */
     protected $rateLimiters = [];
@@ -206,19 +210,28 @@ class Login
      */
     public function register($data)
     {
-        //Add new user ACL settings
-        $groups = $this->config->get('plugins.login.user_registration.groups', []);
+        if (!isset($data['groups'])) {
+            //Add new user ACL settings
+            $groups = (array) $this->config->get('plugins.login.user_registration.groups', []);
 
-        if (count($groups) > 0) {
-            $data['groups'] = $groups;
+            if (count($groups) > 0) {
+                $data['groups'] = $groups;
+            }
         }
 
-        $access = $this->config->get('plugins.login.user_registration.access.site', []);
-        if (count($access) > 0) {
-            $data['access']['site'] = $access;
+        if (!isset($data['access'])) {
+            $access = (array) $this->config->get('plugins.login.user_registration.access.site', []);
+
+            if (count($access) > 0) {
+                $data['access']['site'] = $access;
+            }
         }
 
-        $username = $data['username'];
+        $username = $this->validateField('username', $data['username']);
+        if (User::find($username, ['username'])) {
+            throw new \RuntimeException('Username "' . $username . '" already exists, please pick another username');
+        }
+
         $file = CompiledYamlFile::instance($this->grav['locator']->findResource('account://' . $username . YAML_EXT,
             true, true));
 
@@ -228,6 +241,79 @@ class Login
         $user->save();
 
         return $user;
+    }
+
+    /**
+     * @param string $type
+     * @param mixed  $value
+     * @param string $extra
+     *
+     * @return string
+     */
+    public function validateField($type, $value, $extra = '')
+    {
+        switch ($type) {
+            case 'user':
+            case 'username':
+                /** @var Config $config */
+                $config = Grav::instance()['config'];
+                $username_regex = '/' . $config->get('system.username_regex') . '/';
+
+                if (!is_string($value) || !preg_match($username_regex, $value)) {
+                    throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
+                }
+
+                break;
+
+            case 'password1':
+                /** @var Config $config */
+                $config = Grav::instance()['config'];
+                $pwd_regex = '/' . $config->get('system.pwd_regex') . '/';
+
+                if (!is_string($value) || !preg_match($pwd_regex, $value)) {
+                    throw new \RuntimeException('Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters');
+                }
+
+                break;
+
+            case 'password2':
+                if (!is_string($value) || strcmp($value, $extra)) {
+                    throw new \RuntimeException('Passwords did not match.');
+                }
+
+                break;
+
+            case 'email':
+                if (!is_string($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    throw new \RuntimeException('Not a valid email address');
+                }
+
+                break;
+
+            case 'permissions':
+                if (!is_string($value) || !in_array($value, ['a', 's', 'b'])) {
+                    throw new \RuntimeException('Permissions ' . $value . ' are invalid.');
+                }
+
+                break;
+
+            case 'fullname':
+                if (!is_string($value) || trim($value) === '') {
+                    throw new \RuntimeException('Fullname cannot be empty');
+                }
+
+                break;
+
+            case 'state':
+                if ($value !== 'enabled' && $value !== 'disabled') {
+                    throw new \RuntimeException('State is not valid');
+                }
+
+                break;
+
+        }
+
+        return $value;
     }
 
     /**
@@ -388,6 +474,26 @@ class Login
         }
 
         return $this->rememberMe;
+    }
+
+    /**
+     * Gets and sets the TwoFactorAuth object
+     *
+     * @param TwoFactorAuth $var
+     * @return TwoFactorAuth
+     * @throws \RobThree\Auth\TwoFactorAuthException
+     */
+    public function twoFactorAuth($var = null)
+    {
+        if ($var !== null) {
+            $this->twoFa = $var;
+        }
+
+        if (!$this->twoFa) {
+            $this->twoFa = new TwoFactorAuth;
+        }
+
+        return $this->twoFa;
     }
 
     /**
