@@ -56,6 +56,7 @@ class LoginPlugin extends Plugin
         return [
             'onPluginsInitialized'      => [['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
+            'onTask.login.twofa'        => ['loginController', 0],
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
@@ -512,8 +513,10 @@ class LoginPlugin extends Plugin
             exit;
         }
 
+        $authorized = $user->authenticated && $user->authorized;
+
         // User is not logged in; redirect to login page.
-        if ($this->redirect_to_login && $this->route && !$user->authenticated) {
+        if ($this->redirect_to_login && $this->route && !$authorized) {
             $this->grav->redirect($this->route, 302);
         }
 
@@ -521,7 +524,7 @@ class LoginPlugin extends Plugin
         $twig = $this->grav['twig'];
 
         // Reset page with login page.
-        if (empty($user->authenticated)) {
+        if (!$authorized) {
 
             if ($this->route) {
                 $page = $this->grav['pages']->dispatch($this->route);
@@ -930,6 +933,10 @@ class LoginPlugin extends Plugin
 
                 return;
             }
+        }
+
+        if ($user->twofa_enabled && $user->twofa_secret) {
+            $event->setStatus($event::AUTHORIZATION_DELAYED);
         }
     }
 

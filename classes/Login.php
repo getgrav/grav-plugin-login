@@ -111,7 +111,7 @@ class Login
             // Make sure that event didn't mess up with the user authorization.
             $user = $event->getUser();
             $user->authenticated = true;
-            $user->authorized = $event->isDelayed();
+            $user->authorized = !$event->isDelayed();
 
         } else {
             // Allow plugins to log errors or do other tasks on failure.
@@ -158,6 +158,7 @@ class Login
 
         $user = $event->getUser();
         $user->authenticated = false;
+        $user->authorized = false;
 
         return !empty($event['return_event']) ? $event : $user;
     }
@@ -179,7 +180,7 @@ class Login
         $message = $event->getMessage();
         $messageType = $event->getMessageType();
 
-        if ($user->authenticated) {
+        if ($user->authenticated && $user->authorized) {
             if (!$message) {
                 $message = 'PLUGIN_LOGIN.LOGIN_SUCCESSFUL';
                 $messageType = 'info';
@@ -198,7 +199,7 @@ class Login
             $this->grav->redirect($redirect, $event->getRedirectCode());
         }
 
-        return $user->authenticated;
+        return $user->authenticated && $user->authorized;
     }
 
     /**
