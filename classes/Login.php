@@ -530,6 +530,10 @@ class Login
      */
     public function isUserAuthorizedForPage(User $user, Page $page, $config = null)
     {
+        if (!$user->authorized) {
+            return false;
+        }
+
         $header = $page->header();
         $rules = isset($header->access) ? (array)$header->access : [];
 
