@@ -530,10 +530,6 @@ class Login
      */
     public function isUserAuthorizedForPage(User $user, Page $page, $config = null)
     {
-        if (!$user->authorized) {
-            return false;
-        }
-
         $header = $page->header();
         $rules = isset($header->access) ? (array)$header->access : [];
 
@@ -552,6 +548,10 @@ class Login
         // Continue to the page if it has no ACL rules.
         if (!$rules) {
             return true;
+        }
+
+        if (!$user->authorized) {
+            return false;
         }
 
         // Continue to the page if user is authorized to access the page.
