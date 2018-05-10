@@ -159,7 +159,7 @@ class Controller
                     ?: $this->grav['uri']->referrer('/')
             );
         } else {
-            if ($user->username) {
+            if ($user->authorized) {
                 $event->defMessage('PLUGIN_LOGIN.ACCESS_DENIED', 'error');
 
                 $event->defRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
