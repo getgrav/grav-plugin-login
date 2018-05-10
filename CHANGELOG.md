@@ -3,6 +3,7 @@
 
 1. [](#new)
     * Added support for 2FA authentication
+    * Updated plugin dependencies (Grav >= 1.4.5, Form >=2.13.0, Email >=2.7.0)
 1. [](#improved)
     * Added cleaner way for 3rd party providers to add twig templates to login form
     * Use `Login` class validation methods in CLI
