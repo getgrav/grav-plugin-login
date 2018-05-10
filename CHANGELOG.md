@@ -5,6 +5,7 @@
     * Added support for 2FA authentication
 1. [](#improved)
     * Added cleaner way for 3rd party providers to add twig templates to login form
+    * Use `Login` class validation methods in CLI
 1. [](#bugfix)
     * Don't allow 3rd party accounts (with no password) to password reset    
 

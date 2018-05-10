@@ -12,9 +12,9 @@ use Grav\Common\Grav;
 use Grav\Console\ConsoleCommand;
 use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
+use Grav\Plugin\Login\Login;
 use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
 
@@ -25,11 +25,11 @@ use Symfony\Component\Console\Question\Question;
  */
 class ChangeUserStateCommand extends ConsoleCommand
 {
-
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $options = [];
+
+    /** @var Login */
+    protected $login;
 
     /**
      * Configure the command
@@ -61,6 +61,14 @@ class ChangeUserStateCommand extends ConsoleCommand
      */
     protected function serve()
     {
+        include __DIR__ . '/../vendor/autoload.php';
+
+        $grav = Grav::instance();
+        if (!isset($grav['login'])) {
+            $grav['login'] = new Login($grav);
+        }
+        $this->login = $grav['login'];
+
         $this->options = [
             'user'        => $this->input->getOption('user'),
             'state'       => $this->input->getOption('state')
@@ -78,7 +86,13 @@ class ChangeUserStateCommand extends ConsoleCommand
             // Get username and validate
             $question = new Question('Enter a <yellow>username</yellow>: ');
             $question->setValidator(function ($value) {
-                return $this->validate('user', $value);
+                $this->validate('user', $value);
+
+                if (!User::find($value, ['username'])->exists()) {
+                    throw new \RuntimeException('Username "' . $value . '" does not exist, please pick another username');
+                };
+
+                return true;
             });
 
             $username = $helper->ask($this->input, $this->output, $question);
@@ -135,41 +149,14 @@ class ChangeUserStateCommand extends ConsoleCommand
     }
 
     /**
-     * @param        $type
-     * @param        $value
+     * @param string $type
+     * @param mixed  $value
      * @param string $extra
      *
-     * @return mixed
+     * @return string
      */
-    protected function validate($type, $value, $extra = '')
+    protected function validate($type, $value)
     {
-        /** @var Config $config */
-        $config = Grav::instance()['config'];
-
-        /** @var UniformResourceLocator $locator */
-        $locator = Grav::instance()['locator'];
-
-        $username_regex = '/' . $config->get('system.username_regex') . '/';
-
-        switch ($type) {
-            case 'user':
-                if (!preg_match($username_regex, $value)) {
-                    throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
-                }
-                if (!file_exists($locator->findResource('account://' . $value . YAML_EXT))) {
-                    throw new \RuntimeException('Username "' . $value . '" does not exist, please pick another username');
-                }
-
-                break;
-
-            case 'state':
-                if ($value !== 'enabled' && $value !== 'disabled') {
-                    throw new \RuntimeException('State is not valid');
-                }
-
-                break;
-        }
-
-        return $value;
+        return $this->login->validateField($type, $value);
     }
 }
