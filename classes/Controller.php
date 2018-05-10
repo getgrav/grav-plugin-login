@@ -103,6 +103,7 @@ class Controller
             $success = call_user_func([$this, $method]);
         } catch (\RuntimeException $e) {
             $messages->add($e->getMessage(), 'error');
+            $this->grav['log']->error('plugin.login: '. $e->getMessage());
         }
 
         if (!$this->redirect && isset($redirect)) {
@@ -167,7 +168,7 @@ class Controller
                 }
             }
         } else {
-            if ($user->username) {
+            if ($user->authorized) {
                 $event->defMessage('PLUGIN_LOGIN.ACCESS_DENIED', 'error');
 
                 $event->defRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
