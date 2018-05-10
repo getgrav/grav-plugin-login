@@ -541,6 +541,10 @@ class LoginPlugin extends Plugin
                 }
 
                 $page->slug(basename($this->route));
+
+                /** @var Pages $pages */
+                $pages = $this->grav['pages'];
+                $pages->addPage($page, $this->route);
             }
 
             $this->authenticated = false;

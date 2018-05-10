@@ -3,25 +3,6 @@ title: Login
 
 login_redirect_here: false
 
-form:
-    name: login
-    action:
-    method: post
-
-    fields:
-        username:
-          type: text
-          id: username
-          placeholder: Username
-          label: PLUGIN_LOGIN.USERNAME_EMAIL
-          autofocus: true
-
-        password:
-          type: password
-          id: password
-          placeholder: Password
-          label: PLUGIN_LOGIN.PASSWORD
-
 forms:
   login:
     action:

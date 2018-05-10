@@ -1,5 +1,5 @@
 name: Login
-version: 2.6.3
+version: 2.7.0
 description: Enables user authentication and login screen.
 icon: sign-in
 author:
@@ -13,7 +13,7 @@ license: MIT
 
 dependencies:
   - { name: grav, version: '>=1.4.5' }
-  - { name: form, version: '>=2.13.0' }
+  - { name: form, version: '>=2.13.4' }
   - { name: email, version: '>=2.7.0' }
 
 form:
