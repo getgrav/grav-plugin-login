@@ -236,7 +236,7 @@ form:
                   label: PLUGIN_LOGIN.REGISTRATION_FIELDS
                   help: PLUGIN_LOGIN.REGISTRATION_FIELDS_HELP
                   placeholder_key: PLUGIN_LOGIN.REGISTRATION_FIELD_KEY
-                  placeholder_value: PLUGIN_LOGIN.REGISTRATION_FIELD_VALUE
+                  placeholder_value: PLUGIN_LOGIN.ADDITIONAL_PARAM_VALUE
 
                 user_registration.default_values:
                   type: array
