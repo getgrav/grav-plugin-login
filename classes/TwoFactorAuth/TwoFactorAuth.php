@@ -53,6 +53,8 @@ class TwoFactorAuth
      */
     public function verifyCode($secret, $code)
     {
+        $secret = str_replace(' ', '', $secret);
+
         return $this->twoFa->verifyCode($secret, $code);
     }
 
