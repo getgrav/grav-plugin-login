@@ -101,6 +101,7 @@ class Controller
             $success = call_user_func([$this, $method]);
         } catch (\RuntimeException $e) {
             $messages->add($e->getMessage(), 'error');
+            $this->grav['log']->error('plugin.login: '. $e->getMessage());
         }
 
         if (!$this->redirect && isset($redirect)) {
