@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'RobThree\\Auth\\' => array($vendorDir . '/robthree/twofactorauth/lib'),
     'Grav\\Plugin\\Login\\' => array($baseDir . '/classes'),
     'Birke\\' => array($vendorDir . '/birke/rememberme/src'),
 );

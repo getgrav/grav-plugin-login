@@ -56,6 +56,7 @@ class LoginPlugin extends Plugin
         return [
             'onPluginsInitialized'      => [['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
+            'onTask.login.twofa'        => ['loginController', 0],
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
@@ -512,8 +513,10 @@ class LoginPlugin extends Plugin
             exit;
         }
 
+        $authorized = $user->authenticated && $user->authorized;
+
         // User is not logged in; redirect to login page.
-        if ($this->redirect_to_login && $this->route && !$user->authenticated) {
+        if ($this->redirect_to_login && $this->route && !$authorized) {
             $this->grav->redirect($this->route, 302);
         }
 
@@ -521,8 +524,7 @@ class LoginPlugin extends Plugin
         $twig = $this->grav['twig'];
 
         // Reset page with login page.
-        if (empty($user->authenticated)) {
-
+        if (!$authorized) {
             if ($this->route) {
                 $page = $this->grav['pages']->dispatch($this->route);
             } else {
@@ -539,6 +541,10 @@ class LoginPlugin extends Plugin
                 }
 
                 $page->slug(basename($this->route));
+
+                /** @var Pages $pages */
+                $pages = $this->grav['pages'];
+                $pages->addPage($page, $this->route);
             }
 
             $this->authenticated = false;
@@ -748,8 +754,19 @@ class LoginPlugin extends Plugin
      */
     private function processUserProfile($form, Event $event)
     {
+        /** @var User $user */
         $user     = $this->grav['user'];
         $language = $this->grav['language'];
+
+        // Don't save if user doesn't exist
+        if (!$user->exists()) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.USER_IS_REMOTE_ONLY')
+            ]));
+            $event->stopPropagation();
+            return;
+        }
 
         // Stop overloading of username
         $username = $form->value('username');
@@ -920,6 +937,10 @@ class LoginPlugin extends Plugin
                 return;
             }
         }
+
+        if ($event->getOption('twofa') && $user->twofa_enabled && $user->twofa_secret) {
+            $event->setStatus($event::AUTHORIZATION_DELAYED);
+        }
     }
 
     public function userLoginFailure(UserLoginEvent $event)
@@ -962,7 +983,5 @@ class LoginPlugin extends Plugin
         }
 
         $this->grav['session']->invalidate()->start();
-        $this->grav['session']->setFlashCookieObject(self::TMP_COOKIE_NAME, ['message' => $this->grav['language']->translate('PLUGIN_LOGIN.LOGGED_OUT'),
-            'status' => 'info']);
     }
 }

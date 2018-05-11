@@ -13,6 +13,9 @@ use Grav\Common\Uri;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
+use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
+use Grav\Plugin\LoginPlugin;
+use RocketTheme\Toolbox\Session\Message;
 
 /**
  * Class Controller
@@ -101,6 +104,7 @@ class Controller
             $success = call_user_func([$this, $method]);
         } catch (\RuntimeException $e) {
             $messages->add($e->getMessage(), 'error');
+            $this->grav['log']->error('plugin.login: '. $e->getMessage());
         }
 
         if (!$this->redirect && isset($redirect)) {
@@ -120,6 +124,7 @@ class Controller
         /** @var Language $t */
         $t = $this->grav['language'];
 
+        /** @var Message $messages */
         $messages = $this->grav['messages'];
 
         $userKey = isset($this->post['username']) ? (string)$this->post['username'] : '';
@@ -149,16 +154,22 @@ class Controller
 
         if ($user->authenticated) {
             $rateLimiter->resetRateLimit($ipKey, 'ip')->resetRateLimit($userKey);
+            if ($user->authorized) {
+                $event->defMessage('PLUGIN_LOGIN.LOGIN_SUCCESSFUL', 'info');
 
-            $event->defMessage('PLUGIN_LOGIN.LOGIN_SUCCESSFUL', 'info');
-
-            $event->defRedirect(
-                $this->grav['session']->redirect_after_login
-                    ?: $this->grav['config']->get('plugins.login.redirect_after_login')
-                    ?: $this->grav['uri']->referrer('/')
-            );
+                $event->defRedirect(
+                    $this->grav['session']->redirect_after_login
+                        ?: $this->grav['config']->get('plugins.login.redirect_after_login')
+                        ?: $this->grav['uri']->referrer('/')
+                );
+            } else {
+                $login_route = $this->grav['config']->get('plugins.login.route');
+                if ($login_route) {
+                    $event->defRedirect($login_route);
+                }
+            }
         } else {
-            if ($user->username) {
+            if ($user->authorized) {
                 $event->defMessage('PLUGIN_LOGIN.ACCESS_DENIED', 'error');
 
                 $event->defRedirect($this->grav['config']->get('plugins.login.route_unauthorized', '/'));
@@ -176,6 +187,47 @@ class Controller
         if ($redirect) {
             $this->setRedirect($redirect, $event->getRedirectCode());
         }
+
+        return true;
+    }
+
+    public function taskTwoFa()
+    {
+        /** @var Language $t */
+        $t = $this->grav['language'];
+
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+
+        /** @var TwoFactorAuth $twoFa */
+        $twoFa = $this->grav['login']->twoFactorAuth();
+        $user = $this->grav['user'];
+
+        $code = isset($this->post['2fa_code']) ? $this->post['2fa_code'] : null;
+        $secret = isset($user->twofa_secret) ? $user->twofa_secret : null;
+
+        if (!$code || !$secret || !$twoFa->verifyCode($secret, $code)) {
+            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
+
+            $user->authenticated = false;
+
+            $login_route = $this->grav['config']->get('plugins.login.route');
+            if ($login_route) {
+                $this->setRedirect($login_route, 303);
+            }
+
+            return true;
+        }
+
+        $messages->add($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'),  'info');
+
+        $user->authorized = true;
+
+        $this->setRedirect(
+            $this->grav['session']->redirect_after_login
+                ?: $this->grav['config']->get('plugins.login.redirect_after_login')
+                ?: $this->grav['uri']->referrer('/')
+        );
 
         return true;
     }
@@ -202,6 +254,9 @@ class Controller
         if ($redirect) {
             $this->setRedirect($redirect, $event->getRedirectCode());
         }
+
+        $this->grav['session']->setFlashCookieObject(LoginPlugin::TMP_COOKIE_NAME, ['message' => $this->grav['language']->translate('PLUGIN_LOGIN.LOGGED_OUT'),
+            'status' => 'info']);
 
         return true;
     }
@@ -239,6 +294,14 @@ class Controller
 
         if (empty($user->email)) {
             $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $email]),
+                'error');
+            $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
+
+            return true;
+        }
+
+        if (empty($user->password) && empty($user->hashed_password)) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_PASSWORD', $email]),
                 'error');
             $this->setRedirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
 
