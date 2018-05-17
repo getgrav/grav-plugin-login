@@ -128,7 +128,7 @@ class NewUserCommand extends ConsoleCommand
                     throw new \RuntimeException('Username "' . $value . '" already exists, please pick another username');
                 };
 
-                return true;
+                return $value;
             });
 
             $username = $helper->ask($this->input, $this->output, $question);

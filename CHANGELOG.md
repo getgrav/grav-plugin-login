@@ -1,3 +1,9 @@
+# v2.7.1
+## mm/dd/2018
+
+1. [](#bugfix)
+    * CLI command add-user ignores desired username [#157](https://github.com/getgrav/grav-plugin-login/issues/157)
+
 # v2.7.0
 ## 05/11/2018
 
