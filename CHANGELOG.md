@@ -1,5 +1,5 @@
 # v2.7.1
-## mm/dd/2018
+## 06/03/2018
 
 1. [](#bugfix)
     * Removed extra unnecessary username check [#159](https://github.com/getgrav/grav-plugin-login/issues/159)
