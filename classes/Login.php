@@ -229,9 +229,6 @@ class Login
         }
 
         $username = $this->validateField('username', $data['username']);
-        if (User::find($username, ['username'])) {
-            throw new \RuntimeException('Username "' . $username . '" already exists, please pick another username');
-        }
 
         $file = CompiledYamlFile::instance($this->grav['locator']->findResource('account://' . $username . YAML_EXT,
             true, true));
