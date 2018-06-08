@@ -1,3 +1,9 @@
+# v2.7.2
+## mm/dd/2018
+
+1. [](#bugfix)
+    * Fixed issue with `redirect_after_login` being ignored [#164](https://github.com/getgrav/grav-plugin-login/issues/164)
+
 # v2.7.1
 ## 06/03/2018
 
