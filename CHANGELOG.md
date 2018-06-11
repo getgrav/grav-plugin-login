@@ -1,5 +1,5 @@
 # v2.7.2
-## mm/dd/2018
+## 06/11/2018
 
 1. [](#new)
     * Norwegian translation added [#163](https://github.com/getgrav/grav-plugin-login/issues/163)
