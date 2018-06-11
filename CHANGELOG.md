@@ -1,9 +1,19 @@
+# v2.7.2
+## 06/11/2018
+
+1. [](#new)
+    * Norwegian translation added [#163](https://github.com/getgrav/grav-plugin-login/issues/163)
+
+1. [](#bugfix)
+    * Fixed issue with `redirect_after_login` being ignored [#164](https://github.com/getgrav/grav-plugin-login/issues/164)
+    * CLI commands `change-user-state` and `change-password` were ignoring desired username [#161](https://github.com/getgrav/grav-plugin-login/issues/161)
+
 # v2.7.1
 ## 06/03/2018
 
 1. [](#bugfix)
     * Removed extra unnecessary username check [#159](https://github.com/getgrav/grav-plugin-login/issues/159)
-    * CLI command add-user ignores desired username [#157](https://github.com/getgrav/grav-plugin-login/issues/157)
+    * CLI command `add-user` ignores desired username [#157](https://github.com/getgrav/grav-plugin-login/issues/157)
 
 # v2.7.0
 ## 05/11/2018

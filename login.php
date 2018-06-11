@@ -234,7 +234,7 @@ class LoginPlugin extends Plugin
                 }
 
                 if ($allowed && $page->routable()) {
-                    $this->grav['session']->redirect_after_login = $page->route() . ($uri->params() ?: '');
+                    $this->grav['session']->redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login') ?: $page->route() . ($uri->params() ?: '');
                 }
             }
         }

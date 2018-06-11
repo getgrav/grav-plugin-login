@@ -92,7 +92,7 @@ class ChangeUserStateCommand extends ConsoleCommand
                     throw new \RuntimeException('Username "' . $value . '" does not exist, please pick another username');
                 };
 
-                return true;
+                return $value;
             });
 
             $username = $helper->ask($this->input, $this->output, $question);
