@@ -1,9 +1,14 @@
+# v2.7.3
+## 06/19/2018
+
+1. [](#bugfix)
+    * Fixed regression with `redirect_after_login` setting [#164](https://github.com/getgrav/grav-plugin-login/issues/164)
+
 # v2.7.2
 ## 06/11/2018
 
 1. [](#new)
     * Norwegian translation added [#163](https://github.com/getgrav/grav-plugin-login/issues/163)
-
 1. [](#bugfix)
     * Fixed issue with `redirect_after_login` being ignored [#164](https://github.com/getgrav/grav-plugin-login/issues/164)
     * CLI commands `change-user-state` and `change-password` were ignoring desired username [#161](https://github.com/getgrav/grav-plugin-login/issues/161)

@@ -220,8 +220,10 @@ class LoginPlugin extends Plugin
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
         $current_route = $uri->route();
+        $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
 
-        if (!in_array($current_route, $invalid_redirect_routes, true)) {
+        if (!$redirect && !in_array($current_route, $invalid_redirect_routes, true)) {
+            // No login redirect set in the configuration; can we redirect to the current page?
             $allowed = true;
 
             /** @var Page $page */
@@ -234,10 +236,12 @@ class LoginPlugin extends Plugin
                 }
 
                 if ($allowed && $page->routable()) {
-                    $this->grav['session']->redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login') ?: $page->route() . ($uri->params() ?: '');
+                    $redirect = $page->route() . ($uri->params() ?: '');
                 }
             }
         }
+
+        $this->grav['session']->redirect_after_login = $redirect;
     }
 
     /**
