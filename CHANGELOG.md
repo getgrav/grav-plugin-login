@@ -1,5 +1,5 @@
-# v2.7.2
-## mm/dd/2018
+# v2.7.3
+## 06/19/2018
 
 1. [](#bugfix)
     * Fixed regression with `redirect_after_login` setting [#164](https://github.com/getgrav/grav-plugin-login/issues/164)
