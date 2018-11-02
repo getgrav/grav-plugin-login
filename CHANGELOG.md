@@ -1,3 +1,9 @@
+# v2.7.4
+## mm/dd/2018
+
+1. [](#improved)
+    * If login on registration or activation has been turned on, use login redirect if override is not set
+
 # v2.7.3
 ## 06/20/2018
 

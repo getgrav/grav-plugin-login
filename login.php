@@ -354,6 +354,9 @@ class LoginPlugin extends Plugin
         $token = $uri->param('token');
         $user = User::load($username);
 
+        $redirect_route = $this->config->get('plugins.login.user_registration.redirect_after_activation');
+        $redirect_code = null;
+
         if (empty($user->activation_token)) {
             $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
             $messages->add($message, 'error');
@@ -380,7 +383,18 @@ class LoginPlugin extends Plugin
                     }
 
                     if ($this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-                        $this->login->login(['username' => $username], ['after_registration' => true]);
+                        $loginEvent = $this->login->login(['username' => $username], ['after_registration' => true, 'return_event' => true]);
+
+                        // If there's no activation redirect, get one from login.
+                        if (!$redirect_route) {
+                            $message = $loginEvent->getMessage();
+                            if ($message) {
+                                $messages->add($message, $loginEvent->getMessageType());
+                            }
+
+                            $redirect_route = $loginEvent->getRedirect();
+                            $redirect_code = $loginEvent->getRedirectCode();
+                        }
                     }
                 }
             } else {
@@ -389,8 +403,7 @@ class LoginPlugin extends Plugin
             }
         }
 
-        $redirect_route = $this->config->get('plugins.login.user_registration.redirect_after_activation', '/');
-        $this->grav->redirect($redirect_route);
+        $this->grav->redirect($redirect_route ?: '/', $redirect_code);
     }
 
     /**
@@ -739,13 +752,26 @@ class LoginPlugin extends Plugin
 
         $this->grav->fireEvent('onUserLoginRegistered', new Event(['user' => $user]));
 
+        $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration');
+        $redirect_code = null;
+
         if (isset($data['state']) && $data['state'] === 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-            $this->login->login(['username' => $username], ['after_registration' => true], ['user' => $user]);
+            $loginEvent = $this->login->login(['username' => $username], ['after_registration' => true], ['user' => $user, 'return_event' => true]);
+
+            // If there's no registration redirect, get one from login.
+            if (!$redirect) {
+                $message = $loginEvent->getMessage();
+                if ($message) {
+                    $messages->add($message, $loginEvent->getMessageType());
+                }
+
+                $redirect = $loginEvent->getRedirect();
+                $redirect_code = $loginEvent->getRedirectCode();
+            }
         }
 
-        $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration', false);
         if ($redirect) {
-            $this->grav->redirect($redirect);
+            $this->grav->redirect($redirect, $redirect_code);
         }
     }
 
