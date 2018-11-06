@@ -909,8 +909,21 @@ class LoginPlugin extends Plugin
             }
 
             // Allow remember me to work with different login methods.
+            $user = User::load($username, false);
             $event->setCredential('username', $username);
-            $event->setUser(User::load($username, false));
+            $event->setUser($user);
+
+            if (!$user->exists()) {
+                $event->setStatus($event::AUTHENTICATION_FAILURE);
+                $event->stopPropagation();
+
+                return;
+            } else {
+                $event->setStatus($event::AUTHENTICATION_SUCCESS);
+                $event->stopPropagation();
+
+                return;
+            }
         }
     }
 
