@@ -1018,9 +1018,6 @@ class LoginPlugin extends Plugin
             $username = $event->getUser()->get('username');
             if ($event->getCredential('rememberme')) {
                 $login->rememberMe()->createCookie($username);
-            } else {
-                $login->rememberMe()->getStorage()->cleanAllTriplets($username);
-                $login->rememberMe()->clearCookie();
             }
         }
     }

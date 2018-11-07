@@ -1,8 +1,12 @@
 # v2.7.4
 ## mm/dd/2018
 
+1. [](#new)
+    * Store remember me triplets into `user://data/rememberme` instead of storing them into the cache
 1. [](#improved)
     * If login on registration or activation has been turned on, use login redirect if override is not set
+1. [](#bugfix)
+    * Fixed broken remember me functionality
 
 # v2.7.3
 ## 06/20/2018

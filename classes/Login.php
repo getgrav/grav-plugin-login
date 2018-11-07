@@ -452,12 +452,14 @@ class Login
         if (!$this->rememberMe) {
             /** @var Config $config */
             $config = $this->grav['config'];
+            $cookieName = $config->get('plugins.login.rememberme.name');
+            $timeout = $config->get('plugins.login.rememberme.timeout');
 
             // Setup storage for RememberMe cookies
-            $storage = new TokenStorage;
+            $storage = new TokenStorage('user://data/rememberme', $timeout);
             $this->rememberMe = new RememberMe($storage);
-            $this->rememberMe->setCookieName($config->get('plugins.login.rememberme.name'));
-            $this->rememberMe->setExpireTime($config->get('plugins.login.rememberme.timeout'));
+            $this->rememberMe->setCookieName($cookieName);
+            $this->rememberMe->setExpireTime($timeout);
 
             // Hardening cookies with user-agent and random salt or
             // fallback to use system based cache key
