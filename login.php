@@ -7,6 +7,7 @@
  */
 namespace Grav\Plugin;
 
+use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
@@ -891,17 +892,24 @@ class LoginPlugin extends Plugin
 
         // Only use remember me if user isn't set and feature is enabled.
         if ($this->grav['config']->get('plugins.login.rememberme.enabled') && !$event->getUser()->exists()) {
+            /** @var Debugger $debugger */
+            $debugger = $this->grav['debugger'];
+
             /** @var RememberMe $rememberMe */
             $rememberMe = $this->grav['login']->rememberMe();
             $username = $rememberMe->login();
 
             if ($rememberMe->loginTokenWasInvalid()) {
                 // Token was invalid. We will display error page as this was likely an attack.
+                $debugger->addMessage('Remember Me: Stolen token!');
+
                 throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.REMEMBER_ME_STOLEN_COOKIE'), 403);
             }
 
             if ($username === false) {
                 // User has not been remembered, there is no point of continuing.
+                $debugger->addMessage('Remember Me: No token matched.');
+
                 $event->setStatus($event::AUTHENTICATION_FAILURE);
                 $event->stopPropagation();
 
@@ -914,16 +922,20 @@ class LoginPlugin extends Plugin
             $event->setUser($user);
 
             if (!$user->exists()) {
+                $debugger->addMessage('Remember Me: User does not exist');
+
                 $event->setStatus($event::AUTHENTICATION_FAILURE);
                 $event->stopPropagation();
 
                 return;
-            } else {
-                $event->setStatus($event::AUTHENTICATION_SUCCESS);
-                $event->stopPropagation();
-
-                return;
             }
+
+            $debugger->addMessage('Remember Me: Authenticated!');
+
+            $event->setStatus($event::AUTHENTICATION_SUCCESS);
+            $event->stopPropagation();
+
+            return;
         }
     }
 
