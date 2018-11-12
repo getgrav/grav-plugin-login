@@ -3,6 +3,7 @@
 
 1. [](#new)
     * Store remember me triplets into `user://data/rememberme` instead of storing them into the cache
+    * Ability to register + authorize but require accounts to be manually enabled [#180](https://github.com/getgrav/grav-plugin-login/issues/180)
 1. [](#improved)
     * If login on registration or activation has been turned on, use login redirect if override is not set
 1. [](#bugfix)

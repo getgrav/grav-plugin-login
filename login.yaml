@@ -50,5 +50,6 @@ user_registration:
     set_user_disabled: false                # Set this `true` if you want a user to activate their account via email
     login_after_registration: false         # Automatically login after registration
     send_activation_email: false            # Send an email that requires a special link to be clicked in order to activate the account
+    manually_enable: false                  # When using activation email, don't enable until an admin does it manually
     send_notification_email: false          # Send an email to the site administrator to indicate a user has registered
     send_welcome_email: false               # Send a welcome email to the user (probably should not be used with `send_activation_email`

@@ -369,12 +369,16 @@ class LoginPlugin extends Plugin
                     $message = $this->grav['language']->translate('PLUGIN_LOGIN.ACTIVATION_LINK_EXPIRED');
                     $messages->add($message, 'error');
                 } else {
-                    $user['state'] = 'enabled';
+                    if ($this->config->get('plugins.login.user_registration.options.manually_enable', false)) {
+                        $message = $this->grav['language']->translate('PLUGIN_LOGIN.USER_ACTIVATED_SUCCESSFULLY_NOT_ENABLED');
+                    } else {
+                        $user['state'] = 'enabled';
+                        $message = $this->grav['language']->translate('PLUGIN_LOGIN.USER_ACTIVATED_SUCCESSFULLY');
+                    }
+
+                    $messages->add($message, 'info');
                     unset($user['activation_token']);
                     $user->save();
-
-                    $message = $this->grav['language']->translate('PLUGIN_LOGIN.USER_ACTIVATED_SUCCESSFULLY');
-                    $messages->add($message, 'info');
 
                     if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
                         $this->login->sendWelcomeEmail($user);

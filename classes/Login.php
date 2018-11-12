@@ -423,9 +423,6 @@ class Login
             $author
         ]);
         $to = $user->email;
-
-
-
         $sent = EmailUtils::sendEmail($subject, $content, $to);
 
         if ($sent < 1) {
