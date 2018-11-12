@@ -131,9 +131,9 @@ class NewUserCommand extends ConsoleCommand
                 return $value;
             });
 
-            $username = $helper->ask($this->input, $this->output, $question);
+            $data['username'] = $helper->ask($this->input, $this->output, $question);
         } else {
-            $username = $this->options['user'];
+            $data['username'] = $this->options['user'];
         }
 
 
@@ -227,7 +227,7 @@ class NewUserCommand extends ConsoleCommand
         }
 
         // Lowercase the username for the filename
-        $username = strtolower($username);
+        $username = mb_strtolower($data['username']);
 
         /** @var UniformResourceLocator $locator */
         $locator = Grav::instance()['locator'];

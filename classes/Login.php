@@ -230,7 +230,7 @@ class Login
 
         $username = $this->validateField('username', $data['username']);
 
-        $file = CompiledYamlFile::instance($this->grav['locator']->findResource('account://' . $username . YAML_EXT,
+        $file = CompiledYamlFile::instance($this->grav['locator']->findResource('account://' . mb_strtolower($username) . YAML_EXT,
             true, true));
 
         // Create user object and save it
