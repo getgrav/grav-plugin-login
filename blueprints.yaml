@@ -1,5 +1,5 @@
 name: Login
-version: 2.7.3
+version: 2.8.0
 description: Enables user authentication and login screen.
 icon: sign-in
 author:
@@ -290,7 +290,7 @@ form:
                   type: toggle
                   label: PLUGIN_LOGIN.SET_USER_DISABLED
                   help: PLUGIN_LOGIN.SET_USER_DISABLED_HELP
-                  highlight: 1
+                  highlight: 0
                   options:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
@@ -312,18 +312,29 @@ form:
                   type: toggle
                   label: PLUGIN_LOGIN.SEND_ACTIVATION_EMAIL
                   help: PLUGIN_LOGIN.SEND_ACTIVATION_EMAIL_HELP
-                  highlight: 1
+                  highlight: 0
                   options:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
                   validate:
                       type: bool
 
+                user_registration.options.manually_enable:
+                  type: toggle
+                  label: PLUGIN_LOGIN.MANUALLY_ENABLE
+                  help: PLUGIN_LOGIN.MANUALLY_ENABLE_HELP
+                  highlight: 0
+                  options:
+                    1: PLUGIN_ADMIN.YES
+                    0: PLUGIN_ADMIN.NO
+                  validate:
+                    type: bool
+
                 user_registration.options.send_notification_email:
                   type: toggle
                   label: PLUGIN_LOGIN.SEND_NOTIFICATION_EMAIL
                   help: PLUGIN_LOGIN.SEND_NOTIFICATION_EMAIL_HELP
-                  highlight: 1
+                  highlight: 0
                   options:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
@@ -334,10 +345,12 @@ form:
                   type: toggle
                   label: PLUGIN_LOGIN.SEND_WELCOME_EMAIL
                   help: PLUGIN_LOGIN.SEND_WELCOME_EMAIL_HELP
-                  highlight: 1
+                  highlight: 0
                   options:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
+                  validate:
+                    type: bool
 
         Security:
           type: tab
