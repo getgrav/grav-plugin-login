@@ -349,6 +349,8 @@ form:
                   options:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
+                  validate:
+                    type: bool
 
         Security:
           type: tab
