@@ -331,7 +331,6 @@ class LoginPlugin extends Plugin
         if (!$page) {
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . '/pages/register.md'));
-            $page->template('form');
             $page->slug(basename($route));
 
             $pages->addPage($page, $route);
@@ -448,7 +447,6 @@ class LoginPlugin extends Plugin
         if (!$page) {
             $page = new Page;
             $page->init(new \SplFileInfo(__DIR__ . '/pages/unauthorized.md'));
-            $page->template('default');
             $page->slug(basename($route));
 
             $pages->addPage($page, $route);

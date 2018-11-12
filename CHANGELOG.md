@@ -6,6 +6,7 @@
     * Ability to register + authorize but require accounts to be manually enabled [#180](https://github.com/getgrav/grav-plugin-login/issues/180)
 1. [](#improved)
     * If login on registration or activation has been turned on, use login redirect if override is not set
+    * Don’t set default templates for `register` and `unauthorized`, use overridable templates [#179](https://github.com/getgrav/grav-plugin-login/issues/179)
 1. [](#bugfix)
     * Fixed broken remember me functionality
 
