@@ -1,5 +1,5 @@
-# v2.7.4
-## mm/dd/2018
+# v2.8.0
+## 11/12/2018
 
 1. [](#new)
     * Store remember me triplets into `user://data/rememberme` instead of storing them into the cache
@@ -11,6 +11,7 @@
     * Updated `ru.yaml` [#176](https://github.com/getgrav/grav-plugin-login/pull/176)
 1. [](#bugfix)
     * Fixed broken remember me functionality
+    * Fixed client side validation in login forms
     * Fix uppercase and Unicode username handling [#177](https://github.com/getgrav/grav-plugin-login/pull/177)
 
 # v2.7.3
