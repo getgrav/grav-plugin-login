@@ -335,7 +335,13 @@ class Controller
         $author = $this->grav['config']->get('site.author.name', '');
         $fullname = $user->fullname ?: $user->username;
 
-        $reset_link = $this->grav['base_url_absolute'] . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
+        if ($this->grav['language']->getDefault() != $this->grav['language']->getLanguage()) {
+            $lang = '/'.$this->grav['language']->getLanguage();
+        } else {
+            $lang = '';
+        }
+
+        $reset_link = $this->grav['base_url_absolute'] . $lang . $this->grav['config']->get('plugins.login.route_reset') . '/task:login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
 
         $sitename = $this->grav['config']->get('site.title', 'Website');
 
@@ -381,7 +387,7 @@ class Controller
                 if ($good_token === $token) {
                     if (time() > $expire) {
                         $messages->add($language->translate('PLUGIN_LOGIN.RESET_LINK_EXPIRED'), 'error');
-                        $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
+                        $this->grav->redirectLangSafe($this->grav['config']->get('plugins.login.route_forgot', '/'));
 
                         return true;
                     }
@@ -401,7 +407,7 @@ class Controller
             }
 
             $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
-            $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+            $this->grav->redirectLangSafe($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
 
@@ -412,7 +418,7 @@ class Controller
 
         if (!$user || !$token) {
             $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
-            $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+            $this->grav->redirectLangSafe($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
         }

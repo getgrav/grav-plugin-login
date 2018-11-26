@@ -407,7 +407,7 @@ class LoginPlugin extends Plugin
             }
         }
 
-        $this->grav->redirect($redirect_route ?: '/', $redirect_code);
+        $this->grav->redirectLangSafe($redirect_route ?: '/', $redirect_code);
     }
 
     /**
@@ -537,7 +537,7 @@ class LoginPlugin extends Plugin
 
         // User is not logged in; redirect to login page.
         if ($this->redirect_to_login && $this->route && !$authorized) {
-            $this->grav->redirect($this->route, 302);
+            $this->grav->redirectLangSafe($this->route, 302);
         }
 
         /** @var Twig $twig */
@@ -774,7 +774,7 @@ class LoginPlugin extends Plugin
         }
 
         if ($redirect) {
-            $this->grav->redirect($redirect, $redirect_code);
+            $this->grav->redirectLangSafe($redirect, $redirect_code);
         }
     }
 
