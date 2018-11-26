@@ -381,7 +381,7 @@ class Controller
                 if ($good_token === $token) {
                     if (time() > $expire) {
                         $messages->add($language->translate('PLUGIN_LOGIN.RESET_LINK_EXPIRED'), 'error');
-                        $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot', '/'));
+                        $this->grav->redirectLangSafe($this->grav['config']->get('plugins.login.route_forgot', '/'));
 
                         return true;
                     }
@@ -401,7 +401,7 @@ class Controller
             }
 
             $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
-            $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+            $this->grav->redirectLangSafe($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
 
@@ -412,7 +412,7 @@ class Controller
 
         if (!$user || !$token) {
             $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
-            $this->grav->redirect($this->grav['config']->get('plugins.login.route_forgot'));
+            $this->grav->redirectLangSafe($this->grav['config']->get('plugins.login.route_forgot'));
 
             return true;
         }
