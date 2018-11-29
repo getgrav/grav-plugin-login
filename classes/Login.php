@@ -338,7 +338,7 @@ class Login
             $user->email,
             $this->grav['base_url_absolute'],
         ]);
-        $to = $this->config->get('plugins.email.from');
+        $to = $this->config->get('plugins.email.to');
 
         if (empty($to)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
