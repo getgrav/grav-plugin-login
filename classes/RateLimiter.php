@@ -56,7 +56,7 @@ class RateLimiter
             return false;
         }
 
-        return $this->maxCount && count($this->getAttempts($key, $type)) > $this->maxCount;
+        return $this->maxCount && \count($this->getAttempts($key, $type)) > $this->maxCount;
     }
 
     /**

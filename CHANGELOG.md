@@ -1,3 +1,12 @@
+# 3.0.0-beta.1
+## mm/dd/2018
+
+1. [](#new)
+    * Requires Grav 1.6.0-beta.7, Form 1.6.0-beta.7
+    * Added support for the new `Flex User` object
+1. [](#improved)
+    * Updated code to PHP 7.1 features
+
 # v2.8.0
 ## 11/12/2018
 

@@ -1,10 +1,12 @@
 <?php
+
 /**
  * @package    Grav\Plugin\Login
  *
  * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
+
 namespace Grav\Plugin\Login\Events;
 
 use Grav\Common\Grav;
@@ -138,7 +140,7 @@ class UserLoginEvent extends Event
      */
     public function getCredential($name)
     {
-        return isset($this->items['credentials'][$name]) ? $this->items['credentials'][$name] : null;
+        return $this->items['credentials'][$name] ?? null;
     }
 
     /**
@@ -167,7 +169,7 @@ class UserLoginEvent extends Event
      */
     public function getOption($name)
     {
-        return isset($this->items['options'][$name]) ? $this->items['options'][$name] : null;
+        return $this->items['options'][$name] ?? null;
     }
 
     /**
@@ -264,15 +266,15 @@ class UserLoginEvent extends Event
      */
     public function getRedirect()
     {
-        return !empty($this->items['redirect']) ? (string)$this->items['redirect'] : null;
+        return $this->items['redirect'] ?? null;
     }
 
     /**
-     * @return string|null
+     * @return int
      */
     public function getRedirectCode()
     {
-        return !empty($this->items['redirect_code']) ? (string)$this->items['redirect_code'] : 303;
+        return $this->items['redirect_code'] ?? 303;
     }
 
     /**

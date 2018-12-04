@@ -7,13 +7,10 @@
  */
 namespace Grav\Plugin\Console;
 
-use Grav\Common\Config\Config;
 use Grav\Console\ConsoleCommand;
 use Grav\Common\Grav;
-use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
 use Grav\Plugin\Login\Login;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Question\Question;
@@ -117,23 +114,13 @@ class ChangePasswordCommand extends ConsoleCommand
             $data['password'] = $this->options['password1'];
         }
 
-        // Lowercase the username for the filename
-        $username = mb_strtolower($username);
-
-        /** @var UniformResourceLocator $locator */
-        $locator = Grav::instance()['locator'];
-        
-        // Grab the account file and read in the information before setting the file (prevent setting erase)
-        $oldUserFile = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
-        $oldData = (array)$oldUserFile->content();
-        
+        $user = User::load($username);
+        if (!$user->exists()) {
+            $this->output->writeln('<red>Failure</red> User <cyan>' . $username . '</cyan> does not exist!');
+            exit();
+        }
         //Set the password field to new password
-        $oldData['password'] = $data['password'];
-        
-        // Create user object and save it using oldData (with updated password)
-        $user = new User($oldData);
-        $file = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
-        $user->file($file);
+        $user->set('password', $data['password']);
         $user->save();
 
         $this->output->writeln('');

@@ -1,19 +1,18 @@
 <?php
+
 /**
  * @package    Grav\Plugin\Login
  *
  * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
+
 namespace Grav\Plugin\Console;
 
-use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Console\ConsoleCommand;
-use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\User\User;
 use Grav\Plugin\Login\Login;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\Question;
@@ -101,7 +100,7 @@ class ChangeUserStateCommand extends ConsoleCommand
         }
 
 
-        if (!$this->options['state'] && !count(array_filter($this->options))) {
+        if (!$this->options['state'] && !\count(array_filter($this->options))) {
             // Choose State
             $question = new ChoiceQuestion(
                 'Please choose the <yellow>state</yellow> for the account:',
@@ -115,23 +114,14 @@ class ChangeUserStateCommand extends ConsoleCommand
             $data['state'] = $this->options['state'] ?: 'enabled';
         }
 
-        // Lowercase the username for the filename
-        $username = mb_strtolower($username);
+        $user = User::load($username);
+        if (!$user->exists()) {
+            $this->output->writeln('<red>Failure!</red> User <cyan>' . $username . '</cyan> does not exist!');
+            exit();
+        }
 
-        /** @var UniformResourceLocator $locator */
-        $locator = Grav::instance()['locator'];
-
-        // Grab the account file and read in the information before setting the file (prevent setting erase)
-        $oldUserFile = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
-        $oldData = (array)$oldUserFile->content();
-        
-        //Set the state feild to new state
-        $oldData['state'] = $data['state'];
-        
-        // Create user object and save it using oldData (with updated state)
-        $user = new User($oldData);
-        $file = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
-        $user->file($file);
+        //Set the state field to new state
+        $user->set('state', $data['state']);
         $user->save();
 
         $this->output->writeln('');
