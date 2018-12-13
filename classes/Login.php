@@ -196,7 +196,7 @@ class Login
         }
 
         if ($redirect) {
-            $this->grav->redirect($redirect, $event->getRedirectCode());
+            $this->grav->redirectLangSafe($redirect, $event->getRedirectCode());
         }
 
         return $user->authenticated && $user->authorized;
