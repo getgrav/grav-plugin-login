@@ -1,3 +1,9 @@
+# v2.8.1
+## 12/13/2018
+
+1. [](#bugfix)
+  * Ensure only defined `user_registration.fields` are allowed in registration and profile forms
+
 # v2.8.0
 ## 11/12/2018
 
