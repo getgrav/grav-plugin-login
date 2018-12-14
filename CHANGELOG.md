@@ -1,5 +1,5 @@
 # v2.8.2
-## mm/dd/2018
+## 12/14/2018
   
 1. [](#new)  
   * Fire `onUserLoginRegisteredUser()` event to allow manipulation of User object after registration
