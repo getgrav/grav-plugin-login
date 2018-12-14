@@ -742,6 +742,7 @@ class LoginPlugin extends Plugin
 
         $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data]));
         $user = $this->login->register($data);
+        $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
 
         $fullname = $user->fullname ?: $user->username;
 
