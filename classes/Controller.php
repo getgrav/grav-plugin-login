@@ -432,7 +432,7 @@ class Controller
     public function redirect()
     {
         if ($this->redirect) {
-            $this->grav->redirect($this->redirect, $this->redirectCode);
+            $this->grav->redirectLangSafe($this->redirect, $this->redirectCode);
         }
     }
 
