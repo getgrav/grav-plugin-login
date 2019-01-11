@@ -10,6 +10,7 @@
 namespace Grav\Plugin;
 
 use Composer\Autoload\ClassLoader;
+use Grav\Common\Data\Data;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
@@ -659,8 +660,14 @@ class LoginPlugin extends Plugin
             throw new \RuntimeException($language->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
         }
 
+        $form->validate();
+        $form->filter();
+
+        /** @var Data $form_data */
+        $form_data = $form->getData();
+
         // Check for existing username
-        $username = $form->value('username');
+        $username = $form_data->get('username');
         $existing_username = User::find($username,['username']);
         if ($existing_username->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
@@ -675,7 +682,7 @@ class LoginPlugin extends Plugin
         }
 
         // Check for existing email
-        $email    = $form->value('email');
+        $email    = $form_data->get('email');
         $existing_email = User::find($email,['email']);
         if ($existing_email->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
@@ -697,7 +704,7 @@ class LoginPlugin extends Plugin
         if ($this->config->get('plugins.login.user_registration.options.validate_password1_and_password2',
             false)
         ) {
-            if ($form->value('password1') !== $form->value('password2')) {
+            if ($form_data->get('password1') !== $form_data->get('password2')) {
                 $this->grav->fireEvent('onFormValidationError', new Event([
                     'form'    => $form,
                     'message' => $language->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH')
@@ -706,7 +713,7 @@ class LoginPlugin extends Plugin
 
                 return;
             }
-            $data['password'] = $form->value('password1');
+            $data['password'] = $form_data->get('password1');
         }
 
         $fields = (array)$this->config->get('plugins.login.user_registration.fields', []);
@@ -728,8 +735,8 @@ class LoginPlugin extends Plugin
                 }
             }
 
-            if (!isset($data[$field]) && $form->value($field)) {
-                $data[$field] = $form->value($field);
+            if (!isset($data[$field]) && $form_data->get($field)) {
+                $data[$field] = $form_data->get($field);
             }
         }
 
@@ -741,6 +748,7 @@ class LoginPlugin extends Plugin
 
         $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data]));
         $user = $this->login->register($data);
+        $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
 
         $fullname = $user->fullname ?: $user->username;
 
@@ -798,6 +806,12 @@ class LoginPlugin extends Plugin
         $user     = $this->grav['user'];
         $language = $this->grav['language'];
 
+        $form->validate();
+        $form->filter();
+
+        /** @var Data $form_data */
+        $form_data = $form->getData();
+
         // Don't save if user doesn't exist
         if (!$user->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
@@ -809,7 +823,7 @@ class LoginPlugin extends Plugin
         }
 
         // Stop overloading of username
-        $username = $form->value('username');
+        $username = $form->data('username');
         if (isset($username)) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
@@ -823,7 +837,7 @@ class LoginPlugin extends Plugin
         }
 
         // Check for existing email
-        $email = $form->value('email');
+        $email = $form->getData('email');
         $existing_email = User::find($email,['email']);
         if ($user->username !== $existing_email->username && $existing_email->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
@@ -837,7 +851,15 @@ class LoginPlugin extends Plugin
             return false;
         }
 
-        $user->merge($form->getData()->toArray());
+        $fields = (array)$this->config->get('plugins.login.user_registration.fields', []);
+
+        $data = [];
+        foreach ($fields as $field) {
+            if (!isset($data[$field]) && $form_data->get($field)) {
+                $data[$field] = $form_data->get($field);
+            }
+        }
+        $user->merge($data);
 
         try {
             $user->save();

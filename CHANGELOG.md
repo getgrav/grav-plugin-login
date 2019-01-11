@@ -7,6 +7,19 @@
 1. [](#improved)
     * Updated code to PHP 7.1 features
 
+# v2.8.2
+## 12/14/2018
+  
+1. [](#new)  
+  * Fire `onUserLoginRegisteredUser()` event to allow manipulation of User object after registration
+
+# v2.8.1
+## 12/13/2018
+
+1. [](#bugfix)
+  * Fix various redirects to use `lang-safe` variety for better multi-language support [#186]((https://github.com/getgrav/grav-plugin-login/issues/186))
+  * Ensure only defined `user_registration.fields` are allowed in registration and profile forms
+
 # v2.8.0
 ## 11/12/2018
 
