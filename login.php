@@ -739,9 +739,9 @@ class LoginPlugin extends Plugin
         } else {
             $data['state'] = 'enabled';
         }
-
-        $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data]));
-        $user = $this->login->register($data);
+        $data_object = (object) $data;
+        $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data_object]));
+        $user = $this->login->register((array)$data_object);
         $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
 
         $fullname = $user->fullname ?: $user->username;
