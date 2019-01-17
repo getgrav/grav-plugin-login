@@ -130,6 +130,9 @@ class Controller
         $userKey = (string)($this->post['username'] ?? '');
         $ipKey = Uri::ip();
 
+        // Pseudonymization of the IP
+        $ipKey = sha1($ipKey . $this->grav['config']->get('security.salt'));
+
         $rateLimiter = $this->login->getRateLimiter('login_attempts');
 
         // Check if the current IP has been used in failed login attempts.
