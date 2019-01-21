@@ -530,15 +530,13 @@ class Login
         $header = $page->header();
         $rules = isset($header->access) ? (array)$header->access : [];
 
-        if ($config !== null && $config->get('parent_acl')) {
+        if (!$rules && $config !== null && $config->get('parent_acl')) {
             // If page has no ACL rules, use its parent's rules
-            if (!$rules) {
-                $parent = $page->parent();
-                while (!$rules and $parent) {
-                    $header = $parent->header();
-                    $rules = isset($header->access) ? (array)$header->access : [];
-                    $parent = $parent->parent();
-                }
+            $parent = $page->parent();
+            while (!$rules and $parent) {
+                $header = $parent->header();
+                $rules = isset($header->access) ? (array)$header->access : [];
+                $parent = $parent->parent();
             }
         }
 
