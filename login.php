@@ -21,6 +21,8 @@ use Grav\Common\Twig\Twig;
 use Grav\Common\User\User;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
+use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use Grav\Plugin\Form\Form;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\Controller;
@@ -747,7 +749,13 @@ class LoginPlugin extends Plugin
         }
         $data_object = (object) $data;
         $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data_object]));
-        $user = $this->login->register((array)$data_object);
+
+        $flash = $form->getFlash();
+        $user = $this->login->register((array)$data_object, $flash->getFilesByFields());
+        if ($user instanceof FlexObjectInterface) {
+            $flash->clearFiles();
+        }
+
         $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
 
         $fullname = $user->fullname ?: $user->username;
@@ -859,10 +867,15 @@ class LoginPlugin extends Plugin
                 $data[$field] = $form_data->get($field);
             }
         }
-        $user->merge($data);
 
         try {
+            $flash = $form->getFlash();
+            $user->update($data, $flash->getFilesByFields());
             $user->save();
+
+            if ($user instanceof FlexObjectInterface) {
+                $flash->clearFiles();
+            }
         } catch (\Exception $e) {
             $form->setMessage($e->getMessage(), 'error');
             return false;

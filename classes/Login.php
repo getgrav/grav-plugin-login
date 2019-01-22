@@ -206,10 +206,11 @@ class Login
      * Create a new user file
      *
      * @param array $data
+     * @param array $files
      *
      * @return User
      */
-    public function register($data)
+    public function register(array $data, array $files = [])
     {
         if (!isset($data['groups'])) {
             //Add new user ACL settings
@@ -236,7 +237,7 @@ class Login
             throw new \RuntimeException('User ' . $username . ' cannot be registered: user already exists!');
         }
 
-        $user->update($data);
+        $user->update($data, $files);
         $user->save();
 
         return $user;
