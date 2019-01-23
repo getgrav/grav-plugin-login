@@ -751,7 +751,7 @@ class LoginPlugin extends Plugin
         $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data_object]));
 
         $flash = $form->getFlash();
-        $user = $this->login->register((array)$data_object, $flash->getFilesByFields());
+        $user = $this->login->register((array)$data_object, $flash->getFilesByFields(true));
         if ($user instanceof FlexObjectInterface) {
             $flash->clearFiles();
         }
@@ -870,7 +870,7 @@ class LoginPlugin extends Plugin
 
         try {
             $flash = $form->getFlash();
-            $user->update($data, $flash->getFilesByFields());
+            $user->update($data, $flash->getFilesByFields(true));
             $user->save();
 
             if ($user instanceof FlexObjectInterface) {
