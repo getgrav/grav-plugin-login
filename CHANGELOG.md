@@ -2,10 +2,21 @@
 ## mm/dd/2018
 
 1. [](#new)
-    * Requires Grav 1.6.0-beta.8, Form 3.0.0-beta.5
+    * Requires Grav `1.6.0-beta.8`, Form `3.0.0-beta.5`
     * Added support for the new `Flex User` object
 1. [](#improved)
     * Updated code to PHP 7.1 features
+    
+# v2.8.3
+## 01/25/2018
+  
+1. [](#new)
+  * Wrap data in `onUserLoginRegisterData` event in object to allow reference  
+1. [](#improved)  
+  * IP pseudonymization for rate limiter [#196](https://github.com/getgrav/grav-plugin-login/pull/196)
+  * Made some error lang strings more generic to relfect ability to change username/password requirements
+1. [](#bugfix)
+  * Fix redirectLangSafe in login controller [#192](https://github.com/getgrav/grav-plugin-login/pull/192)      
 
 # v2.8.2
 ## 12/14/2018
