@@ -754,6 +754,7 @@ class LoginPlugin extends Plugin
         $user = $this->login->register((array)$data_object, $flash->getFilesByFields(true));
         if ($user instanceof FlexObjectInterface) {
             $flash->clearFiles();
+            $flash->save();
         }
 
         $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
@@ -875,6 +876,7 @@ class LoginPlugin extends Plugin
 
             if ($user instanceof FlexObjectInterface) {
                 $flash->clearFiles();
+                $flash->save();
             }
         } catch (\Exception $e) {
             $form->setMessage($e->getMessage(), 'error');
