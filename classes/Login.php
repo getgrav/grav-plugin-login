@@ -257,8 +257,8 @@ class Login
                 $config = Grav::instance()['config'];
                 $username_regex = '/' . $config->get('system.username_regex') . '/';
 
-                if (!is_string($value) || !preg_match($username_regex, $value)) {
-                    throw new \RuntimeException('Username should be between 3 and 16 characters, including lowercase letters, numbers, underscores, and hyphens. Uppercase letters, spaces, and special characters are not allowed');
+                if (!\is_string($value) || !preg_match($username_regex, $value)) {
+                    throw new \RuntimeException('Username does not pass the minimum requirements');
                 }
 
                 break;
@@ -268,8 +268,8 @@ class Login
                 $config = Grav::instance()['config'];
                 $pwd_regex = '/' . $config->get('system.pwd_regex') . '/';
 
-                if (!is_string($value) || !preg_match($pwd_regex, $value)) {
-                    throw new \RuntimeException('Password must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters');
+                if (!\is_string($value) || !preg_match($pwd_regex, $value)) {
+                    throw new \RuntimeException('Password does not pass them minimum requirements');
                 }
 
                 break;

@@ -1,3 +1,14 @@
+# v2.8.3
+## 01/25/2018
+  
+1. [](#new)
+  * Wrap data in `onUserLoginRegisterData` event in object to allow reference  
+1. [](#improved)  
+  * IP pseudonymization for rate limiter [#196](https://github.com/getgrav/grav-plugin-login/pull/196)
+  * Made some error lang strings more generic to relfect ability to change username/password requirements
+1. [](#bugfix)
+  * Fix redirectLangSafe in login controller [#192](https://github.com/getgrav/grav-plugin-login/pull/192)  
+
 # v2.8.2
 ## 12/14/2018
   
