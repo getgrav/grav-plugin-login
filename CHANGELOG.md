@@ -1,3 +1,9 @@
+# 3.0.0-beta.2
+## mm/dd/2018
+
+1. [](#new)
+    * New CLI command to `lookup` users 
+
 # 3.0.0-beta.1
 ## mm/dd/2018
 
