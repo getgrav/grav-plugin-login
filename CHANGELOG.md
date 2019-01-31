@@ -1,11 +1,12 @@
-# 3.0.0-beta.2
-## mm/dd/2018
+# 3.0.0-rc.1
+## 01/30/2019
 
 1. [](#new)
     * New CLI command to `lookup` users 
+    * Check requirements to use new `lookup` command
 
 # 3.0.0-beta.1
-## mm/dd/2018
+## 01/25/2019
 
 1. [](#new)
     * Requires Grav `1.6.0-beta.8`, Form `3.0.0-beta.5`

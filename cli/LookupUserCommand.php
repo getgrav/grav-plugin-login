@@ -54,10 +54,16 @@ class LookupUserCommand extends ConsoleCommand
     {
         include __DIR__ . '/../vendor/autoload.php';
 
+        $io = new SymfonyStyle($this->input, $this->output);
+
+        if (version_compare(GRAV_VERSION, '1.7', '<')) {
+            $io->error('Grav 1.7 required to use this command');
+            exit;
+        }
+
         $grav = Grav::instance();
         $grav->setup();
 
-        $io = new SymfonyStyle($this->input, $this->output);
         $io->title('Looking up user');
 
         // Initialize Plugins
