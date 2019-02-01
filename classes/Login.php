@@ -170,6 +170,7 @@ class Login
      * @param array $options
      *
      * @return bool
+     * @deprecated Uses the Controller::taskLogin() event
      */
     public function authenticate($credentials, $options = ['remember_me' => true])
     {

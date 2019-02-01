@@ -130,6 +130,9 @@ class Controller
         $userKey = (string)($this->post['username'] ?? '');
         $ipKey = Uri::ip();
 
+        // Is twofa enabled?
+        $twofa = $this->grav['config']->get('plugins.login.twofa_enabled', false);
+
         // Pseudonymization of the IP
         $ipKey = sha1($ipKey . $this->grav['config']->get('security.salt'));
 
@@ -152,7 +155,7 @@ class Controller
         $form = array_diff_key($this->post, ['login-form-nonce' => true]);
 
         // Fire Login process.
-        $event = $this->login->login($form, ['remember_me' => true], ['return_event' => true]);
+        $event = $this->login->login($form, ['remember_me' => true, 'twofa' => $twofa], ['return_event' => true]);
         $user = $event->getUser();
 
         if ($user->authenticated) {
