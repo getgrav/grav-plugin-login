@@ -449,7 +449,7 @@ class Controller
                 // Save secret into the user file.
                 $user->save();
 
-                $json_response = ['status' => 'success', 'image' => $image, 'secret' => preg_replace('|(\w{4})|', '\\1 ', $secret)];
+                $json_response = ['status' => 'success', 'image' => $image, 'secret' => trim(preg_replace('|(\w{4})|', '\\1 ', $secret))];
             } else {
                 $json_response = ['status' => 'error', 'message' => 'user does not exist'];
             }
