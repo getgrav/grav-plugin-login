@@ -430,6 +430,42 @@ class Controller
     }
 
     /**
+     * @param null $secret
+     * @return bool
+     */
+    public function taskRegenerate2FASecret()
+    {
+        try {
+            /** @var User $user */
+            $user = $this->grav['user'];
+
+            if ($user->exists()) {
+                /** @var TwoFactorAuth $twoFa */
+                $twoFa = $this->grav['login']->twoFactorAuth();
+                $secret = $twoFa->createSecret();
+                $image = $twoFa->getQrImageData($user->username, $secret);
+
+                // Change secret in the session.
+                $user->twofa_secret = $secret;
+
+                // Save secret into the user file.
+                $user->save();
+
+                $json_response = ['status' => 'success', 'image' => $image, 'secret' => preg_replace('|(\w{4})|', '\\1 ', $secret)];
+            } else {
+                $json_response = ['status' => 'error', 'message' => 'user does not exist'];
+            }
+        } catch (\Exception $e) {
+            $json_response = ['status' => 'error', 'message' => $e->getMessage()];
+        }
+
+        // Return JSON
+        header('Content-Type: application/json');
+        echo json_encode($json_response);
+        exit;
+    }
+
+    /**
      * Redirects an action
      */
     public function redirect()

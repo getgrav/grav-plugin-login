@@ -67,6 +67,7 @@ class LoginPlugin extends Plugin
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
+            'onTask.login.regenerate2FASecret' => ['loginController', 0],
             'onPagesInitialized'        => [['storeReferrerPage', 0], ['pageVisibility', 0]],
             'onPageInitialized'         => ['authorizePage', 0],
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
