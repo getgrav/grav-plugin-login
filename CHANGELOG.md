@@ -1,3 +1,9 @@
+# 3.0.0-rc.2
+## mm/dd/2019
+
+1. [](#new)
+    * Added 2-Factor Authentication support for front-end (2FA)
+
 # 3.0.0-rc.1
 ## 01/30/2019
 
