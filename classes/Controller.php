@@ -168,9 +168,7 @@ class Controller
                 );
             } else {
                 $login_route = $this->grav['config']->get('plugins.login.route');
-                if ($login_route) {
-                    $event->defRedirect($login_route);
-                }
+                $event->defRedirect($login_route ?: $this->grav['uri']->referrer('/'));
             }
         } else {
             if ($user->authorized) {
