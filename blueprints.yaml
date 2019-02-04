@@ -117,6 +117,18 @@ form:
               validate:
                 type: bool
 
+            twofa_enabled:
+              type: toggle
+              label: PLUGIN_LOGIN.2FA_ENABLED
+              highlight: 0
+              default: 0
+              help: PLUGIN_LOGIN.2FA_ENABLED_HELP
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
             protect_protected_page_media:
               type: toggle
               label: PLUGIN_LOGIN.PROTECT_PROTECTED_PAGE_MEDIA_LABEL

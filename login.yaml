@@ -36,6 +36,7 @@ user_registration:
     - 'fullname'
     - 'title'
     - 'level'
+    - 'twofa_enabled'
 
   default_values:                           # Any default values for fields you would like to set
     level: Newbie                           # Here the 'level' field will be pre-populated with 'Newbie' text

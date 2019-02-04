@@ -67,6 +67,7 @@ class LoginPlugin extends Plugin
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
+            'onTask.login.regenerate2FASecret' => ['loginController', 0],
             'onPagesInitialized'        => [['storeReferrerPage', 0], ['pageVisibility', 0]],
             'onPageInitialized'         => ['authorizePage', 0],
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
@@ -864,7 +865,8 @@ class LoginPlugin extends Plugin
 
         $data = [];
         foreach ($fields as $field) {
-            if (!isset($data[$field]) && $form_data->get($field)) {
+            $data_field = $form_data->get($field);
+            if (!isset($data[$field]) && isset($data_field)) {
                 $data[$field] = $form_data->get($field);
             }
         }

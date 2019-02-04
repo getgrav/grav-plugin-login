@@ -21,7 +21,7 @@
                 {% include template %}
             {% endfor %}
 
-            <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }}">
+            <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }} login-form">
 
                 {# OLD WAY OF INCLUDING 3RD PARTY LOGIN OPTIONS #}
                 {% if grav.twig.plugins_hooked_loginPage %}
