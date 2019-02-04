@@ -865,7 +865,8 @@ class LoginPlugin extends Plugin
 
         $data = [];
         foreach ($fields as $field) {
-            if (!isset($data[$field]) && $form_data->get($field)) {
+            $data_field = $form_data->get($field);
+            if (!isset($data[$field]) && isset($data_field)) {
                 $data[$field] = $form_data->get($field);
             }
         }
