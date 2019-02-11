@@ -19,7 +19,16 @@
     * Added support for the new `Flex User` object
 1. [](#improved)
     * Updated code to PHP 7.1 features
-    
+
+# v2.8.4
+## mm/dd/2018
+
+1. [](#improved)  
+  * Enable "brute force" protection by default [#195](https://github.com/getgrav/grav-plugin-login/pulls/195)
+1. [](#bugfix)
+  * Set security timeouts in blueprints to use `minutes` rather than `seconds` [#194](https://github.com/getgrav/grav-plugin-login/issues/194)
+  * Send "notification" email to `to` address rather than `from` [#188](https://github.com/getgrav/grav-plugin-login/pulls/188)
+
 # v2.8.3
 ## 01/25/2018
   
