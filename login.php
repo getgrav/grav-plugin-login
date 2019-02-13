@@ -782,8 +782,8 @@ class LoginPlugin extends Plugin
         $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration');
         $redirect_code = null;
 
-        if (isset($data['state']) && $data['state'] === 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-            $loginEvent = $this->login->login(['username' => $username], ['after_registration' => true], ['user' => $user, 'return_event' => true]);
+        if (isset($user['state']) && $user['state'] === 'enabled' && $this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
+            $loginEvent = $this->login->login(['username' => $user->username], ['after_registration' => true], ['user' => $user, 'return_event' => true]);
 
             // If there's no registration redirect, get one from login.
             if (!$redirect) {
