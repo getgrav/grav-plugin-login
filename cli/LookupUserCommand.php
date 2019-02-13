@@ -56,8 +56,8 @@ class LookupUserCommand extends ConsoleCommand
 
         $io = new SymfonyStyle($this->input, $this->output);
 
-        if (version_compare(GRAV_VERSION, '1.7', '<')) {
-            $io->error('Grav 1.7 required to use this command');
+        if (version_compare(GRAV_VERSION, '1.6', '<')) {
+            $io->error('Grav 1.6 required to use this command');
             exit;
         }
 
