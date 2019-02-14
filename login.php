@@ -401,7 +401,7 @@ class LoginPlugin extends Plugin
                     }
 
                     if ($this->config->get('plugins.login.user_registration.options.login_after_registration', false)) {
-                        $loginEvent = $this->login->login(['username' => $username], ['after_registration' => true, 'return_event' => true]);
+                        $loginEvent = $this->login->login(['username' => $username], ['after_registration' => true], ['user' => $user, 'return_event' => true]);
 
                         // If there's no activation redirect, get one from login.
                         if (!$redirect_route) {
@@ -767,7 +767,7 @@ class LoginPlugin extends Plugin
 
         $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
 
-        $fullname = $user->fullname ?: $user->username;
+        $fullname = $user->fullname ?? $user->username;
 
         if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
             $this->login->sendActivationEmail($user);
