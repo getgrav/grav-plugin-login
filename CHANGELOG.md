@@ -6,7 +6,8 @@
 1. [](#improved)
     * Updated typehints from `User` to `UserInterface`
     * Use `$grav['users']` collection instead of deprecated static calls
-
+    * Invalidate cache when modifying users from CLI
+    
 # 3.0.0-rc.2
 ## 02/07/2019
 

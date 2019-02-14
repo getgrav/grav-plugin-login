@@ -126,6 +126,8 @@ class ChangePasswordCommand extends ConsoleCommand
         $user->set('password', $data['password']);
         $user->save();
 
+        $this->invalidateCache();
+
         $this->output->writeln('');
         $this->output->writeln('<green>Success!</green> User <cyan>' . $username . '\'s</cyan> password changed.');
     }

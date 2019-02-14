@@ -127,6 +127,8 @@ class ChangeUserStateCommand extends ConsoleCommand
         $user->set('state', $data['state']);
         $user->save();
 
+        $this->invalidateCache();
+
         $this->output->writeln('');
         $this->output->writeln('<green>Success!</green> User <cyan>' . $username . '</cyan> state set to .' . $data['state']);
     }

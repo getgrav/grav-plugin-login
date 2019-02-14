@@ -235,6 +235,8 @@ class NewUserCommand extends ConsoleCommand
         $user->update($data);
         $user->save();
 
+        $this->invalidateCache();
+
         $this->output->writeln('');
         $this->output->writeln('<green>Success!</green> User <cyan>' . $data['username'] . '</cyan> created.');
     }
