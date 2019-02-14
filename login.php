@@ -18,7 +18,8 @@ use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Plugin;
 use Grav\Common\Twig\Twig;
-use Grav\Common\User\User;
+use Grav\Common\User\Interfaces\UserCollectionInterface;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -359,10 +360,13 @@ class LoginPlugin extends Plugin
         /** @var Message $messages */
         $messages = $this->grav['messages'];
 
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['users'];
+
         $username = $uri->param('username');
 
         $token = $uri->param('token');
-        $user = User::load($username);
+        $user = $users->load($username);
 
         $redirect_route = $this->config->get('plugins.login.user_registration.redirect_after_activation');
         $redirect_code = null;
@@ -525,7 +529,7 @@ class LoginPlugin extends Plugin
             return;
         }
 
-        /** @var User $user */
+        /** @var UserInterface $user */
         $user = $this->grav['user'];
 
         /** @var Page $page */
@@ -669,9 +673,12 @@ class LoginPlugin extends Plugin
         /** @var Data $form_data */
         $form_data = $form->getData();
 
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['users'];
+
         // Check for existing username
         $username = $form_data->get('username');
-        $existing_username = User::find($username,['username']);
+        $existing_username = $users->find($username, ['username']);
         if ($existing_username->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
@@ -686,7 +693,7 @@ class LoginPlugin extends Plugin
 
         // Check for existing email
         $email    = $form_data->get('email');
-        $existing_email = User::find($email,['email']);
+        $existing_email = $users->find($email, ['email']);
         if ($existing_email->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
@@ -812,7 +819,7 @@ class LoginPlugin extends Plugin
      */
     private function processUserProfile($form, Event $event)
     {
-        /** @var User $user */
+        /** @var UserInterface $user */
         $user     = $this->grav['user'];
         $language = $this->grav['language'];
 
@@ -846,9 +853,12 @@ class LoginPlugin extends Plugin
             return false;
         }
 
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['users'];
+
         // Check for existing email
         $email = $form->getData('email');
-        $existing_email = User::find($email,['email']);
+        $existing_email = $users->find($email, ['email']);
         if ($user->username !== $existing_email->username && $existing_email->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
@@ -964,8 +974,11 @@ class LoginPlugin extends Plugin
                 return;
             }
 
+            /** @var UserCollectionInterface $users */
+            $users = $this->grav['users'];
+
             // Allow remember me to work with different login methods.
-            $user = User::load($username);
+            $user = $users->load($username);
             $event->setCredential('username', $username);
             $event->setUser($user);
 
@@ -990,7 +1003,10 @@ class LoginPlugin extends Plugin
     public function userLoginAuthenticateByEmail(UserLoginEvent $event)
     {
         if (($username = $event->getCredential('username')) && !$event->getUser()->exists()) {
-            $event->setUser(User::find($username));
+            /** @var UserCollectionInterface $users */
+            $users = $this->grav['users'];
+
+            $event->setUser($users->find($username));
         }
     }
 
@@ -1048,7 +1064,10 @@ class LoginPlugin extends Plugin
 
     public function userLoginFailure(UserLoginEvent $event)
     {
-        $this->grav['session']->user = User::load('');
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['users'];
+
+        $this->grav['session']->user = $users->load('');
     }
 
     public function userLogin(UserLoginEvent $event)

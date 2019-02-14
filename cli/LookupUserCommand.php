@@ -10,8 +10,10 @@
 namespace Grav\Plugin\Console;
 
 use Grav\Common\Grav;
+use Grav\Common\User\Interfaces\UserCollectionInterface;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Console\ConsoleCommand;
-use Grav\Common\User\User;
+use Grav\Framework\Flex\FlexObject;
 use Grav\Plugin\Login\Login;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -56,11 +58,6 @@ class LookupUserCommand extends ConsoleCommand
 
         $io = new SymfonyStyle($this->input, $this->output);
 
-        if (version_compare(GRAV_VERSION, '1.6', '<')) {
-            $io->error('Grav 1.6 required to use this command');
-            exit;
-        }
-
         $grav = Grav::instance();
         $grav->setup();
 
@@ -72,15 +69,19 @@ class LookupUserCommand extends ConsoleCommand
 
         $key = $this->input->getArgument('key');
 
-        /** @var User $user */
-        $user = User::find($key, ['username', 'email', 'fullname', 'storage_key', 'flex_key']);
+        /** @var UserCollectionInterface $users */
+        $users = $grav['users'];
+
+        /** @var UserInterface $user */
+        $user = $users->find($key, ['username', 'email', 'fullname', 'storage_key', 'flex_key']);
 
         if ($user->exists()) {
-
             /** @var $io SymfonyStyle */
             $io->text('Username: <green>'. $user->username . '</green>');
             $io->text('Name:     <red>' . $user->fullname . '</red>');
-            $io->text('Flex Key: <cyan>' . $user->getFlexKey() . '</cyan>');
+            if ($user instanceof FlexObject) {
+                $io->text('Flex Key: <cyan>' . $user->getFlexKey() . '</cyan>');
+            }
             $io->text('Email:    <yellow>' . $user->email . '</yellow>');
 
             $io->newLine();

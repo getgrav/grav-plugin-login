@@ -12,7 +12,8 @@ namespace Grav\Plugin\Login;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Uri;
-use Grav\Common\User\User;
+use Grav\Common\User\Interfaces\UserCollectionInterface;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
@@ -273,8 +274,11 @@ class Controller
         $param_sep = $this->grav['config']->get('system.param_sep', ':');
         $data = $this->post;
 
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['users'];
+
         $email = $data['email'] ?? '';
-        $user = !empty($email) ? User::find($email, ['email']) : null;
+        $user = !empty($email) ? $users->find($email, ['email']) : null;
 
         /** @var Language $language */
         $language = $this->grav['language'];
@@ -380,8 +384,11 @@ class Controller
         $messages = $this->grav['messages'];
 
         if (isset($data['password'])) {
+            /** @var UserCollectionInterface $users */
+            $users = $this->grav['users'];
+
             $username = $data['username'] ?? null;
-            $user = !empty($username) ? User::find($username) : null;
+            $user = !empty($username) ? $users->find($username) : null;
             $password = $data['password'] ?? null;
             $token = $data['token'] ?? null;
 
@@ -434,7 +441,7 @@ class Controller
     public function taskRegenerate2FASecret()
     {
         try {
-            /** @var User $user */
+            /** @var UserInterface $user */
             $user = $this->grav['user'];
 
             if ($user->exists()) {
@@ -551,14 +558,14 @@ class Controller
     /**
      * Check if user may use password reset functionality.
      *
-     * @param  User $user
+     * @param  UserInterface $user
      * @param $field
      * @param $count
      * @param $interval
      * @return bool
      * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
-    protected function isUserRateLimited(User $user, $field, $count, $interval)
+    protected function isUserRateLimited(UserInterface $user, $field, $count, $interval)
     {
         return $this->login->isUserRateLimited($user, $field, $count, $interval);
     }
@@ -566,11 +573,11 @@ class Controller
     /**
      * Reset the rate limit counter
      *
-     * @param User $user
+     * @param UserInterface $user
      * @param $field
      * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
-    protected function resetRateLimit(User $user, $field)
+    protected function resetRateLimit(UserInterface $user, $field)
     {
         $this->login->resetRateLimit($user, $field);
     }

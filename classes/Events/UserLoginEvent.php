@@ -11,7 +11,8 @@ namespace Grav\Plugin\Login\Events;
 
 use Grav\Common\Grav;
 use Grav\Common\Session;
-use Grav\Common\User\User;
+use Grav\Common\User\Interfaces\UserCollectionInterface;
+use Grav\Common\User\Interfaces\UserInterface;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -23,7 +24,7 @@ use RocketTheme\Toolbox\Event\Event;
  * @property string|string[]    $authorize
  * @property array              $options
  * @property Session            $session
- * @property User               $user
+ * @property UserInterface      $user
  * @property string             $message
  *
  */
@@ -89,7 +90,9 @@ class UserLoginEvent extends Event
             $this->offsetSet('session', Grav::instance()['session']);
         }
         if (!$this->offsetExists('user')) {
-            $this->offsetSet('user', User::load($this['credentials']['username']));
+            /** @var UserCollectionInterface $users */
+            $users = Grav::instance()['users'];
+            $this->offsetSet('user', $users->load($this['credentials']['username']));
         }
     }
 
@@ -193,7 +196,7 @@ class UserLoginEvent extends Event
     }
 
     /**
-     * @return User
+     * @return UserInterface
      */
     public function getUser()
     {
@@ -201,10 +204,10 @@ class UserLoginEvent extends Event
     }
 
     /**
-     * @param User $user
+     * @param UserInterface $user
      * @return $this
      */
-    public function setUser(User $user)
+    public function setUser(UserInterface $user)
     {
         $this->offsetSet('user', $user);
 

@@ -14,7 +14,8 @@ use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Page;
 use Grav\Common\Session;
-use Grav\Common\User\User;
+use Grav\Common\User\Interfaces\UserCollectionInterface;
+use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
@@ -76,7 +77,7 @@ class Login
      * @param array $credentials    Login credentials, eg: ['username' => '', 'password' => '']
      * @param array $options        Login options, eg: ['remember_me' => true]
      * @param array $extra          Example: ['authorize' => 'site.login', 'user' => null], undefined variables get set.
-     * @return User|UserLoginEvent  Returns event if $extra['return_event'] is true.
+     * @return UserInterface|UserLoginEvent  Returns event if $extra['return_event'] is true.
      */
     public function login(array $credentials, array $options = [], array $extra = [])
     {
@@ -133,15 +134,15 @@ class Login
     /**
      * Logout user.
      *
-     * @param array                 $options
-     * @param array|User            $extra      Array of: ['user' => $user, ...] or User object (deprecated).
-     * @return User|UserLoginEvent  Returns event if $extra['return_event'] is true.
+     * @param array                         $options
+     * @param array|UserInterface           $extra      Array of: ['user' => $user, ...] or UserInterface object (deprecated).
+     * @return UserInterface|UserLoginEvent Returns event if $extra['return_event'] is true.
      */
     public function logout(array $options = [], $extra = [])
     {
         $grav = Grav::instance();
 
-        if ($extra instanceof User) {
+        if ($extra instanceof UserInterface) {
             $extra = ['user' => $extra];
         } elseif (isset($extra['user'])) {
             $extra['user'] = $grav['user'];
@@ -209,7 +210,7 @@ class Login
      * @param array $data
      * @param array $files
      *
-     * @return User
+     * @return UserInterface
      */
     public function register(array $data, array $files = [])
     {
@@ -232,8 +233,11 @@ class Login
 
         $username = $this->validateField('username', $data['username']);
 
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['users'];
+
         // Create user object and save it
-        $user = User::load($username);
+        $user = $users->load($username);
         if ($user->exists()) {
             throw new \RuntimeException('User ' . $username . ' cannot be registered: user already exists!');
         }
@@ -320,12 +324,12 @@ class Login
     /**
      * Handle the email to notify the user account creation to the site admin.
      *
-     * @param User $user
+     * @param UserInterface $user
      *
      * @return bool True if the action was performed.
      * @throws \RuntimeException
      */
-    public function sendNotificationEmail(User $user)
+    public function sendNotificationEmail(UserInterface $user)
     {
         if (empty($user->email)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
@@ -359,12 +363,12 @@ class Login
     /**
      * Handle the email to welcome the new user
      *
-     * @param User $user
+     * @param UserInterface $user
      *
      * @return bool True if the action was performed.
      * @throws \RuntimeException
      */
-    public function sendWelcomeEmail(User $user)
+    public function sendWelcomeEmail(UserInterface $user)
     {
         if (empty($user->email)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
@@ -395,12 +399,12 @@ class Login
     /**
      * Handle the email to activate the user account.
      *
-     * @param User $user
+     * @param UserInterface $user
      *
      * @return bool True if the action was performed.
      * @throws \RuntimeException
      */
-    public function sendActivationEmail(User $user)
+    public function sendActivationEmail(UserInterface $user)
     {
         if (empty($user->email)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
@@ -522,12 +526,12 @@ class Login
     }
 
     /**
-     * @param User $user
+     * @param UserInterface $user
      * @param Page $page
      * @param Data|null $config
      * @return bool
      */
-    public function isUserAuthorizedForPage(User $user, Page $page, $config = null)
+    public function isUserAuthorizedForPage(UserInterface $user, Page $page, $config = null)
     {
         $header = $page->header();
         $rules = isset($header->access) ? (array)$header->access : [];
@@ -570,14 +574,14 @@ class Login
     /**
      * Check if user may use password reset functionality.
      *
-     * @param User   $user
-     * @param string $field
-     * @param int    $count
-     * @param int    $interval
+     * @param UserInterface $user
+     * @param string        $field
+     * @param int           $count
+     * @param int           $interval
      * @return bool
      * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
-    public function isUserRateLimited(User $user, $field, $count, $interval)
+    public function isUserRateLimited(UserInterface $user, $field, $count, $interval)
     {
         if ($count > 0) {
             if (!isset($user->{$field})) {
@@ -604,11 +608,11 @@ class Login
     /**
      * Reset the rate limit counter.
      *
-     * @param User   $user
-     * @param string $field
+     * @param UserInterface $user
+     * @param string        $field
      * @deprecated 2.5.0 Use $grav['login']->getRateLimiter($context) instead. See Grav\Plugin\Login\RateLimiter class.
      */
-    public function resetRateLimit(User $user, $field)
+    public function resetRateLimit(UserInterface $user, $field)
     {
         $user->{$field} = [];
     }
@@ -616,12 +620,12 @@ class Login
     /**
      * Get Current logged in user
      *
-     * @return User
+     * @return UserInterface
      * @deprecated 2.5.0 Use $grav['user'] instead.
      */
     public function getUser()
     {
-        /** @var User $user */
+        /** @var UserInterface $user */
         return $this->grav['user'];
     }
 

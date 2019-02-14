@@ -7,8 +7,8 @@
  */
 namespace Grav\Plugin\Console;
 
+use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Console\ConsoleCommand;
-use Grav\Common\User\User;
 use Grav\Common\Grav;
 use Grav\Plugin\Login\Login;
 use Symfony\Component\Console\Input\InputOption;
@@ -115,13 +115,16 @@ class NewUserCommand extends ConsoleCommand
         $this->output->writeln('<green>Creating new user</green>');
         $this->output->writeln('');
 
+        /** @var UserCollectionInterface $users */
+        $users = $grav['users'];
+
         if (!$this->options['user']) {
             // Get username and validate
             $question = new Question('Enter a <yellow>username</yellow>: ', 'admin');
-            $question->setValidator(function ($value) {
+            $question->setValidator(function ($value) use ($users) {
                 $this->validate('user', $value);
 
-                if (User::find($value, ['username'])->exists()) {
+                if ($users->find($value, ['username'])->exists()) {
                     throw new \RuntimeException('Username "' . $value . '" already exists, please pick another username');
                 };
 
@@ -223,7 +226,7 @@ class NewUserCommand extends ConsoleCommand
             $data['state'] = $this->options['state'] ?: 'enabled';
         }
 
-        $user = User::load($data['username']);
+        $user = $users->load($data['username']);
         if ($user->exists()) {
             $this->output->writeln('<red>Failure!</red> User <cyan>' . $data['username'] . '</cyan> already exists!');
             exit();

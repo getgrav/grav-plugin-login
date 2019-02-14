@@ -7,9 +7,9 @@
  */
 namespace Grav\Plugin\Console;
 
+use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Console\ConsoleCommand;
 use Grav\Common\Grav;
-use Grav\Common\User\User;
 use Grav\Plugin\Login\Login;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Helper;
@@ -79,13 +79,16 @@ class ChangePasswordCommand extends ConsoleCommand
         $this->output->writeln('<green>Changing User Password</green>');
         $this->output->writeln('');
 
+        /** @var UserCollectionInterface $users */
+        $users = $grav['users'];
+
         if (!$this->options['user']) {
             // Get username and validate
             $question = new Question('Enter a <yellow>username</yellow>: ');
-            $question->setValidator(function ($value) {
+            $question->setValidator(function ($value) use ($users) {
                 $this->validate('user', $value);
 
-                if (!User::find($value, ['username'])->exists()) {
+                if (!$users->find($value, ['username'])->exists()) {
                     throw new \RuntimeException('Username "' . $value . '" does not exist, please pick another username');
                 };
 
@@ -114,7 +117,7 @@ class ChangePasswordCommand extends ConsoleCommand
             $data['password'] = $this->options['password1'];
         }
 
-        $user = User::load($username);
+        $user = $users->load($username);
         if (!$user->exists()) {
             $this->output->writeln('<red>Failure</red> User <cyan>' . $username . '</cyan> does not exist!');
             exit();

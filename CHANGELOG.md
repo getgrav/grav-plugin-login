@@ -1,3 +1,10 @@
+# 3.0.0-rc.3
+## mm/dd/2019
+
+1. [](#improved)
+    * Updated typehints from `User` to `UserInterface`
+    * Use `$grav['users']` collection instead of deprecated static calls
+
 # 3.0.0-rc.2
 ## 02/07/2019
 
