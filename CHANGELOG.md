@@ -1,6 +1,8 @@
 # 3.0.0-rc.3
 ## mm/dd/2019
 
+1. [](#new)
+    * Requires Grav `1.6.0-rc.3`
 1. [](#improved)
     * Updated typehints from `User` to `UserInterface`
     * Use `$grav['users']` collection instead of deprecated static calls
