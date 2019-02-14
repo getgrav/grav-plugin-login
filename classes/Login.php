@@ -243,6 +243,12 @@ class Login
         }
 
         $user->update($data, $files);
+        if (isset($data['groups'])) {
+            $user->groups = $data['groups'];
+        }
+        if (isset($data['access'])) {
+            $user->access = $data['access'];
+        }
         $user->save();
 
         return $user;
