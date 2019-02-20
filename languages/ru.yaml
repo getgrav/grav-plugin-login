@@ -51,6 +51,7 @@ PLUGIN_LOGIN:
   EMAIL_FOOTER: "GetGrav.org"
   ACTIVATION_LINK_EXPIRED: "Время ссылки для активации истекло"
   USER_ACTIVATED_SUCCESSFULLY: "Пользователь успешно активирован"
+  USER_ACTIVATED_SUCCESSFULLY_NOT_ENABLED: "Аккаунт пользователя активирован, но учетная запись просматривается"
   INVALID_REQUEST: "Неверный запрос"
   USER_REGISTRATION: "Регистрация пользователя"
   USER_REGISTRATION_ENABLED_HELP: "Включить регистрацию пользователя"
@@ -127,3 +128,5 @@ PLUGIN_LOGIN:
   2FA_SECRET_HELP: "Сканируйте этот QR-код в свое [Приложение аутентификации](https://learn.getgrav.org/admin-panel/2fa#apps). Также рекомендуется сохранить секрет в безопасном месте, если вам прийдется переустановить приложение. Проверьте [Grav docs](https://learn.getgrav.org/admin-panel/2fa) для дополнительной информации "
   2FA_REGENERATE: "Сгенерировать повторно"
   BTN_CANCEL: "Отмена"
+  MANUALLY_ENABLE: "Вручную включить"
+  MANUALLY_ENABLE_HELP: "При использовании «активации по электронной почте» и «уведомление по электронной почте» вы можете убедиться, что пользователь может самостоятельно активироваться, но пользователь требует ручного включения для входа в систему"
