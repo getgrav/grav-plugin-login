@@ -1,10 +1,12 @@
 <?php
+
 /**
  * @package    Grav\Plugin\Login
  *
  * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
+
 namespace Grav\Plugin\Login;
 
 use Birke\Rememberme\Cookie;
@@ -12,7 +14,7 @@ use Grav\Common\Config\Config;
 use Grav\Common\Data\Data;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
-use Grav\Common\Page\Page;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Session;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
@@ -533,11 +535,11 @@ class Login
 
     /**
      * @param UserInterface $user
-     * @param Page $page
+     * @param PageInterface $page
      * @param Data|null $config
      * @return bool
      */
-    public function isUserAuthorizedForPage(UserInterface $user, Page $page, $config = null)
+    public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, $config = null)
     {
         $header = $page->header();
         $rules = isset($header->access) ? (array)$header->access : [];

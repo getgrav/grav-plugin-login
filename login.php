@@ -14,6 +14,7 @@ use Grav\Common\Data\Data;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
+use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Plugin;
@@ -238,7 +239,7 @@ class LoginPlugin extends Plugin
             // No login redirect set in the configuration; can we redirect to the current page?
             $allowed = true;
 
-            /** @var Page $page */
+            /** @var PageInterface $page */
             $page = $this->grav['pages']->dispatch($current_route);
 
             if ($page) {
@@ -268,7 +269,7 @@ class LoginPlugin extends Plugin
 
         if (!$page) {
             // Only add login page if it hasn't already been defined.
-            $page = new Page;
+            $page = new Page();
             $page->init(new \SplFileInfo(__DIR__ . '/pages/login.md'));
             $page->slug(basename($this->route));
 
@@ -289,7 +290,7 @@ class LoginPlugin extends Plugin
 
         if (!$page) {
             // Only add forgot page if it hasn't already been defined.
-            $page = new Page;
+            $page = new Page();
             $page->init(new \SplFileInfo(__DIR__ . '/pages/forgot.md'));
             $page->slug(basename($route));
 
@@ -319,7 +320,7 @@ class LoginPlugin extends Plugin
 
         if (!$page) {
             // Only add login page if it hasn't already been defined.
-            $page = new Page;
+            $page = new Page();
             $page->init(new \SplFileInfo(__DIR__ . '/pages/reset.md'));
             $page->slug(basename($route));
 
@@ -340,7 +341,7 @@ class LoginPlugin extends Plugin
         $page = $pages->dispatch($route);
 
         if (!$page) {
-            $page = new Page;
+            $page = new Page();
             $page->init(new \SplFileInfo(__DIR__ . '/pages/register.md'));
             $page->slug(basename($route));
 
@@ -436,7 +437,7 @@ class LoginPlugin extends Plugin
 
         if (!$page) {
             // Only add forgot page if it hasn't already been defined.
-            $page = new Page;
+            $page = new Page();
             $page->init(new \SplFileInfo(__DIR__ . '/pages/profile.md'));
             $page->slug(basename($route));
 
@@ -459,7 +460,7 @@ class LoginPlugin extends Plugin
         $page = $pages->dispatch($route);
 
         if (!$page) {
-            $page = new Page;
+            $page = new Page();
             $page->init(new \SplFileInfo(__DIR__ . '/pages/unauthorized.md'));
             $page->slug(basename($route));
 
@@ -532,7 +533,7 @@ class LoginPlugin extends Plugin
         /** @var UserInterface $user */
         $user = $this->grav['user'];
 
-        /** @var Page $page */
+        /** @var PageInterface $page */
         $page = $this->grav['page'];
 
         if (!$page || $this->grav['login']->isUserAuthorizedForPage($user, $page, $this->mergeConfig($page))) {
@@ -563,7 +564,7 @@ class LoginPlugin extends Plugin
                 $page = $this->grav['pages']->dispatch($this->route);
             } else {
 
-                $page = new Page;
+                $page = new Page();
                 // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
                 // Get the admin Login page is needed, else teh default
