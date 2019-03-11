@@ -1,6 +1,8 @@
 ---
 title: Login
 
+hide_git_sync_repo_link: true
+
 login_redirect_here: false
 
 forms:
