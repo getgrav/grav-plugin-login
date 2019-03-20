@@ -338,7 +338,7 @@ class Login
             $user->email,
             $this->grav['base_url_absolute'],
         ]);
-        $to = $this->config->get('plugins.email.from');
+        $to = $this->config->get('plugins.email.to');
 
         if (empty($to)) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
@@ -508,8 +508,8 @@ class Login
                     $interval = $this->grav['config']->get('plugins.login.max_login_interval', 10);
                     break;
                 case 'pw_resets':
-                    $maxCount = $this->grav['config']->get('plugins.login.max_pw_resets_count', 0);
-                    $interval = $this->grav['config']->get('plugins.login.max_pw_resets_interval', 2);
+                    $maxCount = $this->grav['config']->get('plugins.login.max_pw_resets_count', 2);
+                    $interval = $this->grav['config']->get('plugins.login.max_pw_resets_interval', 60);
                     break;
             }
             $this->rateLimiters[$context] = new RateLimiter($context, $maxCount, $interval);

@@ -20,10 +20,10 @@ rememberme:
   timeout: 604800                           # Timeout in seconds. Defaults to 1 week
   name: grav-rememberme                     # Name prefix of the session cookie
 
-max_pw_resets_count: 0                      # Number of password resets in a specific time frame (0 = unlimited)
+max_pw_resets_count: 2                      # Number of password resets in a specific time frame (0 = unlimited)
 max_pw_resets_interval: 60                  # Time in minutes to track password resets
-max_login_count: 0                          # Number of failed login attempts in a specific time frame (0 = unlimited)
-max_login_interval: 2                       # Time in minutes to track login attempts
+max_login_count: 5                          # Number of failed login attempts in a specific time frame (0 = unlimited)
+max_login_interval: 10                      # Time in minutes to track login attempts
 
 user_registration:
   enabled: false                            # Enable User Registration Process

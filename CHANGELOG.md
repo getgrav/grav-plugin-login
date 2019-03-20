@@ -1,5 +1,15 @@
+# v2.8.4
+## 03/20/2019
+
+1. [](#improved)  
+  * Enable "brute force" protection by default [#195](https://github.com/getgrav/grav-plugin-login/pulls/195)
+  * UPdated various language translations
+1. [](#bugfix)
+  * Set security timeouts in blueprints to use `minutes` rather than `seconds` [#194](https://github.com/getgrav/grav-plugin-login/issues/194)
+  * Send "notification" email to `to` address rather than `from` [#188](https://github.com/getgrav/grav-plugin-login/pulls/188)
+
 # v2.8.3
-## 01/25/2018
+## 01/25/2019
   
 1. [](#new)
   * Wrap data in `onUserLoginRegisterData` event in object to allow reference  

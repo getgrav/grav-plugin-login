@@ -106,6 +106,7 @@ PLUGIN_LOGIN:
   MAX_LOGINS_INTERVAL_HELP: "The time interval for the login count value"
   TOO_MANY_LOGIN_ATTEMPTS: "Too many failed login attempted in the configured time (%s minutes)"
   SECONDS: "seconds"
+  MINUTES: "minutes"
   RESETS: "resets"
   ATTEMPTS: "attempts"
   ROUTES: "Routes"
