@@ -1,5 +1,5 @@
 name: Login
-version: 3.0.0-rc.3
+version: 3.0.0-rc.4
 testing: true
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -13,9 +13,9 @@ bugs: https://github.com/getgrav/grav-plugin-login/issues
 license: MIT
 
 dependencies:
-  - { name: grav, version: '>=1.6.0-rc.3' }
-  - { name: form, version: '>=3.0.0-rc.3' }
-  - { name: email, version: '>=3.0.0-rc.3' }
+  - { name: grav, version: '>=1.6.0-rc.4' }
+  - { name: form, version: '>=3.0.0-rc.4' }
+  - { name: email, version: '>=3.0.0-rc.4' }
 
 form:
   validation: loose

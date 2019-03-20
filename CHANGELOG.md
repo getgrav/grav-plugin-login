@@ -1,5 +1,5 @@
 # 3.0.0-rc.4
-## 02/18/2019
+## 03/20/2019
 
 1. [](#improved)
     * Update all Login classes to rely on `PageInterface` instead of `Page` class
