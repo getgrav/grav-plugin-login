@@ -1,5 +1,5 @@
 # v2.8.4
-## mm/dd/2018
+## 03/20/2019
 
 1. [](#improved)  
   * Enable "brute force" protection by default [#195](https://github.com/getgrav/grav-plugin-login/pulls/195)
@@ -9,7 +9,7 @@
   * Send "notification" email to `to` address rather than `from` [#188](https://github.com/getgrav/grav-plugin-login/pulls/188)
 
 # v2.8.3
-## 01/25/2018
+## 01/25/2019
   
 1. [](#new)
   * Wrap data in `onUserLoginRegisterData` event in object to allow reference  
