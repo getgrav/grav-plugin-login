@@ -1,3 +1,9 @@
+# 3.0.0-rc.5
+## mm/dd/2019
+
+1. [](#improved)
+    * Use `$grav['accounts']` instead of `$grav['users']`
+
 # 3.0.0-rc.4
 ## 03/20/2019
 

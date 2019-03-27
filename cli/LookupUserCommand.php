@@ -70,7 +70,7 @@ class LookupUserCommand extends ConsoleCommand
         $key = $this->input->getArgument('key');
 
         /** @var UserCollectionInterface $users */
-        $users = $grav['users'];
+        $users = $grav['accounts'];
 
         /** @var UserInterface $user */
         $user = $users->find($key, ['username', 'email', 'fullname', 'storage_key', 'flex_key']);

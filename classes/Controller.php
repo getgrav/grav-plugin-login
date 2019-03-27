@@ -275,7 +275,7 @@ class Controller
         $data = $this->post;
 
         /** @var UserCollectionInterface $users */
-        $users = $this->grav['users'];
+        $users = $this->grav['accounts'];
 
         $email = $data['email'] ?? '';
         $user = !empty($email) ? $users->find($email, ['email']) : null;
@@ -385,7 +385,7 @@ class Controller
 
         if (isset($data['password'])) {
             /** @var UserCollectionInterface $users */
-            $users = $this->grav['users'];
+            $users = $this->grav['accounts'];
 
             $username = $data['username'] ?? null;
             $user = !empty($username) ? $users->find($username) : null;

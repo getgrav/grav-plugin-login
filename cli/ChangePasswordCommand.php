@@ -82,7 +82,7 @@ class ChangePasswordCommand extends ConsoleCommand
         $this->output->writeln('');
 
         /** @var UserCollectionInterface $users */
-        $users = $grav['users'];
+        $users = $grav['accounts'];
 
         if (!$this->options['user']) {
             // Get username and validate

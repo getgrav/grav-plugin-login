@@ -236,7 +236,7 @@ class Login
         $username = $this->validateField('username', $data['username']);
 
         /** @var UserCollectionInterface $users */
-        $users = $this->grav['users'];
+        $users = $this->grav['accounts'];
 
         // Create user object and save it
         $user = $users->load($username);

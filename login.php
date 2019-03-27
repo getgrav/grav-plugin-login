@@ -362,7 +362,7 @@ class LoginPlugin extends Plugin
         $messages = $this->grav['messages'];
 
         /** @var UserCollectionInterface $users */
-        $users = $this->grav['users'];
+        $users = $this->grav['accounts'];
 
         $username = $uri->param('username');
 
@@ -675,7 +675,7 @@ class LoginPlugin extends Plugin
         $form_data = $form->getData();
 
         /** @var UserCollectionInterface $users */
-        $users = $this->grav['users'];
+        $users = $this->grav['accounts'];
 
         // Check for existing username
         $username = $form_data->get('username');
@@ -855,7 +855,7 @@ class LoginPlugin extends Plugin
         }
 
         /** @var UserCollectionInterface $users */
-        $users = $this->grav['users'];
+        $users = $this->grav['accounts'];
 
         // Check for existing email
         $email = $form->getData('email');
@@ -976,7 +976,7 @@ class LoginPlugin extends Plugin
             }
 
             /** @var UserCollectionInterface $users */
-            $users = $this->grav['users'];
+            $users = $this->grav['accounts'];
 
             // Allow remember me to work with different login methods.
             $user = $users->load($username);
@@ -1005,7 +1005,7 @@ class LoginPlugin extends Plugin
     {
         if (($username = $event->getCredential('username')) && !$event->getUser()->exists()) {
             /** @var UserCollectionInterface $users */
-            $users = $this->grav['users'];
+            $users = $this->grav['accounts'];
 
             $event->setUser($users->find($username));
         }
@@ -1066,7 +1066,7 @@ class LoginPlugin extends Plugin
     public function userLoginFailure(UserLoginEvent $event)
     {
         /** @var UserCollectionInterface $users */
-        $users = $this->grav['users'];
+        $users = $this->grav['accounts'];
 
         $this->grav['session']->user = $users->load('');
     }

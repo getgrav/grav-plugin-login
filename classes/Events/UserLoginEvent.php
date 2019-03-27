@@ -91,7 +91,7 @@ class UserLoginEvent extends Event
         }
         if (!$this->offsetExists('user')) {
             /** @var UserCollectionInterface $users */
-            $users = Grav::instance()['users'];
+            $users = Grav::instance()['accounts'];
             $this->offsetSet('user', $users->load($this['credentials']['username']));
         }
     }
