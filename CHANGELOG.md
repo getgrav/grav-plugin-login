@@ -2,7 +2,7 @@
 ## 04/11/2019
 
 1. [](#new)
-    * Added 2-Factor Authentication support for front-end (2FA)
+    * Added **2-Factor Authentication** support for front-end (2FA)
     * New CLI command to `lookup` users 
     * Check requirements to use new `lookup` command
     * Added support for the new `Flex User` object
