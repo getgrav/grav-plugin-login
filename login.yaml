@@ -11,6 +11,7 @@ route_profile: '/user_profile'              # Route for the user profile page
 route_register: '/user_register'            # Route for the user registration page
 route_unauthorized: '/user_unauthorized'    # Route for a page to display if user is unauthorized
 
+twofa_enabled: false                        # Two factor authentication enabled
 dynamic_page_visibility: false              # Integrate access into page visibility so things can be shown or hidden in the menu
 parent_acl: false                           # Look to parent `access` rules for access requirements
 protect_protected_page_media: false         # Take `access` rules into account when directly accessing a page's media
@@ -35,6 +36,7 @@ user_registration:
     - 'fullname'
     - 'title'
     - 'level'
+    - 'twofa_enabled'
 
   default_values:                           # Any default values for fields you would like to set
     level: Newbie                           # Here the 'level' field will be pre-populated with 'Newbie' text

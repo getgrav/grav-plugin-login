@@ -7,13 +7,10 @@
  */
 namespace Grav\Plugin\Console;
 
-use Grav\Common\Config\Config;
+use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Console\ConsoleCommand;
-use Grav\Common\File\CompiledYamlFile;
-use Grav\Common\User\User;
 use Grav\Common\Grav;
 use Grav\Plugin\Login\Login;
-use RocketTheme\Toolbox\ResourceLocator\UniformResourceLocator;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Helper\Helper;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -118,13 +115,16 @@ class NewUserCommand extends ConsoleCommand
         $this->output->writeln('<green>Creating new user</green>');
         $this->output->writeln('');
 
+        /** @var UserCollectionInterface $users */
+        $users = $grav['accounts'];
+
         if (!$this->options['user']) {
             // Get username and validate
             $question = new Question('Enter a <yellow>username</yellow>: ', 'admin');
-            $question->setValidator(function ($value) {
+            $question->setValidator(function ($value) use ($users) {
                 $this->validate('user', $value);
 
-                if (User::find($value, ['username'])->exists()) {
+                if ($users->find($value, ['username'])->exists()) {
                     throw new \RuntimeException('Username "' . $value . '" already exists, please pick another username');
                 };
 
@@ -226,20 +226,19 @@ class NewUserCommand extends ConsoleCommand
             $data['state'] = $this->options['state'] ?: 'enabled';
         }
 
-        // Lowercase the username for the filename
-        $username = mb_strtolower($data['username']);
+        $user = $users->load($data['username']);
+        if ($user->exists()) {
+            $this->output->writeln('<red>Failure!</red> User <cyan>' . $data['username'] . '</cyan> already exists!');
+            exit();
+        }
 
-        /** @var UniformResourceLocator $locator */
-        $locator = Grav::instance()['locator'];
-
-        // Create user object and save it
-        $user = new User($data);
-        $file = CompiledYamlFile::instance($locator->findResource('account://' . $username . YAML_EXT, true, true));
-        $user->file($file);
+        $user->update($data);
         $user->save();
 
+        $this->invalidateCache();
+
         $this->output->writeln('');
-        $this->output->writeln('<green>Success!</green> User <cyan>' . $username . '</cyan> created.');
+        $this->output->writeln('<green>Success!</green> User <cyan>' . $data['username'] . '</cyan> created.');
     }
 
     /**
