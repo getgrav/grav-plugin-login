@@ -1,48 +1,20 @@
-# 3.0.0-rc.5
-## mm/dd/2019
-
-1. [](#improved)
-    * Use `$grav['accounts']` instead of `$grav['users']`
-
-# 3.0.0-rc.4
-## 03/20/2019
-
-1. [](#improved)
-    * Update all Login classes to rely on `PageInterface` instead of `Page` class
-
-# 3.0.0-rc.3
-## 02/18/2019
-
-1. [](#new)
-    * Requires Grav `1.6.0-rc.3`
-1. [](#improved)
-    * Updated typehints from `User` to `UserInterface`
-    * Use `$grav['users']` collection instead of deprecated static calls
-    * Invalidate cache when modifying users from CLI
-1. [](#bugfix)
-    * Fix login on registration (FlexUsers)   
-     
-# 3.0.0-rc.2
-## 02/07/2019
+# 3.0.0
+## 04/11/2019
 
 1. [](#new)
     * Added 2-Factor Authentication support for front-end (2FA)
-
-# 3.0.0-rc.1
-## 01/30/2019
-
-1. [](#new)
     * New CLI command to `lookup` users 
     * Check requirements to use new `lookup` command
-
-# 3.0.0-beta.1
-## 01/25/2019
-
-1. [](#new)
-    * Requires Grav `1.6.0-beta.8`, Form `3.0.0-beta.5`
     * Added support for the new `Flex User` object
 1. [](#improved)
+    * Use `$grav['accounts']` instead of `$grav['users']`
+    * Update all Login classes to rely on `PageInterface` instead of `Page` class
+    * Updated typehints from `User` to `UserInterface`
+    * Use `$grav['users']` collection instead of deprecated static calls
+    * Invalidate cache when modifying users from CLI
     * Updated code to PHP 7.1 features
+1. [](#bugfix)
+    * Fix login on registration (FlexUsers)      
 
 # v2.8.4
 ## 03/20/2019
