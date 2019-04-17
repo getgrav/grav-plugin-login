@@ -206,7 +206,7 @@ class LoginPlugin extends Plugin
 
             foreach ($pages->instances() as $page) {
                 $header = $page->header();
-                if (isset($header->login['visibility_requires_access'])) {
+                if (isset($header) && isset($header->access) && isset($header->visibility_requires_access) && $header->visibility_requires_access) {
                     $config = $this->mergeConfig($page);
                     $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
                     if ($access === false) {
