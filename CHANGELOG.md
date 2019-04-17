@@ -1,3 +1,9 @@
+# 3.0.1
+## 04/17/2019
+
+1. [](#improved)
+    * Extra checks for page visibility [#166](https://github.com/getgrav/grav-plugin-login/issues/166)
+
 # 3.0.0
 ## 04/11/2019
 
