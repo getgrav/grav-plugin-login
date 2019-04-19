@@ -1,3 +1,9 @@
+# 3.0.2
+## mm/dd/2019
+
+1. [](#improved)
+  * Added support for IPv6 addresses for login rate limiting @Vivalldi [#204](https://github.com/getgrav/grav-plugin-login/issues/204)
+
 # 3.0.1
 ## 04/17/2019
 

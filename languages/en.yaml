@@ -132,3 +132,5 @@ PLUGIN_LOGIN:
   BTN_CANCEL: "Cancel"
   MANUALLY_ENABLE: "Manually Enable"
   MANUALLY_ENABLE_HELP: "When using 'activation email' and 'notification email', you can ensure the user can self activate, but requires manually enabling the user to login"
+  IPV6_SUBNET_SIZE: "IPv6 Subnet Size"
+  IPV6_SUBNET_SIZE_HELP: "The number of IPv6 addresses typically assigned to a machine"
