@@ -62,7 +62,7 @@ A good location is probably to add this right above where your content is going 
 
 # Creating Users
 
-You can either use the built-in CLI capabilities, or you create a user manually by creating a new YAML file in your `user/acounts` folder.
+You can either use the built-in CLI capabilities, or you create a user manually by creating a new YAML file in your `user/accounts` folder.
 
 
 # CLI Usage

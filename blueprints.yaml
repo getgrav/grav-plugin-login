@@ -1,5 +1,5 @@
 name: Login
-version: 3.0.1
+version: 3.0.2
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -13,7 +13,7 @@ bugs: https://github.com/getgrav/grav-plugin-login/issues
 license: MIT
 
 dependencies:
-  - { name: grav, version: '>=1.6.0' }
+  - { name: grav, version: '>=1.6.7' }
   - { name: form, version: '>=3.0.0' }
   - { name: email, version: '>=3.0.0' }
 
@@ -405,6 +405,16 @@ form:
               size: x-small
               label: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL
               help: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL_HELP
+              append: PLUGIN_LOGIN.MINUTES
+              validate:
+                type: number
+                min: 1
+
+            ipv6_subnet_size:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.IPV6_SUBNET_SIZE
+              help: PLUGIN_LOGIN.IPV6_SUBNET_SIZE_HELP
               append: PLUGIN_LOGIN.MINUTES
               validate:
                 type: number

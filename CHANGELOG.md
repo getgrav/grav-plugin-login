@@ -1,3 +1,12 @@
+# 3.0.2
+## 05/09/2019
+
+1. [](#new)
+  * Added `ru` and `uk` translations [#208](https://github.com/getgrav/grav-plugin-login/pulls/208)
+1. [](#improved)
+  * Fixed typo in README.md
+  * Added support for IPv6 addresses for login rate limiting @Vivalldi [#204](https://github.com/getgrav/grav-plugin-login/issues/204)
+
 # 3.0.1
 ## 04/17/2019
 
