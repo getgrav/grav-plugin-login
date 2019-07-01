@@ -188,7 +188,8 @@ class NewUserCommand extends ConsoleCommand
             case 'a':
                 $access = [
                     'admin' => [
-                        'login' => true, 'super' => true
+                        'login' => true,
+                        'super' => true
                     ]
                 ];
                 break;
