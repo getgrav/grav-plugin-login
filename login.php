@@ -252,6 +252,8 @@ class LoginPlugin extends Plugin
                     $redirect = $page->route() . ($uri->params() ?: '');
                 }
             }
+        } else {
+            $redirect = $this->grav['session']->redirect_after_login;
         }
 
         $this->grav['session']->redirect_after_login = $redirect;

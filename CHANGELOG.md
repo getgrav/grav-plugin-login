@@ -1,3 +1,10 @@
+# 3.0.3
+## 07/01/2019
+
+1. [](#bugfix)
+  * Fix for not redirecting to secure page after login [#199](https://github.com/getgrav/grav-plugin-login/issues/199)
+  * Fixed `bin/plugin login new-user` ACL when using Flex Users
+
 # 3.0.2
 ## 05/09/2019
 
