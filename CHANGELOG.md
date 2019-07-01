@@ -1,5 +1,5 @@
 # 3.0.3
-## mm/dd/2019
+## 07/01/2019
 
 1. [](#bugfix)
   * Fix for not redirecting to secure page after login [#199](https://github.com/getgrav/grav-plugin-login/issues/199)
