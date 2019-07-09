@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * Fixed bad redirect after login on multi-language site [#217](https://github.com/getgrav/grav-plugin-login/issues/217)
+    * Fixed basic login not obeying `redirect_after_login` option
 
 # 3.0.3
 ## 07/01/2019
