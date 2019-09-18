@@ -47,6 +47,7 @@ user_registration:
       login: 'true'
 
   redirect_after_registration: ''           # Route to redirect to after registration
+  redirect_after_activation: ''             # Route to redirect to after activation
 
   options:
     validate_password1_and_password2: true  # Ensure that password1 and password2 match during registration (allows you to have just 1 pw field or 2)
