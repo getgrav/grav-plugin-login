@@ -1,3 +1,9 @@
+# 3.0.5
+## mm/dd/2019
+
+1. [](#bugfix)
+    * Fixed bug in `Login::isUserAuthorizedForPage()` where rules is a list of permissions
+
 # 3.0.4
 ## 10/03/2019
 
