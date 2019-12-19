@@ -284,7 +284,7 @@ class Login
                 $pwd_regex = '/' . $config->get('system.pwd_regex') . '/';
 
                 if (!\is_string($value) || !preg_match($pwd_regex, $value)) {
-                    throw new \RuntimeException('Password does not pass them minimum requirements');
+                    throw new \RuntimeException('Password does not pass the minimum requirements');
                 }
 
                 break;
