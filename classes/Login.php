@@ -284,7 +284,7 @@ class Login
                 $pwd_regex = '/' . $config->get('system.pwd_regex') . '/';
 
                 if (!\is_string($value) || !preg_match($pwd_regex, $value)) {
-                    throw new \RuntimeException('Password does not pass them minimum requirements');
+                    throw new \RuntimeException('Password does not pass the minimum requirements');
                 }
 
                 break;
@@ -565,7 +565,11 @@ class Login
 
         // Continue to the page if user is authorized to access the page.
         foreach ($rules as $rule => $value) {
-            if (\is_array($value)) {
+            if (is_int($rule)) {
+                if ($user->authorize($value) === true) {
+                    return true;
+                }
+            } elseif (\is_array($value)) {
                 foreach ($value as $nested_rule => $nested_value) {
                     if ($user->authorize($rule . '.' . $nested_rule) === Utils::isPositive($nested_value)) {
                         return true;

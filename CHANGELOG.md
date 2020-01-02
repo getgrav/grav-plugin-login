@@ -1,3 +1,11 @@
+# 3.0.5
+## 01/02/2020
+
+1. [](#bugfix)
+    * Fixed bug in `Login::isUserAuthorizedForPage()` where rules is a list of permissions
+    * Fixed password reset link [#233](https://github.com/getgrav/grav-plugin-login/pulls/233)
+    * Fixed Typo [#236](https://github.com/getgrav/grav-plugin-login/pulls/236)
+
 # 3.0.4
 ## 10/03/2019
 
