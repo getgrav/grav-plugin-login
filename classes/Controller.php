@@ -546,9 +546,7 @@ class Controller
      */
     public function rememberMe($var = null)
     {
-        $this->rememberMe = $this->login->rememberMe($var);
-
-        return $this->rememberMe;
+        return $this->login->rememberMe($var);
     }
 
     /**
