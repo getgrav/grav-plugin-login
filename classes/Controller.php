@@ -57,12 +57,6 @@ class Controller
     protected $prefix = 'task';
 
     /**
-     * @var RememberMe\RememberMe
-     * @deprecated 2.0 Use $grav['login']->rememberMe() instead
-     */
-    protected $rememberMe;
-
-    /**
      * @var Login
      */
     protected $login;
@@ -78,8 +72,6 @@ class Controller
         $this->action = $action;
         $this->login = $this->grav['login'];
         $this->post = $post ? $this->getPost($post) : [];
-
-        $this->rememberMe();
     }
 
     /**

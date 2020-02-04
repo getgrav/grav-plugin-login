@@ -2,6 +2,7 @@
 ## mm/dd/2020
 
 1. [](#new)
+    * Pass phpstan level 1 tests
     * Updated 2FA library to v1.7.0
 
 # 3.0.5
