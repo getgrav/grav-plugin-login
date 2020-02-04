@@ -18,6 +18,7 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
         'G' => 
         array (
             'Grav\\Plugin\\Login\\' => 18,
+            'Grav\\Plugin\\Console\\' => 20,
         ),
         'B' => 
         array (
@@ -33,6 +34,10 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
         'Grav\\Plugin\\Login\\' => 
         array (
             0 => __DIR__ . '/../..' . '/classes',
+        ),
+        'Grav\\Plugin\\Console\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/cli',
         ),
         'Birke\\' => 
         array (
@@ -50,12 +55,17 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
         ),
     );
 
+    public static $classMap = array (
+        'Grav\\Plugin\\LoginPlugin' => __DIR__ . '/../..' . '/login.php',
+    );
+
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$prefixDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$prefixesPsr0;
+            $loader->classMap = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$classMap;
 
         }, null, ClassLoader::class);
     }
