@@ -13,6 +13,7 @@ use Grav\Common\Grav;
 use Grav\Common\Session;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
+use Grav\Plugin\Login\Login;
 use RocketTheme\Toolbox\Event\Event;
 
 /**
@@ -92,7 +93,17 @@ class UserLoginEvent extends Event
         if (!$this->offsetExists('user')) {
             /** @var UserCollectionInterface $users */
             $users = Grav::instance()['accounts'];
-            $this->offsetSet('user', $users->load($this['credentials']['username']));
+            $user = $users->load($this['credentials']['username']);
+            $this->offsetSet('user', $user);
+
+            if (Login::DEBUG) {
+                if ($user->exists()) {
+                    Login::addDebugMessage('Login user:', $user);
+                } else {
+                    Login::addDebugMessage("Login: user '{$this['credentials']['username']}' not found");
+                }
+            }
+
         }
     }
 
@@ -348,5 +359,13 @@ class UserLoginEvent extends Event
     public function __unset($offset)
     {
         $this->offsetUnset($offset);
+    }
+
+    /**
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return get_object_vars($this);
     }
 }

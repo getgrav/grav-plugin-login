@@ -4,6 +4,8 @@
 1. [](#new)
     * Pass phpstan level 1 tests
     * Updated 2FA library to v1.7.0
+* [](#improved)
+    * Added some debugging messages (turned off by default)
 
 # 3.0.5
 ## 01/02/2020
