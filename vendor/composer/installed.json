@@ -146,26 +146,26 @@
     },
     {
         "name": "robthree/twofactorauth",
-        "version": "1.6.1",
-        "version_normalized": "1.6.1.0",
+        "version": "1.7.0",
+        "version_normalized": "1.7.0.0",
         "source": {
             "type": "git",
             "url": "https://github.com/RobThree/TwoFactorAuth.git",
-            "reference": "a77e7d822343bb88112baef808839cfae7bc5abb"
+            "reference": "37983bf675c5baca09d19d6705170489d0df0002"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/RobThree/TwoFactorAuth/zipball/a77e7d822343bb88112baef808839cfae7bc5abb",
-            "reference": "a77e7d822343bb88112baef808839cfae7bc5abb",
+            "url": "https://api.github.com/repos/RobThree/TwoFactorAuth/zipball/37983bf675c5baca09d19d6705170489d0df0002",
+            "reference": "37983bf675c5baca09d19d6705170489d0df0002",
             "shasum": ""
         },
         "require": {
-            "php": ">=5.3.0"
+            "php": ">=5.6.0"
         },
         "require-dev": {
             "phpunit/phpunit": "@stable"
         },
-        "time": "2017-11-06T17:55:56+00:00",
+        "time": "2020-01-02T19:56:46+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

@@ -8,5 +8,6 @@ $baseDir = dirname($vendorDir);
 return array(
     'RobThree\\Auth\\' => array($vendorDir . '/robthree/twofactorauth/lib'),
     'Grav\\Plugin\\Login\\' => array($baseDir . '/classes'),
+    'Grav\\Plugin\\Console\\' => array($baseDir . '/cli'),
     'Birke\\' => array($vendorDir . '/birke/rememberme/src'),
 );
