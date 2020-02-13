@@ -417,6 +417,7 @@ class LoginPlugin extends Plugin
                             $redirect_code = $loginEvent->getRedirectCode();
                         }
                     }
+                    $this->grav->fireEvent('onUserActivated', new Event(['user' => $user]));
                 }
             } else {
                 $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
