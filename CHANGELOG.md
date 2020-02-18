@@ -1,3 +1,9 @@
+# 3.0.7
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Turn off extra debug messages [#244](https://github.com/getgrav/grav-plugin-login/issues/244)
+
 # 3.0.6
 ## 02/11/2020
 
