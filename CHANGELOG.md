@@ -3,6 +3,7 @@
 
 1. [](#new)
     * Added new `onUserActivated` event [#242](https://github.com/getgrav/grav-plugin-login/issues/242)
+    * Change session ID during login to prevent session fixation (requires Grav 1.7)
 1. [](#bugfix)
     * Turn off extra debug messages [#244](https://github.com/getgrav/grav-plugin-login/issues/244)
 

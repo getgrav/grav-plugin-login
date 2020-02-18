@@ -24,6 +24,7 @@ use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use Grav\Framework\Session\SessionInterface;
 use Grav\Plugin\Form\Form;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Login;
@@ -1074,7 +1075,14 @@ class LoginPlugin extends Plugin
 
     public function userLogin(UserLoginEvent $event)
     {
+        /** @var SessionInterface $session */
         $session = $this->grav['session'];
+
+        // Prevent session fixation if supported.
+        // TODO: remove method_exists() test when requiring Grav v1.7
+        if (method_exists($session, 'regenerateId')) {
+            $session->regenerateId();
+        }
         $session->user = $event->getUser();
 
         if ($event->getOption('remember_me')) {
@@ -1103,6 +1111,10 @@ class LoginPlugin extends Plugin
             $login->rememberMe()->clearCookie();
         }
 
-        $this->grav['session']->invalidate()->start();
+        /** @var SessionInterface $session */
+        $session = $this->grav['session'];
+
+        // Clear all session data.
+        $session->invalidate()->start();
     }
 }
