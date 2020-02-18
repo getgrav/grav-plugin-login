@@ -1,6 +1,8 @@
 # 3.0.7
 ## mm/dd/2020
 
+1. [](#new)
+    * Added new `onUserActivated` event [#242](https://github.com/getgrav/grav-plugin-login/issues/242)
 1. [](#bugfix)
     * Turn off extra debug messages [#244](https://github.com/getgrav/grav-plugin-login/issues/244)
 

@@ -36,6 +36,7 @@ They use following events which can be hooked by plugins:
 * `onUserLogout`            Allows plugins to include their own logic when user logs out.
 * `onUserLoginRegisterData` Allows plugins to include their own data to be added to the user object during registration.
 * `onUserLoginRegistered`   Allows plugins to hook into user registration just before the redirect.
+* `onUserActivated`         Allows plugins to hook into user activation, when user has clicked on confirmation email.
 
 New Plugin options have been added for:
 
