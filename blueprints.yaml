@@ -265,10 +265,11 @@ form:
 
                 fields:
                     user_registration.groups:
-                        type: selectize
+                        type: select
+                        multiple: true
                         size: large
                         label: PLUGIN_ADMIN.GROUPS
-                        '@data-options': '\Grav\User\Groups::groups'
+                        data-options@: '\Grav\Common\User\Group::groupNames'
                         classes: fancy
                         help: PLUGIN_LOGIN.GROUPS_HELP
                         validate:

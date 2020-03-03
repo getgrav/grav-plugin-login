@@ -6,6 +6,7 @@
     * Change session ID during login to prevent session fixation (requires Grav 1.7)
 1. [](#bugfix)
     * Turn off extra debug messages [#244](https://github.com/getgrav/grav-plugin-login/issues/244)
+    * Fixed `groups` field not listing available user groups
 
 # 3.0.6
 ## 02/11/2020
