@@ -1,5 +1,5 @@
 # 3.1.0
-## mm/dd/2020
+## 03/05/2020
 
 1. [](#new)
     * Added new `onUserActivated` event [#242](https://github.com/getgrav/grav-plugin-login/issues/242)
