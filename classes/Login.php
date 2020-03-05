@@ -33,7 +33,7 @@ use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
  */
 class Login
 {
-    public const DEBUG = 1;
+    public const DEBUG = 0;
 
     /** @var Grav */
     protected $grav;

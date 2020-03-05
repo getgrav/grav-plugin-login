@@ -12,6 +12,10 @@ These are available via GPM, and because the plugin has dependencies you just ne
 $ bin/gpm install login
 ```
 
+# Changes in version 3.1
+
+* `onUserActivated`         Allows plugins to hook into user activation, when user has clicked on confirmation email.
+
 # Changes in version 2.6
 
 * User registration is now disabled by default.  If you were relying on it being activated, you need to manually enable it in your `user/config/plugins/login.yaml`:
