@@ -206,14 +206,16 @@ class LoginPlugin extends Plugin
             $user = $this->grav['user'];
 
             foreach ($pages->instances() as $page) {
-                $header = $page->header();
-                if ($header && isset($header->access) && isset($header->login['visibility_requires_access']) && $header->login['visibility_requires_access'] === true) {
-                    $config = $this->mergeConfig($page);
-                    $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
-                    if ($access === false) {
-                        $page->visible(false);
+                if ($page) {
+                    $header = $page->header();
+                    if ($header && isset($header->access) && isset($header->login['visibility_requires_access']) && $header->login['visibility_requires_access'] === true) {
+                        $config = $this->mergeConfig($page);
+                        $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
+                        if ($access === false) {
+                            $page->visible(false);
+                        }
                     }
-                }
+                }                
             }
         }
     }
