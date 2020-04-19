@@ -236,7 +236,11 @@ class LoginPlugin extends Plugin
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
         $current_route = $uri->route();
-        $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
+
+        /* Support old string-based $redirect_after_login + new bool approach */
+        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
+        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
+        $redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
 
         if (!$redirect && !in_array($current_route, $invalid_redirect_routes, true)) {
             // No login redirect set in the configuration; can we redirect to the current page?
@@ -571,7 +575,6 @@ class LoginPlugin extends Plugin
             } else {
 
                 $page = new Page();
-                // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
                 // Get the admin Login page is needed, else teh default
                 if ($this->isAdmin()) {

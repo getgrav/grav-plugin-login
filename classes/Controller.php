@@ -153,6 +153,12 @@ class Controller
         $event = $this->login->login($form, ['remember_me' => true, 'twofa' => $twofa], ['return_event' => true]);
         $user = $event->getUser();
 
+        /* Support old string-based $redirect_after_login + new bool approach */
+        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
+        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
+        $login_redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+
+
         if ($user->authenticated) {
             $rateLimiter->resetRateLimit($ipKey, 'ip')->resetRateLimit($userKey);
             if ($user->authorized) {
@@ -160,12 +166,13 @@ class Controller
 
                 $event->defRedirect(
                     $this->grav['session']->redirect_after_login ?:
-                        $this->grav['config']->get('plugins.login.redirect_after_login') ?:
-                            $this->grav['uri']->referrer('/')
+                        $login_redirect ?: $this->grav['uri']->referrer('/')
                 );
             } else {
+                $redirect_to_login = $this->grav['config']->get('plugins.login.route_to_login');
                 $login_route = $this->grav['config']->get('plugins.login.route');
-                $event->defRedirect($login_route ?: $this->grav['uri']->referrer('/'));
+                $redirect_route = $redirect_to_login && $login_route ? $login_route : false;
+                $event->defRedirect($redirect_route ?: $this->grav['uri']->referrer('/'));
             }
         } else {
             if ($user->authorized) {
@@ -210,9 +217,11 @@ class Controller
 
             $user->authenticated = false;
 
+            $redirect_to_login = $this->grav['config']->get('plugins.login.route_to_login');
             $login_route = $this->grav['config']->get('plugins.login.route');
-            if ($login_route) {
-                $this->setRedirect($login_route, 303);
+            $redirect_route = $redirect_to_login && $login_route ? $login_route : false;
+            if ($redirect_route) {
+                $this->setRedirect($redirect_route, 303);
             }
 
             return true;
@@ -222,9 +231,14 @@ class Controller
 
         $user->authorized = true;
 
+        /* Support old string-based $redirect_after_login + new bool approach */
+        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
+        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
+        $login_redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+
         $this->setRedirect(
             $this->grav['session']->redirect_after_login
-                ?: $this->grav['config']->get('plugins.login.redirect_after_login')
+                ?: $login_redirect
                 ?: $this->grav['uri']->referrer('/')
         );
 
@@ -249,7 +263,12 @@ class Controller
             $messages->add($t->translate($message), $event->getMessageType());
         }
 
-        $redirect = $event->getRedirect() ?: $this->grav['config']->get('plugins.login.redirect_after_logout');
+        /* Support old string-based $redirect_after_logout + new bool approach */
+        $redirect_after_logout = $this->grav['config']->get('plugins.login.redirect_after_logout');
+        $route_after_logout = $this->grav['config']->get('plugins.login.route_after_logout');
+        $logout_redirect = is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
+
+        $redirect = $event->getRedirect() ?: $logout_redirect;
         if ($redirect) {
             $this->setRedirect($redirect, $event->getRedirectCode());
         }
