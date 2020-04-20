@@ -187,6 +187,7 @@ form:
               size: medium
               label: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN
               help: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN_HELP
+              data-default@: '\Grav\Plugin\LoginPlugin::defaultRedirectAfterLogin'
               placeholder: "/user_profile"
 
             route_after_logout:
@@ -194,6 +195,7 @@ form:
               size: medium
               label: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT
               help: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT_HELP
+              data-default@: '\Grav\Plugin\LoginPlugin::defaultRedirectAfterLogout'
               placeholder: "/"
 
             route_forgot:

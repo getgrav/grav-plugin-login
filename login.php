@@ -1122,4 +1122,15 @@ class LoginPlugin extends Plugin
         // Clear all session data.
         $session->invalidate()->start();
     }
+
+    public static function defaultRedirectAfterLogin()
+    {
+        return Grav::instance()['config']->get('plugins.login.redirect_after_login');
+
+    }
+
+    public static function defaultRedirectAfterLogout()
+    {
+        return Grav::instance()['config']->get('plugins.login.redirect_after_logout');
+    }
 }
