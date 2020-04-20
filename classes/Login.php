@@ -578,7 +578,8 @@ class Login
             return true;
         }
 
-        if (!$user->authorized) {
+        // Deny access if user has not completed 2FA challenge.
+        if ($user->authenticated && !$user->authorized) {
             return false;
         }
 
