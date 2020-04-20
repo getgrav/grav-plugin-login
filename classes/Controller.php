@@ -169,7 +169,7 @@ class Controller
                         $login_redirect ?: $this->grav['uri']->referrer('/')
                 );
             } else {
-                $redirect_to_login = $this->grav['config']->get('plugins.login.route_to_login');
+                $redirect_to_login = $this->grav['config']->get('plugins.login.redirect_to_login');
                 $login_route = $this->grav['config']->get('plugins.login.route');
                 $redirect_route = $redirect_to_login && $login_route ? $login_route : false;
                 $event->defRedirect($redirect_route ?: $this->grav['uri']->referrer('/'));
