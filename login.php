@@ -567,35 +567,39 @@ class LoginPlugin extends Plugin
 
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
+        $login_page = null;
 
         // Reset page with login page.
         if (!$authorized) {
             if ($this->route) {
-                $page = $this->grav['pages']->dispatch($this->route);
-            } else {
+                $login_page = $this->grav['pages']->dispatch($this->route);
+            }
 
-                $page = new Page();
+
+            if (!$login_page) {
+
+                $login_page = new Page();
 
                 // Get the admin Login page is needed, else teh default
                 if ($this->isAdmin()) {
                     $login_file = $this->grav['locator']->findResource('plugins://admin/pages/admin/login.md');
-                    $page->init(new \SplFileInfo($login_file));
+                    $login_page->init(new \SplFileInfo($login_file));
                 } else {
-                    $page->init(new \SplFileInfo(__DIR__ . '/pages/login.md'));
+                    $login_page->init(new \SplFileInfo(__DIR__ . '/pages/login.md'));
                 }
 
-                $page->slug(basename($this->route));
+                $login_page->slug(basename($this->route));
 
                 /** @var Pages $pages */
                 $pages = $this->grav['pages'];
-                $pages->addPage($page, $this->route);
+                $pages->addPage($login_page, $this->route);
             }
 
             $this->authenticated = false;
             unset($this->grav['page']);
-            $this->grav['page'] = $page;
+            $this->grav['page'] = $login_page;
 
-            $twig->twig_vars['form'] = new Form($page);
+            $twig->twig_vars['form'] = new Form($login_page);
         } else {
             /** @var Language $l */
             $l = $this->grav['language'];
