@@ -256,7 +256,12 @@ class LoginPlugin extends Plugin
                 }
 
                 if ($allowed && $page->routable()) {
-                    $redirect = $page->route() . ($uri->params() ?: '');
+                    $redirect = $page->route();
+                    foreach ($uri->params(null, true) as $key => $value) {
+                        if (!in_array($key, ['task', 'nonce', 'login-nonce', 'logout-nonce'], true)) {
+                            $redirect .= $uri->params($key);
+                        }
+                    }
                 }
             }
         } else {
@@ -488,7 +493,7 @@ class LoginPlugin extends Plugin
     {
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
-        $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
+        $task = $_POST['task'] ?? $uri->param('task');
         $task = substr($task, \strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
 
