@@ -1,3 +1,9 @@
+# 3.1.1
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed guest only pages requiring login
+
 # 3.1.0
 ## 03/05/2020
 
