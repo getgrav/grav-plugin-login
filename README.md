@@ -232,7 +232,7 @@ Enabling the setting "Use parent access rules" (`parent_acl` in login.yaml) allo
 
 The login plugin can **automatically generate** a login page for you when you try to access a page that your user (or guest account) does not have access to.
 
-Alternatively, you can also provide a specific login route if you wish to forward users to a specific login page. To do this you need to create a copy of the `login.yaml` from the plugin in your `user/config/plugins` folder and provide a specific route (or just edit the plugin setttings in the admin plugin).
+Alternatively, you can also provide a specific login route if you wish to forward users to a specific login page. To do this you need to create a copy of the `login.yaml` from the plugin in your `user/config/plugins` folder and provide a specific route (or just edit the plugin settings in the admin plugin).
 
 ```
 route: /user-login

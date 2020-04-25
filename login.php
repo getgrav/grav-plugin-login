@@ -585,7 +585,7 @@ class LoginPlugin extends Plugin
 
                 $login_page = new Page();
 
-                // Get the admin Login page is needed, else teh default
+                // Get the admin Login page is needed, else the default
                 if ($this->isAdmin()) {
                     $login_file = $this->grav['locator']->findResource('plugins://admin/pages/admin/login.md');
                     $login_page->init(new \SplFileInfo($login_file));
