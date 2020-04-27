@@ -1,5 +1,5 @@
 name: Login
-version: 3.1.0
+version: 3.2.0
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -27,9 +27,9 @@ form:
       class: subtle
 
       fields:
-        login:
+        options:
           type: tab
-          title: PLUGIN_LOGIN.BTN_LOGIN
+          title: PLUGIN_LOGIN.OPTIONS
 
           fields:
 
@@ -56,42 +56,40 @@ form:
               validate:
                 type: bool
 
-            route:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE
-              help: PLUGIN_LOGIN.ROUTE_HELP
-              placeholder: "/my-custom-login"
+            redirect_to_login:
+              type: toggle
+              label: PLUGIN_LOGIN.REDIRECT_TO_LOGIN
+              help: PLUGIN_LOGIN.REDIRECT_TO_LOGIN_HELP
+              default: 1
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
 
             redirect_after_login:
-              type: text
+              type: toggle
               label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
-              placeholder: "/my-page"
+              force_bool: true
+              default: 0
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
 
             redirect_after_logout:
-              type: text
+              type: toggle
               label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT_HELP
-              placeholder: "/"
-
-            route_forgot:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_FORGOT
-              placeholder: "/forgot_password"
-
-            route_reset:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_RESET
-              placeholder: "/reset_password"
-
-            route_profile:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_PROFILE
-              placeholder: "/user_profile"
+              force_bool: true
+              default: 0
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
 
             parent_acl:
               type: toggle
@@ -141,55 +139,6 @@ form:
               validate:
                 type: bool
 
-            routes:
-              type: section
-              title: PLUGIN_LOGIN.ROUTES
-
-              fields:
-
-                route_activate:
-                  type: text
-                  size: medium
-                  label: PLUGIN_LOGIN.ROUTE_ACTIVATE
-                  placeholder: '/activate_user'
-
-                route_forgot:
-                  type: text
-                  size: medium
-                  label: PLUGIN_LOGIN.ROUTE_FORGOT
-                  placeholder: '/forgot_password'
-
-                route_reset:
-                  type: text
-                  size: medium
-                  label: PLUGIN_LOGIN.ROUTE_RESET
-                  placeholder: '/reset_password'
-
-                route_profile:
-                  type: text
-                  size: medium
-                  label: PLUGIN_LOGIN.ROUTE_PROFILE
-                  placeholder: '/user_profile'
-
-                route_register:
-                  type: text
-                  size: medium
-                  label: PLUGIN_LOGIN.ROUTE_REGISTER
-                  help: PLUGIN_LOGIN.ROUTE_REGISTER_HELP
-                  placeholder: "/register"
-
-                user_registration.redirect_after_registration:
-                  type: text
-                  label: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION
-                  help: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION_HELP
-                  placeholder: "/page-to-show-after-registration"
-
-                user_registration.redirect_after_activation:
-                  type: text
-                  label: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION
-                  help: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION_HELP
-                  placeholder: "/page-to-show-after-activation"
-
             rememberme:
               type: section
               title: PLUGIN_LOGIN.REMEMBER_ME
@@ -221,6 +170,100 @@ form:
                   size: small
                   label: PLUGIN_ADMIN.NAME
                   help: PLUGIN_ADMIN.SESSION_NAME_HELP
+
+        routes:
+          type: tab
+          title: PLUGIN_LOGIN.ROUTES
+
+          fields:
+
+            route:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE
+              help: PLUGIN_LOGIN.ROUTE_HELP
+              placeholder: "/login"
+
+            route_after_login:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN
+              help: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN_HELP
+              data-default@: '\Grav\Plugin\LoginPlugin::defaultRedirectAfterLogin'
+              placeholder: "/user_profile"
+
+            route_after_logout:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT
+              help: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT_HELP
+              data-default@: '\Grav\Plugin\LoginPlugin::defaultRedirectAfterLogout'
+              placeholder: "/"
+
+            route_forgot:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_FORGOT
+              placeholder: "/forgot_password"
+
+            route_reset:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_RESET
+              placeholder: "/reset_password"
+
+            route_profile:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_PROFILE
+              placeholder: "/user_profile"
+
+            route_activate:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_ACTIVATE
+              placeholder: '/activate_user'
+
+            user_registration.redirect_after_activation:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION
+              help: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION_HELP
+              placeholder: "/page-to-show-after-activation"
+
+            route_forgot:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_FORGOT
+              placeholder: '/forgot_password'
+
+            route_reset:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_RESET
+              placeholder: '/reset_password'
+
+            route_profile:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_PROFILE
+              placeholder: '/user_profile'
+
+            route_register:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_REGISTER
+              help: PLUGIN_LOGIN.ROUTE_REGISTER_HELP
+              placeholder: "/register"
+
+            user_registration.redirect_after_registration:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION
+              help: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION_HELP
+              placeholder: "/page-to-show-after-registration"
+
+
 
         registration:
           type: tab

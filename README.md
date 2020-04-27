@@ -145,10 +145,13 @@ access:
 ```yaml
 enabled: true                               # Enable the plugin
 built_in_css: true                          # Use built-in CSS
-route:                                      # Specific route for Login page (default is '/login')
-redirect_to_login: true                     # If you try to access a page you don't have access to, should you redirect to login route
-redirect_after_login:                       # Path to redirect to after a successful login (eg '/user_profile')
-redirect_after_logout: '/'                  # Path to redirect to after a successful logout (eg '/')
+redirect_to_login: false                    # If you try to access a page you don't have access to, should you redirect to login route
+redirect_after_login: true                  # Path to redirect to after a successful login
+redirect_after_logout: true                 # Path to redirect to after a successful logout
+
+route: '/login'                             # Specific route for Login page (default is '/login')
+route_after_login:                          # Route to go to after login if enabled
+route_after_logout:                         # Route to logout to if enabled
 route_activate: '/activate_user'            # Route for the user activation process
 route_forgot: '/forgot_password'            # Route for the forgot password process
 route_reset: '/reset_password'              # Route for the reset password process
@@ -156,6 +159,7 @@ route_profile: '/user_profile'              # Route for the user profile page
 route_register: '/user_register'            # Route for the user registration page
 route_unauthorized: '/user_unauthorized'    # Route for a page to display if user is unauthorized
 
+twofa_enabled: false                        # Two factor authentication enabled
 dynamic_page_visibility: false              # Integrate access into page visibility so things can be shown or hidden in the menu
 parent_acl: false                           # Look to parent `access` rules for access requirements
 protect_protected_page_media: false         # Take `access` rules into account when directly accessing a page's media
@@ -169,6 +173,7 @@ max_pw_resets_count: 2                      # Number of password resets in a spe
 max_pw_resets_interval: 60                  # Time in minutes to track password resets
 max_login_count: 5                          # Number of failed login attempts in a specific time frame (0 = unlimited)
 max_login_interval: 10                      # Time in minutes to track login attempts
+ipv6_subnet_size: 64                        # Size of IPv6 block to track login attempts
 
 user_registration:
   enabled: false                            # Enable User Registration Process
@@ -180,6 +185,7 @@ user_registration:
     - 'fullname'
     - 'title'
     - 'level'
+    - 'twofa_enabled'
 
   default_values:                           # Any default values for fields you would like to set
     level: Newbie                           # Here the 'level' field will be pre-populated with 'Newbie' text
@@ -189,6 +195,7 @@ user_registration:
       login: 'true'
 
   redirect_after_registration: ''           # Route to redirect to after registration
+  redirect_after_activation: ''             # Route to redirect to after activation
 
   options:
     validate_password1_and_password2: true  # Ensure that password1 and password2 match during registration (allows you to have just 1 pw field or 2)
@@ -225,7 +232,7 @@ Enabling the setting "Use parent access rules" (`parent_acl` in login.yaml) allo
 
 The login plugin can **automatically generate** a login page for you when you try to access a page that your user (or guest account) does not have access to.
 
-Alternatively, you can also provide a specific login route if you wish to forward users to a specific login page. To do this you need to create a copy of the `login.yaml` from the plugin in your `user/config/plugins` folder and provide a specific route (or just edit the plugin setttings in the admin plugin).
+Alternatively, you can also provide a specific login route if you wish to forward users to a specific login page. To do this you need to create a copy of the `login.yaml` from the plugin in your `user/config/plugins` folder and provide a specific route (or just edit the plugin settings in the admin plugin).
 
 ```
 route: /user-login

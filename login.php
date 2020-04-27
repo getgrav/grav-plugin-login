@@ -206,14 +206,16 @@ class LoginPlugin extends Plugin
             $user = $this->grav['user'];
 
             foreach ($pages->instances() as $page) {
-                $header = $page->header();
-                if ($header && isset($header->access) && isset($header->login['visibility_requires_access']) && $header->login['visibility_requires_access'] === true) {
-                    $config = $this->mergeConfig($page);
-                    $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
-                    if ($access === false) {
-                        $page->visible(false);
+                if ($page) {
+                    $header = $page->header();
+                    if ($header && isset($header->access) && isset($header->login['visibility_requires_access']) && $header->login['visibility_requires_access'] === true) {
+                        $config = $this->mergeConfig($page);
+                        $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
+                        if ($access === false) {
+                            $page->visible(false);
+                        }
                     }
-                }
+                }                
             }
         }
     }
@@ -234,7 +236,11 @@ class LoginPlugin extends Plugin
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
         $current_route = $uri->route();
-        $redirect = $this->grav['config']->get('plugins.login.redirect_after_login');
+
+        /* Support old string-based $redirect_after_login + new bool approach */
+        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
+        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
+        $redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
 
         if (!$redirect && !in_array($current_route, $invalid_redirect_routes, true)) {
             // No login redirect set in the configuration; can we redirect to the current page?
@@ -250,7 +256,12 @@ class LoginPlugin extends Plugin
                 }
 
                 if ($allowed && $page->routable()) {
-                    $redirect = $page->route() . ($uri->params() ?: '');
+                    $redirect = $page->route();
+                    foreach ($uri->params(null, true) as $key => $value) {
+                        if (!in_array($key, ['task', 'nonce', 'login-nonce', 'logout-nonce'], true)) {
+                            $redirect .= $uri->params($key);
+                        }
+                    }
                 }
             }
         } else {
@@ -482,7 +493,7 @@ class LoginPlugin extends Plugin
     {
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
-        $task = !empty($_POST['task']) ? $_POST['task'] : $uri->param('task');
+        $task = $_POST['task'] ?? $uri->param('task');
         $task = substr($task, \strlen('login.'));
         $post = !empty($_POST) ? $_POST : [];
 
@@ -561,36 +572,39 @@ class LoginPlugin extends Plugin
 
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
+        $login_page = null;
 
         // Reset page with login page.
         if (!$authorized) {
             if ($this->route) {
-                $page = $this->grav['pages']->dispatch($this->route);
-            } else {
+                $login_page = $this->grav['pages']->dispatch($this->route);
+            }
 
-                $page = new Page();
-                // $this->grav['session']->redirect_after_login = $this->grav['uri']->path() . ($this->grav['uri']->params() ?: '');
 
-                // Get the admin Login page is needed, else teh default
+            if (!$login_page) {
+
+                $login_page = new Page();
+
+                // Get the admin Login page is needed, else the default
                 if ($this->isAdmin()) {
                     $login_file = $this->grav['locator']->findResource('plugins://admin/pages/admin/login.md');
-                    $page->init(new \SplFileInfo($login_file));
+                    $login_page->init(new \SplFileInfo($login_file));
                 } else {
-                    $page->init(new \SplFileInfo(__DIR__ . '/pages/login.md'));
+                    $login_page->init(new \SplFileInfo(__DIR__ . '/pages/login.md'));
                 }
 
-                $page->slug(basename($this->route));
+                $login_page->slug(basename($this->route));
 
                 /** @var Pages $pages */
                 $pages = $this->grav['pages'];
-                $pages->addPage($page, $this->route);
+                $pages->addPage($login_page, $this->route);
             }
 
             $this->authenticated = false;
             unset($this->grav['page']);
-            $this->grav['page'] = $page;
+            $this->grav['page'] = $login_page;
 
-            $twig->twig_vars['form'] = new Form($page);
+            $twig->twig_vars['form'] = new Form($login_page);
         } else {
             /** @var Language $l */
             $l = $this->grav['language'];
@@ -1116,5 +1130,16 @@ class LoginPlugin extends Plugin
 
         // Clear all session data.
         $session->invalidate()->start();
+    }
+
+    public static function defaultRedirectAfterLogin()
+    {
+        return Grav::instance()['config']->get('plugins.login.redirect_after_login');
+
+    }
+
+    public static function defaultRedirectAfterLogout()
+    {
+        return Grav::instance()['config']->get('plugins.login.redirect_after_logout');
     }
 }
