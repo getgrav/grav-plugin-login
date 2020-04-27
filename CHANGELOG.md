@@ -1,5 +1,5 @@
 # 3.2.0
-## mm/dd/2020
+## 04/27/2020
 
 1. [](#new)
     * CHANGE: `redirect_to_login` and `redirect_after_logout` are now boolean, with accompanying `route_after_login` and `route_after_logout` options.  NOTE: Compatibility is maintained with existing config.
