@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * Fixed logout not removing task if there was no redirect set
+    * Fixed remember me triggering `onUserLoginFailure`, use `onUserLoginGuest` event instead
 
 # 3.2.0
 ## 04/27/2020

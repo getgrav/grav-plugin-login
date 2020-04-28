@@ -137,8 +137,9 @@ class Login
             static::DEBUG && static::addDebugMessage('Login failed', $event);
 
             // Allow plugins to log errors or do other tasks on failure.
+            $eventName = $event->getOption('failureEvent') ?? 'onUserLoginFailure';
             $event = new UserLoginEvent($event->toArray());
-            $grav->fireEvent('onUserLoginFailure', $event);
+            $grav->fireEvent($eventName, $event);
 
             // Make sure that event didn't mess up with the user authorization.
             $user = $event->getUser();

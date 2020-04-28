@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Plugin\Login
  *
- * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @copyright  Copyright (C) 2014 - 2020 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -44,18 +44,13 @@ class LoginPlugin extends Plugin
     /** @var string */
     protected $route;
 
-    /** @var string */
-    protected $route_register;
-
-    /** @var string */
-    protected $route_forgot;
-
     /** @var bool */
     protected $authenticated = true;
 
     /** @var Login */
     protected $login;
 
+    /** @var bool */
     protected $redirect_to_login;
 
     /**
@@ -79,7 +74,8 @@ class LoginPlugin extends Plugin
             'onFormProcessed'           => ['onFormProcessed', 0],
             'onUserLoginAuthenticate'   => [['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
-            'onUserLoginFailure'        => ['userLoginFailure', 0],
+            'onUserLoginFailure'        => ['userLoginGuest', 0],
+            'onUserLoginGuest'          => ['userLoginGuest', 0],
             'onUserLogin'               => ['userLogin', 0],
             'onUserLogout'              => ['userLogout', 0],
         ];
@@ -107,16 +103,20 @@ class LoginPlugin extends Plugin
         }
 
         // Define login service.
-        $this->grav['login'] = function (Grav $c) {
+        $this->grav['login'] = static function (Grav $c) {
             return new Login($c);
         };
 
         // Define current user service.
-        $this->grav['user'] = function (Grav $c) {
+        $this->grav['user'] = static function (Grav $c) {
             $session = $c['session'];
 
             if (empty($session->user)) {
-                $session->user = $c['login']->login(['username' => ''], ['remember_me' => true, 'remember_me_login' => true]);
+                // Try remember me login.
+                $session->user = $c['login']->login(
+                    ['username' => ''],
+                    ['remember_me' => true, 'remember_me_login' => true, 'failureEvent' => 'onUserLoginGuest']
+                );
             }
 
             return $session->user;
@@ -390,7 +390,7 @@ class LoginPlugin extends Plugin
             $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
             $messages->add($message, 'error');
         } else {
-            list($good_token, $expire) = explode('::', $user->activation_token, 2);
+            [$good_token, $expire] = explode('::', $user->activation_token, 2);
 
             if ($good_token === $token) {
                 if (time() > $expire) {
@@ -1079,12 +1079,14 @@ class LoginPlugin extends Plugin
         }
     }
 
-    public function userLoginFailure(UserLoginEvent $event)
+    public function userLoginGuest(UserLoginEvent $event)
     {
         /** @var UserCollectionInterface $users */
         $users = $this->grav['accounts'];
+        $user = $users->load('');
 
-        $this->grav['session']->user = $users->load('');
+        $event->setUser($user);
+        $this->grav['session']->user = $user;
     }
 
     public function userLogin(UserLoginEvent $event)
