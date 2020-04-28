@@ -1,3 +1,9 @@
+# 3.2.1
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed logout not removing task if there was no redirect set
+
 # 3.2.0
 ## 04/27/2020
 

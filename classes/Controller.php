@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Plugin\Login
  *
- * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @copyright  Copyright (C) 2014 - 2020 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -268,7 +268,7 @@ class Controller
         $route_after_logout = $this->grav['config']->get('plugins.login.route_after_logout');
         $logout_redirect = is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
 
-        $redirect = $event->getRedirect() ?: $logout_redirect;
+        $redirect = $event->getRedirect() ?: $logout_redirect ?: $this->getCurrentRedirect();
         if ($redirect) {
             $this->setRedirect($redirect, $event->getRedirectCode());
         }
@@ -483,6 +483,23 @@ class Controller
         header('Content-Type: application/json');
         echo json_encode($json_response);
         exit;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getCurrentRedirect()
+    {
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        $redirect = $uri->route();
+        foreach ($uri->params(null, true) as $key => $value) {
+            if (!in_array($key, ['task', 'nonce', 'login-nonce', 'logout-nonce'], true)) {
+                $redirect .= $uri->params($key);
+            }
+        }
+
+        return $redirect;
     }
 
     /**
