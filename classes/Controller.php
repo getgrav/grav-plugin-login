@@ -9,6 +9,7 @@
 
 namespace Grav\Plugin\Login;
 
+use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Uri;
@@ -16,6 +17,7 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
+use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
 use Grav\Plugin\LoginPlugin;
 use RocketTheme\Toolbox\Session\Message;
@@ -174,48 +176,133 @@ class Controller
 
     public function taskTwoFa()
     {
+        /** @var Config $config */
+        $config = $this->grav['config'];
+
         /** @var Language $t */
         $t = $this->grav['language'];
 
         /** @var Message $messages */
         $messages = $this->grav['messages'];
+        if (!$config->get('plugins.login.twofa_enabled', false)) {
+            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
 
-        /** @var TwoFactorAuth $twoFa */
-        $twoFa = $this->grav['login']->twoFactorAuth();
+            return true;
+        }
+
+        $twoFa = $this->login->twoFactorAuth();
         $user = $this->grav['user'];
 
         $code = $this->post['2fa_code'] ?? null;
         $secret = $user->twofa_secret ?? null;
 
+        $eventOptions = [
+            'credentials' => ['username' => $user->get('username')],
+            'options' => ['twofa' => true]
+        ];
+
+        // Attempt to authenticate the user.
+        $event = new UserLoginEvent($eventOptions);
+        $event->setUser($user);
+
         if (!$code || !$secret || !$twoFa->verifyCode($secret, $code)) {
-            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
+            $event->setStatus(UserLoginEvent::AUTHENTICATION_FAILURE | UserLoginEvent::AUTHORIZATION_CHALLENGE);
+            $event->setMessage($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
 
+            $this->grav->fireEvent('onUserLoginFailure', $event);
+
+            // Make sure that event didn't mess up with the user authorization.
+            $user = $event->getUser();
             $user->authenticated = false;
+            $user->authorized = false;
 
-            $redirect_to_login = $this->grav['config']->get('plugins.login.route_to_login');
-            $login_route = $this->grav['config']->get('plugins.login.route');
-            $redirect_route = $redirect_to_login && $login_route ? $login_route : false;
-            if ($redirect_route) {
-                $this->setRedirect($redirect_route, 303);
+            if (!$event->getRedirect()) {
+                $redirect_to_login = $this->grav['config']->get('plugins.login.route_to_login');
+                $login_route = $this->grav['config']->get('plugins.login.route');
+
+                $event->setRedirect(
+                    $redirect_to_login && $login_route ? $login_route : $this->getCurrentRedirect(),
+                    303
+                );
             }
+        } else {
+
+            $event->setStatus(UserLoginEvent::AUTHENTICATION_SUCCESS | UserLoginEvent::AUTHORIZATION_CHALLENGE);
+            $event->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'),  'info');
+
+            $this->grav->fireEvent('onUserLoginAuthorized', $event);
+
+            // Make sure that event didn't mess up with the user authorization.
+            $user = $event->getUser();
+            $user->authenticated = $event->isSuccess();
+            $user->authorized = !$event->isDelayed();
+
+            if (!$event->getRedirect()) {
+                /* Support old string-based $redirect_after_login + new bool approach */
+                $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
+                $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
+                $login_redirect = is_bool($redirect_after_login) && $redirect_after_login === true ? $route_after_login : $redirect_after_login;
+
+                $event->setRedirect(
+                    $this->grav['session']->redirect_after_login ?: $login_redirect ?: $this->grav['uri']->referrer('/'),
+                    303
+                );
+            }
+        }
+
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+        $messages->add($event->getMessage(), $event->getMessageType());
+
+        $redirect = $event->getRedirect() ?: $this->getCurrentRedirect();
+        $this->setRedirect($redirect, $event->getRedirectCode());
+
+        return true;
+    }
+
+    public function taskTwofa_cancel()
+    {
+        /** @var Config $config */
+        $config = $this->grav['config'];
+
+        /** @var Language $t */
+        $t = $this->grav['language'];
+
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+        if (!$config->get('plugins.login.twofa_enabled', false)) {
+            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
 
             return true;
         }
 
-        $messages->add($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'),  'info');
+        $user = $this->grav['user'];
+        $eventOptions = [
+            'credentials' => ['username' => $user->get('username')],
+            'options' => ['twofa' => true]
+        ];
 
-        $user->authorized = true;
+        $event = new UserLoginEvent($eventOptions);
 
-        /* Support old string-based $redirect_after_login + new bool approach */
-        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
-        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
-        $login_redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+        $event->setStatus(UserLoginEvent::AUTHENTICATION_CANCELLED | UserLoginEvent::AUTHORIZATION_CHALLENGE);
+        $event->setMessage($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
 
-        $this->setRedirect(
-            $this->grav['session']->redirect_after_login
-                ?: $login_redirect
-                ?: $this->grav['uri']->referrer('/')
-        );
+        $this->grav->fireEvent('onUserLoginFailure', $event);
+
+        // Make sure that event didn't mess up with the user authorization.
+        $user = $event->getUser();
+        $user->authenticated = false;
+        $user->authorized = false;
+
+        if (!$event->getRedirect()) {
+            $redirect_to_login = $this->grav['config']->get('plugins.login.route_to_login');
+            $login_route = $this->grav['config']->get('plugins.login.route');
+
+            $event->setRedirect(
+                $redirect_to_login && $login_route ? $login_route : $this->getCurrentRedirect(),
+                303
+            );
+        }
 
         return true;
     }
