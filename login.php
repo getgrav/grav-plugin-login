@@ -72,11 +72,11 @@ class LoginPlugin extends Plugin
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
             'onFormProcessed'           => ['onFormProcessed', 0],
-            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
+            'onUserLoginAuthenticate'   => [['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
             'onUserLoginFailure'        => ['userLoginGuest', 0],
             'onUserLoginGuest'          => ['userLoginGuest', 0],
-            'onUserLogin'               => ['userLogin', 0],
+            'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 0]],
             'onUserLogout'              => ['userLogout', 0],
         ];
     }
@@ -943,6 +943,32 @@ class LoginPlugin extends Plugin
      * @param UserLoginEvent $event
      * @throws \RuntimeException
      */
+    public function userLoginAuthenticateRateLimit(UserLoginEvent $event)
+    {
+        // Check that we're logging in with rate limit turned on.
+        if (!$event->getOption('rate_limit')) {
+            return;
+        }
+
+        $credentials = $event->getCredentials();
+        $username = $credentials['username'];
+
+        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
+        if ($interval = $this->login->checkLoginRateLimit($username)) {
+            /** @var Language $t */
+            $t = $this->grav['language'];
+
+            $event->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
+            $event->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
+            $event->setStatus(UserLoginEvent::AUTHENTICATION_CANCELLED);
+            $event->stopPropagation();
+        }
+    }
+
+    /**
+     * @param UserLoginEvent $event
+     * @throws \RuntimeException
+     */
     public function userLoginAuthenticateByRegistration(UserLoginEvent $event)
     {
         // Check that we're logging in after registration.
@@ -1089,6 +1115,15 @@ class LoginPlugin extends Plugin
         $this->grav['session']->user = $user;
     }
 
+    public function userLoginResetRateLimit(UserLoginEvent $event)
+    {
+        if ($event->getOption('rate_limit')) {
+            // Reset user rate limit.
+            $user = $event->getUser();
+            $this->login->resetLoginRateLimit($user->get('username'));
+        }
+    }
+
     public function userLogin(UserLoginEvent $event)
     {
         /** @var SessionInterface $session */
@@ -1099,7 +1134,8 @@ class LoginPlugin extends Plugin
         if (method_exists($session, 'regenerateId')) {
             $session->regenerateId();
         }
-        $session->user = $event->getUser();
+
+        $session->user = $user = $event->getUser();
 
         if ($event->getOption('remember_me')) {
             /** @var Login $login */
@@ -1108,7 +1144,7 @@ class LoginPlugin extends Plugin
             $session->remember_me = (bool)$event->getOption('remember_me_login');
 
             // If the user wants to be remembered, create Rememberme cookie.
-            $username = $event->getUser()->get('username');
+            $username = $user->get('username');
             if ($event->getCredential('rememberme')) {
                 $login->rememberMe()->createCookie($username);
             }

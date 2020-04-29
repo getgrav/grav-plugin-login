@@ -120,37 +120,14 @@ class Controller
         /** @var Message $messages */
         $messages = $this->grav['messages'];
 
-        $userKey = (string)($this->post['username'] ?? '');
-        $ip = Uri::ip();
-        $isIPv4 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
-        $ipKey = $isIPv4 ? $ip : Utils::getSubnet($ip, $this->grav['config']->get('plugins.login.ipv6_subnet_size'));
+        // Remove login nonce from the form.
+        $form = array_diff_key($this->post, ['login-form-nonce' => true]);
 
         // Is twofa enabled?
         $twofa = $this->grav['config']->get('plugins.login.twofa_enabled', false);
 
-        // Pseudonymization of the IP
-        $ipKey = sha1($ipKey . $this->grav['config']->get('security.salt'));
-
-        $rateLimiter = $this->login->getRateLimiter('login_attempts');
-
-        // Check if the current IP has been used in failed login attempts.
-        $attempts = \count($rateLimiter->getAttempts($ipKey, 'ip'));
-
-        $rateLimiter->registerRateLimitedAction($ipKey, 'ip')->registerRateLimitedAction($userKey);
-
-        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
-        if ($rateLimiter->isRateLimited($ipKey, 'ip') || ($attempts && $rateLimiter->isRateLimited($userKey))) {
-            $messages->add($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $rateLimiter->getInterval()]), 'error');
-            $this->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
-
-            return true;
-        }
-
-        // Remove login nonce from the form.
-        $form = array_diff_key($this->post, ['login-form-nonce' => true]);
-
         // Fire Login process.
-        $event = $this->login->login($form, ['remember_me' => true, 'twofa' => $twofa], ['return_event' => true]);
+        $event = $this->login->login($form, ['rate_limit' => true, 'remember_me' => true, 'twofa' => $twofa], ['return_event' => true]);
         $user = $event->getUser();
 
         /* Support old string-based $redirect_after_login + new bool approach */
@@ -158,9 +135,7 @@ class Controller
         $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
         $login_redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
 
-
         if ($user->authenticated) {
-            $rateLimiter->resetRateLimit($ipKey, 'ip')->resetRateLimit($userKey);
             if ($user->authorized) {
                 $event->defMessage('PLUGIN_LOGIN.LOGIN_SUCCESSFUL', 'info');
 
