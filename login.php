@@ -62,6 +62,7 @@ class LoginPlugin extends Plugin
             'onPluginsInitialized'      => [['autoload', 100000], ['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
             'onTask.login.twofa'        => ['loginController', 0],
+            'onTask.login.twofa_cancel' => ['loginController', 0],
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
@@ -215,7 +216,7 @@ class LoginPlugin extends Plugin
                             $page->visible(false);
                         }
                     }
-                }                
+                }
             }
         }
     }
