@@ -132,13 +132,17 @@ class Login
             $user = $event->getUser();
             $user->authenticated = true;
             $user->authorized = !$event->isDelayed();
-
+            if ($user->authorized) {
+                $event = new UserLoginEvent($event->toArray());
+                $this->grav->fireEvent('onUserLoginAuthorized', $event);
+            }
         } else {
             static::DEBUG && static::addDebugMessage('Login failed', $event);
 
             // Allow plugins to log errors or do other tasks on failure.
+            $eventName = $event->getOption('failureEvent') ?? 'onUserLoginFailure';
             $event = new UserLoginEvent($event->toArray());
-            $grav->fireEvent('onUserLoginFailure', $event);
+            $grav->fireEvent($eventName, $event);
 
             // Make sure that event didn't mess up with the user authorization.
             $user = $event->getUser();
@@ -273,6 +277,53 @@ class Login
         $user->save();
 
         return $user;
+    }
+
+    /**
+     * @param string $username
+     * @param string|null $ip
+     * @return int Return positive number if rate limited, otherwise return 0.
+     */
+    public function checkLoginRateLimit(string $username, string $ip = null): int
+    {
+        $ipKey = $this->getIpKey($ip);
+        $rateLimiter = $this->getRateLimiter('login_attempts');
+        $rateLimiter->registerRateLimitedAction($ipKey, 'ip')->registerRateLimitedAction($username);
+
+        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
+        $attempts = \count($rateLimiter->getAttempts($ipKey, 'ip'));
+        if ($rateLimiter->isRateLimited($ipKey, 'ip') || ($attempts && $rateLimiter->isRateLimited($username))) {
+            return $rateLimiter->getInterval();
+        }
+
+        return 0;
+    }
+
+    /**
+     * @param string $username
+     * @param string|null $ip
+     */
+    public function resetLoginRateLimit(string $username, string $ip = null): void
+    {
+        $ipKey = $this->getIpKey($ip);
+        $rateLimiter = $this->getRateLimiter('login_attempts');
+        $rateLimiter->resetRateLimit($ipKey, 'ip')->resetRateLimit($username);
+    }
+
+    /**
+     * @param string|null $ip
+     * @return string
+     */
+    public function getIpKey(string $ip = null): string
+    {
+        if (null === $ip) {
+            $ip = Uri::ip();
+        }
+        $isIPv4 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
+        $ipKey = $isIPv4 ? $ip : Utils::getSubnet($ip, $this->grav['config']->get('plugins.login.ipv6_subnet_size'));
+
+        // Pseudonymization of the IP
+        return sha1($ipKey . $this->grav['config']->get('security.salt'));
     }
 
     /**

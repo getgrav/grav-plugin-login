@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Plugin\Login
  *
- * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @copyright  Copyright (C) 2014 - 2020 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -44,18 +44,13 @@ class LoginPlugin extends Plugin
     /** @var string */
     protected $route;
 
-    /** @var string */
-    protected $route_register;
-
-    /** @var string */
-    protected $route_forgot;
-
     /** @var bool */
     protected $authenticated = true;
 
     /** @var Login */
     protected $login;
 
+    /** @var bool */
     protected $redirect_to_login;
 
     /**
@@ -67,6 +62,7 @@ class LoginPlugin extends Plugin
             'onPluginsInitialized'      => [['autoload', 100000], ['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
             'onTask.login.twofa'        => ['loginController', 0],
+            'onTask.login.twofa_cancel' => ['loginController', 0],
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
@@ -77,10 +73,11 @@ class LoginPlugin extends Plugin
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
             'onFormProcessed'           => ['onFormProcessed', 0],
-            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
+            'onUserLoginAuthenticate'   => [['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
-            'onUserLoginFailure'        => ['userLoginFailure', 0],
-            'onUserLogin'               => ['userLogin', 0],
+            'onUserLoginFailure'        => ['userLoginGuest', 0],
+            'onUserLoginGuest'          => ['userLoginGuest', 0],
+            'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 0]],
             'onUserLogout'              => ['userLogout', 0],
         ];
     }
@@ -107,16 +104,20 @@ class LoginPlugin extends Plugin
         }
 
         // Define login service.
-        $this->grav['login'] = function (Grav $c) {
+        $this->grav['login'] = static function (Grav $c) {
             return new Login($c);
         };
 
         // Define current user service.
-        $this->grav['user'] = function (Grav $c) {
+        $this->grav['user'] = static function (Grav $c) {
             $session = $c['session'];
 
             if (empty($session->user)) {
-                $session->user = $c['login']->login(['username' => ''], ['remember_me' => true, 'remember_me_login' => true]);
+                // Try remember me login.
+                $session->user = $c['login']->login(
+                    ['username' => ''],
+                    ['remember_me' => true, 'remember_me_login' => true, 'failureEvent' => 'onUserLoginGuest']
+                );
             }
 
             return $session->user;
@@ -215,7 +216,7 @@ class LoginPlugin extends Plugin
                             $page->visible(false);
                         }
                     }
-                }                
+                }
             }
         }
     }
@@ -390,7 +391,7 @@ class LoginPlugin extends Plugin
             $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
             $messages->add($message, 'error');
         } else {
-            list($good_token, $expire) = explode('::', $user->activation_token, 2);
+            [$good_token, $expire] = explode('::', $user->activation_token, 2);
 
             if ($good_token === $token) {
                 if (time() > $expire) {
@@ -943,6 +944,32 @@ class LoginPlugin extends Plugin
      * @param UserLoginEvent $event
      * @throws \RuntimeException
      */
+    public function userLoginAuthenticateRateLimit(UserLoginEvent $event)
+    {
+        // Check that we're logging in with rate limit turned on.
+        if (!$event->getOption('rate_limit')) {
+            return;
+        }
+
+        $credentials = $event->getCredentials();
+        $username = $credentials['username'];
+
+        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
+        if ($interval = $this->login->checkLoginRateLimit($username)) {
+            /** @var Language $t */
+            $t = $this->grav['language'];
+
+            $event->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
+            $event->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
+            $event->setStatus(UserLoginEvent::AUTHENTICATION_CANCELLED);
+            $event->stopPropagation();
+        }
+    }
+
+    /**
+     * @param UserLoginEvent $event
+     * @throws \RuntimeException
+     */
     public function userLoginAuthenticateByRegistration(UserLoginEvent $event)
     {
         // Check that we're logging in after registration.
@@ -1079,12 +1106,23 @@ class LoginPlugin extends Plugin
         }
     }
 
-    public function userLoginFailure(UserLoginEvent $event)
+    public function userLoginGuest(UserLoginEvent $event)
     {
         /** @var UserCollectionInterface $users */
         $users = $this->grav['accounts'];
+        $user = $users->load('');
 
-        $this->grav['session']->user = $users->load('');
+        $event->setUser($user);
+        $this->grav['session']->user = $user;
+    }
+
+    public function userLoginResetRateLimit(UserLoginEvent $event)
+    {
+        if ($event->getOption('rate_limit')) {
+            // Reset user rate limit.
+            $user = $event->getUser();
+            $this->login->resetLoginRateLimit($user->get('username'));
+        }
     }
 
     public function userLogin(UserLoginEvent $event)
@@ -1097,7 +1135,8 @@ class LoginPlugin extends Plugin
         if (method_exists($session, 'regenerateId')) {
             $session->regenerateId();
         }
-        $session->user = $event->getUser();
+
+        $session->user = $user = $event->getUser();
 
         if ($event->getOption('remember_me')) {
             /** @var Login $login */
@@ -1106,7 +1145,7 @@ class LoginPlugin extends Plugin
             $session->remember_me = (bool)$event->getOption('remember_me_login');
 
             // If the user wants to be remembered, create Rememberme cookie.
-            $username = $event->getUser()->get('username');
+            $username = $user->get('username');
             if ($event->getCredential('rememberme')) {
                 $login->rememberMe()->createCookie($username);
             }
