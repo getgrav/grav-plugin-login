@@ -1134,12 +1134,24 @@ class LoginPlugin extends Plugin
 
     public static function defaultRedirectAfterLogin()
     {
-        return Grav::instance()['config']->get('plugins.login.redirect_after_login');
+        $legacy_option = Grav::instance()['config']->get('plugins.login.redirect_after_login');
+        if (is_bool($legacy_option)) {
+            $default = Grav::instance()['config']->get('plugins.login.route_after_login');
+        } else {
+            $default = $legacy_option;
+        }
+        return $default;
 
     }
 
     public static function defaultRedirectAfterLogout()
     {
-        return Grav::instance()['config']->get('plugins.login.redirect_after_logout');
+        $legacy_option = Grav::instance()['config']->get('plugins.login.redirect_after_logout');
+        if (is_bool($legacy_option)) {
+            $default = Grav::instance()['config']->get('plugins.login.route_after_logout');
+        } else {
+            $default = $legacy_option;
+        }
+        return $default;
     }
 }

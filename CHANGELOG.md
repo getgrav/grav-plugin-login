@@ -1,3 +1,10 @@
+# 3.2.1
+## 04/30/2020
+
+1. [](#bugfix)
+    * Fixed issue with backwards compatibility for `route_after_login` and `route_after_logout`
+    * Removed duplicate entries in `blueprint.yaml` causing YAML errors
+
 # 3.2.0
 ## 04/27/2020
 
