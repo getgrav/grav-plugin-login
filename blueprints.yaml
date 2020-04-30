@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.2.0
+version: 3.3.0
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -232,24 +232,6 @@ form:
               label: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION
               help: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION_HELP
               placeholder: "/page-to-show-after-activation"
-
-            route_forgot:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_FORGOT
-              placeholder: '/forgot_password'
-
-            route_reset:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_RESET
-              placeholder: '/reset_password'
-
-            route_profile:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_PROFILE
-              placeholder: '/user_profile'
 
             route_register:
               type: text

@@ -12,7 +12,15 @@ These are available via GPM, and because the plugin has dependencies you just ne
 $ bin/gpm install login
 ```
 
+# Changes in version 3.2
+
+New events:
+
+* `onUserLoginAuthorized`   Allows plugins to include their own logic when user gets authorized (usually after 2FA challenge).
+
 # Changes in version 3.1
+
+New events:
 
 * `onUserActivated`         Allows plugins to hook into user activation, when user has clicked on confirmation email.
 
@@ -40,6 +48,8 @@ They use following events which can be hooked by plugins:
 * `onUserLogout`            Allows plugins to include their own logic when user logs out.
 * `onUserLoginRegisterData` Allows plugins to include their own data to be added to the user object during registration.
 * `onUserLoginRegistered`   Allows plugins to hook into user registration just before the redirect.
+
+All the events use `UserLoginEvent` with some useful methods to see what is going on.
 
 New Plugin options have been added for:
 
