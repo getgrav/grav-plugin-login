@@ -1,3 +1,9 @@
+# 3.3.1
+## 05/07/2020
+
+1. [](#bugfix)
+    * Set missing default logout route to `/` for homepage
+
 # 3.3.0
 ## 04/30/2020
 
