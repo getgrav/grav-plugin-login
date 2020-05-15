@@ -23,7 +23,7 @@
 
 1. [](#new)
     * CHANGE: `redirect_to_login` and `redirect_after_logout` are now boolean, with accompanying `route_after_login` and `route_after_logout` options.  NOTE: Compatibility is maintained with existing config.
-* [](#improved)
+1. [](#improved)
     * Improved configuration layout
     * Better handling of login route when that page doesn't exist 
 1. [](#bugfix)
@@ -46,7 +46,7 @@
 1. [](#new)
     * Pass phpstan level 1 tests
     * Updated 2FA library to v1.7.0
-* [](#improved)
+1. [](#improved)
     * Added some debugging messages (turned off by default)
 
 # 3.0.5
