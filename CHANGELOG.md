@@ -7,7 +7,7 @@
 # 3.3.0
 ## 04/30/2020
 
-* [](#new)
+1. [](#new)
     * Rate limiter logic was moved to login events and can be turned on with `['rate_limit' => true]` option
     * Rate limiter sets `UserLoginEvent::AUTHENTICATION_CANCELLED` and triggers `onUserLoginFailure` event
     * Login now triggers extra `onUserLoginAuthorized` event if user is authorized
