@@ -1,3 +1,9 @@
+# 3.3.2
+## mm/dd/2020
+
+1. [](#improved)
+    * Added error message when user cannot log in because of account has not been activated or it has been disabled
+
 # 3.3.1
 ## 05/07/2020
 

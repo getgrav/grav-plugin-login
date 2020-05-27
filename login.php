@@ -1094,6 +1094,9 @@ class LoginPlugin extends Plugin
         $user = $event->getUser();
         foreach ($event->getAuthorize() as $authorize) {
             if (!$user->authorize($authorize)) {
+                if ($user->state !== 'enabled') {
+                    $event->setMessage($this->grav['language']->translate('PLUGIN_LOGIN.USER_ACCOUNT_DISABLED'), 'error');
+                }
                 $event->setStatus($event::AUTHORIZATION_DENIED);
                 $event->stopPropagation();
 
