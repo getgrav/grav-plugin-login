@@ -1,6 +1,8 @@
 # 3.3.2
 ## mm/dd/2020
 
+1. [](#new)
+    * Grav 1.7 only: Added `Sync User in Session` feature [#252](https://github.com/getgrav/grav-plugin-login/issues/252)
 1. [](#improved)
     * Added error message when user cannot log in because of account has not been activated or it has been disabled
 

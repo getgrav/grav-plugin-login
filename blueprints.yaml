@@ -141,6 +141,18 @@ form:
               validate:
                 type: bool
 
+            session_user_sync:
+              type: toggle
+              label: PLUGIN_LOGIN.SESSION_USER_SYNC
+              highlight: 1
+              default: 0
+              help: PLUGIN_LOGIN.SESSION_USER_SYNC_HELP
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
             rememberme:
               type: section
               title: PLUGIN_LOGIN.REMEMBER_ME

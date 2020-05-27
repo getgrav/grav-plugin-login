@@ -12,6 +12,7 @@ namespace Grav\Plugin;
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Data\Data;
 use Grav\Common\Debugger;
+use Grav\Common\Flex\Types\Users\UserObject;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
@@ -23,6 +24,8 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
+use Grav\Events\SessionStartEvent;
+use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Session\SessionInterface;
 use Grav\Plugin\Form\Form;
@@ -59,6 +62,7 @@ class LoginPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
+            SessionStartEvent::class    => ['onSessionStart', 0],
             'onPluginsInitialized'      => [['autoload', 100000], ['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
             'onTask.login.twofa'        => ['loginController', 0],
@@ -90,6 +94,45 @@ class LoginPlugin extends Plugin
     public function autoload() : ClassLoader
     {
         return require __DIR__ . '/vendor/autoload.php';
+    }
+
+
+    public function onSessionStart(SessionStartEvent $event)
+    {
+        $session = $event->session;
+
+        $user = $session->user ?? null;
+        if ($user && $user->exists() && ($this->config()['session_user_sync'] ?? false)) {
+            // User is stored into the filesystem.
+
+            /** @var UserCollectionInterface $accounts */
+            $accounts = $this->grav['accounts'];
+
+            /** @var UserObject $stored */
+            if ($accounts instanceof FlexCollectionInterface) {
+                $stored = $accounts[$user->username];
+            } else {
+                // TODO: remove when removing legacy support.
+                $stored = $accounts->load($user->username);
+            }
+
+            if ($stored && $stored->exists()) {
+                // User still exists, update user object in the session.
+                $user->update($stored->jsonSerialize());
+            } else {
+                // User doesn't exist anymore, prepare for session invalidation.
+                $user->state = 'disabled';
+            }
+
+            if ($user->state !== 'enabled') {
+                // If user isn't enabled, clear all session data and display error.
+                $session->invalidate()->start();
+
+                /** @var Message $messages */
+                $messages = $this->grav['messages'];
+                $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.USER_ACCOUNT_DISABLED'), 'error');
+            }
+        }
     }
 
     /**
