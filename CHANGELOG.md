@@ -1,3 +1,14 @@
+# 3.3.2
+## 06/03/2020
+
+1. [](#new)
+    * Grav 1.7 only: Added `Sync User in Session` feature [#252](https://github.com/getgrav/grav-plugin-login/issues/252)
+1. [](#improved)
+    * Refactored code to use helper methods to find redirect routes
+    * Added error message when user cannot log in because of account has not been activated or it has been disabled
+    * Set better defaults for redirects on login and logout
+    * Fixed proper highlights and default states for admin option toggles
+
 # 3.3.1
 ## 05/07/2020
 
@@ -7,7 +18,7 @@
 # 3.3.0
 ## 04/30/2020
 
-* [](#new)
+1. [](#new)
     * Rate limiter logic was moved to login events and can be turned on with `['rate_limit' => true]` option
     * Rate limiter sets `UserLoginEvent::AUTHENTICATION_CANCELLED` and triggers `onUserLoginFailure` event
     * Login now triggers extra `onUserLoginAuthorized` event if user is authorized
@@ -23,7 +34,7 @@
 
 1. [](#new)
     * CHANGE: `redirect_to_login` and `redirect_after_logout` are now boolean, with accompanying `route_after_login` and `route_after_logout` options.  NOTE: Compatibility is maintained with existing config.
-* [](#improved)
+1. [](#improved)
     * Improved configuration layout
     * Better handling of login route when that page doesn't exist 
 1. [](#bugfix)
@@ -46,7 +57,7 @@
 1. [](#new)
     * Pass phpstan level 1 tests
     * Updated 2FA library to v1.7.0
-* [](#improved)
+1. [](#improved)
     * Added some debugging messages (turned off by default)
 
 # 3.0.5

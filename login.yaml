@@ -1,11 +1,12 @@
 enabled: true                               # Enable the plugin
 built_in_css: true                          # Use built-in CSS
 redirect_to_login: false                    # If you try to access a page you don't have access to, should you redirect to login route
-redirect_after_login: true                  # Path to redirect to after a successful login
+redirect_after_login: false                 # Path to redirect to after a successful login
 redirect_after_logout: true                 # Path to redirect to after a successful logout
+session_user_sync: false                    # Sync session user with changes in stored user file
 
 route: '/login'                             # Specific route for Login page (default is '/login')
-route_after_login:                          # Route to go to after login if enabled
+route_after_login: '/'                      # Route to go to after login if enabled
 route_after_logout: '/'                     # Route to logout to if enabled
 route_activate: '/activate_user'            # Route for the user activation process
 route_forgot: '/forgot_password'            # Route for the forgot password process

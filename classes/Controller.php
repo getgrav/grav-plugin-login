@@ -132,10 +132,7 @@ class Controller
         $event = $this->login->login($form, ['rate_limit' => true, 'remember_me' => true, 'twofa' => $twofa], ['return_event' => true]);
         $user = $event->getUser();
 
-        /* Support old string-based $redirect_after_login + new bool approach */
-        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
-        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
-        $login_redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+        $login_redirect = LoginPlugin::defaultRedirectAfterLogin();
 
         if ($user->authenticated) {
             if ($user->authorized) {
@@ -238,10 +235,7 @@ class Controller
             $user->authorized = !$event->isDelayed();
 
             if (!$event->getRedirect()) {
-                /* Support old string-based $redirect_after_login + new bool approach */
-                $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
-                $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
-                $login_redirect = is_bool($redirect_after_login) && $redirect_after_login === true ? $route_after_login : $redirect_after_login;
+                $login_redirect = LoginPlugin::defaultRedirectAfterLogin();
 
                 $event->setRedirect(
                     $this->grav['session']->redirect_after_login ?: $login_redirect ?: $this->grav['uri']->referrer('/'),
@@ -325,10 +319,7 @@ class Controller
             $messages->add($t->translate($message), $event->getMessageType());
         }
 
-        /* Support old string-based $redirect_after_logout + new bool approach */
-        $redirect_after_logout = $this->grav['config']->get('plugins.login.redirect_after_logout');
-        $route_after_logout = $this->grav['config']->get('plugins.login.route_after_logout');
-        $logout_redirect = is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
+        $logout_redirect = LoginPlugin::defaultRedirectAfterLogout();
 
         $redirect = $event->getRedirect() ?: $logout_redirect ?: $this->getCurrentRedirect();
         if ($redirect) {
