@@ -1,5 +1,5 @@
 # 3.3.2
-## mm/dd/2020
+## 06/03/2020
 
 1. [](#new)
     * Grav 1.7 only: Added `Sync User in Session` feature [#252](https://github.com/getgrav/grav-plugin-login/issues/252)
