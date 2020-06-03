@@ -281,10 +281,7 @@ class LoginPlugin extends Plugin
         $uri = $this->grav['uri'];
         $current_route = $uri->route();
 
-        /* Support old string-based $redirect_after_login + new bool approach */
-        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
-        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
-        $redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+        $redirect = static::defaultRedirectAfterLogin();
 
         if (!$redirect && !in_array($current_route, $invalid_redirect_routes, true)) {
             // No login redirect set in the configuration; can we redirect to the current page?
@@ -1219,24 +1216,19 @@ class LoginPlugin extends Plugin
 
     public static function defaultRedirectAfterLogin()
     {
-        $legacy_option = Grav::instance()['config']->get('plugins.login.redirect_after_login');
-        if (is_bool($legacy_option)) {
-            $default = Grav::instance()['config']->get('plugins.login.route_after_login');
-        } else {
-            $default = $legacy_option;
-        }
-        return $default;
+        $config = Grav::instance()['config'];
+        $redirect_after_login = $config->get('plugins.login.redirect_after_login');
+        $route_after_login = $config->get('plugins.login.route_after_login');
 
+        return is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
     }
 
     public static function defaultRedirectAfterLogout()
     {
-        $legacy_option = Grav::instance()['config']->get('plugins.login.redirect_after_logout');
-        if (is_bool($legacy_option)) {
-            $default = Grav::instance()['config']->get('plugins.login.route_after_logout');
-        } else {
-            $default = $legacy_option;
-        }
-        return $default;
+        $config = Grav::instance()['config'];
+        $redirect_after_logout = $config->get('plugins.logout.redirect_after_logout');
+        $route_after_logout = $config->get('plugins.logout.route_after_logout');
+
+        return is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
     }
 }
