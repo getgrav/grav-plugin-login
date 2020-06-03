@@ -4,7 +4,10 @@
 1. [](#new)
     * Grav 1.7 only: Added `Sync User in Session` feature [#252](https://github.com/getgrav/grav-plugin-login/issues/252)
 1. [](#improved)
+    * Refactored code to use helper methods to find redirect routes
     * Added error message when user cannot log in because of account has not been activated or it has been disabled
+    * Set better defaults for redirects on login and logout
+    * Fixed proper highlights and default states for admin option toggles
 
 # 3.3.1
 ## 05/07/2020
