@@ -15,7 +15,7 @@ form:
 
     email:
       type: email
-      placeholder: "Enter your email"
+      placeholder: PLUGIN_LOGIN.ENTER_EMAIL
       validate:
         required: true
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
@@ -28,7 +28,7 @@ form:
 
     password:
       type: password
-      label: Enter new password
+      label: PLUGIN_LOGIN.ENTER_NEW_PASSWORD
       validate:
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
         config-pattern@: system.pwd_regex
