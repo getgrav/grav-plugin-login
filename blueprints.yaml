@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.2.0
+version: 3.3.2
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -62,7 +62,8 @@ form:
               type: toggle
               label: PLUGIN_LOGIN.REDIRECT_TO_LOGIN
               help: PLUGIN_LOGIN.REDIRECT_TO_LOGIN_HELP
-              default: 1
+              default: 0
+              highlight: 0
               options:
                 1: PLUGIN_ADMIN.ENABLED
                 0: PLUGIN_ADMIN.DISABLED
@@ -75,6 +76,7 @@ form:
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
               force_bool: true
               default: 0
+              highlight: 0
               options:
                 1: PLUGIN_ADMIN.ENABLED
                 0: PLUGIN_ADMIN.DISABLED
@@ -86,7 +88,8 @@ form:
               label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT
               help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT_HELP
               force_bool: true
-              default: 0
+              default: 1
+              highlight: 1
               options:
                 1: PLUGIN_ADMIN.ENABLED
                 0: PLUGIN_ADMIN.DISABLED
@@ -96,7 +99,7 @@ form:
             parent_acl:
               type: toggle
               label: PLUGIN_LOGIN.USE_PARENT_ACL_LABEL
-              highlight: 1
+              highlight: 0
               default: 0
               help: PLUGIN_LOGIN.USE_PARENT_ACL_HELP
               options:
@@ -132,9 +135,21 @@ form:
             protect_protected_page_media:
               type: toggle
               label: PLUGIN_LOGIN.PROTECT_PROTECTED_PAGE_MEDIA_LABEL
-              highlight: 1
+              highlight: 0
               default: 0
               help: PLUGIN_LOGIN.PROTECT_PROTECTED_PAGE_MEDIA_HELP
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
+            session_user_sync:
+              type: toggle
+              label: PLUGIN_LOGIN.SESSION_USER_SYNC
+              highlight: 0
+              default: 0
+              help: PLUGIN_LOGIN.SESSION_USER_SYNC_HELP
               options:
                 1: PLUGIN_ADMIN.ENABLED
                 0: PLUGIN_ADMIN.DISABLED
@@ -232,24 +247,6 @@ form:
               label: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION
               help: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION_HELP
               placeholder: "/page-to-show-after-activation"
-
-            route_forgot:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_FORGOT
-              placeholder: '/forgot_password'
-
-            route_reset:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_RESET
-              placeholder: '/reset_password'
-
-            route_profile:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_PROFILE
-              placeholder: '/user_profile'
 
             route_register:
               type: text

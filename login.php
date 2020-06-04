@@ -12,6 +12,7 @@ namespace Grav\Plugin;
 use Composer\Autoload\ClassLoader;
 use Grav\Common\Data\Data;
 use Grav\Common\Debugger;
+use Grav\Common\Flex\Types\Users\UserObject;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
@@ -23,6 +24,8 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
+use Grav\Events\SessionStartEvent;
+use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Session\SessionInterface;
 use Grav\Plugin\Form\Form;
@@ -59,9 +62,11 @@ class LoginPlugin extends Plugin
     public static function getSubscribedEvents()
     {
         return [
+            SessionStartEvent::class    => ['onSessionStart', 0],
             'onPluginsInitialized'      => [['autoload', 100000], ['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
             'onTask.login.twofa'        => ['loginController', 0],
+            'onTask.login.twofa_cancel' => ['loginController', 0],
             'onTask.login.forgot'       => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
@@ -72,11 +77,11 @@ class LoginPlugin extends Plugin
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
             'onFormProcessed'           => ['onFormProcessed', 0],
-            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
+            'onUserLoginAuthenticate'   => [['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
             'onUserLoginFailure'        => ['userLoginGuest', 0],
             'onUserLoginGuest'          => ['userLoginGuest', 0],
-            'onUserLogin'               => ['userLogin', 0],
+            'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 0]],
             'onUserLogout'              => ['userLogout', 0],
         ];
     }
@@ -89,6 +94,45 @@ class LoginPlugin extends Plugin
     public function autoload() : ClassLoader
     {
         return require __DIR__ . '/vendor/autoload.php';
+    }
+
+
+    public function onSessionStart(SessionStartEvent $event)
+    {
+        $session = $event->session;
+
+        $user = $session->user ?? null;
+        if ($user && $user->exists() && ($this->config()['session_user_sync'] ?? false)) {
+            // User is stored into the filesystem.
+
+            /** @var UserCollectionInterface $accounts */
+            $accounts = $this->grav['accounts'];
+
+            /** @var UserObject $stored */
+            if ($accounts instanceof FlexCollectionInterface) {
+                $stored = $accounts[$user->username];
+            } else {
+                // TODO: remove when removing legacy support.
+                $stored = $accounts->load($user->username);
+            }
+
+            if ($stored && $stored->exists()) {
+                // User still exists, update user object in the session.
+                $user->update($stored->jsonSerialize());
+            } else {
+                // User doesn't exist anymore, prepare for session invalidation.
+                $user->state = 'disabled';
+            }
+
+            if ($user->state !== 'enabled') {
+                // If user isn't enabled, clear all session data and display error.
+                $session->invalidate()->start();
+
+                /** @var Message $messages */
+                $messages = $this->grav['messages'];
+                $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.USER_ACCOUNT_DISABLED'), 'error');
+            }
+        }
     }
 
     /**
@@ -215,7 +259,7 @@ class LoginPlugin extends Plugin
                             $page->visible(false);
                         }
                     }
-                }                
+                }
             }
         }
     }
@@ -237,10 +281,7 @@ class LoginPlugin extends Plugin
         $uri = $this->grav['uri'];
         $current_route = $uri->route();
 
-        /* Support old string-based $redirect_after_login + new bool approach */
-        $redirect_after_login = $this->grav['config']->get('plugins.login.redirect_after_login');
-        $route_after_login = $this->grav['config']->get('plugins.login.route_after_login');
-        $redirect = is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+        $redirect = static::defaultRedirectAfterLogin();
 
         if (!$redirect && !in_array($current_route, $invalid_redirect_routes, true)) {
             // No login redirect set in the configuration; can we redirect to the current page?
@@ -943,6 +984,32 @@ class LoginPlugin extends Plugin
      * @param UserLoginEvent $event
      * @throws \RuntimeException
      */
+    public function userLoginAuthenticateRateLimit(UserLoginEvent $event)
+    {
+        // Check that we're logging in with rate limit turned on.
+        if (!$event->getOption('rate_limit')) {
+            return;
+        }
+
+        $credentials = $event->getCredentials();
+        $username = $credentials['username'];
+
+        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
+        if ($interval = $this->login->checkLoginRateLimit($username)) {
+            /** @var Language $t */
+            $t = $this->grav['language'];
+
+            $event->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
+            $event->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
+            $event->setStatus(UserLoginEvent::AUTHENTICATION_CANCELLED);
+            $event->stopPropagation();
+        }
+    }
+
+    /**
+     * @param UserLoginEvent $event
+     * @throws \RuntimeException
+     */
     public function userLoginAuthenticateByRegistration(UserLoginEvent $event)
     {
         // Check that we're logging in after registration.
@@ -1067,6 +1134,9 @@ class LoginPlugin extends Plugin
         $user = $event->getUser();
         foreach ($event->getAuthorize() as $authorize) {
             if (!$user->authorize($authorize)) {
+                if ($user->state !== 'enabled') {
+                    $event->setMessage($this->grav['language']->translate('PLUGIN_LOGIN.USER_ACCOUNT_DISABLED'), 'error');
+                }
                 $event->setStatus($event::AUTHORIZATION_DENIED);
                 $event->stopPropagation();
 
@@ -1089,6 +1159,15 @@ class LoginPlugin extends Plugin
         $this->grav['session']->user = $user;
     }
 
+    public function userLoginResetRateLimit(UserLoginEvent $event)
+    {
+        if ($event->getOption('rate_limit')) {
+            // Reset user rate limit.
+            $user = $event->getUser();
+            $this->login->resetLoginRateLimit($user->get('username'));
+        }
+    }
+
     public function userLogin(UserLoginEvent $event)
     {
         /** @var SessionInterface $session */
@@ -1099,7 +1178,8 @@ class LoginPlugin extends Plugin
         if (method_exists($session, 'regenerateId')) {
             $session->regenerateId();
         }
-        $session->user = $event->getUser();
+
+        $session->user = $user = $event->getUser();
 
         if ($event->getOption('remember_me')) {
             /** @var Login $login */
@@ -1108,7 +1188,7 @@ class LoginPlugin extends Plugin
             $session->remember_me = (bool)$event->getOption('remember_me_login');
 
             // If the user wants to be remembered, create Rememberme cookie.
-            $username = $event->getUser()->get('username');
+            $username = $user->get('username');
             if ($event->getCredential('rememberme')) {
                 $login->rememberMe()->createCookie($username);
             }
@@ -1136,12 +1216,19 @@ class LoginPlugin extends Plugin
 
     public static function defaultRedirectAfterLogin()
     {
-        return Grav::instance()['config']->get('plugins.login.redirect_after_login');
+        $config = Grav::instance()['config'];
+        $redirect_after_login = $config->get('plugins.login.redirect_after_login');
+        $route_after_login = $config->get('plugins.login.route_after_login');
 
+        return is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
     }
 
     public static function defaultRedirectAfterLogout()
     {
-        return Grav::instance()['config']->get('plugins.login.redirect_after_logout');
+        $config = Grav::instance()['config'];
+        $redirect_after_logout = $config->get('plugins.logout.redirect_after_logout');
+        $route_after_logout = $config->get('plugins.logout.route_after_logout');
+
+        return is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
     }
 }
