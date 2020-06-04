@@ -89,3 +89,4 @@ PLUGIN_LOGIN:
   USE_PARENT_ACL_HELP: "Utiliser les règles d’accès parentes si aucune règle n’a été définie"
   PROTECT_PROTECTED_PAGE_MEDIA_LABEL: "Protéger le média d'une page par une protection par connexion"
   PROTECT_PROTECTED_PAGE_MEDIA_HELP: "Si activé, les médias d'une page protégée par connexion sera également protégé par un système de connexion et ne pourra pas être visible à moins d'être connecté."
+  PROFILE_UPDATED: "Votre profil a été mis à jour"
