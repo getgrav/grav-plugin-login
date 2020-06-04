@@ -92,3 +92,6 @@ PLUGIN_LOGIN:
   PROFILE_UPDATED: "Votre profil a été mis à jour"
   ENTER_EMAIL: "Saisir votre e-mail"
   ENTER_NEW_PASSWORD: "Saisir un nouveau mot de passe"
+  ENTER_PASSWORD: "Saisir votre mot de passe"
+  ENTER_PASSWORD_AGAIN: "Confirmer votre mot de passe"
+  REGISTRATION_THANK_YOU: "Merci pour votre inscription."

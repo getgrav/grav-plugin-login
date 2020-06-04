@@ -146,3 +146,6 @@ PLUGIN_LOGIN:
   PROFILE_UPDATED: "Your profile has been updated"
   ENTER_EMAIL: "Enter your email"
   ENTER_NEW_PASSWORD: "Enter new password"
+  ENTER_PASSWORD: "Enter a password"
+  ENTER_PASSWORD_AGAIN: "Enter the password again"
+  REGISTRATION_THANK_YOU: "Thank you for registering."
