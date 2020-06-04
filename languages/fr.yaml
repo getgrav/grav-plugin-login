@@ -10,6 +10,8 @@ PLUGIN_LOGIN:
   BTN_LOGOUT: "Déconnexion"
   BTN_FORGOT: "Mot de passe oublié"
   BTN_REGISTER: "S’enregister"
+  BTN_SUBMIT_PROFILE: "Enregistrer"
+  BTN_RESET: "Réinitialiser"
   BTN_RESET_PASSWORD: "Réinitialiser le mot de passe"
   BTN_SEND_INSTRUCTIONS: "Envoyer les instructions de Réinitialisation"
   RESET_LINK_EXPIRED: "Le lien de réinitialisation a expiré, veuillez réessayer"

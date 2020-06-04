@@ -10,6 +10,8 @@ PLUGIN_LOGIN:
   BTN_LOGOUT: "Logout"
   BTN_FORGOT: "Forgot"
   BTN_REGISTER: "Register"
+  BTN_SUBMIT_PROFILE: "Submit"
+  BTN_RESET: "Reset"
   BTN_RESET_PASSWORD: "Reset Password"
   BTN_SEND_INSTRUCTIONS: "Send Reset Instructions"
   BTN_SUBMIT: "Submit"

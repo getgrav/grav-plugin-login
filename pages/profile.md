@@ -67,10 +67,10 @@ form:
   buttons:
       -
           type: submit
-          value: Submit
+          value: PLUGIN_LOGIN.BTN_SUBMIT_PROFILE
       -
           type: reset
-          value: Reset
+          value: PLUGIN_LOGIN.BTN_RESET
 
   process:
       update_user: true
