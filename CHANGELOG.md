@@ -1,4 +1,12 @@
-# 3.3.2
+# v3.3.3
+## 06/05/2020
+
+1. [](#bugfix)
+    * Fixed saving in 'normal' mode with `visibility_requires_access` [#228](https://github.com/getgrav/grav-plugin-login/issues/228)
+    * Fixed missing `|raw` on content in profile template
+    * Fixed blueprint
+
+# v3.3.2
 ## 06/03/2020
 
 1. [](#new)
@@ -9,13 +17,13 @@
     * Set better defaults for redirects on login and logout
     * Fixed proper highlights and default states for admin option toggles
 
-# 3.3.1
+# v3.3.1
 ## 05/07/2020
 
 1. [](#bugfix)
     * Set missing default logout route to `/` for homepage
 
-# 3.3.0
+# v3.3.0
 ## 04/30/2020
 
 1. [](#new)
@@ -29,7 +37,7 @@
     * Fixed logout not removing task if there was no redirect set
     * Fixed remember me triggering `onUserLoginFailure`, use `onUserLoginGuest` event instead
 
-# 3.2.0
+# v3.2.0
 ## 04/27/2020
 
 1. [](#new)
@@ -41,7 +49,7 @@
     * Fixed guest only pages requiring login
     * Fixed issue when logging out, not redirecting, and attempting to log right back in
 
-# 3.1.0
+# v3.1.0
 ## 03/05/2020
 
 1. [](#new)
@@ -51,7 +59,7 @@
     * Turn off extra debug messages [#244](https://github.com/getgrav/grav-plugin-login/issues/244)
     * Fixed `groups` field not listing available user groups
 
-# 3.0.6
+# v3.0.6
 ## 02/11/2020
 
 1. [](#new)
@@ -60,7 +68,7 @@
 1. [](#improved)
     * Added some debugging messages (turned off by default)
 
-# 3.0.5
+# v3.0.5
 ## 01/02/2020
 
 1. [](#bugfix)
@@ -68,7 +76,7 @@
     * Fixed password reset link [#233](https://github.com/getgrav/grav-plugin-login/pulls/233)
     * Fixed Typo [#236](https://github.com/getgrav/grav-plugin-login/pulls/236)
 
-# 3.0.4
+# v3.0.4
 ## 10/03/2019
 
 1. [](#bugfix)
@@ -76,14 +84,14 @@
     * Fixed basic login not obeying `redirect_after_login` option
     * Provide default `redirect_after_activation` option [#225](https://github.com/getgrav/grav-plugin-login/issues/225)
 
-# 3.0.3
+# v3.0.3
 ## 07/01/2019
 
 1. [](#bugfix)
   * Fix for not redirecting to secure page after login [#199](https://github.com/getgrav/grav-plugin-login/issues/199)
   * Fixed `bin/plugin login new-user` ACL when using Flex Users
 
-# 3.0.2
+# v3.0.2
 ## 05/09/2019
 
 1. [](#new)
@@ -92,13 +100,13 @@
   * Fixed typo in README.md
   * Added support for IPv6 addresses for login rate limiting @Vivalldi [#204](https://github.com/getgrav/grav-plugin-login/issues/204)
 
-# 3.0.1
+# v3.0.1
 ## 04/17/2019
 
 1. [](#improved)
     * Extra checks for page visibility [#166](https://github.com/getgrav/grav-plugin-login/issues/166)
 
-# 3.0.0
+# v3.0.0
 ## 04/11/2019
 
 1. [](#new)

@@ -71,7 +71,7 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
-            'onPagesInitialized'        => [['storeReferrerPage', 0], ['pageVisibility', 0]],
+            'onPagesInitialized'        => ['storeReferrerPage', 0],
             'onPageInitialized'         => ['authorizePage', 0],
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
@@ -181,6 +181,9 @@ class LoginPlugin extends Plugin
         // Admin has its own login; make sure we're not in admin.
         if (!isset($this->grav['admin'])) {
             $this->route = $this->config->get('plugins.login.route');
+            $this->enable([
+                'onPagesInitialized' => ['pageVisibility', 0],
+            ]);
         }
 
         $path = $uri->path();
