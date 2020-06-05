@@ -1,3 +1,9 @@
+# v3.3.3
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed missing `|raw` on content in profile template
+
 # v3.3.2
 ## 06/03/2020
 
