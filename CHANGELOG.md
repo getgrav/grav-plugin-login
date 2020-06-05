@@ -1,9 +1,10 @@
 # v3.3.3
-## mm/dd/2020
+## 06/05/2020
 
 1. [](#bugfix)
     * Fixed saving in 'normal' mode with `visibility_requires_access` [#228](https://github.com/getgrav/grav-plugin-login/issues/228)
     * Fixed missing `|raw` on content in profile template
+    * Fixed blueprint
 
 # v3.3.2
 ## 06/03/2020
