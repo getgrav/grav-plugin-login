@@ -2,12 +2,12 @@
 title: Profile
 access:
     site.login: true
-    
+
 form:
   fields:
     avatar_img:
       type: avatar
-  
+
     username:
       type: text
       readonly: true
@@ -15,24 +15,24 @@ form:
 
     email:
       type: email
-      placeholder: "Enter your email"
+      placeholder: PLUGIN_LOGIN.ENTER_EMAIL
       validate:
         required: true
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
-        
+
     fullname:
       type: text
-      
+
     title:
-      type: text  
+      type: text
 
     password:
       type: password
-      label: Enter new password
+      label: PLUGIN_LOGIN.ENTER_NEW_PASSWORD
       validate:
         message: PLUGIN_LOGIN.PASSWORD_VALIDATION_MESSAGE
         config-pattern@: system.pwd_regex
-        
+
     twofa_check:
       type: conditional
       condition: config.plugins.login.twofa_enabled
@@ -61,20 +61,20 @@ form:
             outerclasses: 'twofa-secret'
             markdown: true
             label: PLUGIN_LOGIN.2FA_SECRET
-            sublabel: PLUGIN_LOGIN.2FA_SECRET_HELP    
+            sublabel: PLUGIN_LOGIN.2FA_SECRET_HELP
 
 
   buttons:
       -
           type: submit
-          value: Submit
+          value: PLUGIN_LOGIN.BTN_SUBMIT_PROFILE
       -
           type: reset
-          value: Reset
+          value: PLUGIN_LOGIN.BTN_RESET
 
   process:
       update_user: true
-      message: "Your profile has been updated"
+      message: PLUGIN_LOGIN.PROFILE_UPDATED
 ---
 
 # Profile
