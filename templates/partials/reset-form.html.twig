@@ -16,12 +16,10 @@
             {% endif %}
         {% endfor %}
         <div class="form-actions secondary-accent">
-            <button type="submit" class="button primary" name="task" value="login.reset"><i class="fa fa-key"></i> {{ "PLUGIN_LOGIN.BTN_RESET"|t }}</button>
+            <button type="submit" class="button primary" name="task" value="login.reset"><i class="fa fa-key"></i> {{ "PLUGIN_LOGIN.BTN_RESET_PASSWORD"|t }}</button>
         </div>
 
         {{ nonce_field('reset-form', 'reset-form-nonce')|raw }}
     </form>
 </section>
 {% endif %}
-
-
