@@ -10,7 +10,6 @@ PLUGIN_LOGIN:
   BTN_REGISTER: "Înregistrare"
   BTN_RESET_PASSWORD: "Resetează parola"
   BTN_RESET: "Reset"
-  BTN_SEND_INSTRUCTIONS: "Send Reset Instructions"
   BTN_SUBMIT: "Submit"
   # as in "save profile"
   BTN_SUBMIT_PROFILE: "Submit"
