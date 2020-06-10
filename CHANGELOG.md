@@ -1,3 +1,9 @@
+# v3.3.5
+## 06/10/2020
+
+1. [](#bugfix)
+    * Fixed broken lang strings [#258](https://github.com/getgrav/grav-plugin-login/pulls/258)
+
 # v3.3.4
 ## 06/08/2020
 
