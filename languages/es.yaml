@@ -12,7 +12,6 @@ PLUGIN_LOGIN:
   BTN_REGISTER: "Registro"
   BTN_RESET_PASSWORD: "Restaurar contraseña"
   BTN_RESET: "Reset"
-  BTN_SEND_INSTRUCTIONS: "Send Reset Instructions"
   BTN_SUBMIT: "Submit"
   # as in "save profile"
   BTN_SUBMIT_PROFILE: "Submit"
