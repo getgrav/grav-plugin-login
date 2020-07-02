@@ -30,7 +30,7 @@
                     {% endfor %}
                 {% endif %}
 
-                {% if config.plugins.login.no_login_mask.disabled %}
+                {% if not config.plugins.login.no_login_mask %}
                     {% for field in form.fields %}
                         {% set value = field.name == 'username' ? username : '' %}
                         {% if field.type %}
