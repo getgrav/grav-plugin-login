@@ -137,3 +137,5 @@ PLUGIN_LOGIN:
   ENTER_PASSWORD_AGAIN: "Enter the password again"
   REGISTRATION_THANK_YOU: "Thank you for registering."
   USER_ACCOUNT_DISABLED: "Your user account is disabled or it has not yet been activated."
+  NO_LOGIN_MASK: "Login Maske nicht anzeigen"
+  NO_LOGIN_MASK_HELP: "Die Login Maske wird nicht angezeigt, wenn diese Option aktiviert ist. Das ist insbesondere dann nützlich, wenn ein weiteres Authentisierungs-Plugin wie z.B. login-oauth2 verwendet wird und diese Authentisierungsmethode forciert werden soll."
