@@ -1229,8 +1229,8 @@ class LoginPlugin extends Plugin
     public static function defaultRedirectAfterLogout()
     {
         $config = Grav::instance()['config'];
-        $redirect_after_logout = $config->get('plugins.logout.redirect_after_logout');
-        $route_after_logout = $config->get('plugins.logout.route_after_logout');
+        $redirect_after_logout = $config->get('plugins.login.redirect_after_logout');
+        $route_after_logout = $config->get('plugins.login.route_after_logout');
 
         return is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
     }

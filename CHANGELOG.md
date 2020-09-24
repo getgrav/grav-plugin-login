@@ -1,3 +1,9 @@
+# v3.3.6
+## mm/dd/2020
+
+1. [](#bugfix)
+    * Fixed typos causing invalid config for logout
+
 # v3.3.5
 ## 06/10/2020
 
