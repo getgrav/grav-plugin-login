@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * Fixed typos causing invalid config for logout
+    * Fixed cache issues with user login pages [#264](https://github.com/getgrav/grav-plugin-login/issues/264) 
 
 # v3.3.5
 ## 06/10/2020

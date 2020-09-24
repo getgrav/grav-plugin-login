@@ -1,5 +1,6 @@
 ---
 title: Forgot password
+expires: 0
 
 login_redirect_here: false
 
