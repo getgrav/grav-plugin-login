@@ -1,5 +1,5 @@
 # v3.3.7
-## mm/dd/2020
+## 12/02/2020
 
 1. [](#bugfix)
     * Flex Users: Make sure the user object is fresh and not cached
