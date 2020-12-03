@@ -1,3 +1,9 @@
+# v3.3.7
+## 12/02/2020
+
+1. [](#bugfix)
+    * Flex Users: Make sure the user object is fresh and not cached
+
 # v3.3.6
 ## 09/24/2020
 

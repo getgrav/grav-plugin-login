@@ -111,6 +111,9 @@ class LoginPlugin extends Plugin
             /** @var UserObject $stored */
             if ($accounts instanceof FlexCollectionInterface) {
                 $stored = $accounts[$user->username];
+                if (is_callable([$stored, 'refresh'])) {
+                    $stored->refresh();
+                }
             } else {
                 // TODO: remove when removing legacy support.
                 $stored = $accounts->load($user->username);
@@ -439,6 +442,9 @@ class LoginPlugin extends Plugin
 
         $token = $uri->param('token');
         $user = $users->load($username);
+        if (is_callable([$user, 'refresh'])) {
+            $user->refresh();
+        }
 
         $redirect_route = $this->config->get('plugins.login.user_registration.redirect_after_activation');
         $redirect_code = null;
@@ -1086,6 +1092,10 @@ class LoginPlugin extends Plugin
 
             // Allow remember me to work with different login methods.
             $user = $users->load($username);
+            if (is_callable([$user, 'refresh'])) {
+                $user->refresh();
+            }
+
             $event->setCredential('username', $username);
             $event->setUser($user);
 

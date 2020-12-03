@@ -100,6 +100,10 @@ class UserLoginEvent extends Event
             /** @var UserCollectionInterface $users */
             $users = Grav::instance()['accounts'];
             $user = $users->load($this['credentials']['username']);
+            if (is_callable([$user, 'refresh'])) {
+                $user->refresh();
+            }
+
             $this->offsetSet('user', $user);
 
             if (Login::DEBUG) {
