@@ -1,5 +1,5 @@
 # v3.3.8
-## mm/dd/2020
+## 12/11/2020
 
 1. [](#bugfix)
    * Fixed saving another user in Admin with 2FA enabled regenerating 2FA secret [#268](https://github.com/getgrav/grav-plugin-login/issues/268)
