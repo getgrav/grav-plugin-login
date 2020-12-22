@@ -339,7 +339,10 @@ class LoginPlugin extends Plugin
         }
 
         // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $page->expires(0);
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $page->cacheControl('private, no-cache, must-revalidate');
+        }
     }
 
     /**
@@ -363,7 +366,10 @@ class LoginPlugin extends Plugin
         }
 
         // Forgot page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $page->expires(0);
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $page->cacheControl('private, no-cache, must-revalidate');
+        }
     }
 
     /**
@@ -396,7 +402,10 @@ class LoginPlugin extends Plugin
         }
 
         // Reset page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $page->expires(0);
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $page->cacheControl('private, no-cache, must-revalidate');
+        }
     }
 
     /**
@@ -420,7 +429,10 @@ class LoginPlugin extends Plugin
         }
 
         // Register page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $page->expires(0);
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $page->cacheControl('private, no-cache, must-revalidate');
+        }
     }
 
     /**
@@ -523,7 +535,10 @@ class LoginPlugin extends Plugin
         }
 
         // Profile page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $page->expires(0);
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $page->cacheControl('private, no-cache, must-revalidate');
+        }
 
         $this->storeReferrerPage();
     }
@@ -549,7 +564,10 @@ class LoginPlugin extends Plugin
         }
 
         // Unauthorized page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $page->expires(0);
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $page->cacheControl('private, no-cache, must-revalidate');
+        }
 
         unset($this->grav['page']);
         $this->grav['page'] = $page;
@@ -668,7 +686,10 @@ class LoginPlugin extends Plugin
             }
 
             // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
-            $login_page->expires(0);
+            $cacheControl = $page->cacheControl();
+            if (!$cacheControl) {
+                $page->cacheControl('private, no-cache, must-revalidate');
+            }
 
             $this->authenticated = false;
             unset($this->grav['page']);

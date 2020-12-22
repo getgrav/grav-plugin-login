@@ -1,3 +1,9 @@
+# v3.4.0
+## mm/dd/2020
+
+1. [](#improved)
+   * Allow browser caching for all login/profile pages
+
 # v3.3.8
 ## 12/11/2020
 

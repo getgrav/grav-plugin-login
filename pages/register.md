@@ -1,6 +1,6 @@
 ---
 login_redirect_here: false
-expires: 0
+cache_control: private, no-cache, must-revalidate
 
 form:
 
