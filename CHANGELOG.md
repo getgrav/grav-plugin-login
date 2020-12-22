@@ -1,6 +1,8 @@
 # v3.4.0
 ## mm/dd/2020
 
+1. [](#new)
+   * Prevent information leak on every ACL protected page by always setting Cache-Control [#264](https://github.com/getgrav/grav-plugin-login/issues/264))
 1. [](#improved)
    * Allow browser caching for all login/profile pages
 

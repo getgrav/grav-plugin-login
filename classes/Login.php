@@ -612,14 +612,14 @@ class Login
     public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, $config = null)
     {
         $header = $page->header();
-        $rules = isset($header->access) ? (array)$header->access : [];
+        $rules = (array)($header->access ?? []);
 
         if (!$rules && $config !== null && $config->get('parent_acl')) {
             // If page has no ACL rules, use its parent's rules
             $parent = $page->parent();
             while (!$rules and $parent) {
                 $header = $parent->header();
-                $rules = isset($header->access) ? (array)$header->access : [];
+                $rules = (array)($header->access ?? []);
                 $parent = $parent->parent();
             }
         }
@@ -628,6 +628,27 @@ class Login
         if (!$rules) {
             return true;
         }
+
+        // All protected pages have a private cache-control. This includes pages which are for guests only.
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $cacheControl = 'private, no-cache, must-revalidate';
+        } else {
+            // The response is intended for a single user only and must not be stored by a shared cache.
+            $cacheControl = str_replace('public', 'private', $cacheControl);
+            if (strpos($cacheControl, 'private') === false) {
+                $cacheControl = 'private, ' . $cacheControl;
+            }
+            // The cache will send the request to the origin server for validation before releasing a cached copy.
+            if (strpos($cacheControl, 'no-cache') === false) {
+                $cacheControl .= ', no-cache';
+            }
+            // The cache must verify the status of the stale resources before using the copy and expired ones should not be used.
+            if (strpos($cacheControl, 'must-revalidate') === false) {
+                $cacheControl .= ', must-revalidate';
+            }
+        }
+        $page->cacheControl($cacheControl);
 
         // Deny access if user has not completed 2FA challenge.
         if ($user->authenticated && !$user->authorized) {
