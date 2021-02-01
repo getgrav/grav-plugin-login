@@ -1,3 +1,12 @@
+# v3.4.0
+## 01/31/2021
+
+1. [](#new)
+   * Prevent information leak on every ACL protected page by always setting Cache-Control [#264](https://github.com/getgrav/grav-plugin-login/issues/264))
+1. [](#improved)
+   * Allow browser caching for all login/profile pages
+   * Composer update 
+
 # v3.3.8
 ## 12/11/2020
 

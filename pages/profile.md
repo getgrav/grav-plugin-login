@@ -1,6 +1,6 @@
 ---
 title: Profile
-expires: 0
+cache_control: private, no-cache, must-revalidate
 access:
     site.login: true
 

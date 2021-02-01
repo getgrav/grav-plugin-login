@@ -1,6 +1,6 @@
 ---
 title: Reset password
-expires: 0
+cache_control: private, no-cache, must-revalidate
 
 login_redirect_here: false
 
