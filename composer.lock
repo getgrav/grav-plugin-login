@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "28a285533fbaa23e98ab6350b8207efd",
+    "content-hash": "bbcc2f78d1043e3e053994cf79736169",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -50,6 +50,10 @@
             ],
             "description": "BaconQrCode is a QR code generator for PHP.",
             "homepage": "https://github.com/Bacon/BaconQrCode",
+            "support": {
+                "issues": "https://github.com/Bacon/BaconQrCode/issues",
+                "source": "https://github.com/Bacon/BaconQrCode/tree/master"
+            },
             "time": "2017-10-17T09:59:25+00:00"
         },
         {
@@ -95,6 +99,10 @@
                 "remember",
                 "security"
             ],
+            "support": {
+                "issues": "https://github.com/gbirke/rememberme/issues",
+                "source": "https://github.com/gbirke/rememberme/tree/master"
+            },
             "time": "2017-02-12T12:43:00+00:00"
         },
         {
@@ -143,6 +151,11 @@
                 "pseudorandom",
                 "random"
             ],
+            "support": {
+                "email": "info@paragonie.com",
+                "issues": "https://github.com/paragonie/random_compat/issues",
+                "source": "https://github.com/paragonie/random_compat"
+            },
             "time": "2018-04-04T21:48:54+00:00"
         },
         {
@@ -194,6 +207,10 @@
                 "php",
                 "tfa"
             ],
+            "support": {
+                "issues": "https://github.com/RobThree/TwoFactorAuth/issues",
+                "source": "https://github.com/RobThree/TwoFactorAuth"
+            },
             "time": "2020-01-02T19:56:46+00:00"
         }
     ],
@@ -210,5 +227,6 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.1.3"
-    }
+    },
+    "plugin-api-version": "2.0.0"
 }
