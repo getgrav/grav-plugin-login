@@ -1,3 +1,11 @@
+# v3.4.1
+## 02/17/2021
+
+1. [](#new)
+  * Added Lithuanian translation [#270](https://github.com/getgrav/grav-plugin-login/pull/270)
+  * Added Chinese Translation [#245](https://github.com/getgrav/grav-plugin-login/pull/345)
+  * Added Brazillian Portuguese [#222](https://github.com/getgrav/grav-plugin-login/pull/222)
+
 # v3.4.0
 ## 01/31/2021
 
