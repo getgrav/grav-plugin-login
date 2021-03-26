@@ -256,7 +256,13 @@ class Login
             }
         }
 
+        // Validate fields from the form.
         $username = $this->validateField('username', $data['username']);
+        $password = $this->validateField('password1', $data['password'] ?? $data['password1'] ?? null);
+        foreach ($data as $key => &$value) {
+            $value = $this->validateField($key, $value, $key === 'password2' ? $password : '');
+        }
+        unset($value);
 
         /** @var UserCollectionInterface $users */
         $users = $this->grav['accounts'];
@@ -348,6 +354,7 @@ class Login
 
                 break;
 
+            case 'password':
             case 'password1':
                 /** @var Config $config */
                 $config = Grav::instance()['config'];
