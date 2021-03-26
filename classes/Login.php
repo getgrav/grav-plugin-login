@@ -348,7 +348,8 @@ class Login
                 $config = Grav::instance()['config'];
                 $username_regex = '/' . $config->get('system.username_regex') . '/';
 
-                if (!\is_string($value) || !preg_match($username_regex, $value)) {
+                $value = \is_string($value) ? trim($value) : '';
+                if ($value === '' || !preg_match($username_regex, $value)) {
                     throw new \RuntimeException('Username does not pass the minimum requirements');
                 }
 
@@ -360,36 +361,32 @@ class Login
                 $config = Grav::instance()['config'];
                 $pwd_regex = '/' . $config->get('system.pwd_regex') . '/';
 
-                if (!\is_string($value) || !preg_match($pwd_regex, $value)) {
+                $value = \is_string($value) ? $value : '';
+                if ($value === '' || !preg_match($pwd_regex, $value)) {
                     throw new \RuntimeException('Password does not pass the minimum requirements');
                 }
 
                 break;
 
             case 'password2':
-                if (!\is_string($value) || strcmp($value, $extra)) {
+                $value = \is_string($value) ? $value : '';
+                if ($value === '' || $value !== $extra) {
                     throw new \RuntimeException('Passwords did not match.');
                 }
 
                 break;
 
             case 'email':
-                if (!\is_string($value) || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                $value = \is_string($value) ? trim($value) : '';
+                if ($value === '' || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     throw new \RuntimeException('Not a valid email address');
                 }
 
                 break;
 
             case 'permissions':
-                if (!\is_string($value) || !\in_array($value, ['a', 's', 'b'], true)) {
+                if (!\in_array($value, ['a', 's', 'b'], true)) {
                     throw new \RuntimeException('Permissions ' . $value . ' are invalid.');
-                }
-
-                break;
-
-            case 'fullname':
-                if (!\is_string($value) || trim($value) === '') {
-                    throw new \RuntimeException('Fullname cannot be empty');
                 }
 
                 break;
