@@ -1,3 +1,11 @@
+# v3.4.2
+## 04/06/2021
+
+1. [](#improved)
+   * `Login::register()` now validates all the provided built-in user fields, not just username
+   * Improved user field validation
+   * Do not validate optional `fullname` field, it's already handled in the registration form
+
 # v3.4.1
 ## 02/17/2021
 
