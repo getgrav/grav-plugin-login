@@ -1,5 +1,5 @@
 # v3.4.2
-## mm/dd/2021
+## 04/06/2021
 
 1. [](#improved)
    * `Login::register()` now validates all the provided built-in user fields, not just username
