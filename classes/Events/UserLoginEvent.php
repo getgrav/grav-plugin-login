@@ -101,7 +101,7 @@ class UserLoginEvent extends Event
             $users = Grav::instance()['accounts'];
             $user = $users->load($this['credentials']['username']);
             if (is_callable([$user, 'refresh'])) {
-                $user->refresh();
+                $user->refresh(true);
             }
 
             $this->offsetSet('user', $user);
