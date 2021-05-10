@@ -156,6 +156,18 @@ form:
               validate:
                 type: bool
 
+            no_login_mask:
+              type: toggle
+              label: PLUGIN_LOGIN.NO_LOGIN_MASK
+              highlight: 0
+              default: 0
+              help: PLUGIN_LOGIN.NO_LOGIN_MASK_HELP
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
             rememberme:
               type: section
               title: PLUGIN_LOGIN.REMEMBER_ME
