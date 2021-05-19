@@ -539,7 +539,7 @@ You can set the "Redirect after registration" option in the Login plugin, or as 
 You can control whether or not a page is visible to a user by first enabling the option in the `login` configuration:
 
 ```
-dyanamic_page_visilbity: true
+dynamic_page_visibility: true
 ```
 
 With this activated you can put the following option into the header of each page:
