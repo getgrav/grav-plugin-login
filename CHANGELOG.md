@@ -1,5 +1,5 @@
 # v3.4.3
-## mm/dd/2021
+## 05/19/2021
 
 1. [](#bugfix)
     * Fixed failing Flex User validation if user has changed in the filesystem (requires Grav 1.7.13) [#278](https://github.com/getgrav/grav-plugin-login/issues/278)
