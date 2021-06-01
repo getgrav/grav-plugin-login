@@ -1,3 +1,9 @@
+# v3.4.4
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed missing email conflict check when calling `Login::register()`
+
 # v3.4.3
 ## 05/19/2021
 
