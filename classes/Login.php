@@ -267,12 +267,12 @@ class Login
         }
         unset($value);
 
-        /** @var UserCollectionInterface $users */
-        $users = $this->grav['accounts'];
+        /** @var UserCollectionInterface $accounts */
+        $accounts = $this->grav['accounts'];
 
         // Check whether username already exists.
         $username = $data['username'];
-        if (!$username || !$users->find($username, ['username'])->exists()) {
+        if (!$username || $accounts->find($username, ['username'])->exists()) {
             /** @var Language $language */
             $language = $this->grav['language'];
 
@@ -280,14 +280,14 @@ class Login
         }
         // Check whether email already exists.
         $email = $data['email'];
-        if (!$email || $users->find($email, ['email'])->exists()) {
+        if (!$email || $accounts->find($email, ['email'])->exists()) {
             /** @var Language $language */
             $language = $this->grav['language'];
 
             throw new \RuntimeException($language->translate(['PLUGIN_LOGIN.EMAIL_NOT_AVAILABLE', $email]));
         }
 
-        $user = $users->load($username);
+        $user = $accounts->load($username);
         $user->update($data, $files);
         if (isset($data['groups'])) {
             $user->groups = $data['groups'];
