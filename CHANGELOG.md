@@ -1,6 +1,8 @@
 # v3.4.4
 ## mm/dd/2021
 
+1. [](#new)
+   * Updated 2FA library
 1. [](#bugfix)
    * Fixed missing email conflict check when calling `Login::register()`
 
