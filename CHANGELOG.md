@@ -1,5 +1,5 @@
 # v3.4.4
-## mm/dd/2021
+## 06/16/2021
 
 1. [](#new)
    * Updated 2FA library
