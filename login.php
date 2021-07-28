@@ -81,7 +81,7 @@ class LoginPlugin extends Plugin
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
             'onUserLoginFailure'        => ['userLoginGuest', 0],
             'onUserLoginGuest'          => ['userLoginGuest', 0],
-            'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 0]],
+            'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 10]],
             'onUserLogout'              => ['userLogout', 0],
         ];
     }
