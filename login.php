@@ -259,7 +259,7 @@ class LoginPlugin extends Plugin
 
             // TODO: This is super slow especially with Flex Pages. Better solution is required (on indexing / on load?).
             foreach ($pages->instances() as $page) {
-                if ($page) {
+                if ($page && $page->visible()) {
                     $header = $page->header();
                     if ($header && isset($header->access) && isset($header->login['visibility_requires_access']) && $header->login['visibility_requires_access'] === true) {
                         $config = $this->mergeConfig($page);
@@ -355,6 +355,7 @@ class LoginPlugin extends Plugin
     public function addForgotPage()
     {
         $route = $this->config->get('plugins.login.route_forgot');
+
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
         $page = $pages->find($route);
@@ -524,6 +525,7 @@ class LoginPlugin extends Plugin
     public function addProfilePage()
     {
         $route = $this->config->get('plugins.login.route_profile');
+
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
         $page = $pages->find($route);

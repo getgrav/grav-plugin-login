@@ -1,6 +1,8 @@
 # v3.4.5
 ## mm/dd/2021
 
+1. [](#improved)
+   * Speed up `visibility_requires_access` checks by restricting full check to only visible pages
 1. [](#bugfix)
    * Fixed login pages with redirect breaking the site
 
