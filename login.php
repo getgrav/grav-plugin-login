@@ -296,8 +296,9 @@ class LoginPlugin extends Plugin
             // No login redirect set in the configuration; can we redirect to the current page?
             $allowed = true;
 
-            /** @var PageInterface $page */
-            $page = $this->grav['pages']->dispatch($current_route);
+            /** @var Pages $pages */
+            $pages = $this->grav['pages'];
+            $page = $pages->find($current_route);
 
             if ($page) {
                 $header = $page->header();
@@ -329,7 +330,7 @@ class LoginPlugin extends Plugin
     {
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
-        $page = $pages->dispatch($this->route);
+        $page = $pages->find($this->route);
 
         if (!$page) {
             // Only add login page if it hasn't already been defined.
@@ -356,7 +357,7 @@ class LoginPlugin extends Plugin
         $route = $this->config->get('plugins.login.route_forgot');
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
+        $page = $pages->find($route);
 
         if (!$page) {
             // Only add forgot page if it hasn't already been defined.
@@ -392,7 +393,7 @@ class LoginPlugin extends Plugin
 
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
+        $page = $pages->find($route);
 
         if (!$page) {
             // Only add login page if it hasn't already been defined.
@@ -420,7 +421,7 @@ class LoginPlugin extends Plugin
 
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
+        $page = $pages->find($route);
 
         if (!$page) {
             $page = new Page();
@@ -525,7 +526,7 @@ class LoginPlugin extends Plugin
         $route = $this->config->get('plugins.login.route_profile');
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
+        $page = $pages->find($route);
 
         if (!$page) {
             // Only add forgot page if it hasn't already been defined.
@@ -555,7 +556,7 @@ class LoginPlugin extends Plugin
 
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
+        $page = $pages->find($route);
 
         if (!$page) {
             $page = new Page();
@@ -637,8 +638,8 @@ class LoginPlugin extends Plugin
         /** @var UserInterface $user */
         $user = $this->grav['user'];
 
-        /** @var PageInterface $page */
-        $page = $this->grav['page'];
+        /** @var PageInterface|null $page */
+        $page = $this->grav['page'] ?? null;
 
         if (!$page || $this->grav['login']->isUserAuthorizedForPage($user, $page, $this->mergeConfig($page))) {
             return;
@@ -666,7 +667,9 @@ class LoginPlugin extends Plugin
         // Reset page with login page.
         if (!$authorized) {
             if ($this->route) {
-                $login_page = $this->grav['pages']->dispatch($this->route);
+                /** @var Pages $pages */
+                $pages = $this->grav['pages'];
+                $login_page = $pages->find($this->route);
             }
 
             if (!$login_page) {

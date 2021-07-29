@@ -1,3 +1,9 @@
+# v3.4.5
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed login pages with redirect breaking the site
+
 # v3.4.4
 ## 06/16/2021
 
