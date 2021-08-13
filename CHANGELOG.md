@@ -1,6 +1,9 @@
-# v3.4.5
+# v3.5.0
 ## mm/dd/2021
 
+1. [](#new)
+   * Added support for getting all login routes by `$grav['login']->getRoute()`
+   * Deprecated methods `LoginPlugin::defaultRedirectAfterLogin()` and `LoginPlugin::defaultRedirectAfterLogout()`
 1. [](#improved)
    * Speed up `visibility_requires_access` checks by restricting full check to only visible pages
 1. [](#bugfix)

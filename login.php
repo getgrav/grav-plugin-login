@@ -1274,21 +1274,27 @@ class LoginPlugin extends Plugin
         $session->invalidate()->start();
     }
 
+    /**
+     * @return string|false
+     * @deprecated 3.5.0 Use $grav['login']->getRoute('after_login') instead
+     */
     public static function defaultRedirectAfterLogin()
     {
-        $config = Grav::instance()['config'];
-        $redirect_after_login = $config->get('plugins.login.redirect_after_login');
-        $route_after_login = $config->get('plugins.login.route_after_login');
+        /** @var Login $login */
+        $login = Grav::instance()['login'];
 
-        return is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+        return $login->getRoute('after_login') ?? false;
     }
 
+    /**
+     * @return string|false
+     * @deprecated 3.5.0 Use $grav['login']->getRoute('after_logout') instead
+     */
     public static function defaultRedirectAfterLogout()
     {
-        $config = Grav::instance()['config'];
-        $redirect_after_logout = $config->get('plugins.login.redirect_after_logout');
-        $route_after_logout = $config->get('plugins.login.route_after_logout');
+        /** @var Login $login */
+        $login = Grav::instance()['login'];
 
-        return is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
+        return $login->getRoute('after_logout') ?? false;
     }
 }

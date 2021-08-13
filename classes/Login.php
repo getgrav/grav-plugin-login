@@ -623,6 +623,54 @@ class Login
     }
 
     /**
+     * Get route to a given login page.
+     *
+     * @param string $type Use one of: login, activate, forgot, reset, profile, unauthorized, after_login, after_logout,
+     *                     register, after_registration, after_activation
+     * @return string|null Returns route or null if the route has been disabled.
+     */
+    public function getRoute(string $type): ?string
+    {
+        switch ($type) {
+            case 'login':
+                $route = $this->config->get('plugins.login.route');
+                break;
+            case 'activate':
+            case 'forgot':
+            case 'reset':
+            case 'profile':
+                $route = $this->config->get('plugins.login.route_' . $type);
+                break;
+            case 'unauthorized':
+                $route = $this->config->get('plugins.login.route_' . $type, '/');
+                break;
+            case 'after_login':
+            case 'after_logout':
+                $route = $this->config->get('plugins.login.redirect_' . $type);
+                if ($route === true) {
+                    $route = $this->config->get('plugins.login.route_' . $type);
+                }
+                break;
+            case 'register':
+                $enabled = $this->config->get('plugins.login.user_registration.enabled', false);
+                $route = $enabled === true ? $this->config->get('plugins.login.route_' . $type) : null;
+                break;
+            case 'after_registration':
+            case 'after_activation':
+                $route = $this->config->get('plugins.login.redirect_' . $type);
+                break;
+            default:
+                $route = null;
+        }
+
+        if (!is_string($route) || $route === '') {
+            return null;
+        }
+
+        return $route;
+    }
+
+    /**
      * @param UserInterface $user
      * @param PageInterface $page
      * @param Data|null $config
