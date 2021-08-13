@@ -16,6 +16,8 @@ use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
+use Grav\Common\Page\Page;
+use Grav\Common\Page\Pages;
 use Grav\Common\Session;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
@@ -78,9 +80,9 @@ class Login
 
     /**
      * @param string $message
-     * @param array $data
+     * @param object|array $data
      */
-    public static function addDebugMessage(string $message, $data = [])
+    public static function addDebugMessage(string $message, $data = []): void
     {
         /** @var Debugger $debugger */
         $debugger = Grav::instance()['debugger'];
@@ -620,6 +622,42 @@ class Login
         }
 
         return $this->rateLimiters[$context];
+    }
+
+    /**
+     * Add Login page.
+     *
+     * @param string $type
+     * @param string|null $route Optional route if we want to force-add the page.
+     * @return PageInterface|null
+     */
+    public function addPage(string $type, string $route = null): ?PageInterface
+    {
+        $route = $route ?? $this->getRoute($type);
+        if (null === $route) {
+            return null;
+        }
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+
+        $page = $pages->find($route);
+        if (!$page instanceof PageInterface) {
+            // Only add login page if it hasn't already been defined.
+            $page = new Page();
+            $page->init(new \SplFileInfo('plugin://login/pages/' . $type . '.md'));
+            $page->slug(basename($route));
+
+            $pages->addPage($page, $route);
+        }
+
+        // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
+        $cacheControl = $page->cacheControl();
+        if (!$cacheControl) {
+            $page->cacheControl('private, no-cache, must-revalidate');
+        }
+
+        return $page;
     }
 
     /**
