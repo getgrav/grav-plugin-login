@@ -2,6 +2,7 @@
 ## mm/dd/2021
 
 1. [](#new)
+   * Require **Grav 1.7.0**, **Form 5.0.0** and **Email 3.1.0**
    * Added support for getting all login routes by `$grav['login']->getRoute()`
    * Deprecated methods `LoginPlugin::defaultRedirectAfterLogin()` and `LoginPlugin::defaultRedirectAfterLogout()`
 1. [](#improved)
