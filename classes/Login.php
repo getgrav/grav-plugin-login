@@ -170,6 +170,8 @@ class Login
         $grav = Grav::instance();
 
         if ($extra instanceof UserInterface) {
+            user_error(__METHOD__ . '($options, $user) is deprecated since Login Plugin 3.5.0, use logout($options, [\'user\' => $user]) instead', E_USER_DEPRECATED);
+
             $extra = ['user' => $extra];
         } elseif (isset($extra['user'])) {
             $extra['user'] = $grav['user'];
@@ -515,7 +517,8 @@ class Login
         $user->save();
 
         $param_sep = $this->config->get('system.param_sep', ':');
-        $activation_link = $this->grav['base_url_absolute'] . $this->config->get('plugins.login.route_activate') . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username;
+        $activationRoute = $this->getRoute('activate');
+        $activation_link = $this->grav['base_url_absolute'] . $activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username;
 
         $site_name = $this->config->get('site.title', 'Website');
         $author = $this->grav['config']->get('site.author.name', '');
