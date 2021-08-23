@@ -5,6 +5,7 @@
    * Require **Grav 1.7.0**, **Form 5.0.0** and **Email 3.1.0**
    * Added support for adding login pages by `$grav['login']->addPage()`
    * Added support for getting all login routes by `$grav['login']->getRoute()`
+   * Added support for form layouts
    * Deprecated methods `LoginPlugin::defaultRedirectAfterLogin()` and `LoginPlugin::defaultRedirectAfterLogout()`
 1. [](#improved)
    * Speed up `visibility_requires_access` checks by restricting full check to only visible pages
