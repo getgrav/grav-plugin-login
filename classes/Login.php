@@ -632,9 +632,10 @@ class Login
      *
      * @param string $type
      * @param string|null $route Optional route if we want to force-add the page.
+     * @param PageInterface|null $page
      * @return PageInterface|null
      */
-    public function addPage(string $type, string $route = null): ?PageInterface
+    public function addPage(string $type, string $route = null, PageInterface $page = null): ?PageInterface
     {
         $route = $route ?? $this->getRoute($type);
         if (null === $route) {
@@ -644,15 +645,21 @@ class Login
         /** @var Pages $pages */
         $pages = $this->grav['pages'];
 
-        $page = $pages->find($route);
+        if ($page) {
+            $route = $route ?? '/login';
+            $page->route($route);
+            $page->slug(basename($route));
+        } else {
+            $page = $pages->find($route);
+        }
         if (!$page instanceof PageInterface) {
             // Only add login page if it hasn't already been defined.
             $page = new Page();
             $page->init(new \SplFileInfo('plugin://login/pages/' . $type . '.md'));
             $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
         }
+
+        $pages->addPage($page, $route);
 
         // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
         $cacheControl = $page->cacheControl();
