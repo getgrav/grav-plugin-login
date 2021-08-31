@@ -495,6 +495,10 @@ class LoginPlugin extends Plugin
      */
     public function authorizeLoginPage(Event $event): void
     {
+        if ($this->isAdmin()) {
+            return;
+        }
+
         $page = $event['page'];
         if (!$page instanceof PageInterface) {
             return;
