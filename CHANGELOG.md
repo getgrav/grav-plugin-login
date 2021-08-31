@@ -1,3 +1,9 @@
+# v3.5.1
+## 08/31/2021
+
+1. [](#bugfix)
+   * Fixed white-page during new install with admin 
+
 # v3.5.0
 ## 08/31/2021
 
