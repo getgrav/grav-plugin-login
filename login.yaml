@@ -48,7 +48,7 @@ user_registration:
 
   access:                                   # Default access to set for users created during registration
     site:
-      login: 'true'
+      login: true
 
   redirect_after_registration: ''           # Route to redirect to after registration
   redirect_after_activation: ''             # Route to redirect to after activation

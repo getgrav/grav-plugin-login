@@ -16,7 +16,6 @@ use Grav\Common\Flex\Types\Users\UserObject;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Interfaces\PageInterface;
-use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Plugin;
 use Grav\Common\Twig\Twig;
@@ -27,6 +26,7 @@ use Grav\Common\Uri;
 use Grav\Events\SessionStartEvent;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
+use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Session\SessionInterface;
 use Grav\Plugin\Form\Form;
 use Grav\Plugin\Login\Events\UserLoginEvent;
@@ -44,9 +44,6 @@ class LoginPlugin extends Plugin
 {
     const TMP_COOKIE_NAME = 'tmp-message';
 
-    /** @var string */
-    protected $route;
-
     /** @var bool */
     protected $authenticated = true;
 
@@ -59,7 +56,7 @@ class LoginPlugin extends Plugin
     /**
      * @return array
      */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             SessionStartEvent::class    => ['onSessionStart', 0],
@@ -72,7 +69,7 @@ class LoginPlugin extends Plugin
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
             'onPagesInitialized'        => ['storeReferrerPage', 0],
-            'onPageInitialized'         => ['authorizePage', 0],
+            'onPageInitialized'         => [['authorizeLoginPage', 10], ['authorizePage', 0]],
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
@@ -81,7 +78,7 @@ class LoginPlugin extends Plugin
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
             'onUserLoginFailure'        => ['userLoginGuest', 0],
             'onUserLoginGuest'          => ['userLoginGuest', 0],
-            'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 0]],
+            'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 10]],
             'onUserLogout'              => ['userLogout', 0],
         ];
     }
@@ -91,13 +88,12 @@ class LoginPlugin extends Plugin
      *
      * @return ClassLoader
      */
-    public function autoload() : ClassLoader
+    public function autoload(): ClassLoader
     {
         return require __DIR__ . '/vendor/autoload.php';
     }
 
-
-    public function onSessionStart(SessionStartEvent $event)
+    public function onSessionStart(SessionStartEvent $event): void
     {
         $session = $event->session;
 
@@ -144,7 +140,7 @@ class LoginPlugin extends Plugin
      * [onPluginsInitialized:10000] Initialize login plugin if path matches.
      * @throws \RuntimeException
      */
-    public function initializeSession()
+    public function initializeSession(): void
     {
         // Check to ensure sessions are enabled.
         if (!$this->config->get('system.session.enabled')) {
@@ -176,69 +172,49 @@ class LoginPlugin extends Plugin
      * [onPluginsInitialized:1000] Initialize login plugin if path matches.
      * @throws \RuntimeException
      */
-    public function initializeLogin()
+    public function initializeLogin(): void
     {
         $this->login = $this->grav['login'];
 
-        /** @var Uri $uri */
-        $uri = $this->grav['uri'];
-
         // Admin has its own login; make sure we're not in admin.
-        if (!isset($this->grav['admin'])) {
-            $this->route = $this->config->get('plugins.login.route');
-            $this->enable([
-                'onPagesInitialized' => ['pageVisibility', 0],
-            ]);
+        if ($this->isAdmin()) {
+            return;
         }
 
+        $this->enable([
+            'onPagesInitialized' => ['pageVisibility', 0],
+        ]);
+
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
         $path = $uri->path();
         $this->redirect_to_login = $this->config->get('plugins.login.redirect_to_login');
 
         // Register route to login page if it has been set.
-        if ($this->route && $this->route === $path) {
+        if ($path === $this->login->getRoute('login')) {
             $this->enable([
                 'onPagesInitialized' => ['addLoginPage', 0],
             ]);
-            return;
-        }
-
-        if ($path === $this->config->get('plugins.login.route_forgot')) {
+        } elseif ($path === $this->login->getRoute('forgot')) {
             $this->enable([
                 'onPagesInitialized' => ['addForgotPage', 0],
             ]);
-            return;
-        }
-
-        if ($path === $this->config->get('plugins.login.route_reset')) {
+        } elseif ($path === $this->login->getRoute('reset')) {
             $this->enable([
                 'onPagesInitialized' => ['addResetPage', 0],
             ]);
-            return;
-        }
-
-        if ($path === $this->config->get('plugins.login.route_register')) {
-            if ($this->config->get('plugins.login.user_registration.enabled')) {
-                $this->enable([
-                    'onPagesInitialized' => ['addRegisterPage', 0],
-                ]);
-            } else {
-                throw new \RuntimeException($this->grav['language']->translate('PLUGIN_LOGIN.REGISTRATION_DISABLED'), 404);
-            }
-            return;
-        }
-
-        if ($path === $this->config->get('plugins.login.route_activate')) {
+        } elseif ($path === $this->login->getRoute('register')) {
+            $this->enable([
+                'onPagesInitialized' => ['addRegisterPage', 0],
+            ]);
+        } elseif ($path === $this->login->getRoute('activate')) {
             $this->enable([
                 'onPagesInitialized' => ['handleUserActivation', 0],
             ]);
-            return;
-        }
-
-        if ($path === $this->config->get('plugins.login.route_profile')) {
+        } elseif ($path === $this->login->getRoute('profile')) {
             $this->enable([
                 'onPagesInitialized' => ['addProfilePage', 0],
             ]);
-            return;
         }
     }
 
@@ -248,25 +224,29 @@ class LoginPlugin extends Plugin
      *
      * Note that this setting may be slow on large sites as it loads all pages into memory for each page load!
      *
-     * @param Event $e
+     * @param Event $event
      */
-    public function pageVisibility(Event $e)
+    public function pageVisibility(Event $event): void
     {
-        if ($this->config->get('plugins.login.dynamic_page_visibility')) {
-            /** @var Pages $pages */
-            $pages = $e['pages'];
-            $user = $this->grav['user'];
+        if (!$this->config->get('plugins.login.dynamic_page_visibility')) {
+            return;
+        }
 
-            // TODO: This is super slow especially with Flex Pages. Better solution is required (on indexing / on load?).
-            foreach ($pages->instances() as $page) {
-                if ($page) {
-                    $header = $page->header();
-                    if ($header && isset($header->access) && isset($header->login['visibility_requires_access']) && $header->login['visibility_requires_access'] === true) {
-                        $config = $this->mergeConfig($page);
-                        $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
-                        if ($access === false) {
-                            $page->visible(false);
-                        }
+        /** @var Pages $pages */
+        $pages = $event['pages'];
+        /** @var UserInterface|null $user */
+        $user = $this->grav['user'] ?? null;
+
+        // TODO: This is super slow especially with Flex Pages. Better solution is required (on indexing / on load?).
+        foreach ($pages->instances() as $page) {
+            if ($page && $page->visible()) {
+                $header = $page->header();
+                $require_access = $header->login['visibility_requires_access'] ?? false;
+                if ($require_access === true && isset($header->access)) {
+                    $config = $this->mergeConfig($page);
+                    $access = $this->login->isUserAuthorizedForPage($user, $page, $config);
+                    if ($access === false) {
+                        $page->visible(false);
                     }
                 }
             }
@@ -276,35 +256,32 @@ class LoginPlugin extends Plugin
     /**
      * [onPagesInitialized]
      */
-    public function storeReferrerPage()
+    public function storeReferrerPage(): void
     {
         $invalid_redirect_routes = [
-            $this->config->get('plugins.login.route') ?: '/login',
-            $this->config->get('plugins.login.route_register') ?: '/register',
-            $this->config->get('plugins.login.route_activate') ?: '/activate_user',
-            $this->config->get('plugins.login.route_forgot') ?: '/forgot_password',
-            $this->config->get('plugins.login.route_reset') ?: '/reset_password',
+            $this->login->getRoute('login') ?: '/login',
+            $this->login->getRoute('register') ?: '/register',
+            $this->login->getRoute('activate') ?: '/activate_user',
+            $this->login->getRoute('forgot') ?: '/forgot_password',
+            $this->login->getRoute('reset') ?: '/reset_password',
         ];
 
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
         $current_route = $uri->route();
 
-        $redirect = static::defaultRedirectAfterLogin();
-
+        $redirect = $this->login->getRoute('after_login');
         if (!$redirect && !in_array($current_route, $invalid_redirect_routes, true)) {
             // No login redirect set in the configuration; can we redirect to the current page?
-            $allowed = true;
 
-            /** @var PageInterface $page */
-            $page = $this->grav['pages']->dispatch($current_route);
+            /** @var Pages $pages */
+            $pages = $this->grav['pages'];
 
+            $page = $pages->find($current_route);
             if ($page) {
                 $header = $page->header();
-                if (isset($header->login_redirect_here) && $header->login_redirect_here === false) {
-                    $allowed = false;
-                }
 
+                $allowed = ($header->login_redirect_here ?? true) === false;
                 if ($allowed && $page->routable()) {
                     $redirect = $page->route();
                     foreach ($uri->params(null, true) as $key => $value) {
@@ -323,125 +300,71 @@ class LoginPlugin extends Plugin
 
     /**
      * Add Login page
-     * @throws \Exception
      */
-    public function addLoginPage()
+    public function addLoginPage(): void
     {
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($this->route);
-
-        if (!$page) {
-            // Only add login page if it hasn't already been defined.
-            $page = new Page();
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/login.md'));
-            $page->slug(basename($this->route));
-
-            $pages->addPage($page, $this->route);
-        }
-
-        // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $cacheControl = $page->cacheControl();
-        if (!$cacheControl) {
-            $page->cacheControl('private, no-cache, must-revalidate');
-        }
+        $this->login->addPage('login');
     }
 
     /**
      * Add Login page
-     * @throws \Exception
      */
-    public function addForgotPage()
+    public function addForgotPage(): void
     {
-        $route = $this->config->get('plugins.login.route_forgot');
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
-
-        if (!$page) {
-            // Only add forgot page if it hasn't already been defined.
-            $page = new Page();
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/forgot.md'));
-            $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
-        }
-
-        // Forgot page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $cacheControl = $page->cacheControl();
-        if (!$cacheControl) {
-            $page->cacheControl('private, no-cache, must-revalidate');
-        }
+        $this->login->addPage('forgot');
     }
 
     /**
      * Add Reset page
-     * @throws \Exception
      */
-    public function addResetPage()
+    public function addResetPage(): void
     {
-        $route = $this->config->get('plugins.login.route_reset');
-
+        /** @var Uri $uri */
         $uri = $this->grav['uri'];
+
         $token = $uri->param('token');
         $user = $uri->param('user');
-
         if (!$user || !$token) {
             return;
         }
 
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
-
-        if (!$page) {
-            // Only add login page if it hasn't already been defined.
-            $page = new Page();
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/reset.md'));
-            $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
-        }
-
-        // Reset page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $cacheControl = $page->cacheControl();
-        if (!$cacheControl) {
-            $page->cacheControl('private, no-cache, must-revalidate');
-        }
+        $this->login->addPage('reset');
     }
 
     /**
      * Add Register page
-     * @throws \Exception
      */
-    public function addRegisterPage()
+    public function addRegisterPage(): void
     {
-        $route = $this->config->get('plugins.login.route_register');
+        $this->login->addPage('register');
+    }
 
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
+    /**
+     * Add Profile page
+     */
+    public function addProfilePage(): void
+    {
+        $this->login->addPage('profile');
+        $this->storeReferrerPage();
+    }
 
-        if (!$page) {
-            $page = new Page();
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/register.md'));
-            $page->slug(basename($route));
 
-            $pages->addPage($page, $route);
-        }
+    /**
+     * Set Unauthorized page
+     */
+    public function setUnauthorizedPage(): void
+    {
+        $page = $this->login->addPage('unauthorized');
 
-        // Register page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $cacheControl = $page->cacheControl();
-        if (!$cacheControl) {
-            $page->cacheControl('private, no-cache, must-revalidate');
-        }
+        unset($this->grav['page']);
+        $this->grav['page'] = $page;
     }
 
     /**
      * Handle user activation
      * @throws \RuntimeException
      */
-    public function handleUserActivation()
+    public function handleUserActivation(): void
     {
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
@@ -518,67 +441,9 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Add Profile page
-     */
-    public function addProfilePage()
-    {
-        $route = $this->config->get('plugins.login.route_profile');
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
-
-        if (!$page) {
-            // Only add forgot page if it hasn't already been defined.
-            $page = new Page();
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/profile.md'));
-            $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
-        }
-
-        // Profile page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $cacheControl = $page->cacheControl();
-        if (!$cacheControl) {
-            $page->cacheControl('private, no-cache, must-revalidate');
-        }
-
-        $this->storeReferrerPage();
-    }
-
-    /**
-     * Set Unauthorized page
-     * @throws \Exception
-     */
-    public function setUnauthorizedPage()
-    {
-        $route = $this->config->get('plugins.login.route_unauthorized');
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $page = $pages->dispatch($route);
-
-        if (!$page) {
-            $page = new Page();
-            $page->init(new \SplFileInfo(__DIR__ . '/pages/unauthorized.md'));
-            $page->slug(basename($route));
-
-            $pages->addPage($page, $route);
-        }
-
-        // Unauthorized page may not have the correct Cache-Control header set, force no-store for the proxies.
-        $cacheControl = $page->cacheControl();
-        if (!$cacheControl) {
-            $page->cacheControl('private, no-cache, must-revalidate');
-        }
-
-        unset($this->grav['page']);
-        $this->grav['page'] = $page;
-    }
-
-    /**
      * Initialize login controller
      */
-    public function loginController()
+    public function loginController(): void
     {
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
@@ -614,7 +479,7 @@ class LoginPlugin extends Plugin
     /**
      * Authorize the Page fallback url (page media accessed through the page route)
      */
-    public function authorizeFallBackUrl()
+    public function authorizeFallBackUrl(): void
     {
         if ($this->config->get('plugins.login.protect_protected_page_media', false)) {
             $page_url = \dirname($this->grav['uri']->path());
@@ -626,9 +491,32 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * [onPageInitialized]
+     */
+    public function authorizeLoginPage(Event $event): void
+    {
+        $page = $event['page'];
+        if (!$page instanceof PageInterface) {
+            return;
+        }
+
+        // Only applies to the page templates defined by login plugin.
+        $template = $page->template();
+        if (!in_array($template, ['forgot', 'login', 'profile', 'register', 'reset', 'unauthorized'])) {
+            return;
+        }
+
+        // Check if the login page is enabled.
+        $route = $this->login->getRoute($template);
+        if (null === $route) {
+            $page->routable(false);
+        }
+    }
+
+    /**
      * [onPageInitialized] Authorize Page
      */
-    public function authorizePage()
+    public function authorizePage(): void
     {
         if (!$this->authenticated) {
             return;
@@ -637,10 +525,13 @@ class LoginPlugin extends Plugin
         /** @var UserInterface $user */
         $user = $this->grav['user'];
 
-        /** @var PageInterface $page */
-        $page = $this->grav['page'];
+        $page = $this->grav['page'] ?? null;
+        if (!$page instanceof PageInterface) {
+            return;
+        }
 
-        if (!$page || $this->grav['login']->isUserAuthorizedForPage($user, $page, $this->mergeConfig($page))) {
+        $hasAccess = $this->login->isUserAuthorizedForPage($user, $page, $this->mergeConfig($page));
+        if ($hasAccess) {
             return;
         }
 
@@ -652,48 +543,22 @@ class LoginPlugin extends Plugin
             exit;
         }
 
-        $authorized = $user->authenticated && $user->authorized;
-
         // User is not logged in; redirect to login page.
-        if ($this->redirect_to_login && $this->route && !$authorized) {
-            $this->grav->redirectLangSafe($this->route, 302);
+        $authenticated = $user->authenticated && $user->authorized;
+        $login_route = $this->login->getRoute('login');
+        if (!$authenticated && $this->redirect_to_login && $login_route) {
+            $this->grav->redirectLangSafe($login_route, 302);
         }
 
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
-        $login_page = null;
 
         // Reset page with login page.
-        if (!$authorized) {
-            if ($this->route) {
-                $login_page = $this->grav['pages']->dispatch($this->route);
-            }
-
-            if (!$login_page) {
-                $login_page = new Page();
-
-                // Get the admin Login page is needed, else the default
-                if ($this->isAdmin()) {
-                    $login_file = $this->grav['locator']->findResource('plugins://admin/pages/admin/login.md');
-                    $login_page->init(new \SplFileInfo($login_file));
-                } else {
-                    $login_page->init(new \SplFileInfo(__DIR__ . '/pages/login.md'));
-                }
-
-                $login_page->slug(basename($this->route));
-
-                /** @var Pages $pages */
-                $pages = $this->grav['pages'];
-                $pages->addPage($login_page, $this->route);
-            }
-
-            // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
-            $cacheControl = $page->cacheControl();
-            if (!$cacheControl) {
-                $page->cacheControl('private, no-cache, must-revalidate');
-            }
-
+        if (!$authenticated) {
             $this->authenticated = false;
+
+            $login_page = $this->login->addPage('login', $this->login->getRoute('login') ?? '/login');
+
             unset($this->grav['page']);
             $this->grav['page'] = $login_page;
 
@@ -711,7 +576,7 @@ class LoginPlugin extends Plugin
     /**
      * [onTwigTemplatePaths] Add twig paths to plugin templates.
      */
-    public function onTwigTemplatePaths()
+    public function onTwigTemplatePaths(): void
     {
         $twig = $this->grav['twig'];
         $twig->twig_paths[] = __DIR__ . '/templates';
@@ -720,7 +585,7 @@ class LoginPlugin extends Plugin
     /**
      * [onTwigSiteVariables] Set all twig variables for generating output.
      */
-    public function onTwigSiteVariables()
+    public function onTwigSiteVariables(): void
     {
         /** @var Twig $twig */
         $twig = $this->grav['twig'];
@@ -766,7 +631,7 @@ class LoginPlugin extends Plugin
      * @param Form $form
      * @throws \RuntimeException
      */
-    private function processUserRegistration($form, Event $event)
+    private function processUserRegistration(FormInterface $form, Event $event): void
     {
         $language = $this->grav['language'];
         $messages = $this->grav['messages'];
@@ -928,7 +793,7 @@ class LoginPlugin extends Plugin
      * @param Event $event
      * @return bool
      */
-    private function processUserProfile($form, Event $event)
+    private function processUserProfile(FormInterface $form, Event $event): bool
     {
         /** @var UserInterface $user */
         $user     = $this->grav['user'];
@@ -1017,7 +882,7 @@ class LoginPlugin extends Plugin
      * @param Event $event
      * @throws \RuntimeException
      */
-    public function onFormProcessed(Event $event)
+    public function onFormProcessed(Event $event): void
     {
         $form = $event['form'];
         $action = $event['action'];
@@ -1036,7 +901,7 @@ class LoginPlugin extends Plugin
      * @param UserLoginEvent $event
      * @throws \RuntimeException
      */
-    public function userLoginAuthenticateRateLimit(UserLoginEvent $event)
+    public function userLoginAuthenticateRateLimit(UserLoginEvent $event): void
     {
         // Check that we're logging in with rate limit turned on.
         if (!$event->getOption('rate_limit')) {
@@ -1052,7 +917,7 @@ class LoginPlugin extends Plugin
             $t = $this->grav['language'];
 
             $event->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
-            $event->setRedirect($this->grav['config']->get('plugins.login.route', '/'));
+            $event->setRedirect($this->login->getRoute('login') ?? '/');
             $event->setStatus(UserLoginEvent::AUTHENTICATION_CANCELLED);
             $event->stopPropagation();
         }
@@ -1062,7 +927,7 @@ class LoginPlugin extends Plugin
      * @param UserLoginEvent $event
      * @throws \RuntimeException
      */
-    public function userLoginAuthenticateByRegistration(UserLoginEvent $event)
+    public function userLoginAuthenticateByRegistration(UserLoginEvent $event): void
     {
         // Check that we're logging in after registration.
         if (!$event->getOption('after_registration') || $this->isAdmin()) {
@@ -1077,7 +942,7 @@ class LoginPlugin extends Plugin
      * @param UserLoginEvent $event
      * @throws \RuntimeException
      */
-    public function userLoginAuthenticateByRememberMe(UserLoginEvent $event)
+    public function userLoginAuthenticateByRememberMe(UserLoginEvent $event): void
     {
         // Check that we're logging in with remember me.
         if (!$event->getOption('remember_me_login') || !$event->getOption('remember_me') || $this->isAdmin()) {
@@ -1138,7 +1003,7 @@ class LoginPlugin extends Plugin
         }
     }
 
-    public function userLoginAuthenticateByEmail(UserLoginEvent $event)
+    public function userLoginAuthenticateByEmail(UserLoginEvent $event): void
     {
         if (($username = $event->getCredential('username')) && !$event->getUser()->exists()) {
             /** @var UserCollectionInterface $users */
@@ -1148,7 +1013,7 @@ class LoginPlugin extends Plugin
         }
     }
 
-    public function userLoginAuthenticate(UserLoginEvent $event)
+    public function userLoginAuthenticate(UserLoginEvent $event): void
     {
         $user = $event->getUser();
         $credentials = $event->getCredentials();
@@ -1182,7 +1047,7 @@ class LoginPlugin extends Plugin
         // If authentication status is undefined, lower level event handlers may still be able to authenticate user.
     }
 
-    public function userLoginAuthorize(UserLoginEvent $event)
+    public function userLoginAuthorize(UserLoginEvent $event): void
     {
         // Always block access if authorize defaulting to site.login fails.
         $user = $event->getUser();
@@ -1203,7 +1068,7 @@ class LoginPlugin extends Plugin
         }
     }
 
-    public function userLoginGuest(UserLoginEvent $event)
+    public function userLoginGuest(UserLoginEvent $event): void
     {
         /** @var UserCollectionInterface $users */
         $users = $this->grav['accounts'];
@@ -1213,7 +1078,7 @@ class LoginPlugin extends Plugin
         $this->grav['session']->user = $user;
     }
 
-    public function userLoginResetRateLimit(UserLoginEvent $event)
+    public function userLoginResetRateLimit(UserLoginEvent $event): void
     {
         if ($event->getOption('rate_limit')) {
             // Reset user rate limit.
@@ -1222,16 +1087,13 @@ class LoginPlugin extends Plugin
         }
     }
 
-    public function userLogin(UserLoginEvent $event)
+    public function userLogin(UserLoginEvent $event): void
     {
         /** @var SessionInterface $session */
         $session = $this->grav['session'];
 
-        // Prevent session fixation if supported.
-        // TODO: remove method_exists() test when requiring Grav v1.7
-        if (method_exists($session, 'regenerateId')) {
-            $session->regenerateId();
-        }
+        // Prevent session fixation.
+        $session->regenerateId();
 
         $session->user = $user = $event->getUser();
 
@@ -1249,7 +1111,7 @@ class LoginPlugin extends Plugin
         }
     }
 
-    public function userLogout(UserLoginEvent $event)
+    public function userLogout(UserLoginEvent $event): void
     {
         if ($event->getOption('remember_me')) {
             /** @var Login $login */
@@ -1268,21 +1130,27 @@ class LoginPlugin extends Plugin
         $session->invalidate()->start();
     }
 
+    /**
+     * @return string|false
+     * @deprecated 3.5.0 Use $grav['login']->getRoute('after_login') instead
+     */
     public static function defaultRedirectAfterLogin()
     {
-        $config = Grav::instance()['config'];
-        $redirect_after_login = $config->get('plugins.login.redirect_after_login');
-        $route_after_login = $config->get('plugins.login.route_after_login');
+        /** @var Login $login */
+        $login = Grav::instance()['login'];
 
-        return is_bool($redirect_after_login) && $redirect_after_login == true ? $route_after_login : $redirect_after_login;
+        return $login->getRoute('after_login') ?? false;
     }
 
+    /**
+     * @return string|false
+     * @deprecated 3.5.0 Use $grav['login']->getRoute('after_logout') instead
+     */
     public static function defaultRedirectAfterLogout()
     {
-        $config = Grav::instance()['config'];
-        $redirect_after_logout = $config->get('plugins.login.redirect_after_logout');
-        $route_after_logout = $config->get('plugins.login.route_after_logout');
+        /** @var Login $login */
+        $login = Grav::instance()['login'];
 
-        return is_bool($redirect_after_logout) && $redirect_after_logout == true ? $route_after_logout : $redirect_after_logout;
+        return $login->getRoute('after_logout') ?? false;
     }
 }

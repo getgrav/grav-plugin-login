@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.4.4
+version: 3.5.0
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -15,9 +15,9 @@ bugs: https://github.com/getgrav/grav-plugin-login/issues
 license: MIT
 
 dependencies:
-  - { name: grav, version: '>=1.6.7' }
-  - { name: form, version: '>=3.0.0' }
-  - { name: email, version: '>=3.0.0' }
+  - { name: grav, version: '>=1.7.19' }
+  - { name: form, version: '>=5.1.0' }
+  - { name: email, version: '>=3.1.0' }
 
 form:
   validation: loose

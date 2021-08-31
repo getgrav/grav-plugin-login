@@ -1,3 +1,6 @@
+{% set layout = layout ?? form.layout ?? 'default' %}
+{% set field_layout = layout %}
+
 {% set client_side_validation = form.client_side_validation is not null ? form.client_side_validation : config.plugins.form.client_side_validation|default(true) %}
 {% set inline_errors = form.inline_errors is not null ? form.inline_errors : config.plugins.form.inline_errors(false) %}
 
@@ -31,14 +34,19 @@
                 {% endif %}
 
                 {% for field in form.fields %}
-                    {% set value = field.name == 'username' ? username : '' %}
-                    {% if field.type %}
-                        {% include ["forms/fields/#{field.type}/#{field.type}.html.twig", 'forms/fields/text/text.html.twig'] %}
+                    {% set field = prepare_form_field(field, field_name) %}
+                    {% if field %}
+                      {% set value = field.name == 'username' ? username : '' %}
+                      {# {% set value = form.value(field.name) %} #}
+                      {% set field_templates = include_form_field(field.type, field_layout) %}
+                      {% block field %}
+                        {% include field_templates ignore missing %}
+                      {% endblock %}
                     {% endif %}
                 {% endfor %}
 
                 <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
-                    {% if config.plugins.login.rememberme.enabled and page.header.form.login.rememberme ?? true %}
+                    {% if config.plugins.login.rememberme.enabled and form.login.rememberme ?? true %}
                         <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
                             <div class="form-input-wrapper">
                                 <input type="checkbox" value="1" name="rememberme" id="#rememberme">
@@ -47,8 +55,10 @@
                         </div>
                     {% endif %}
 
-                    {% if page.header.form.login.forgot_button ?? true %}
-                    <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative }}{{ config.plugins.login.route_forgot }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
+                    {% set forgot_button = form.login.forgot_button ?? true %}
+                    {% set forgot_route = grav.login.getRoute('forgot') %}
+                    {% if forgot_button and forgot_route %}
+                    <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ forgot_route }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
                     {% endif %}
 
                     <button class="{{ form_button_classes ?: 'button primary' }}" type="submit"  name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
