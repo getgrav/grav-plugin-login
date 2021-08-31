@@ -1,8 +1,8 @@
 # v3.5.0
-## mm/dd/2021
+## 08/31/2021
 
 1. [](#new)
-   * Require **Grav 1.7.0**, **Form 5.1.0** and **Email 3.1.0**
+   * Require **Grav 1.7.19**, **Form 5.1.0** and **Email 3.1.0**
    * Added support for adding login pages by `$grav['login']->addPage()`
    * Added support for getting all login routes by `$grav['login']->getRoute()`
    * Added support for form layouts
