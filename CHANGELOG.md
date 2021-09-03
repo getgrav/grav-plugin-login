@@ -6,6 +6,7 @@
     * Added support for `{% throw 401 'Unauthorized' %}` and `{% throw 403 'Forbidden' %}` from twig template to show appropriate login pages
 2. [](#improved)
     * Unauthorized page uses now `HTTP 403` code
+    * Remove notification on unauthorized page
 
 # v3.5.1
 ## 08/31/2021

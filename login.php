@@ -596,9 +596,6 @@ class LoginPlugin extends Plugin
 
             $twig->twig_vars['form'] = new Form($login_page);
         } else {
-            /** @var Language $l */
-            $l = $this->grav['language'];
-            $this->grav['messages']->add($l->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
             $twig->twig_vars['notAuthorized'] = true;
 
             $this->setUnauthorizedPage();
