@@ -1,6 +1,8 @@
 # v3.5.2
 ## 08/31/2021
 
+1. [](#new)
+    * Require **Grav 1.7.21**
 2. [](#improved)
     * Unauthorized page uses now `HTTP 403` code
 
