@@ -69,6 +69,8 @@ class LoginPlugin extends Plugin
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
             'onPagesInitialized'        => ['storeReferrerPage', 0],
+            'onDisplayErrorPage.401'    => ['onDisplayErrorPage401', -1],
+            'onDisplayErrorPage.403'    => ['onDisplayErrorPage403', -1],
             'onPageInitialized'         => [['authorizeLoginPage', 10], ['authorizePage', 0]],
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
@@ -488,6 +490,24 @@ class LoginPlugin extends Plugin
             $this->grav['page'] = $page;
             $this->authorizePage();
         }
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function onDisplayErrorPage401(Event $event): void
+    {
+        $event['page'] = $this->login->addPage('login');
+        $event->stopPropagation();
+    }
+
+    /**
+     * @param Event $event
+     */
+    public function onDisplayErrorPage403(Event $event): void
+    {
+        $event['page'] = $this->login->addPage('unauthorized');
+        $event->stopPropagation();
     }
 
     /**
