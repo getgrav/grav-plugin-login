@@ -1,3 +1,9 @@
+# v3.5.2
+## 08/31/2021
+
+2. [](#improved)
+    * Unauthorized page uses now `HTTP 403` code
+
 # v3.5.1
 ## 08/31/2021
 
