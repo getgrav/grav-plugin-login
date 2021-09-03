@@ -497,6 +497,10 @@ class LoginPlugin extends Plugin
      */
     public function onDisplayErrorPage401(Event $event): void
     {
+        if ($this->isAdmin()) {
+            return;
+        }
+
         $event['page'] = $this->login->addPage('login');
         $event->stopPropagation();
     }
@@ -506,6 +510,10 @@ class LoginPlugin extends Plugin
      */
     public function onDisplayErrorPage403(Event $event): void
     {
+        if ($this->isAdmin()) {
+            return;
+        }
+
         $event['page'] = $this->login->addPage('unauthorized');
         $event->stopPropagation();
     }
