@@ -1,13 +1,9 @@
-# v3.5.3
-## mm/dd/2021
+# v3.5.2
+## 09/14/2021
 
 1. [](#bugfix)
    * Fixed broken CLI [#280](https://github.com/getgrav/grav-plugin-login/issues/280)
    * Remove dynamic defaults in `route_after_login` and `route_after_login` settings as they have no effect
-
-# v3.5.2
-## 08/31/2021
-
 1. [](#new)
     * Require **Grav 1.7.21**
     * Added support for `{% throw 401 'Unauthorized' %}` and `{% throw 403 'Forbidden' %}` from twig template to show appropriate login pages
