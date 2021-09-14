@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
    * Fixed broken CLI [#280](https://github.com/getgrav/grav-plugin-login/issues/280)
+   * Remove dynamic defaults in `route_after_login` and `route_after_login` settings as they have no effect
 
 # v3.5.2
 ## 08/31/2021
