@@ -1180,7 +1180,10 @@ class LoginPlugin extends Plugin
     public static function defaultRedirectAfterLogin()
     {
         /** @var Login $login */
-        $login = Grav::instance()['login'];
+        $login = Grav::instance()['login'] ?? null;
+        if (null === $login) {
+            return '/';
+        }
 
         return $login->getRoute('after_login') ?? false;
     }
@@ -1192,7 +1195,10 @@ class LoginPlugin extends Plugin
     public static function defaultRedirectAfterLogout()
     {
         /** @var Login $login */
-        $login = Grav::instance()['login'];
+        $login = Grav::instance()['login'] ?? null;
+        if (null === $login) {
+            return '/';
+        }
 
         return $login->getRoute('after_logout') ?? false;
     }
