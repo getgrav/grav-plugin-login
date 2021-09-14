@@ -646,7 +646,6 @@ class Login
         $pages = $this->grav['pages'];
 
         if ($page) {
-            $route = $route ?? '/login';
             $page->route($route);
             $page->slug(basename($route));
         } else {
