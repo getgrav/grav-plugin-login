@@ -1,3 +1,9 @@
+# v3.5.3
+## mm/dd/2021
+
+1. [](#bugfix)
+   * Fixed broken CLI [#280](https://github.com/getgrav/grav-plugin-login/issues/280)
+
 # v3.5.2
 ## 08/31/2021
 

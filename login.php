@@ -23,6 +23,7 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
+use Grav\Events\PluginsLoadedEvent;
 use Grav\Events\SessionStartEvent;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
@@ -59,8 +60,9 @@ class LoginPlugin extends Plugin
     public static function getSubscribedEvents(): array
     {
         return [
+            PluginsLoadedEvent::class   => [['onPluginsLoaded', 10]],
             SessionStartEvent::class    => ['onSessionStart', 0],
-            'onPluginsInitialized'      => [['autoload', 100000], ['initializeSession', 10000], ['initializeLogin', 1000]],
+            'onPluginsInitialized'      => [['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
             'onTask.login.twofa'        => ['loginController', 0],
             'onTask.login.twofa_cancel' => ['loginController', 0],
@@ -86,13 +88,30 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * [onPluginsInitialized:100000] Composer autoload.
+     * Composer autoload.
      *
      * @return ClassLoader
      */
     public function autoload(): ClassLoader
     {
         return require __DIR__ . '/vendor/autoload.php';
+    }
+
+    /**
+     * [onPluginsLoaded:10] Initialize login service.
+     * @throws \RuntimeException
+     */
+    public function onPluginsLoaded(): void
+    {
+        // Check to ensure sessions are enabled.
+        if (!$this->config->get('system.session.enabled') && !\constant('GRAV_CLI')) {
+            throw new \RuntimeException('The Login plugin requires "system.session" to be enabled');
+        }
+
+        // Define login service.
+        $this->grav['login'] = static function (Grav $c) {
+            return new Login($c);
+        };
     }
 
     public function onSessionStart(SessionStartEvent $event): void
@@ -148,11 +167,6 @@ class LoginPlugin extends Plugin
         if (!$this->config->get('system.session.enabled')) {
             throw new \RuntimeException('The Login plugin requires "system.session" to be enabled');
         }
-
-        // Define login service.
-        $this->grav['login'] = static function (Grav $c) {
-            return new Login($c);
-        };
 
         // Define current user service.
         $this->grav['user'] = static function (Grav $c) {
