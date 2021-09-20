@@ -2,7 +2,7 @@
 ## mm/dd/2021
 
 1. [](#bugfix)
-    * Fixed double language in redirection after successful login [#3411](https://github.com/getgrav/grav/issues/3411)
+    * Fixed double language in redirection after successful login [grav#3411](https://github.com/getgrav/grav/issues/3411)
 
 # v3.5.2
 ## 09/14/2021
