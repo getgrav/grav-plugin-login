@@ -140,12 +140,12 @@ class Controller
 
                 $event->defRedirect(
                     $this->grav['session']->redirect_after_login ?:
-                        $login_redirect ?: $this->grav['uri']->referrer('/')
+                        $login_redirect ?: $this->grav['uri']->referrer('/', '', true)
                 );
             } else {
                 $redirect_to_login = $this->grav['config']->get('plugins.login.redirect_to_login');
                 $redirect_route = $redirect_to_login ? $this->login->getRoute('login') : null;
-                $event->defRedirect($redirect_route ?? $this->grav['uri']->referrer('/'));
+                $event->defRedirect($redirect_route ?? $this->grav['uri']->referrer('/', '', true));
             }
         } else {
             if ($user->authorized) {
@@ -237,7 +237,7 @@ class Controller
                 $login_redirect = $this->login->getRoute('after_login');
 
                 $event->setRedirect(
-                    $this->grav['session']->redirect_after_login ?: $login_redirect ?: $this->grav['uri']->referrer('/'),
+                    $this->grav['session']->redirect_after_login ?: $login_redirect ?: $this->grav['uri']->referrer('/', '', true),
                     303
                 );
             }
