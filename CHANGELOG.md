@@ -1,5 +1,5 @@
 # v3.5.3
-## mm/dd/2021
+## 09/29/2021
 
 1. [](#bugfix)
     * Fixed double language in redirection after successful login [grav#3411](https://github.com/getgrav/grav/issues/3411)
