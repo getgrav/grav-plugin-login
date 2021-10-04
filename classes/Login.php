@@ -546,12 +546,12 @@ class Login
      * Handle the email to invite user.
      *
      * @param Invitation $invitation
-     * @param string $message
+     * @param string|null $message
      * @param UserInterface|null $user
      * @return bool True if the action was performed.
      * @throws \RuntimeException
      */
-    public function sendInviteEmail(Invitation $invitation, string $message, UserInterface $user = null)
+    public function sendInviteEmail(Invitation $invitation, string $message = null, UserInterface $user = null)
     {
         /** @var UserInterface $user */
         $user = $user ?? $this->grav['user'];
@@ -563,6 +563,7 @@ class Login
         $siteName = $this->config->get('site.title', 'Website');
 
         $subject = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT', $siteName]);
+        $message = $message ?? $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE']);
         $content = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_BODY',
             $invitationLink,
             $siteName,

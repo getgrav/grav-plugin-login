@@ -563,13 +563,12 @@ class Controller
         if (!$emails) {
             return false;
         }
-
         $message = $data['message'] ?? null;
 
         $defaults = [
             'expiration' => 86400
         ];
-        $invite = $form->getBlueprint()->get('meta.invite') + $defaults;
+        $invite = (array)($form->getBlueprint()->get('form/meta/invite')) + $defaults;
 
         /** @var UserInterface $user */
         $user = $this->grav['user'];

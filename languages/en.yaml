@@ -156,3 +156,4 @@ PLUGIN_LOGIN:
   USER_REGISTRATION_DISABLED: "User registration has been disabled"
   INVITATION_EMAIL_SUBJECT: "You have been invited to %s"
   INVITATION_EMAIL_BODY: "<h1>Invitation</h1><p>Hi, </p><p>You have been invited to join to <b>%2$s</b>.</p><p>%4$s</p><p><br/><a href=\"%2$s\" class=\"btn-primary\">Create Your Account Now</a><br/><br/></p><p>Alternatively, copy the following URL into your browser's address bar:</p><p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p><p><br/>Kind regards,<br/><br/>%4$s</p>"
+  INVITATION_EMAIL_MESSAGE: ""
