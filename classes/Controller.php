@@ -598,6 +598,8 @@ class Controller
             $this->login->sendInviteEmail($invitation, $message, $user);
         }
 
+        $form->reset();
+
         return true;
     }
 

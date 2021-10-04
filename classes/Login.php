@@ -565,9 +565,9 @@ class Login
         $subject = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT', $siteName]);
         $message = $message ?? $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE']);
         $content = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_BODY',
-            $invitationLink,
             $siteName,
             $message,
+            $invitationLink,
             $user->fullname
         ]);
         $to = $invitation->email;
