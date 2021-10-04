@@ -18,6 +18,7 @@ use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Form\Form;
+use Grav\Plugin\Form\Forms;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Invitations\Invitation;
 use Grav\Plugin\Login\Invitations\Invitations;
@@ -545,10 +546,11 @@ class Controller
     /**
      * @return bool
      */
-    public function taskInvite(Event $event)
+    public function taskInvite()
     {
-        /** @var Form|null $form */
-        $form = $event['form'];
+        /** @var Forms $forms */
+        $forms = $this->grav['forms'] ?? null;
+        $form = $forms ? $forms->getActiveForm() : null;
         if (null === $form) {
             return false;
         }
