@@ -17,9 +17,13 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
+use Grav\Plugin\Form\Form;
 use Grav\Plugin\Login\Events\UserLoginEvent;
+use Grav\Plugin\Login\Invitations\Invitation;
+use Grav\Plugin\Login\Invitations\Invitations;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
 use Grav\Plugin\LoginPlugin;
+use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
 
 /**
@@ -536,6 +540,64 @@ class Controller
         header('Content-Type: application/json');
         echo json_encode($json_response);
         exit;
+    }
+
+    /**
+     * @return bool
+     */
+    public function taskInvite(Event $event)
+    {
+        /** @var Form|null $form */
+        $form = $event['form'];
+        if (null === $form) {
+            return false;
+        }
+
+        $data = $form->getData();
+
+        $emails = $data['emails'] ?? null;
+        $emails = array_unique(preg_split('/[\s,]+/mu', $emails));
+        $emails = array_filter($emails, static function ($str) { return $str && filter_var($str, FILTER_VALIDATE_EMAIL); });
+        if (!$emails) {
+            return false;
+        }
+
+        $message = $data['message'] ?? null;
+
+        $defaults = [
+            'expiration' => 86400
+        ];
+        $invite = $form->getBlueprint()->get('meta.invite') + $defaults;
+
+        /** @var UserInterface $user */
+        $user = $this->grav['user'];
+        $issuer = $user->email;
+        $invitations = Invitations::getInstance();
+        $list = [];
+        foreach ($emails as $email) {
+            $data = [
+                'email' => $email,
+                'created_by' => $issuer,
+                'created_timestamp' => time(),
+                'expiration_timestamp' => time() + $invite['expiration'],
+                'account' => $invite['account']
+            ];
+
+            $invitation = new Invitation($invitations->generateToken(), $data);
+            $old = $invitations->getByEmail($email);
+            if ($old) {
+                $invitations->remove($old);
+            }
+            $invitations->add($invitation);
+            $list[] = $invitation;
+        }
+
+        $invitations->save();
+        foreach ($list as $invitation) {
+            $this->login->sendInviteEmail($invitation, $message, $user);
+        }
+
+        return true;
     }
 
     /**

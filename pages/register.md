@@ -1,4 +1,5 @@
 ---
+title: Register User
 login_redirect_here: false
 cache_control: private, no-cache, must-revalidate
 

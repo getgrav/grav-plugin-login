@@ -25,6 +25,7 @@ use Grav\Common\Uri;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Login\Events\UserLoginEvent;
+use Grav\Plugin\Login\Invitations\Invitation;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use Grav\Plugin\Login\RememberMe\TokenStorage;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
@@ -542,6 +543,43 @@ class Login
     }
 
     /**
+     * Handle the email to invite user.
+     *
+     * @param Invitation $invitation
+     * @param string $message
+     * @param UserInterface|null $user
+     * @return bool True if the action was performed.
+     * @throws \RuntimeException
+     */
+    public function sendInviteEmail(Invitation $invitation, string $message, UserInterface $user = null)
+    {
+        /** @var UserInterface $user */
+        $user = $user ?? $this->grav['user'];
+
+        $param_sep = $this->config->get('system.param_sep', ':');
+        $inviteRoute = $this->getRoute('register', true);
+        $invitationLink = $this->grav['base_url_absolute'] . "{$inviteRoute}/{$param_sep}{$invitation->token}";
+
+        $siteName = $this->config->get('site.title', 'Website');
+
+        $subject = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT', $siteName]);
+        $content = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_BODY',
+            $invitationLink,
+            $siteName,
+            $message,
+            $user->fullname
+        ]);
+        $to = $invitation->email;
+        $sent = EmailUtils::sendEmail($subject, $content, $to);
+
+        if ($sent < 1) {
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+        }
+
+        return true;
+    }
+
+    /**
      * Gets and sets the RememberMe class
      *
      * @param  mixed $var A rememberMe instance to set
@@ -628,37 +666,33 @@ class Login
     }
 
     /**
-     * Add Login page.
-     *
      * @param string $type
-     * @param string|null $route Optional route if we want to force-add the page.
+     * @param string|null $route
      * @param PageInterface|null $page
      * @return PageInterface|null
      */
-    public function addPage(string $type, string $route = null, PageInterface $page = null): ?PageInterface
+    public function getPage(string $type, string $route = null, PageInterface $page = null): ?PageInterface
     {
-        $route = $route ?? $this->getRoute($type);
+        $route = $route ?? $this->getRoute($type, true);
         if (null === $route) {
             return null;
         }
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
 
         if ($page) {
             $page->route($route);
             $page->slug(basename($route));
         } else {
+            /** @var Pages $pages */
+            $pages = $this->grav['pages'];
             $page = $pages->find($route);
         }
         if (!$page instanceof PageInterface) {
             // Only add login page if it hasn't already been defined.
             $page = new Page();
             $page->init(new \SplFileInfo('plugin://login/pages/' . $type . '.md'));
+            $page->route($route);
             $page->slug(basename($route));
         }
-
-        $pages->addPage($page, $route);
 
         // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
         $cacheControl = $page->cacheControl();
@@ -670,13 +704,36 @@ class Login
     }
 
     /**
+     * Add Login page.
+     *
+     * @param string $type
+     * @param string|null $route Optional route if we want to force-add the page.
+     * @param PageInterface|null $page
+     * @return PageInterface|null
+     */
+    public function addPage(string $type, string $route = null, PageInterface $page = null): ?PageInterface
+    {
+        $page = $this->getPage($type, $route, $page);
+        if (null === $page) {
+            return null;
+        }
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $pages->addPage($page, $route);
+
+        return $page;
+    }
+
+    /**
      * Get route to a given login page.
      *
      * @param string $type Use one of: login, activate, forgot, reset, profile, unauthorized, after_login, after_logout,
      *                     register, after_registration, after_activation
+     * @param bool|null $enabled
      * @return string|null Returns route or null if the route has been disabled.
      */
-    public function getRoute(string $type): ?string
+    public function getRoute(string $type, bool $enabled = null): ?string
     {
         switch ($type) {
             case 'login':
@@ -699,7 +756,7 @@ class Login
                 }
                 break;
             case 'register':
-                $enabled = $this->config->get('plugins.login.user_registration.enabled', false);
+                $enabled = $enabled ?? $this->config->get('plugins.login.user_registration.enabled', false);
                 $route = $enabled === true ? $this->config->get('plugins.login.route_' . $type) : null;
                 break;
             case 'after_registration':
