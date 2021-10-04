@@ -143,7 +143,7 @@ class Invitations implements \Countable, \Iterator, \ArrayAccess
     public function generateToken(): string
     {
         do {
-            $id = Utils::uniqueId();
+            $id = Utils::uniqueId(24);
         } while (isset($this->items[$id]));
 
         return $id;
