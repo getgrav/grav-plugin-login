@@ -558,7 +558,7 @@ class Controller
         $data = $form->getData();
 
         $emails = $data['emails'] ?? null;
-        $emails = array_unique(preg_split('/[\s,]+/mu', $emails));
+        $emails = array_unique(preg_split('/[\s,;]+/mu', $emails));
         $emails = array_filter($emails, static function ($str) { return $str && filter_var($str, FILTER_VALIDATE_EMAIL); });
         if (!$emails) {
             return false;
