@@ -564,12 +564,9 @@ class LoginPlugin extends Plugin
         if ($token && $template === 'register') {
             // Special register page for invited users.
             $invitation = Invitations::getInstance()->get($token);
-            if ($invitation) {
-                if (!$invitation->isExpired()) {
-                    $this->invitation = $invitation;
-                    return;
-                }
-                // TODO: add suitable error page.
+            if ($invitation && !$invitation->isExpired()) {
+                $this->invitation = $invitation;
+                return;
             }
         }
 
@@ -805,6 +802,9 @@ class LoginPlugin extends Plugin
             $data['state'] = 'disabled';
         } else {
             $data['state'] = 'enabled';
+        }
+        if ($this->invitation) {
+            $data += $this->invitation->account;
         }
         $data_object = (object) $data;
         $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data_object]));
