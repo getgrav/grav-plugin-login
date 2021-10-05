@@ -551,16 +551,27 @@ class Controller
         /** @var Forms $forms */
         $forms = $this->grav['forms'] ?? null;
         $form = $forms ? $forms->getActiveForm() : null;
+
+        /** @var Language $t */
+        $t = $this->grav['language'];
+
         if (null === $form) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form' => $form,
+                'message' => $t->translate("PLUGIN_LOGIN.INVALID_FORM"),
+            ]));
             return false;
         }
 
         $data = $form->getData();
-
         $emails = $data['emails'] ?? null;
         $emails = array_unique(preg_split('/[\s,;]+/mu', $emails));
         $emails = array_filter($emails, static function ($str) { return $str && filter_var($str, FILTER_VALIDATE_EMAIL); });
         if (!$emails) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form' => $form,
+                'message' => $t->translate("PLUGIN_LOGIN.INVALID_INVITE_EMAILS"),
+            ]));
             return false;
         }
         $message = $data['message'] ?? null;
@@ -597,8 +608,6 @@ class Controller
         foreach ($list as $invitation) {
             $this->login->sendInviteEmail($invitation, $message, $user);
         }
-
-        $form->reset();
 
         return true;
     }
