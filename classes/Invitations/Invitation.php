@@ -9,8 +9,6 @@
 
 namespace Grav\Plugin\Login\Invitations;
 
-use Grav\Common\Grav;
-
 /**
  * Invite users to the site.
  *
