@@ -81,7 +81,7 @@ You can either use the built-in CLI capabilities, or you create a user manually 
 
 # CLI Usage
 
-The simplest way to create a new user is to simply run the `bin/plugin login newuser` command. This will take you through a few questions to gather information with which to create your user. You can also use inline arguments to avoid the interactive questions.
+The simplest way to create a new user is to simply run the `bin/plugin login new-user` command. This will take you through a few questions to gather information with which to create your user. You can also use inline arguments to avoid the interactive questions.
 
 ### Commands
 
