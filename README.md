@@ -81,13 +81,13 @@ You can either use the built-in CLI capabilities, or you create a user manually 
 
 # CLI Usage
 
-The simplest way to create a new user is to simply run the `bin/plugin login newuser` command. This will take you through a few questions to gather information with which to create your user. You can also use inline arguments to avoid the interactive questions.
+The simplest way to create a new user is to simply run the `bin/plugin login new-user` command. This will take you through a few questions to gather information with which to create your user. You can also use inline arguments to avoid the interactive questions.
 
 ### Commands
 
 | Command       | Arguments                            | Explination                |
 |---------------|--------------------------------------|----------------------------|
-|`newuser`|Aliases: `add-user`, `new-user`|Creates a new user (creates file in `user/accounts/`)
+|`new-user`||Creates a new user (creates file in `user/accounts/`)
 || [ -u, --user=USER ]               | The username.                                                   |
 || [ -p, --password=PASSWORD ]       | The password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
 || [ -e, --email=EMAIL ]             | The user email address.                                         |
@@ -96,14 +96,14 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 || [ -t, --title=TITLE ]             | The title of the user. Usually used as a subtext. Example: Admin, Collaborator, Developer |
 || [ -s, --state=STATE ]             | The state of the account. Either `enabled` (default) or `disabled` |
 |||
-|`changepass`|Aliases: `newpass`, `passwd`|Changes password of the specified user (User file must exist)
+|`change-pass`||Changes password of the specified user (User file must exist)
 || [ -u, --user=USER ]               | The username.                                                   |
 || [ -p, --password=PASSWORD ]       | The new password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
 
 
 ### CLI Example
 ```
-> bin/plugin login newuser -u joeuser -p 8c9sRCeBExAiwk -e joeuser@grav.org -P b -N "Joe User" -t "Site Administrator"
+> bin/plugin login new-user -u joeuser -p 8c9sRCeBExAiwk -e joeuser@grav.org -P b -N "Joe User" -t "Site Administrator"
 Creating new user
 
 
@@ -112,7 +112,7 @@ Success! User joeuser created.
 
 ### Interactive Example
 ```
-> bin/plugin login newuser
+> bin/plugin login new-user
 Creating new user
 
 Enter a username: joeuser
