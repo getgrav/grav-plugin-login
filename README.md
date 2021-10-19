@@ -87,7 +87,7 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 
 | Command       | Arguments                            | Explination                |
 |---------------|--------------------------------------|----------------------------|
-|`new-user`|Aliases: `add-user`, `new-user`|Creates a new user (creates file in `user/accounts/`)
+|`new-user`||Creates a new user (creates file in `user/accounts/`)
 || [ -u, --user=USER ]               | The username.                                                   |
 || [ -p, --password=PASSWORD ]       | The password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
 || [ -e, --email=EMAIL ]             | The user email address.                                         |
@@ -96,7 +96,7 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 || [ -t, --title=TITLE ]             | The title of the user. Usually used as a subtext. Example: Admin, Collaborator, Developer |
 || [ -s, --state=STATE ]             | The state of the account. Either `enabled` (default) or `disabled` |
 |||
-|`change-pass`|Aliases: `newpass`, `passwd`|Changes password of the specified user (User file must exist)
+|`change-pass`||Changes password of the specified user (User file must exist)
 || [ -u, --user=USER ]               | The username.                                                   |
 || [ -p, --password=PASSWORD ]       | The new password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
 
