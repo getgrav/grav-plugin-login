@@ -15,6 +15,7 @@ use Grav\Common\Data\Data;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
+use Grav\Common\Language\LanguageCodes;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
@@ -418,6 +419,13 @@ class Login
 
                 break;
 
+            case 'language':
+                $languages = new LanguageCodes();
+                if ($value !== null && !array_key_exists($value, $languages->getList())) {
+                    throw new \RuntimeException('Language code is not valid');
+                }
+
+                break;
         }
 
         return $value;
