@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Plugin\Login
  *
- * @copyright  Copyright (C) 2014 - 2020 RocketTheme, LLC. All rights reserved.
+ * @copyright  Copyright (C) 2014 - 2021 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -31,6 +31,8 @@ use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Session\SessionInterface;
 use Grav\Plugin\Form\Form;
 use Grav\Plugin\Login\Events\UserLoginEvent;
+use Grav\Plugin\Login\Invitations\Invitation;
+use Grav\Plugin\Login\Invitations\Invitations;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\Controller;
 use Grav\Plugin\Login\RememberMe\RememberMe;
@@ -54,6 +56,9 @@ class LoginPlugin extends Plugin
     /** @var bool */
     protected $redirect_to_login;
 
+    /** @var Invitation|null */
+    protected $invitation;
+
     /**
      * @return array
      */
@@ -70,6 +75,7 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
+            'onPageTask.login.invite'    => ['loginController', 0],
             'onPagesInitialized'        => ['storeReferrerPage', 0],
             'onDisplayErrorPage.401'    => ['onDisplayErrorPage401', -1],
             'onDisplayErrorPage.403'    => ['onDisplayErrorPage403', -1],
@@ -219,7 +225,7 @@ class LoginPlugin extends Plugin
             $this->enable([
                 'onPagesInitialized' => ['addResetPage', 0],
             ]);
-        } elseif ($path === $this->login->getRoute('register')) {
+        } elseif ($path === $this->login->getRoute('register', true)) {
             $this->enable([
                 'onPagesInitialized' => ['addRegisterPage', 0],
             ]);
@@ -276,7 +282,7 @@ class LoginPlugin extends Plugin
     {
         $invalid_redirect_routes = [
             $this->login->getRoute('login') ?: '/login',
-            $this->login->getRoute('register') ?: '/register',
+            $this->login->getRoute('register', true) ?: '/register',
             $this->login->getRoute('activate') ?: '/activate_user',
             $this->login->getRoute('forgot') ?: '/forgot_password',
             $this->login->getRoute('reset') ?: '/reset_password',
@@ -552,6 +558,18 @@ class LoginPlugin extends Plugin
             return;
         }
 
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        $token = $uri->param('');
+        if ($token && $template === 'register') {
+            // Special register page for invited users.
+            $invitation = Invitations::getInstance()->get($token);
+            if ($invitation && !$invitation->isExpired()) {
+                $this->invitation = $invitation;
+                return;
+            }
+        }
+
         // Check if the login page is enabled.
         $route = $this->login->getRoute($template);
         if (null === $route) {
@@ -647,6 +665,17 @@ class LoginPlugin extends Plugin
             $this->grav['assets']->add('plugin://login/css/login.css');
         }
 
+        // Handle invitation during the registration.
+        if ($this->invitation) {
+            /** @var Form $form */
+            $form = $twig->twig_vars['form'];
+            /** @var Uri $uri */
+            $uri = $this->grav['uri'];
+
+            $form->action = $uri->route() . $uri->params();
+            $form->setData('email', $this->invitation->email);
+        }
+
         $task = $this->grav['uri']->param('task') ?: ($_POST['task'] ?? '');
         $task = substr($task, \strlen('login.'));
         if ($task === 'reset') {
@@ -683,7 +712,7 @@ class LoginPlugin extends Plugin
             throw new \RuntimeException($language->translate('PLUGIN_LOGIN.PLUGIN_LOGIN_DISABLED'));
         }
 
-        if (!$this->config->get('plugins.login.user_registration.enabled')) {
+        if (null === $this->invitation && !$this->config->get('plugins.login.user_registration.enabled')) {
             throw new \RuntimeException($language->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
         }
 
@@ -774,6 +803,9 @@ class LoginPlugin extends Plugin
         } else {
             $data['state'] = 'enabled';
         }
+        if ($this->invitation) {
+            $data += $this->invitation->account;
+        }
         $data_object = (object) $data;
         $this->grav->fireEvent('onUserLoginRegisterData', new Event(['data' => &$data_object]));
 
@@ -782,6 +814,14 @@ class LoginPlugin extends Plugin
         if ($user instanceof FlexObjectInterface) {
             $flash->clearFiles();
             $flash->save();
+        }
+
+        // Remove invitation after it has been used.
+        if ($this->invitation) {
+            $invitations = Invitations::getInstance();
+            $invitations->remove($this->invitation);
+            $invitations->save();
+            $this->invitation = null;
         }
 
         $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));

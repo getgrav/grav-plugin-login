@@ -2,7 +2,7 @@
 /**
  * @package    Grav\Plugin\Login
  *
- * @copyright  Copyright (C) 2014 - 2017 RocketTheme, LLC. All rights reserved.
+ * @copyright  Copyright (C) 2014 - 2021 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 namespace Grav\Plugin\Console;
@@ -56,6 +56,12 @@ class NewUserCommand extends ConsoleCommand
                 'The user email'
             )
             ->addOption(
+                'language',
+                'l',
+                InputOption::VALUE_OPTIONAL,
+                'The default language of the account. [default: "en"]'
+            )
+            ->addOption(
                 'permissions',
                 'P',
                 InputOption::VALUE_REQUIRED,
@@ -101,6 +107,7 @@ class NewUserCommand extends ConsoleCommand
             'user'        => $this->input->getOption('user'),
             'password1'   => $this->input->getOption('password'),
             'email'       => $this->input->getOption('email'),
+            'language'    => $this->input->getOption('language'),
             'permissions' => $this->input->getOption('permissions'),
             'fullname'    => $this->input->getOption('fullname'),
             'title'       => $this->input->getOption('title'),
@@ -168,6 +175,21 @@ class NewUserCommand extends ConsoleCommand
             $user->set('email', $helper->ask($this->input, $this->output, $question));
         } else {
             $user->set('email', $this->options['email']);
+        }
+
+        if (!$this->options['language']) {
+            // Get language and validate.
+            $question = new Question('Enter a <yellow>language abbreviation</yellow> [en]:   ');
+            $question->setValidator(function ($value) {
+                return $this->validate('language', $value);
+            });
+
+            $user->set('language', $helper->ask($this->input, $this->output, $question));
+            if ($user->get('language') == null) {
+                $user->set('language', 'en');
+            }
+        } else {
+            $user->set('language', $this->options['language']);
         }
 
         if (!$this->options['permissions']) {
