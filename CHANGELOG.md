@@ -1,5 +1,5 @@
 # v3.6.0
-## mm/dd/2021
+## 10/26/2021
 
 1. [](#new)
     * Create a new "invite users" feature
