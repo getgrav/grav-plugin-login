@@ -2,7 +2,8 @@
 ## mm/dd/2021
 
 1. [](#new)
-    * Create a new invite users feature
+    * Create a new "invite users" feature
+    * Add CLI option for language [#277](https://github.com/getgrav/grav-plugin-login/issues/277)
 
 # v3.5.3
 ## 09/29/2021
