@@ -364,7 +364,7 @@ class Controller
         }
 
         if (!$user || !$user->exists()) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
+            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $email]), 'error');
             $this->setRedirect($this->login->getRoute('forgot') ?? '/');
 
             return true;
