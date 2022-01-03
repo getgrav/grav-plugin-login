@@ -1,3 +1,9 @@
+# v3.6.1
+## 01/03/2022
+
+1. [](#bugfix)
+   * Fixed issue with forgot password error message translation [#285](https://github.com/getgrav/grav-plugin-login/pull/285)
+   * 
 # v3.6.0
 ## 10/26/2021
 
