@@ -1,3 +1,9 @@
+# v3.6.2
+## mm/dd/2022
+
+1. [](#new)
+   * Support for `YubiKey OTP` 2-Factor authenticator
+
 # v3.6.1
 ## 01/03/2022
 
