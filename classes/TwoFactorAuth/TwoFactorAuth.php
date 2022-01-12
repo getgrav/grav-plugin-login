@@ -61,6 +61,10 @@ class TwoFactorAuth
      */
     public function verifyCode($secret, $code)
     {
+        if (!$secret || !$code) {
+            return false;
+        }
+
         $secret = str_replace(' ', '', $secret);
 
         return $this->twoFa->verifyCode($secret, $code);
@@ -88,9 +92,10 @@ class TwoFactorAuth
     public function verifyYubikeyOTP(string $yubikey_id, string $otp): bool
     {
         // Quick sanity check
-        if (null === $yubikey_id || null === $otp || !Utils::startsWith($otp, $yubikey_id)) {
+        if (!$yubikey_id || !$otp || !Utils::startsWith($otp, $yubikey_id)) {
             return false;
         }
+
         $api_url = "https://api.yubico.com/wsapi/2.0/verify?id=1&otp=%s&nonce=%s";
         $client = Client::getClient();
 
