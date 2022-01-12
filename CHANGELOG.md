@@ -1,3 +1,10 @@
+# v3.6.2
+## 01/12/2022
+
+1. [](#new)
+   * Support for `YubiKey OTP` 2-Factor authenticator
+   * Requires Grav `v1.7.27`
+
 # v3.6.1
 ## 01/03/2022
 
