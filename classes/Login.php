@@ -527,7 +527,13 @@ class Login
 
         $param_sep = $this->config->get('system.param_sep', ':');
         $activationRoute = $this->getRoute('activate');
-        $activation_link = $this->grav['base_url_absolute'] . $activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username;
+        if (!$activationRoute) {
+            throw new \RuntimeException('User activation route does not exist!');
+        }
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $activationLink = $pages->url($activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username, null, true);
 
         $site_name = $this->config->get('site.title', 'Website');
         $author = $this->grav['config']->get('site.author.name', '');
@@ -536,7 +542,7 @@ class Login
         $subject = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $site_name]);
         $content = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY',
             $fullname,
-            $activation_link,
+            $activationLink,
             $site_name,
             $author
         ]);
@@ -566,12 +572,18 @@ class Login
 
         $param_sep = $this->config->get('system.param_sep', ':');
         $inviteRoute = $this->getRoute('register', true);
-        $invitationLink = $this->grav['base_url_absolute'] . "{$inviteRoute}/{$param_sep}{$invitation->token}";
+        if (!$inviteRoute) {
+            throw new \RuntimeException('User registration route does not exist!');
+        }
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $invitationLink = $pages->url("{$inviteRoute}/{$param_sep}{$invitation->token}", null, true);
 
         $siteName = $this->config->get('site.title', 'Website');
 
         $subject = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT', $siteName]);
-        $message = $message ?? $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE']);
+        $message = $message ?? (string)$this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE']);
         $content = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_BODY',
             $siteName,
             $message,
