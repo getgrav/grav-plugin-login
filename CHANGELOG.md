@@ -1,5 +1,5 @@
 # v3.6.3
-## mm/dd/2022
+## 03/14/2022
 
 1. [](#improved)
     * Improved multi-site support in user emails
