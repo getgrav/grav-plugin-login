@@ -12,12 +12,12 @@ namespace Grav\Plugin\Login;
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
+use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
-use Grav\Plugin\Form\Form;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Invitations\Invitation;
@@ -343,7 +343,9 @@ class Controller
      */
     protected function taskForgot()
     {
-        $param_sep = $this->grav['config']->get('system.param_sep', ':');
+        /** @var Config $config */
+        $config = $this->grav['config'];
+        $param_sep = $config->get('system.param_sep', ':');
         $data = $this->post;
 
         /** @var UserCollectionInterface $users */
@@ -386,7 +388,7 @@ class Controller
             return true;
         }
 
-        $from = $this->grav['config']->get('plugins.email.from');
+        $from = $config->get('plugins.email.from');
 
         if (empty($from)) {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
@@ -412,19 +414,21 @@ class Controller
         $user->reset = $token . '::' . $expire;
         $user->save();
 
-        $author = $this->grav['config']->get('site.author.name', '');
+        $author = $config->get('site.author.name', '');
         $fullname = $user->fullname ?: $user->username;
 
-        if ($this->grav['language']->getDefault() != $this->grav['language']->getLanguage()) {
-            $lang = '/'.$this->grav['language']->getLanguage();
-        } else {
-            $lang = '';
+        $resetRoute = $this->login->getRoute('reset');
+        if (!$resetRoute) {
+            throw new \RuntimeException('Password reset route does not exist!');
         }
 
-        $resetRoute = $this->login->getRoute('reset');
-        $reset_link = $this->grav['base_url_absolute'] . $lang . $resetRoute . '/task' . $param_sep . 'login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $route = $pages->url($resetRoute, null, true);
 
-        $sitename = $this->grav['config']->get('site.title', 'Website');
+        $reset_link = $route . '/task' . $param_sep . 'login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
+
+        $sitename = $config->get('site.title', 'Website');
 
         $to = $user->email;
 

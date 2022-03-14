@@ -1,3 +1,9 @@
+# v3.6.3
+## 03/14/2022
+
+1. [](#improved)
+    * Improved multi-site support in user emails
+
 # v3.6.2
 ## 01/12/2022
 
@@ -10,7 +16,7 @@
 
 1. [](#bugfix)
    * Fixed issue with forgot password error message translation [#285](https://github.com/getgrav/grav-plugin-login/pull/285)
-   * 
+
 # v3.6.0
 ## 10/26/2021
 
