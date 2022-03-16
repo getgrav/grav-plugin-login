@@ -17,7 +17,7 @@ license: MIT
 dependencies:
   - { name: grav, version: '>=1.7.27' }
   - { name: form, version: '>=5.1.0' }
-  - { name: email, version: '>=3.1.0' }
+  - { name: email, version: '>=3.1.6' }
 
 form:
   validation: loose

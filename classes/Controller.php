@@ -345,7 +345,6 @@ class Controller
     {
         /** @var Config $config */
         $config = $this->grav['config'];
-        $param_sep = $config->get('system.param_sep', ':');
         $data = $this->post;
 
         /** @var UserCollectionInterface $users */
@@ -414,33 +413,12 @@ class Controller
         $user->reset = $token . '::' . $expire;
         $user->save();
 
-        $author = $config->get('site.author.name', '');
-        $fullname = $user->fullname ?: $user->username;
+        try {
+            Email::sendResetPasswordEmail($user);
 
-        $resetRoute = $this->login->getRoute('reset');
-        if (!$resetRoute) {
-            throw new \RuntimeException('Password reset route does not exist!');
-        }
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $route = $pages->url($resetRoute, null, true);
-
-        $reset_link = $route . '/task' . $param_sep . 'login.reset/token' . $param_sep . $token . '/user' . $param_sep . $user->username . '/nonce' . $param_sep . Utils::getNonce('reset-form');
-
-        $sitename = $config->get('site.title', 'Website');
-
-        $to = $user->email;
-
-        $subject = $language->translate(['PLUGIN_LOGIN.FORGOT_EMAIL_SUBJECT', $sitename]);
-        $content = $language->translate(['PLUGIN_LOGIN.FORGOT_EMAIL_BODY', $fullname, $reset_link, $author, $sitename]);
-
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
-        } else {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
+        } catch (\Exception $e) {
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
         }
 
         $this->setRedirect($this->login->getRoute('login') ?? '/');

@@ -1,3 +1,11 @@
+# v3.6.4
+## mm/dd/2022
+
+1. [](#new)
+    * Require **Email 3.1.6**
+    * Added support for fully customizable email templates
+    * Added `Grav\PluginsLogin\Email` class to simplify sending emails
+
 # v3.6.3
 ## 03/14/2022
 

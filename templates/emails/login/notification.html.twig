@@ -1,0 +1,30 @@
+{% extends 'email/base.html.twig' %}
+
+{# Notification email to site owner #}
+
+{%- set subject = 'PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT'|t(site_name) %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY'|t(site_name, user.username, user.email, base_url_absolute)|raw }}
+{%- endblock content -%}
+
+{#
+
+<h1>New User</h1>
+<p>Hi, a new user registered on {{ site_name }}.</p>
+<p>
+  <ul>
+    <li>Username: <b>{{ user.username }}</b></li>
+    <li>Email: <b>{{ user.email }}</b>
+  </ul>
+</p>
+<p>
+  <br/>
+  <a href="{{ base_url_absolute }}" class="btn-primary">Visit {{ site_name }}</a>
+  <br/>
+  <br/>
+</p>
+
+#}

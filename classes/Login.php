@@ -445,25 +445,9 @@ class Login
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
-        $site_name = $this->config->get('site.title', 'Website');
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate([
-            'PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY',
-            $site_name,
-            $user->username,
-            $user->email,
-            $this->grav['base_url_absolute'],
-        ]);
-        $to = $this->config->get('plugins.email.to');
-
-        if (empty($to)) {
-            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
-        }
-
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendNotificationEmail($user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
@@ -484,22 +468,9 @@ class Login
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
-        $site_name = $this->config->get('site.title', 'Website');
-        $author = $this->grav['config']->get('site.author.name', '');
-        $fullname = $user->fullname ?: $user->username;
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY',
-            $fullname,
-            $this->grav['base_url_absolute'],
-            $site_name,
-            $author
-        ]);
-        $to = $user->email;
-
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendWelcomeEmail($user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
@@ -525,31 +496,9 @@ class Login
         $user->activation_token = $token . '::' . $expire;
         $user->save();
 
-        $param_sep = $this->config->get('system.param_sep', ':');
-        $activationRoute = $this->getRoute('activate');
-        if (!$activationRoute) {
-            throw new \RuntimeException('User activation route does not exist!');
-        }
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $activationLink = $pages->url($activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username, null, true);
-
-        $site_name = $this->config->get('site.title', 'Website');
-        $author = $this->grav['config']->get('site.author.name', '');
-        $fullname = $user->fullname ?: $user->username;
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY',
-            $fullname,
-            $activationLink,
-            $site_name,
-            $author
-        ]);
-        $to = $user->email;
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendActivationEmail($user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
@@ -567,33 +516,9 @@ class Login
      */
     public function sendInviteEmail(Invitation $invitation, string $message = null, UserInterface $user = null)
     {
-        /** @var UserInterface $user */
-        $user = $user ?? $this->grav['user'];
-
-        $param_sep = $this->config->get('system.param_sep', ':');
-        $inviteRoute = $this->getRoute('register', true);
-        if (!$inviteRoute) {
-            throw new \RuntimeException('User registration route does not exist!');
-        }
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $invitationLink = $pages->url("{$inviteRoute}/{$param_sep}{$invitation->token}", null, true);
-
-        $siteName = $this->config->get('site.title', 'Website');
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT', $siteName]);
-        $message = $message ?? (string)$this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE']);
-        $content = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_BODY',
-            $siteName,
-            $message,
-            $invitationLink,
-            $user->fullname
-        ]);
-        $to = $invitation->email;
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendInvitationEmail($invitation, $message, $user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 

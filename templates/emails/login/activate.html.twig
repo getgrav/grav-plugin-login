@@ -1,0 +1,42 @@
+{% extends 'email/base.html.twig' %}
+
+{# Activation email #}
+
+{%- set subject = 'PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT'|t(site_name) %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY'|t(user.fullname, activation_link, site_name, author)|raw }}
+{%- endblock content -%}
+
+{#
+
+<h1>Account Activation</h1>
+<p>
+  Hi {{ user.fullname ?? user.username }},
+</p>
+<p>
+  Your account has been successfully created on <b>{{ site_name }}</b>, but you cannot login until it is activated.
+</p>
+<p>
+  <br/>
+  <a href="{{ activation_link }}" class="btn-primary">Activate Your Account Now</a>
+  <br/>
+  <br/>
+</p>
+<p>
+  Alternatively, copy the following URL into your browser's address bar:
+</p>
+<p class="word-break">
+  <a href="{{ activation_link }}">{{ activation_link }}</a>
+</p>
+<p>
+  <br/>
+  Kind regards,
+  <br/>
+  <br/>
+  {{ author }}
+</p>
+
+#}
