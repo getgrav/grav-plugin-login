@@ -3,7 +3,7 @@
 /**
  * @package    Grav\Plugin\Login
  *
- * @copyright  Copyright (C) 2014 - 2021 RocketTheme, LLC. All rights reserved.
+ * @copyright  Copyright (C) 2014 - 2022 RocketTheme, LLC. All rights reserved.
  * @license    MIT License; see LICENSE file for details.
  */
 
@@ -19,7 +19,7 @@ use RocketTheme\Toolbox\Event\Event;
 
 /**
  * Class UserLoginEvent
- * @package Grav\Common\User\Events
+ * @package Grav\Plugin\Login\Events
  *
  * @property int                $status
  * @property array              $credentials

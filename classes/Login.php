@@ -24,7 +24,7 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
-use Grav\Plugin\Email\Utils as EmailUtils;
+use Grav\Plugin\Login\Events\PageAuthorizeEvent;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Invitations\Invitation;
 use Grav\Plugin\Login\RememberMe\RememberMe;
@@ -726,27 +726,15 @@ class Login
      * @param Data|null $config
      * @return bool
      */
-    public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, $config = null)
+    public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, Data $config = null): bool
     {
-        $header = $page->header();
-        $rules = (array)($header->access ?? []);
-
-        if (!$rules && $config !== null && $config->get('parent_acl')) {
-            // If page has no ACL rules, use its parent's rules
-            $parent = $page->parent();
-            while (!$rules and $parent) {
-                $header = $parent->header();
-                $rules = (array)($header->access ?? []);
-                $parent = $parent->parent();
-            }
-        }
-
-        // Continue to the page if it has no ACL rules.
-        if (!$rules) {
+        /** @var PageAuthorizeEvent $event */
+        $event = $this->grav->dispatchEvent(new PageAuthorizeEvent($page, $user, $config));
+        if (!$event->hasProtectedAccess()) {
             return true;
         }
 
-        // All protected pages have a private cache-control. This includes pages which are for guests only.
+        // All access protected pages have a private cache-control. This includes pages which are for guests only.
         $cacheControl = $page->cacheControl();
         if (!$cacheControl) {
             $cacheControl = 'private, no-cache, must-revalidate';
@@ -768,28 +756,12 @@ class Login
         $page->cacheControl($cacheControl);
 
         // Deny access if user has not completed 2FA challenge.
+        $user = $event->user;
         if ($user->authenticated && !$user->authorized) {
-            return false;
+            $event->deny();
         }
 
-        // Continue to the page if user is authorized to access the page.
-        foreach ($rules as $rule => $value) {
-            if (is_int($rule)) {
-                if ($user->authorize($value) === true) {
-                    return true;
-                }
-            } elseif (\is_array($value)) {
-                foreach ($value as $nested_rule => $nested_value) {
-                    if ($user->authorize($rule . '.' . $nested_rule) === Utils::isPositive($nested_value)) {
-                        return true;
-                    }
-                }
-            } elseif ($user->authorize($rule) === Utils::isPositive($value)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $event->isAllowed();
     }
 
     /**
