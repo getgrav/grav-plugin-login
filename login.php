@@ -659,7 +659,7 @@ class LoginPlugin extends Plugin
         $user = $this->grav['user'];
 
         $page = $this->grav['page'] ?? null;
-        if (!$page instanceof PageInterface) {
+        if (!$page instanceof PageInterface || $page->isModule()) {
             return;
         }
 

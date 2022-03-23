@@ -6,6 +6,8 @@
     * Added support for fully customizable email templates
     * Added `Grav\PluginsLogin\Email` class to simplify sending emails
     * Added `PageAuthorizeEvent` event for customizing page access
+1. [](#bugfix)
+    * Removed ACL checks for page modules as they caused unexpected behavior
 
 # v3.6.3
 ## 03/14/2022
