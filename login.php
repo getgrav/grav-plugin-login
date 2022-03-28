@@ -28,8 +28,10 @@ use Grav\Events\SessionStartEvent;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
 use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
+use Grav\Framework\Psr7\Response;
 use Grav\Framework\Session\SessionInterface;
 use Grav\Plugin\Form\Form;
+use Grav\Plugin\Login\Events\PageAuthorizeEvent;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Invitations\Invitation;
 use Grav\Plugin\Login\Invitations\Invitations;
@@ -38,6 +40,7 @@ use Grav\Plugin\Login\Controller;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
+use function is_array;
 
 /**
  * Class LoginPlugin
@@ -67,6 +70,7 @@ class LoginPlugin extends Plugin
         return [
             PluginsLoadedEvent::class   => [['onPluginsLoaded', 10]],
             SessionStartEvent::class    => ['onSessionStart', 0],
+            PageAuthorizeEvent::class   => ['onPageAuthorizeEvent', -10000],
             'onPluginsInitialized'      => [['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
             'onTask.login.twofa'        => ['loginController', 0],
@@ -120,6 +124,10 @@ class LoginPlugin extends Plugin
         };
     }
 
+    /**
+     * @param SessionStartEvent $event
+     * @return void
+     */
     public function onSessionStart(SessionStartEvent $event): void
     {
         $session = $event->session;
@@ -578,6 +586,67 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * @param PageAuthorizeEvent $event
+     * @return void
+     */
+    public function onPageAuthorizeEvent(PageAuthorizeEvent $event): void
+    {
+        if ($event->isDenied()) {
+            // Deny access always wins.
+            return;
+        }
+
+        $page = $event->page;
+        $header = $page->header();
+        $rules = (array)($header->access ?? []);
+
+        if (!$rules && $event->config->get('parent_acl')) {
+            // If page has no ACL rules, use its parent's rules
+            $parent = $page->parent();
+            while (!$rules and $parent) {
+                $header = $parent->header();
+                $rules = (array)($header->access ?? []);
+                $parent = $parent->parent();
+            }
+        }
+
+        // Continue to the page if it has no access rules.
+        if (!$rules) {
+            return;
+        }
+
+        // Mark the page to be protected by access rules.
+        $event->setProtectedAccess();
+
+        // Continue to the page if user is authorized to access the page.
+        $user = $event->user;
+        foreach ($rules as $rule => $value) {
+            if (is_int($rule)) {
+                if ($user->authorize($value) === true) {
+                    $event->allow();
+
+                    return;
+                }
+            } elseif (is_array($value)) {
+                foreach ($value as $nested_rule => $nested_value) {
+                    if ($user->authorize($rule . '.' . $nested_rule) === Utils::isPositive($nested_value)) {
+                        $event->allow();
+
+                        return;
+                    }
+                }
+            } elseif ($user->authorize($rule) === Utils::isPositive($value)) {
+                $event->allow();
+
+                return;
+            }
+        }
+
+        // No match, deny access.
+        $event->deny();
+    }
+
+    /**
      * [onPageInitialized] Authorize Page
      */
     public function authorizePage(): void
@@ -590,7 +659,7 @@ class LoginPlugin extends Plugin
         $user = $this->grav['user'];
 
         $page = $this->grav['page'] ?? null;
-        if (!$page instanceof PageInterface) {
+        if (!$page instanceof PageInterface || $page->isModule()) {
             return;
         }
 
@@ -603,8 +672,9 @@ class LoginPlugin extends Plugin
         $uri_extension = $this->grav['uri']->extension('html');
         $supported_types = $this->config->get('media.types');
         if ($uri_extension !== 'html' && array_key_exists($uri_extension, $supported_types)) {
-            header('HTTP/1.0 403 Forbidden');
-            exit;
+            $response = new Response(403);
+
+            $this->grav->close($response);
         }
 
         // User is not logged in; redirect to login page.
@@ -783,7 +853,7 @@ class LoginPlugin extends Plugin
                 foreach ($default_values as $key => $param) {
 
                     if ($key === $field) {
-                        if (\is_array($param)) {
+                        if (is_array($param)) {
                             $values = explode(',', $param);
                         } else {
                             $values = $param;

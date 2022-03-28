@@ -25,7 +25,7 @@ class ComposerAutoloaderIniteed5e5cf0aa1e2139f2db7445511e366
         require __DIR__ . '/platform_check.php';
 
         spl_autoload_register(array('ComposerAutoloaderIniteed5e5cf0aa1e2139f2db7445511e366', 'loadClassLoader'), true, true);
-        self::$loader = $loader = new \Composer\Autoload\ClassLoader();
+        self::$loader = $loader = new \Composer\Autoload\ClassLoader(\dirname(\dirname(__FILE__)));
         spl_autoload_unregister(array('ComposerAutoloaderIniteed5e5cf0aa1e2139f2db7445511e366', 'loadClassLoader'));
 
         $useStaticLoader = PHP_VERSION_ID >= 50600 && !defined('HHVM_VERSION') && (!function_exists('zend_loader_file_encoded') || !zend_loader_file_encoded());
@@ -65,11 +65,16 @@ class ComposerAutoloaderIniteed5e5cf0aa1e2139f2db7445511e366
     }
 }
 
+/**
+ * @param string $fileIdentifier
+ * @param string $file
+ * @return void
+ */
 function composerRequireeed5e5cf0aa1e2139f2db7445511e366($fileIdentifier, $file)
 {
     if (empty($GLOBALS['__composer_autoload_files'][$fileIdentifier])) {
-        require $file;
-
         $GLOBALS['__composer_autoload_files'][$fileIdentifier] = true;
+
+        require $file;
     }
 }

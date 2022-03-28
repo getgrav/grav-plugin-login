@@ -24,7 +24,7 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Uri;
 use Grav\Common\Utils;
-use Grav\Plugin\Email\Utils as EmailUtils;
+use Grav\Plugin\Login\Events\PageAuthorizeEvent;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Invitations\Invitation;
 use Grav\Plugin\Login\RememberMe\RememberMe;
@@ -445,25 +445,9 @@ class Login
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
-        $site_name = $this->config->get('site.title', 'Website');
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate([
-            'PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY',
-            $site_name,
-            $user->username,
-            $user->email,
-            $this->grav['base_url_absolute'],
-        ]);
-        $to = $this->config->get('plugins.email.to');
-
-        if (empty($to)) {
-            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_NOT_CONFIGURED'));
-        }
-
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendNotificationEmail($user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
@@ -484,22 +468,9 @@ class Login
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
-        $site_name = $this->config->get('site.title', 'Website');
-        $author = $this->grav['config']->get('site.author.name', '');
-        $fullname = $user->fullname ?: $user->username;
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate(['PLUGIN_LOGIN.WELCOME_EMAIL_BODY',
-            $fullname,
-            $this->grav['base_url_absolute'],
-            $site_name,
-            $author
-        ]);
-        $to = $user->email;
-
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendWelcomeEmail($user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
@@ -525,31 +496,9 @@ class Login
         $user->activation_token = $token . '::' . $expire;
         $user->save();
 
-        $param_sep = $this->config->get('system.param_sep', ':');
-        $activationRoute = $this->getRoute('activate');
-        if (!$activationRoute) {
-            throw new \RuntimeException('User activation route does not exist!');
-        }
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $activationLink = $pages->url($activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username, null, true);
-
-        $site_name = $this->config->get('site.title', 'Website');
-        $author = $this->grav['config']->get('site.author.name', '');
-        $fullname = $user->fullname ?: $user->username;
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT', $site_name]);
-        $content = $this->language->translate(['PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY',
-            $fullname,
-            $activationLink,
-            $site_name,
-            $author
-        ]);
-        $to = $user->email;
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendActivationEmail($user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
@@ -567,33 +516,9 @@ class Login
      */
     public function sendInviteEmail(Invitation $invitation, string $message = null, UserInterface $user = null)
     {
-        /** @var UserInterface $user */
-        $user = $user ?? $this->grav['user'];
-
-        $param_sep = $this->config->get('system.param_sep', ':');
-        $inviteRoute = $this->getRoute('register', true);
-        if (!$inviteRoute) {
-            throw new \RuntimeException('User registration route does not exist!');
-        }
-
-        /** @var Pages $pages */
-        $pages = $this->grav['pages'];
-        $invitationLink = $pages->url("{$inviteRoute}/{$param_sep}{$invitation->token}", null, true);
-
-        $siteName = $this->config->get('site.title', 'Website');
-
-        $subject = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT', $siteName]);
-        $message = $message ?? (string)$this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE']);
-        $content = $this->language->translate(['PLUGIN_LOGIN.INVITATION_EMAIL_BODY',
-            $siteName,
-            $message,
-            $invitationLink,
-            $user->fullname
-        ]);
-        $to = $invitation->email;
-        $sent = EmailUtils::sendEmail($subject, $content, $to);
-
-        if ($sent < 1) {
+        try {
+            Email::sendInvitationEmail($invitation, $message, $user);
+        } catch (\Exception $e) {
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
         }
 
@@ -801,27 +726,15 @@ class Login
      * @param Data|null $config
      * @return bool
      */
-    public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, $config = null)
+    public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, Data $config = null): bool
     {
-        $header = $page->header();
-        $rules = (array)($header->access ?? []);
-
-        if (!$rules && $config !== null && $config->get('parent_acl')) {
-            // If page has no ACL rules, use its parent's rules
-            $parent = $page->parent();
-            while (!$rules and $parent) {
-                $header = $parent->header();
-                $rules = (array)($header->access ?? []);
-                $parent = $parent->parent();
-            }
-        }
-
-        // Continue to the page if it has no ACL rules.
-        if (!$rules) {
+        /** @var PageAuthorizeEvent $event */
+        $event = $this->grav->dispatchEvent(new PageAuthorizeEvent($page, $user, $config));
+        if (!$event->hasProtectedAccess()) {
             return true;
         }
 
-        // All protected pages have a private cache-control. This includes pages which are for guests only.
+        // All access protected pages have a private cache-control. This includes pages which are for guests only.
         $cacheControl = $page->cacheControl();
         if (!$cacheControl) {
             $cacheControl = 'private, no-cache, must-revalidate';
@@ -843,28 +756,12 @@ class Login
         $page->cacheControl($cacheControl);
 
         // Deny access if user has not completed 2FA challenge.
+        $user = $event->user;
         if ($user->authenticated && !$user->authorized) {
-            return false;
+            $event->deny();
         }
 
-        // Continue to the page if user is authorized to access the page.
-        foreach ($rules as $rule => $value) {
-            if (is_int($rule)) {
-                if ($user->authorize($value) === true) {
-                    return true;
-                }
-            } elseif (\is_array($value)) {
-                foreach ($value as $nested_rule => $nested_value) {
-                    if ($user->authorize($rule . '.' . $nested_rule) === Utils::isPositive($nested_value)) {
-                        return true;
-                    }
-                }
-            } elseif ($user->authorize($rule) === Utils::isPositive($value)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $event->isAllowed();
     }
 
     /**

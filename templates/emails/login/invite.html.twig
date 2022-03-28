@@ -1,0 +1,46 @@
+{% extends 'email/base.html.twig' %}
+
+{# Invitation email #}
+
+{%- set subject = 'PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT'|t(site_name) %}
+{%- set message = message ?? 'PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE'|t %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.INVITATION_EMAIL_BODY'|t(site_name, message, invitation_link, actor.fullname)|raw }}
+{%- endblock content -%}
+
+{#
+
+<h1>Account Invitation</h1>
+<p>
+  Hi,
+</p>
+<p>
+  You have been invited to join <b>{{ site_name }}</b>.
+</p>
+<p>
+  {{ message }}
+</p>
+<p>
+  <br/>
+  <a href="{{ invitation_link }}" class="btn-primary">Create Your Account Now</a>
+  <br/>
+  <br/>
+</p>
+<p>
+  Alternatively, copy the following URL into your browser's address bar:
+</p>
+<p class="word-break">
+  <a href="{{ invitation_link }}">{{ invitation_link }}</a>
+</p>
+<p>
+  <br/>
+  Kind regards,
+  <br/>
+  <br/>
+  {{ actor.fullname }}
+</p>
+
+#}

@@ -1,0 +1,41 @@
+{% extends 'email/base.html.twig' %}
+
+{# Welcome email to the new user #}
+
+{%- set subject = 'PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT'|t(site_name) %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.WELCOME_EMAIL_BODY'|t(user.fullname ?? user.username, base_url_absolute, site_name, author)|raw }}
+{%- endblock content -%}
+
+{#
+
+<h1>Account Created</h1>
+<p>
+  Hi {{ user.fullname ?? user.username }},
+</p>
+<p>
+  Your account has been successfully created on <b>{{ site_name }}</b>.
+</p>
+<p>
+  <br/>
+  <a href="{{ base_url_absolute }}" class="btn-primary">Login Now</a>
+  <br/>
+  <br/>
+</p>
+<p>
+  Alternatively, copy the following URL into your browser's address bar:
+</p>
+<p class="word-break">
+  <a href="{{ base_url_absolute }}">{{ base_url_absolute }}</a>
+</p>
+<p>
+  <br/>
+  Kind regards,
+  <br/><br/>
+  {{ author }}
+</p>
+
+#}
