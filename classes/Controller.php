@@ -407,7 +407,7 @@ class Controller
             return true;
         }
 
-        $token = md5(uniqid(mt_rand(), true));
+        $token = md5(uniqid((string)mt_rand(), true));
         $expire = time() + 604800; // next week
 
         $user->reset = $token . '::' . $expire;
