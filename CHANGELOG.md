@@ -1,5 +1,5 @@
 # v3.7.1
-## mm/dd/2022
+## 06/14/2022
 
 1. [](#bugfix)
     * PHP 8.1 fixes in QR code library
