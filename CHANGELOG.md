@@ -2,7 +2,7 @@
 ## mm/dd/2022
 
 1. [](#bugfix)
-    * Nothing yet
+    * PHP 8.1 fixes in QR code library
 
 # v3.7.0
 ## 03/28/2022
