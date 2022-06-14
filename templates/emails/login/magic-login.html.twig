@@ -1,0 +1,46 @@
+{% extends 'email/base.html.twig' %}
+
+{# Magic login link email (login by email link) #}
+
+{%- set subject = 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_SUBJECT'|t(site_name) %}
+{%- set message = message ?? 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_MESSAGE'|t %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_BODY'|t(site_name, message, login_link, actor.fullname)|raw }}
+{%- endblock content -%}
+
+{# https://workos.com/blog/a-guide-to-magic-links
+
+<h1>Account Invitation</h1>
+<p>
+  Hi,
+</p>
+<p>
+  You have been invited to join <b>{{ site_name }}</b>.
+</p>
+<p>
+  {{ message }}
+</p>
+<p>
+  <br/>
+  <a href="{{ login_link }}" class="btn-primary">Create Your Account Now</a>
+  <br/>
+  <br/>
+</p>
+<p>
+  Alternatively, copy the following URL into your browser's address bar:
+</p>
+<p class="word-break">
+  <a href="{{ login_link }}">{{ login_link }}</a>
+</p>
+<p>
+  <br/>
+  Kind regards,
+  <br/>
+  <br/>
+  {{ actor.fullname }}
+</p>
+
+#}

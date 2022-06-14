@@ -1,3 +1,9 @@
+# v3.7.1
+## 06/14/2022
+
+1. [](#bugfix)
+    * PHP 8.1 fixes in QR code library
+
 # v3.7.0
 ## 03/28/2022
 

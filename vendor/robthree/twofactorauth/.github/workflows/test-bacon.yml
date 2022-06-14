@@ -1,4 +1,4 @@
-name: Test
+name: Test Bacon QR Code Provider
 
 on:
   push:
@@ -24,5 +24,7 @@ jobs:
 
     - uses: ramsey/composer-install@v1
 
+    - run: composer require bacon/bacon-qr-code
+
     - run: composer lint
-    - run: composer test
+    - run: composer test testsDependency/BaconQRCodeTest.php
