@@ -165,6 +165,7 @@ class Controller
         $message = $event->getMessage();
         if ($message) {
             $messages->add($t->translate($message), $event->getMessageType());
+            $this->grav['session']->messages = $messages;
         }
 
         $redirect = $event->getRedirect();
