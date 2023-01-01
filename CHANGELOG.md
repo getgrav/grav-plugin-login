@@ -1,9 +1,3 @@
-# v3.7.2
-## mm/dd/2022
-
-1. [](#bugfix)
-    * Fixed issue where **successful login** message was not being persisted to session
-
 # v3.7.1
 ## 06/14/2022
 
