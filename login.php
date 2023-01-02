@@ -1271,7 +1271,6 @@ class LoginPlugin extends Plugin
         /** @var SessionInterface $session */
         $session = $this->grav['session'];
 
-        $this->grav['messages']->add('userLogin()', 'info');
         // Prevent session fixation.
         $session->regenerateId();
 
