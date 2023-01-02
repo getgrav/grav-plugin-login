@@ -1,3 +1,9 @@
+# v3.7.2
+## mm/dd/2023
+
+1. [](#new)
+   * Added new `onBeforeSessionStart()` event to store redirect + messages when session is regenerated during login
+
 # v3.7.1
 ## 06/14/2022
 
