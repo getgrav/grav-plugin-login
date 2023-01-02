@@ -23,6 +23,7 @@ use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Common\Uri;
+use Grav\Events\BeforeSessionStartEvent;
 use Grav\Events\PluginsLoadedEvent;
 use Grav\Events\SessionStartEvent;
 use Grav\Framework\Flex\Interfaces\FlexCollectionInterface;
@@ -62,6 +63,9 @@ class LoginPlugin extends Plugin
     /** @var Invitation|null */
     protected $invitation;
 
+    protected $temp_redirect;
+    protected $temp_messages;
+
     /**
      * @return array
      */
@@ -70,6 +74,7 @@ class LoginPlugin extends Plugin
         return [
             PluginsLoadedEvent::class   => [['onPluginsLoaded', 10]],
             SessionStartEvent::class    => ['onSessionStart', 0],
+            BeforeSessionStartEvent::class => ['onBeforeSessionStart', 0],
             PageAuthorizeEvent::class   => ['onPageAuthorizeEvent', -10000],
             'onPluginsInitialized'      => [['initializeSession', 10000], ['initializeLogin', 1000]],
             'onTask.login.login'        => ['loginController', 0],
@@ -125,12 +130,33 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * @param BeforeSessionStartEvent $event
+     * @return void
+     */
+    public function onBeforeSessionStart(BeforeSessionStartEvent $event): void
+    {
+        $session = $event->session;
+        $this->temp_redirect = $session->redirect_after_login ?? null;
+        $this->temp_messages = $session->messages;
+    }
+
+
+    /**
      * @param SessionStartEvent $event
      * @return void
      */
     public function onSessionStart(SessionStartEvent $event): void
     {
         $session = $event->session;
+
+        if (isset($this->temp_redirect)) {
+            $session->redirect_after_login = $this->temp_redirect;
+            unset($this->temp_redirect);
+        }
+        if (isset($this->temp_messages)) {
+            $session->messages = $this->temp_messages;
+            unset($this->temp_messages);
+        }
 
         $user = $session->user ?? null;
         if ($user && $user->exists() && ($this->config()['session_user_sync'] ?? false)) {
