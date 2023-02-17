@@ -337,7 +337,7 @@ class LoginPlugin extends Plugin
             if ($page) {
                 $header = $page->header();
 
-                $allowed = ($header->login_redirect_here ?? true) === false;
+                $allowed = ($header->login_redirect_here ?? true) === true;
                 if ($allowed && $page->routable()) {
                     $redirect = $page->route();
                     foreach ($uri->params(null, true) as $key => $value) {
