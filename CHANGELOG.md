@@ -1,5 +1,5 @@
 # v3.7.3
-## mm/dd/2023
+## 02/17/2023
 
 1. [](#bugfix)
    * Fixed an issue where user was not being redirected to the correct page after login
