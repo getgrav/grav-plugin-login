@@ -1,3 +1,9 @@
+# v3.7.4
+## mm/dd/2023
+
+1. [](#improved)
+   * Removed `FILTER_SANITIZE_STRING` input filter in favor of `htmlspecialchars(strip_tags())` 
+
 # v3.7.3
 ## 02/17/2023
 
