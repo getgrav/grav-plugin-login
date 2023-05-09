@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.7.3
+version: 3.7.4
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -15,7 +15,7 @@ bugs: https://github.com/getgrav/grav-plugin-login/issues
 license: MIT
 
 dependencies:
-  - { name: grav, version: '>=1.7.38' }
+  - { name: grav, version: '>=1.7.41' }
   - { name: form, version: '>=6.0.0' }
   - { name: email, version: '>=3.1.6' }
 
@@ -309,7 +309,7 @@ form:
                         multiple: true
                         size: large
                         label: PLUGIN_ADMIN.GROUPS
-                        data-options@: '\Grav\Common\User\Group::groupNames'
+                        data-options@: 'Grav\Common\Flex\Types\UserGroups\UserGroupObject::groupNames'
                         classes: fancy
                         help: PLUGIN_LOGIN.GROUPS_HELP
                         validate:

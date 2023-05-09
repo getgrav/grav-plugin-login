@@ -1,3 +1,11 @@
+# v3.7.4
+## 05/09/2023
+
+1. [](#improved)
+   * Removed `FILTER_SANITIZE_STRING` input filter in favor of `htmlspecialchars(strip_tags())` 
+   * Require Grav `v1.7.41` for new  `UserGroupObject::groupNames` to address deprecation message
+   * Updated to BaconQRCode `v2.0.8`
+
 # v3.7.3
 ## 02/17/2023
 
