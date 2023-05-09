@@ -3,6 +3,8 @@
 
 1. [](#improved)
    * Removed `FILTER_SANITIZE_STRING` input filter in favor of `htmlspecialchars(strip_tags())` 
+   * Use new `UserGroupObject::groupNames` to address deprecation message
+   * Updated to BaconQRCode `v2.0.8`
 
 # v3.7.3
 ## 02/17/2023

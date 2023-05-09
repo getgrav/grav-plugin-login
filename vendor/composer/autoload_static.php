@@ -20,9 +20,14 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
             'Grav\\Plugin\\Login\\' => 18,
             'Grav\\Plugin\\Console\\' => 20,
         ),
+        'D' => 
+        array (
+            'DASPRiD\\Enum\\' => 13,
+        ),
         'B' => 
         array (
             'Birke\\' => 6,
+            'BaconQrCode\\' => 12,
         ),
     );
 
@@ -39,19 +44,17 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
         array (
             0 => __DIR__ . '/../..' . '/cli',
         ),
+        'DASPRiD\\Enum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dasprid/enum/src',
+        ),
         'Birke\\' => 
         array (
             0 => __DIR__ . '/..' . '/birke/rememberme/src',
         ),
-    );
-
-    public static $prefixesPsr0 = array (
-        'B' => 
+        'BaconQrCode\\' => 
         array (
-            'BaconQrCode' => 
-            array (
-                0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
-            ),
+            0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
     );
 
@@ -65,7 +68,6 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$prefixesPsr0;
             $loader->classMap = ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366::$classMap;
 
         }, null, ClassLoader::class);
