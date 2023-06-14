@@ -1,5 +1,5 @@
 # v3.7.5
-## mm/dd/2023
+## 06/14/2023
 
 1. [](#bugfix)
    * Sanitized `email` during the "forgot password" process to protect against XSS attacks
