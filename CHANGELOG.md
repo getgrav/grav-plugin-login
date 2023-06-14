@@ -3,7 +3,7 @@
 
 1. [](#bugfix)
    * Sanitized `email` during the "forgot password" process to protect against XSS attacks
-   * Fixed an account enumeration vulneratiblity in forgot password [#293](https://github.com/getgrav/grav-plugin-login/pull/293)
+   * Fixed an account enumeration vulnerability in forgot password [#293](https://github.com/getgrav/grav-plugin-login/pull/293)
 
 # v3.7.4
 ## 05/09/2023
