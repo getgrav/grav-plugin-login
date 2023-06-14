@@ -368,29 +368,6 @@ class Controller
             return true;
         }
 
-        if (!$user || !$user->exists()) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $email]), 'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
-
-            return true;
-        }
-
-        if (empty($user->email)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $email]),
-                'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
-
-            return true;
-        }
-
-        if (empty($user->password) && empty($user->hashed_password)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_PASSWORD', $email]),
-                'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
-
-            return true;
-        }
-
         $from = $config->get('plugins.email.from');
 
         if (empty($from)) {

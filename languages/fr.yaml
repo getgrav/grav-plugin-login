@@ -19,8 +19,6 @@ PLUGIN_LOGIN:
   RESET_INVALID_LINK: "Le lien de réinitialisation utilisé n’est pas valide, veuillez réessayer"
   FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL: "Les instructions pour la réinitialisation de votre mot de passe ont été envoyées par e-mail"
   FORGOT_FAILED_TO_EMAIL: "Impossible d’envoyer les instructions, veuillez réessayer ultérieurement"
-  FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL: "Impossible de réinitialiser le mot de passe pour %s, aucune adresse e-mail n’a été paramétrée"
-  FORGOT_USERNAME_DOES_NOT_EXIST: "L’utilisateur avec le nom d’utilisateur <b>%s</b> n’existe pas"
   FORGOT_EMAIL_NOT_CONFIGURED: "Impossible de réinitialiser le mot de passe. Ce site n’est pas configuré pour envoyer des e-mails"
   FORGOT_EMAIL_SUBJECT: "Demande de réinitialisation de mot de passe %s"
   FORGOT_EMAIL_BODY: "<h1>Réinitialisation de mot de passe</h1><p>%1$s,</p><p>Une demande a été faite sur <b>%4$s</b> pour la réinitialisation de votre mot de passe.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Cliquez ici pour réinitialiser votre mot de passe</a><br /><br /></p><p>Vous pouvez également copier l’URL suivante dans la barre d’adresse de votre navigateur :</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Cordialement,<br /><br />%3$s</p>"
