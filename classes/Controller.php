@@ -351,6 +351,10 @@ class Controller
         $users = $this->grav['accounts'];
 
         $email = $data['email'] ?? '';
+
+        // Sanitize $email
+        $email = htmlspecialchars(strip_tags($email), ENT_QUOTES, 'UTF-8');
+
         $user = !empty($email) ? $users->find($email, ['email']) : null;
 
         /** @var Language $language */
@@ -359,29 +363,6 @@ class Controller
 
         if (!isset($this->grav['Email'])) {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
-
-            return true;
-        }
-
-        if (!$user || !$user->exists()) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $email]), 'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
-
-            return true;
-        }
-
-        if (empty($user->email)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $email]),
-                'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
-
-            return true;
-        }
-
-        if (empty($user->password) && empty($user->hashed_password)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_PASSWORD', $email]),
-                'error');
             $this->setRedirect($this->login->getRoute('forgot') ?? '/');
 
             return true;
