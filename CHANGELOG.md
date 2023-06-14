@@ -1,3 +1,9 @@
+# v3.7.5
+## mm/dd/2023
+
+1. [](#bugfix)
+   * Sanitized `email` during the "forgot password" process to protect against XSS attacks
+
 # v3.7.4
 ## 05/09/2023
 

@@ -351,6 +351,10 @@ class Controller
         $users = $this->grav['accounts'];
 
         $email = $data['email'] ?? '';
+
+        // Sanitize $email
+        $email = htmlspecialchars(strip_tags($email), ENT_QUOTES, 'UTF-8');
+
         $user = !empty($email) ? $users->find($email, ['email']) : null;
 
         /** @var Language $language */
