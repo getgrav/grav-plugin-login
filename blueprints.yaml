@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.7.5
+version: 3.7.6
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
