@@ -1,5 +1,5 @@
 # v3.7.6
-## mm/dd/2023
+## 06/29/2023
 
 1. [](#bugfix)
    * Don't save an empty user file on password reset of non-existing user
