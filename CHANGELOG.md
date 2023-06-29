@@ -1,8 +1,42 @@
-# v3.7.1
-## mm/dd/2022
+# v3.7.6
+## 06/29/2023
 
 1. [](#bugfix)
-    * Nothing yet
+   * Don't save an empty user file on password reset of non-existing user
+
+# v3.7.5
+## 06/14/2023
+
+1. [](#bugfix)
+   * Sanitized `email` during the "forgot password" process to protect against XSS attacks
+   * Fixed an account enumeration vulnerability in forgot password [#293](https://github.com/getgrav/grav-plugin-login/pull/293)
+
+# v3.7.4
+## 05/09/2023
+
+1. [](#improved)
+   * Removed `FILTER_SANITIZE_STRING` input filter in favor of `htmlspecialchars(strip_tags())` 
+   * Require Grav `v1.7.41` for new  `UserGroupObject::groupNames` to address deprecation message
+   * Updated to BaconQRCode `v2.0.8`
+
+# v3.7.3
+## 02/17/2023
+
+1. [](#bugfix)
+   * Fixed an issue where user was not being redirected to the correct page after login
+
+# v3.7.2
+## 01/02/2023
+
+1. [](#new)
+   * Added new `onBeforeSessionStart()` event to store redirect + messages when session is regenerated during login
+   * Requires Grav `1.7.38` for new event availability
+
+# v3.7.1
+## 06/14/2022
+
+1. [](#bugfix)
+    * PHP 8.1 fixes in QR code library
 
 # v3.7.0
 ## 03/28/2022

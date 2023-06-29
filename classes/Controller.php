@@ -347,79 +347,65 @@ class Controller
         $config = $this->grav['config'];
         $data = $this->post;
 
-        /** @var UserCollectionInterface $users */
-        $users = $this->grav['accounts'];
-
-        $email = $data['email'] ?? '';
-        $user = !empty($email) ? $users->find($email, ['email']) : null;
-
         /** @var Language $language */
         $language = $this->grav['language'];
         $messages = $this->grav['messages'];
 
-        if (!isset($this->grav['Email'])) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['accounts'];
+        $email = $data['email'] ?? '';
 
-            return true;
-        }
+        // Sanitize $email
+        $email = htmlspecialchars(strip_tags($email), ENT_QUOTES, 'UTF-8');
 
-        if (!$user || !$user->exists()) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_USERNAME_DOES_NOT_EXIST', $email]), 'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
+        // Find user if they exist
+        $user = $users->find($email, ['email']);
 
-            return true;
-        }
+        if ($user->exists()) {
+            if (!isset($this->grav['Email'])) {
+                $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
+                $this->setRedirect($this->login->getRoute('forgot') ?? '/');
 
-        if (empty($user->email)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_EMAIL', $email]),
-                'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
+                return true;
+            }
 
-            return true;
-        }
+            $from = $config->get('plugins.email.from');
 
-        if (empty($user->password) && empty($user->hashed_password)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_EMAIL_NO_PASSWORD', $email]),
-                'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
+            if (empty($from)) {
+                $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
+                $this->setRedirect($this->login->getRoute('forgot') ?? '/');
 
-            return true;
-        }
+                return true;
+            }
 
-        $from = $config->get('plugins.email.from');
+            $userKey = $user->username;
+            $rateLimiter = $this->login->getRateLimiter('pw_resets');
+            $rateLimiter->registerRateLimitedAction($userKey);
 
-        if (empty($from)) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_EMAIL_NOT_CONFIGURED'), 'error');
-            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
+            if ($rateLimiter->isRateLimited($userKey)) {
+                $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $email, $rateLimiter->getInterval()]), 'error');
+                $this->setRedirect($this->login->getRoute('login') ?? '/');
 
-            return true;
-        }
+                return true;
+            }
 
-        $userKey = $user->username;
-        $rateLimiter = $this->login->getRateLimiter('pw_resets');
-        $rateLimiter->registerRateLimitedAction($userKey);
+            $token = md5(uniqid((string)mt_rand(), true));
+            $expire = time() + 604800; // next week
 
-        if ($rateLimiter->isRateLimited($userKey)) {
-            $messages->add($language->translate(['PLUGIN_LOGIN.FORGOT_CANNOT_RESET_IT_IS_BLOCKED', $email, $rateLimiter->getInterval()]), 'error');
-            $this->setRedirect($this->login->getRoute('login') ?? '/');
+            $user->reset = $token . '::' . $expire;
+            $user->save();
 
-            return true;
-        }
+            try {
+                Email::sendResetPasswordEmail($user);
 
-        $token = md5(uniqid((string)mt_rand(), true));
-        $expire = time() + 604800; // next week
-
-        $user->reset = $token . '::' . $expire;
-        $user->save();
-
-        try {
-            Email::sendResetPasswordEmail($user);
-
+                $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
+            } catch (\Exception $e) {
+                $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
+            }
+        } else {
             $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_INSTRUCTIONS_SENT_VIA_EMAIL'), 'info');
-        } catch (\Exception $e) {
-            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_FAILED_TO_EMAIL'), 'error');
         }
+
 
         $this->setRedirect($this->login->getRoute('login') ?? '/');
 
