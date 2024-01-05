@@ -1,3 +1,11 @@
+# v3.7.7
+## 01/05/2024
+
+1. [](#improved)
+   * Updated French translation [#292](https://github.com/getgrav/grav-plugin-login/pull/292)
+   * Updated Russian translation [#295](https://github.com/getgrav/grav-plugin-login/pull/295)
+   * Prevent session fixation only if initialized [#296](https://github.com/getgrav/grav-plugin-login/pull/296)
+
 # v3.7.6
 ## 06/29/2023
 
