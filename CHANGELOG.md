@@ -1,5 +1,5 @@
 # v3.7.7
-## mm/dd/2023
+## 01/05/2024
 
 1. [](#improved)
    * Updated French translation [#292](https://github.com/getgrav/grav-plugin-login/pull/292)
