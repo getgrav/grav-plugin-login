@@ -389,7 +389,13 @@ class Controller
                 return true;
             }
 
-            $token = md5(uniqid((string)mt_rand(), true));
+            try {
+                $random_number = random_bytes(32);
+            } catch (\Exception $e) {
+                $random_number = mt_rand();
+            }
+
+            $token = md5(uniqid($random_number, true));
             $expire = time() + 604800; // next week
 
             $user->reset = $token . '::' . $expire;

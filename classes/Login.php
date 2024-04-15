@@ -491,7 +491,13 @@ class Login
             throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
         }
 
-        $token = md5(uniqid(mt_rand(), true));
+        try {
+            $random_number = random_bytes(32);
+        } catch (\Exception $e) {
+            $random_number = mt_rand();
+        }
+
+        $token = md5(uniqid($random_number, true));
         $expire = time() + 604800; // next week
         $user->activation_token = $token . '::' . $expire;
         $user->save();
