@@ -3,6 +3,8 @@
 
 1. [](#improved)
    * Use `random_bytes()` for password reset and activation, only fallback to `mt_rand()` if there's a generation error
+   * Added a new `site_host` field in the "Security" section to use in password reset and activation links sent in email. This allows you to avoid any "Password Reset Poisoning" attacks.
+   * Added a new warning in reset and activation emails that shows the "site host" clearly in order to avoid any nefariously sent emails.
 
 # v3.7.7
 ## 01/05/2024

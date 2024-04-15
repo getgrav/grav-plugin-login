@@ -7,6 +7,7 @@
 {%- do email.message.setSubject(subject) %}
 
 {%- block content -%}
+  {{ 'PLUGIN_LOGIN.HOST_WARNING'|t(site_host)|raw }}
   {{ 'PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY'|t(user.fullname, activation_link, site_name, author)|raw }}
 {%- endblock content -%}
 

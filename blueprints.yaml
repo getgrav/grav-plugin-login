@@ -411,6 +411,12 @@ form:
           title: PLUGIN_LOGIN.SECURITY_TAB
 
           fields:
+            site_host:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.SITE_HOST
+              help: PLUGIN_LOGIN.SITE_HOST_HELP
+              placeholder: "https://example.com"
             max_pw_resets_count:
               type: number
               size: x-small
