@@ -492,12 +492,12 @@ class Login
         }
 
         try {
-            $random_number = random_bytes(32);
+            $random_bytes = random_bytes(16);
         } catch (\Exception $e) {
-            $random_number = mt_rand();
+            $random_bytes = mt_rand();
         }
 
-        $token = md5(uniqid($random_number, true));
+        $token = md5(uniqid($random_bytes, true));
         $expire = time() + 604800; // next week
         $user->activation_token = $token . '::' . $expire;
         $user->save();

@@ -390,13 +390,13 @@ class Controller
             }
 
             try {
-                $random_number = random_bytes(32);
+                $random_bytes = random_bytes(16);
             } catch (\Exception $e) {
-                $random_number = mt_rand();
+                $random_bytes = mt_rand();
             }
 
-            $token = md5(uniqid($random_number, true));
-            $expire = time() + 604800; // next week
+            $token = md5(uniqid($random_bytes, true));
+            $expire = time() + 86400; // 24 hours
 
             $user->reset = $token . '::' . $expire;
             $user->save();
