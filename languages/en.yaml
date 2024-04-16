@@ -157,3 +157,6 @@ PLUGIN_LOGIN:
   INVALID_INVITE_EMAILS: "<strong>Error:</strong> An invalid list of emails was provided"
   INVALID_FORM: "<strong>Error:</strong> Invalid form"
   FAILED_TO_SEND_EMAILS: "Failed to send emails to: %s"
+  HOST_WARNING: '<div style="background-color: #FFEDAD; color: #725F1C; border: 1px solid #FFD74E; padding: 10px; margin: 10px 0; border-radius: 5px;">NOTE: If you did not initiate this email or you don''t recognize the originating site: <strong>"%s"</strong> please ignore or delete this email.</div>'
+  SITE_HOST: "Site Host"
+  SITE_HOST_HELP: "For extra security, force this URL to be used in all password reset and activation emails. Leave empty to use the default site URL"

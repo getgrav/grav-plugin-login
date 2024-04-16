@@ -5,7 +5,6 @@ namespace Grav\Plugin\Login;
 use Grav\Common\Config\Config;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
-use Grav\Common\Page\Pages;
 use Grav\Common\User\Interfaces\UserInterface;
 use Grav\Common\Utils;
 use Grav\Plugin\Login\Invitations\Invitation;
@@ -39,9 +38,12 @@ class Email
                 throw new \RuntimeException('User activation route does not exist!');
             }
 
-            /** @var Pages $pages */
-            $pages = Grav::instance()['pages'];
-            $activationLink = $pages->url(
+            $site_host = $config->get('plugins.login.site_host');
+            if (!empty($site_host)) {
+                $activationRoute = rtrim($site_host, '/') . '/' . ltrim($activationRoute, '/');
+            }
+
+            $activationLink = Utilis::url(
                 $activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username,
                 null,
                 true
@@ -89,11 +91,14 @@ class Email
                 throw new \RuntimeException('Password reset route does not exist!');
             }
 
-            /** @var Pages $pages */
-            $pages = Grav::instance()['pages'];
-            $resetLink = $pages->url(
+            $site_host = static::getConfig()->get('plugins.login.site_host');
+            if (!empty($site_host)) {
+                $resetRoute = rtrim($site_host, '/') . '/' . ltrim($resetRoute, '/');
+            }
+
+            $resetLink = Utils::url(
                 "{$resetRoute}/task{$param_sep}login.reset/token{$param_sep}{$token}/user{$param_sep}{$user->username}/nonce{$param_sep}" . Utils::getNonce('reset-form'),
-                null,
+                true,
                 true
             );
 
@@ -190,9 +195,7 @@ class Email
                 throw new \RuntimeException('User registration route does not exist!');
             }
 
-            /** @var Pages $pages */
-            $pages = Grav::instance()['pages'];
-            $invitationLink = $pages->url("{$inviteRoute}/{$param_sep}{$invitation->token}", null, true);
+            $invitationLink = Utils::url("{$inviteRoute}/{$param_sep}{$invitation->token}", true, true);
 
             $context = [
                 'invitation_link' => $invitationLink,
@@ -218,11 +221,17 @@ class Email
 
         $config = static::getConfig();
 
+        $site_host = $config->get('plugins.login.site_host');
+        if (empty($site_host)) {
+            $site_host = Grav::instance()['uri']->host();
+        }
+
         // Twig context.
         $context += [
             'actor' => $actor,
             'user' => $user,
             'site_name' => $config->get('site.title', 'Website'),
+            'site_host' => $site_host,
             'author' => $config->get('site.author.name', ''),
         ];
 

@@ -174,6 +174,8 @@ dynamic_page_visibility: false              # Integrate access into page visibil
 parent_acl: false                           # Look to parent `access` rules for access requirements
 protect_protected_page_media: false         # Take `access` rules into account when directly accessing a page's media
 
+site_host:                                  # Optionally used in password reset and activation emails, to avoid "password poisoning attacks", this should be the URL of your site including the protocol.  e.g. https://foo.com
+
 rememberme:
   enabled: true                             # Enable 'remember me' functionality
   timeout: 604800                           # Timeout in seconds. Defaults to 1 week
@@ -426,6 +428,10 @@ user_registration:
     send_notification_email: false          # Send an email to the site administrator to indicate a user has registered
     send_welcome_email: false               # Send a welcome email to the user (probably should not be used with `send_activation_email`
 ```
+
+## Email Security Considerations
+
+For increased security and to deter users from being tricked into resetting their passwords or activating their accounts on 'fake' sites utilizing a [Password Poisoning Attack](https://portswigger.net/web-security/host-header/exploiting/password-reset-poisoning), you can now set the `site_host` property in the "Security" tab of the login properties, (e.g. `https://foo.com`) to ensure the users are sent to the original site only.
 
 ## Sending an activation email
 
