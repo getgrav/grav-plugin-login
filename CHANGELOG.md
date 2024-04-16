@@ -1,5 +1,5 @@
 # v3.7.8
-## mm/dd/2024
+## 04/16/2024
 
 1. [](#improved)
    * Use `random_bytes()` for password reset and activation, only fallback to `mt_rand()` if there's a generation error
