@@ -43,7 +43,7 @@ class Email
                 $activationRoute = rtrim($site_host, '/') . '/' . ltrim($activationRoute, '/');
             }
 
-            $activationLink = Utilis::url(
+            $activationLink = Utils::url(
                 $activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username,
                 null,
                 true

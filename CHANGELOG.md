@@ -1,9 +1,15 @@
+# v3.7.8.1
+## 04/19/2024
+
+1. [](#bugfix)
+    * Fixed a typo in `Email::sendActivationEmail()` [#303](https://github.com/getgrav/grav-plugin-login/issues/303)
+
 # v3.7.8
 ## 04/16/2024
 
 1. [](#improved)
-   * Use `random_bytes()` for password reset and activation, only fallback to `mt_rand()` if there's a generation error
-   * Added a new `site_host` field in the "Security" section to use in password reset and activation links sent in email. This allows you to avoid any "Password Reset Poisoning" attacks.
+   * Use `random_bytes()` for password reset and activation, only fallback to `mt_rand()` if there's a generation error - discovered by [Fortbridge](https://fortbridge.co.uk)
+   * Added a new `site_host` field in the "Security" section to use in password reset and activation links sent in email. This allows you to avoid any "Password Reset Poisoning" attacks. - discovered by [Fortbridge](https://fortbridge.co.uk)
    * Added a new warning in reset and activation emails that shows the "site host" clearly in order to avoid any nefariously sent emails.
 
 # v3.7.7
