@@ -1,3 +1,9 @@
+# v3.7.9
+## 05/15/2024
+
+1. [](#improved)
+   * Added default `site_host:` entry to `login.yaml` configuration file
+
 # v3.7.8.1
 ## 04/19/2024
 
