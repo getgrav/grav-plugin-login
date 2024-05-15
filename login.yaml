@@ -4,6 +4,7 @@ redirect_to_login: false                    # If you try to access a page you do
 redirect_after_login: false                 # Path to redirect to after a successful login
 redirect_after_logout: true                 # Path to redirect to after a successful logout
 session_user_sync: false                    # Sync session user with changes in stored user file
+site_host:                                  # Site host to use for email links. Enhances security by ensuring links are to the correct host (e.g. https://foo.com)
 
 route: '/login'                             # Specific route for Login page (default is '/login')
 route_after_login: '/'                      # Route to go to after login if enabled
