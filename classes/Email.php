@@ -18,7 +18,7 @@ class Email
      * @return void
      * @throws \Exception
      */
-    public static function sendActivationEmail(UserInterface $user, UserInterface $actor = null): void
+    public static function sendActivationEmail(UserInterface $user, ?UserInterface $actor = null): void
     {
         $email = $user->email;
         $token = (string)$user->get('activation_token', '');
@@ -73,7 +73,7 @@ class Email
      * @return void
      * @throws \Exception
      */
-    public static function sendResetPasswordEmail(UserInterface $user, UserInterface $actor = null): void
+    public static function sendResetPasswordEmail(UserInterface $user, ?UserInterface $actor = null): void
     {
         $email = $user->email;
         $token = (string)$user->get('reset', '');
@@ -125,7 +125,7 @@ class Email
      * @return void
      * @throws \Exception
      */
-    public static function sendWelcomeEmail(UserInterface $user, UserInterface $actor = null): void
+    public static function sendWelcomeEmail(UserInterface $user, ?UserInterface $actor = null): void
     {
         if (!$user->email) {
             return;
@@ -152,7 +152,7 @@ class Email
      * @return void
      * @throws \Exception
      */
-    public static function sendNotificationEmail(UserInterface $user, UserInterface $actor = null): void
+    public static function sendNotificationEmail(UserInterface $user, ?UserInterface $actor = null): void
     {
         try {
             $to = static::getConfig()->get('plugins.email.to');
@@ -181,7 +181,7 @@ class Email
      * @return void
      * @throws \Exception
      */
-    public static function sendInvitationEmail(Invitation $invitation, string $message = null, UserInterface $actor = null): void
+    public static function sendInvitationEmail(Invitation $invitation, ?string $message = null, ?UserInterface $actor = null): void
     {
         if (!$invitation->email) {
             return;
@@ -215,7 +215,7 @@ class Email
         }
     }
 
-    protected static function sendEmail(string $template, array $context, array $params, UserInterface $user = null, UserInterface $actor = null): void
+    protected static function sendEmail(string $template, array $context, array $params, ?UserInterface $user = null, ?UserInterface $actor = null): void
     {
         $actor = $actor ?? static::getUser();
 

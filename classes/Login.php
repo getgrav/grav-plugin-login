@@ -311,7 +311,7 @@ class Login
      * @param string|null $ip
      * @return int Return positive number if rate limited, otherwise return 0.
      */
-    public function checkLoginRateLimit(string $username, string $ip = null): int
+    public function checkLoginRateLimit(string $username, ?string $ip = null): int
     {
         $ipKey = $this->getIpKey($ip);
         $rateLimiter = $this->getRateLimiter('login_attempts');
@@ -330,7 +330,7 @@ class Login
      * @param string $username
      * @param string|null $ip
      */
-    public function resetLoginRateLimit(string $username, string $ip = null): void
+    public function resetLoginRateLimit(string $username, ?string $ip = null): void
     {
         $ipKey = $this->getIpKey($ip);
         $rateLimiter = $this->getRateLimiter('login_attempts');
@@ -341,7 +341,7 @@ class Login
      * @param string|null $ip
      * @return string
      */
-    public function getIpKey(string $ip = null): string
+    public function getIpKey(?string $ip = null): string
     {
         if (null === $ip) {
             $ip = Uri::ip();
@@ -520,7 +520,7 @@ class Login
      * @return bool True if the action was performed.
      * @throws \RuntimeException
      */
-    public function sendInviteEmail(Invitation $invitation, string $message = null, UserInterface $user = null)
+    public function sendInviteEmail(Invitation $invitation, ?string $message = null, ?UserInterface $user = null)
     {
         try {
             Email::sendInvitationEmail($invitation, $message, $user);
@@ -623,7 +623,7 @@ class Login
      * @param PageInterface|null $page
      * @return PageInterface|null
      */
-    public function getPage(string $type, string $route = null, PageInterface $page = null): ?PageInterface
+    public function getPage(string $type, ?string $route = null, ?PageInterface $page = null): ?PageInterface
     {
         $route = $route ?? $this->getRoute($type, true);
         if (null === $route) {
@@ -663,7 +663,7 @@ class Login
      * @param PageInterface|null $page
      * @return PageInterface|null
      */
-    public function addPage(string $type, string $route = null, PageInterface $page = null): ?PageInterface
+    public function addPage(string $type, ?string $route = null, ?PageInterface $page = null): ?PageInterface
     {
         $page = $this->getPage($type, $route, $page);
         if (null === $page) {
@@ -685,7 +685,7 @@ class Login
      * @param bool|null $enabled
      * @return string|null Returns route or null if the route has been disabled.
      */
-    public function getRoute(string $type, bool $enabled = null): ?string
+    public function getRoute(string $type, ?bool $enabled = null): ?string
     {
         switch ($type) {
             case 'login':
@@ -732,7 +732,7 @@ class Login
      * @param Data|null $config
      * @return bool
      */
-    public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, Data $config = null): bool
+    public function isUserAuthorizedForPage(UserInterface $user, PageInterface $page, ?Data $config = null): bool
     {
         /** @var PageAuthorizeEvent $event */
         $event = $this->grav->dispatchEvent(new PageAuthorizeEvent($page, $user, $config));
