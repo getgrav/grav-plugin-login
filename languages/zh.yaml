@@ -21,6 +21,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "%s 的密码重置请求"
   FORGOT_EMAIL_BODY: "<h1>密码充值</h1><p>尊敬的 %1$s,</p><p>我们收到一个重置您的 <b>%4$s</b> 密码的请求。</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">点击这里进行重置密码</a><br /><br /></p><p>另外，您也可以复制下面的链接到浏览器地址栏中访问：</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />此致<br /><br />%3$s</p>"
   SESSION: "&ldquo;记住登录&rdquo;-Session"
+  FORGOT_BUTTON_ENABLED: 忘记按钮
+  FORGOT_BUTTON_ENABLED_HELP: 在登录表单中启用忘记按钮
   REMEMBER_ME: "记住登录"
   REMEMBER_ME_HELP: "设置浏览器上的持久cookie以允许会话之间的持久登录身份验证。"
   REMEMBER_ME_STOLEN_COOKIE: "其他人已经使用您的登录信息来访问这个页面！所有会话都已注销。请使用您的凭证登录并检查您的数据。"

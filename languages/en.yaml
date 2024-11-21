@@ -24,6 +24,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "%s Password Reset Request"
   FORGOT_EMAIL_BODY: "<h1>Password Reset</h1><p>Dear %1$s,</p><p>A request was made on <b>%4$s</b> to reset your password.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Click this to reset your password</a><br /><br /></p><p>Alternatively, copy the following URL into your browser's address bar:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Kind regards,<br /><br />%3$s</p>"
   SESSION: "&ldquo;Remember Me&rdquo;-Session"
+  FORGOT_BUTTON_ENABLED: Forgot Button
+  FORGOT_BUTTON_ENABLED_HELP: Enable Forgot Button in Login Form
   REMEMBER_ME: "Remember Me"
   REMEMBER_ME_HELP: "Sets a persistent cookie on your browser to allow persistent-login authentication between sessions."
   REMEMBER_ME_STOLEN_COOKIE: "Someone else has used your login information to access this page! All sessions were logged out. Please log in with your credentials and check your data."

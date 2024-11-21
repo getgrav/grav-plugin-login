@@ -24,6 +24,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "%s slaptažodžio atstatymo užklausa"
   FORGOT_EMAIL_BODY: "<h1>Slaptažodis atstatytas</h1><p>Miela(s) %1$s,</p><p><b>%4$s</b> buvo gauta užklausa jūsų slaptažodžio atstatymui.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Paspauskite čia norėdami atstatyti slaptažodį</a><br /><br /></p><p>Taip pat galite nukopijuoti sekančią nuorodą į savo naršyklės adreso juostą:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Linkėjimai,<br /><br />%3$s</p>"
   SESSION: "&ldquo;Prisiminti mane&rdquo;-sesija"
+  FORGOT_BUTTON_ENABLED: Pamirštas mygtukas
+  FORGOT_BUTTON_ENABLED_HELP: Įjungti pamirštą mygtuką prisijungimo formoje
   REMEMBER_ME: "Prisiminti"
   REMEMBER_ME_HELP: "Nustato sausainiuką (Cookie) jūsų naršyklėje, kad būtų palaikomas pastovus prisijungimas tarp sesijų."
   REMEMBER_ME_STOLEN_COOKIE: "Kažkas pasinaudojo jūsų prisijungimo informacija šioje svetainėje! Visos sesijos buvo atjungtos. Prašome prisijungti su savo prisijungimais ir patikrinti duomenis."

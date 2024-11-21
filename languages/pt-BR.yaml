@@ -21,6 +21,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "%s requer recuperação da senha"
   FORGOT_EMAIL_BODY: "<h1>Recuperação da Senha</h1><p>Olá %1$s,</p><p>Foi feito um pedido no <b>%4$s</b> para recuperar sua senha.</p><p><br /><a href=\"%2$s\" class=\"btn btn-primary\">Clique aqui para recuperar sua senha</a><br /><br /></p><p>Como alternativa, copie a seguinte URL na barra de endereços do navegador:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Atenciosamente,<br /><br />%3$s</p>"
   SESSION: "&ldquo;Lembrar-me&rdquo;-Session"
+  FORGOT_BUTTON_ENABLED: Botão Esquecido
+  FORGOT_BUTTON_ENABLED_HELP: Habilitar Botão Esquecido no Formulário de Login
   REMEMBER_ME: "Lembrar-me"
   REMEMBER_ME_HELP: "Defina um cookie persistente no seu navegador para permitir a autenticação de login entre as sessões."
   REMEMBER_ME_STOLEN_COOKIE: "Outra pessoa usou seu login para acessar essa página. Todas as sessões foram encerradas. Por favor, entre com seu login e confirme seus dados."	

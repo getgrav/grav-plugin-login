@@ -27,6 +27,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "Demande de réinitialisation de mot de passe %s"
   FORGOT_EMAIL_BODY: "<h1>Réinitialisation de mot de passe</h1><p>%1$s,</p><p>Une demande a été faite sur <b>%4$s</b> pour la réinitialisation de votre mot de passe.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Cliquez ici pour réinitialiser votre mot de passe</a><br /><br /></p><p>Vous pouvez également copier l’URL suivante dans la barre d’adresse de votre navigateur :</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Cordialement,<br /><br />%3$s</p>"
   SESSION: "Session - &ldquo;Se souvenir de moi&rdquo;"
+  FORGOT_BUTTON_ENABLED: Bouton Oublié
+  FORGOT_BUTTON_ENABLED_HELP: Activer le Bouton Oublié dans le Formulaire de Connexion
   REMEMBER_ME: "Se souvenir de moi"
   REMEMBER_ME_HELP: "Définit un cookie persistant sur votre navigateur autorisant l’authentification par connexion persistante entre les sessions."
   REMEMBER_ME_STOLEN_COOKIE: "Quelqu’un d’autre a utilisé vos informations de connexion pour accéder à cette page ! Toutes les sessions ont été déconnectées. Veuillez vous connecter avec vos identifiants et vérifier vos données."

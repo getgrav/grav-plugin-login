@@ -156,6 +156,22 @@ form:
               validate:
                 type: bool
 
+            forgot_button_enabled:
+              type: section
+              title: PLUGIN_LOGIN.FORGOT_BUTTON_ENABLED
+            
+              fields:
+                forgot_button.enabled:
+                  type: toggle
+                  label: PLUGIN_ADMIN.ENABLED
+                  help: PLUGIN_LOGIN.FORGOT_BUTTON_ENABLED_HELP
+                  highlight: 1
+                  options:
+                      1: PLUGIN_ADMIN.YES
+                      0: PLUGIN_ADMIN.NO
+                  validate:
+                      type: bool
+
             rememberme:
               type: section
               title: PLUGIN_LOGIN.REMEMBER_ME
@@ -164,7 +180,7 @@ form:
                 rememberme.enabled:
                   type: toggle
                   label: PLUGIN_ADMIN.ENABLED
-                  help: PLUGIN_ADMIN.SESSION_ENABLED_HELP
+                  help: PLUGIN_LOGIN.REMEMBER_ME_HELP
                   highlight: 1
                   options:
                       1: PLUGIN_ADMIN.YES

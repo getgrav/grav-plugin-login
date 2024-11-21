@@ -54,13 +54,14 @@
                             </div>
                         </div>
                     {% endif %}
-
-                    {% set forgot_button = form.login.forgot_button ?? true %}
-                    {% set forgot_route = grav.login.getRoute('forgot') %}
-                    {% if forgot_button and forgot_route %}
-                    <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ forgot_route }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
+                    
+                    {% if config.plugins.login.forgot_button.enabled and config.plugins.login.forgot.route_forgot ?? true %}
+                        {% set forgot_button = form.login.forgot_button ?? true %}
+                        {% set forgot_route = grav.login.getRoute('forgot') %}
+                        {% if forgot_button and forgot_route %}
+                        <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ forgot_route }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
+                        {% endif %}
                     {% endif %}
-
                     <button class="{{ form_button_classes ?: 'button primary' }}" type="submit"  name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
                 </div>
 

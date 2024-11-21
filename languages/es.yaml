@@ -25,6 +25,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "%s solicitud de restauración de contraseña"
   FORGOT_EMAIL_BODY: "<h1>Restauración de contraseña</h1><p>Estimado/a %1$s,</p><p>Se ha realizado una petición de restauración de contraseña en <b>%4$s</b>.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Pulse aquí para restaurar su contraseña</a><br /><br /></p><p>Como alternativa puede copiar la siguiente URL en la barra de direcciones de su navegador:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Saludos cordiales,<br /><br />%3$s</p>"
   SESSION: "&ldquo;Recuérdame&rdquo;-Sesión"
+  FORGOT_BUTTON_ENABLED: Botón de Olvidado
+  FORGOT_BUTTON_ENABLED_HELP: Habilitar el Botón de Olvidado en el Formulario de Inicio de Sesión
   REMEMBER_ME: "Recuérdame"
   REMEMBER_ME_HELP: "Fija una cookie persistente en su navegador para permitir autenticación persistente entre sesiones."
   REMEMBER_ME_STOLEN_COOKIE: "Alguien ha usado su información de acceso para acceder a este sitio. Se han cerrado todas las sesiones. Vuelva a acceder con sus credenciales y compruebe sus datos."

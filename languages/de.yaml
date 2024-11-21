@@ -24,6 +24,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_NOT_CONFIGURED: "Das Passwort kann nicht zurückgesetzt werden, da die Website ist nicht zum Versenden von E-Mails konfiguriert."
   FORGOT_EMAIL_SUBJECT: "Passwort zurückzusetzen für %s"
   FORGOT_EMAIL_BODY: "<h1>Passwort Zurücksetzen</h1><p>Hallo %1$s,</p><p>Es wurde ein Anfrage auf <b>%4$s</b> gestellt, um Ihr Passwort zu ändern.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Klicken Sie hier, um Ihr Passwort zurückzusetzen</a><br /><br /></p><p>Alternativ kopieren Sie die folgende URL in die Adresszeile Ihres Browsers:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Mit freundlichen Grüßen,<br /><br />%3$s</p>"
+  FORGOT_BUTTON_ENABLED: Vergessen-Button
+  FORGOT_BUTTON_ENABLED_HELP: Vergessen-Button im Anmeldeformular aktivieren
   REMEMBER_ME: "Angemeldet bleiben"
   REMEMBER_ME_HELP: "Speichert einen Cookie im Browser, welcher eine fortwährende Anmeldung sicherstellt."
   REMEMBER_ME_STOLEN_COOKIE: "Jemand anderes hat Ihre Zugangsdaten verwendet, um auf diese Seite zuzugreifen! Alle Sitzungen wurden ausgeloggt. Bitte melden Sie sich mit Ihren Zugangsdaten an und überprüfen Sie Ihre Daten."

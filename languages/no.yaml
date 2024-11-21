@@ -25,6 +25,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "Forespørsel om tilbakestilling av passord for %s"
   FORGOT_EMAIL_BODY: "<h1>Tilbekestilling av passord</h1><p>%1$s,</p><p>En forespørsel om tilbakestilling av passord ble gjort på <b>%4$s</b>.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Klikk her for å tilbakestille passordet ditt</a><br /><br /></p><p>Du kan også kopiere følgende nettadresse til nettleserens adressefelt:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Vennlig hilsen,<br /><br />%3$s</p>"
   SESSION: "&ldquo;Husk meg&rdquo;-Sesjon"
+  FORGOT_BUTTON_ENABLED: Glemt knapp
+  FORGOT_BUTTON_ENABLED_HELP: Aktiver glemt knapp i påloggingsskjemaet
   REMEMBER_ME: "Husk meg"
   REMEMBER_ME_HELP: "Setter en informasjonskapsel i nettleseren din for å tillate persistent innlogging."
   REMEMBER_ME_STOLEN_COOKIE: "Din innloggingsinformasjon har blitt benyttet et annet sted. Alle sesjoner har blitt logget ut. Vennligst logg inn med brukernavn og passord, og sjekk din brukerinformasjon."

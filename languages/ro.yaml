@@ -25,6 +25,8 @@ PLUGIN_LOGIN:
   FORGOT_EMAIL_SUBJECT: "%s Cerere de resetare a parolei"
   FORGOT_EMAIL_BODY: "<h1>Resetare parolă</h1><p> Dragă %1$s,</p><p>O cerere de resetare a parolei a fost făcută în data de <b>%4$s</b>.</p><p><br /><a href=\"%2$s\" class=\"btn-primary\">Apasă aici pentru a reseta parola</a><br /><br /></p><p>Alternativ, copiază URL de mai jos în bara de adrese a browser-ului favorit:</p> <p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p> <p><br />Cu respect,<br /><br />%3$s</p>"
   SESSION: "&ldquo;Ține-mă minte&rdquo;-Sesiune"
+  FORGOT_BUTTON_ENABLED: Buton uitat
+  FORGOT_BUTTON_ENABLED_HELP: Activează butonul uitat în formularul de autentificare
   REMEMBER_ME: "Ține-mă minte"
   REMEMBER_ME_HELP: "Setează o cookie în browserul Dvs. ce permite menținerea datelor de logare între sesiuni."
   REMEMBER_ME_STOLEN_COOKIE: "Altcineva a folosit darele Dvs de logare pentru a accesa această pagină! Toate sesiunile au fost deconectate. Vă rugăm să vă logați cu datele Dvs. și să verificați toate detaliile. "
