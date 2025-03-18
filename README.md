@@ -1,6 +1,6 @@
 # Grav Login Plugin
 
-The **login plugin** for [Grav](http://github.com/getgrav/grav) adds login, basic ACL, and session wide messages to Grav.  It is designed to provide a way to secure front-end and admin content throughout Grav.
+The **login plugin** for [Grav](https://github.com/getgrav/grav) adds login, basic ACL, and session wide messages to Grav.  It is designed to provide a way to secure front-end and admin content throughout Grav.
 
 # Installation
 
