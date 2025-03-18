@@ -19,7 +19,6 @@
         }
     ],
     "support": {
-        "email": "support@example.org",
         "issues": "https://github.com/getgrav/grav-plugin-login/issues",
         "irc": "https://gitter.im/getgrav/grav",
         "forum": "http://getgrav.org/forum",
