@@ -85,7 +85,7 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 
 ### Commands
 
-| Command       | Arguments                            | Explination                |
+| Command       | Arguments                            | Explanation                |
 |---------------|--------------------------------------|----------------------------|
 |`new-user`||Creates a new user (creates file in `user/accounts/`)
 || [ -u, --user=USER ]               | The username.                                                   |
