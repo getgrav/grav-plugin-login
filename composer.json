@@ -21,8 +21,8 @@
     "support": {
         "email": "support@example.org",
         "issues": "https://github.com/getgrav/grav-plugin-login/issues",
-        "irc": "https://gitter.im/getgrav/grav",
-        "forum": "http://getgrav.org/forum",
+        "chat": "https://getgrav.org/discord",
+        "forum": "https://getgrav.org/forum",
         "docs": "https://github.com/getgrav/grav-plugin-login/blob/master/README.md"
     },
     "require": {
