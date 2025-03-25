@@ -8,7 +8,7 @@ icon: sign-in
 author:
   name: Team Grav
   email: devs@getgrav.org
-  url: http://getgrav.org
+  url: https://getgrav.org
 homepage: https://github.com/getgrav/grav-plugin-login
 keywords: login, authentication, admin, security
 bugs: https://github.com/getgrav/grav-plugin-login/issues
