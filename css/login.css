@@ -50,8 +50,8 @@
     margin: 1rem 0;
 }
 
-#grav-login .delimiter:after,
-#grav-login .delimiter:before {
+#grav-login .delimiter::after,
+#grav-login .delimiter::before {
     background-color: #777777;
     content: "";
     height: 1px;
@@ -59,12 +59,12 @@
     top: 0.8rem;
     width: 40%;
 }
-#grav-login .delimiter:before {
-    background-image: -moz-linear-gradient(right center , #777777, #ffffff);
+#grav-login .delimiter::before {
+    background-image: linear-gradient(to right, #777777, #ffffff);
     left: 0;
 }
-#grav-login .delimiter:after {
-    background-image: -moz-linear-gradient(left center , #777777, #ffffff);
+#grav-login .delimiter::after {
+    background-image: linear-gradient(to left, #777777, #ffffff);
     right: 0;
 }
 
