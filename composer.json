@@ -19,16 +19,15 @@
         }
     ],
     "support": {
-        "email": "support@example.org",
         "issues": "https://github.com/getgrav/grav-plugin-login/issues",
-        "irc": "https://gitter.im/getgrav/grav",
-        "forum": "http://getgrav.org/forum",
+        "chat": "https://getgrav.org/discord",
+        "forum": "https://getgrav.org/forum",
         "docs": "https://github.com/getgrav/grav-plugin-login/blob/master/README.md"
     },
     "require": {
         "php": ">=7.3.6",
         "ext-json": "*",
-        "birke/rememberme": "^1.0",
+        "mober/rememberme": "^1.0",
         "robthree/twofactorauth": "^1.8",
         "bacon/bacon-qr-code": "^2.0"
     },

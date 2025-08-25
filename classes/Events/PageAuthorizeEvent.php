@@ -37,7 +37,7 @@ class PageAuthorizeEvent extends Event
      * @param UserInterface $user
      * @param Data|null $config
      */
-    public function __construct(PageInterface $page, UserInterface $user, Data $config = null)
+    public function __construct(PageInterface $page, UserInterface $user, ?Data $config = null)
     {
         $this->page = $page;
         $this->user = $user;
