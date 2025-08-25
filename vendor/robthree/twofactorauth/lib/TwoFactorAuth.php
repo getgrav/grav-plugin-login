@@ -60,7 +60,7 @@ class TwoFactorAuth
      * @param ?IRNGProvider $rngprovider
      * @param ?ITimeProvider $timeprovider
      */
-    public function __construct($issuer = null, $digits = 6, $period = 30, $algorithm = 'sha1', IQRCodeProvider $qrcodeprovider = null, IRNGProvider $rngprovider = null, ITimeProvider $timeprovider = null)
+    public function __construct($issuer = null, $digits = 6, $period = 30, $algorithm = 'sha1', ?IQRCodeProvider $qrcodeprovider = null, ?IRNGProvider $rngprovider = null, ?ITimeProvider $timeprovider = null)
     {
         $this->issuer = $issuer;
         if (!is_int($digits) || $digits <= 0) {
@@ -214,7 +214,7 @@ class TwoFactorAuth
      *
      * @return void
      */
-    public function ensureCorrectTime(array $timeproviders = null, $leniency = 5)
+    public function ensureCorrectTime(?array $timeproviders = null, $leniency = 5)
     {
         if ($timeproviders === null) {
             $timeproviders = array(

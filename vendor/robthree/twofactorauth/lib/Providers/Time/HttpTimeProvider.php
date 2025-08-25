@@ -23,7 +23,7 @@ class HttpTimeProvider implements ITimeProvider
      * @param string $expectedtimeformat
      * @param array $options
      */
-    public function __construct($url = 'https://google.com', $expectedtimeformat = 'D, d M Y H:i:s O+', array $options = null)
+    public function __construct($url = 'https://google.com', $expectedtimeformat = 'D, d M Y H:i:s O+', ?array $options = null)
     {
         $this->url = $url;
         $this->expectedtimeformat = $expectedtimeformat;
