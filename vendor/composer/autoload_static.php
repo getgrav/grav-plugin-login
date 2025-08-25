@@ -50,7 +50,7 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
         ),
         'Birke\\' => 
         array (
-            0 => __DIR__ . '/..' . '/birke/rememberme/src',
+            0 => __DIR__ . '/..' . '/mober/rememberme/src',
         ),
         'BaconQrCode\\' => 
         array (

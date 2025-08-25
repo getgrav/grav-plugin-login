@@ -58,17 +58,70 @@
             "install-path": "../bacon/bacon-qr-code"
         },
         {
-            "name": "birke/rememberme",
+            "name": "dasprid/enum",
+            "version": "1.0.6",
+            "version_normalized": "1.0.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/DASPRiD/Enum.git",
+                "reference": "8dfd07c6d2cf31c8da90c53b83c026c7696dda90"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/DASPRiD/Enum/zipball/8dfd07c6d2cf31c8da90c53b83c026c7696dda90",
+                "reference": "8dfd07c6d2cf31c8da90c53b83c026c7696dda90",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1 <9.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^7 || ^8 || ^9 || ^10 || ^11",
+                "squizlabs/php_codesniffer": "*"
+            },
+            "time": "2024-08-09T14:30:48+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "DASPRiD\\Enum\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Ben Scholzen 'DASPRiD'",
+                    "email": "mail@dasprids.de",
+                    "homepage": "https://dasprids.de/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP 7.1 enum implementation",
+            "keywords": [
+                "enum",
+                "map"
+            ],
+            "support": {
+                "issues": "https://github.com/DASPRiD/Enum/issues",
+                "source": "https://github.com/DASPRiD/Enum/tree/1.0.6"
+            },
+            "install-path": "../dasprid/enum"
+        },
+        {
+            "name": "mober/rememberme",
             "version": "1.0.5",
             "version_normalized": "1.0.5.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/gbirke/rememberme.git",
+                "url": "https://github.com/m-ober/rememberme.git",
                 "reference": "810473852eb4823098e47e23376a19b77ba0c165"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gbirke/rememberme/zipball/810473852eb4823098e47e23376a19b77ba0c165",
+                "url": "https://api.github.com/repos/m-ober/rememberme/zipball/810473852eb4823098e47e23376a19b77ba0c165",
                 "reference": "810473852eb4823098e47e23376a19b77ba0c165",
                 "shasum": ""
             },
@@ -103,60 +156,11 @@
                 "remember",
                 "security"
             ],
-            "install-path": "../birke/rememberme"
-        },
-        {
-            "name": "dasprid/enum",
-            "version": "1.0.4",
-            "version_normalized": "1.0.4.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/DASPRiD/Enum.git",
-                "reference": "8e6b6ea76eabbf19ea2bf5b67b98e1860474012f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/DASPRiD/Enum/zipball/8e6b6ea76eabbf19ea2bf5b67b98e1860474012f",
-                "reference": "8e6b6ea76eabbf19ea2bf5b67b98e1860474012f",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1 <9.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^7 | ^8 | ^9",
-                "squizlabs/php_codesniffer": "*"
-            },
-            "time": "2023-03-01T18:44:03+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "psr-4": {
-                    "DASPRiD\\Enum\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-2-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Ben Scholzen 'DASPRiD'",
-                    "email": "mail@dasprids.de",
-                    "homepage": "https://dasprids.de/",
-                    "role": "Developer"
-                }
-            ],
-            "description": "PHP 7.1 enum implementation",
-            "keywords": [
-                "enum",
-                "map"
-            ],
             "support": {
-                "issues": "https://github.com/DASPRiD/Enum/issues",
-                "source": "https://github.com/DASPRiD/Enum/tree/1.0.4"
+                "issues": "https://github.com/m-ober/rememberme/issues",
+                "source": "https://github.com/m-ober/rememberme/tree/1.0.5"
             },
-            "install-path": "../dasprid/enum"
+            "install-path": "../mober/rememberme"
         },
         {
             "name": "paragonie/random_compat",
