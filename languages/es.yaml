@@ -42,7 +42,7 @@ PLUGIN_LOGIN:
   USER_NEEDS_EMAIL_FIELD: "El usuario necesita un campo de email."
   EMAIL_SENDING_FAILURE: "Ha ocurrido un error al enviar el email."
   ACTIVATION_EMAIL_SUBJECT: "Active su cuenta en %s"
-  ACTIVATION_EMAIL_BODY: "<h1>%Activación de cuenta</h1><p>Hola %1$s, </p><p>Su cuenta en <b>%3$s</b> ha sido creada con éxito, pero no podrá acceder hasta que se active..</p><p><br/><a href=\"%2$s\" class=\"btn-primary\">Active su cuenta ahora</a><br/><br/></p><p>Como alternativa puede copiar la siguiente URL en la barra de direcciones de su navegador:</p><p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p><p><br/>Saludos cordiales,<br/><br/>%4$s</p>"
+  ACTIVATION_EMAIL_BODY: "<h1>Activación de cuenta</h1><p>Hola %1$s, </p><p>Su cuenta en <b>%3$s</b> ha sido creada con éxito, pero no podrá acceder hasta que se active..</p><p><br/><a href=\"%2$s\" class=\"btn-primary\">Active su cuenta ahora</a><br/><br/></p><p>Como alternativa puede copiar la siguiente URL en la barra de direcciones de su navegador:</p><p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p><p><br/>Saludos cordiales,<br/><br/>%4$s</p>"
   ACTIVATION_NOTICE_MSG: "Hola %s, su cuenta ha sido creada, compruebe su correo electrónico para acivarla completamente."
   WELCOME_EMAIL_SUBJECT: "Bienvenido/a a %s"
   WELCOME_EMAIL_BODY: "<h1>Cuenta creada</h1><p>Hola %1$s, </p><p>Su cuenta en <b>%3$s</b> ha sido creada con éxito.</p><p><br/><a href=\"%2$s\" class=\"btn-primary\">Acceda ahora</a><br/><br/></p><p>Como alternativa puede copiar la siguiente URL en la barra de direcciones de su navegador:</p><p class=\"word-break\"><a href=\"%2$s\">%2$s</a></p><p><br/>Saludos cordiales,<br/><br/>%4$s</p>"
