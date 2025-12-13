@@ -121,4 +121,4 @@ PLUGIN_LOGIN:
   ENTER_PASSWORD: "Introduzca la contraseña"
   ENTER_PASSWORD_AGAIN: "Introduzca la contraseña de nuevo"
   REGISTRATION_THANK_YOU: "Gracias por registrarse"
-  USER_ACCOUNT_DISABLED: "SSu cuenta de usuario está desactivada o aún no ha sido activada."
+  USER_ACCOUNT_DISABLED: "Su cuenta de usuario está desactivada o aún no ha sido activada."
