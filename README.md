@@ -557,6 +557,145 @@ login:
 
 This will ensure the `access:` options on the page are satisfied in order for this page to be `visible` and therefore displayed in the menu structure.
 
+# User Invitations
+
+Added in **v3.6.0**, the invitation system allows administrators to invite users to register on the site via email. This is particularly useful when public user registration is disabled — invited users can still register through a unique, time-limited invitation link.
+
+## How It Works
+
+1. An admin submits an invitation form with one or more email addresses
+2. The system generates a unique token for each email and stores it in `user/data/accounts/invites.yaml`
+3. An invitation email is sent to each address with a registration link
+4. The recipient clicks the link and is taken to the registration page with their email pre-filled
+5. Once registered, the invitation token is consumed and deleted
+6. The new user account is created with the permissions defined in the invitation
+
+## Setting Up an Invitation Form
+
+To use invitations, you need to create a page with a form that triggers the `login.invite` task. Create a page (e.g., `invite/form.md`) with the following content:
+
+```yaml
+---
+title: Invite Users
+access:
+  admin.login: true
+
+form:
+  name: invite-form
+
+  meta:
+    invite:
+      expiration: 86400       # Token expiration in seconds (default: 86400 = 24 hours)
+      account:                # Default permissions for invited users
+        access:
+          site:
+            login: true
+
+  fields:
+    emails:
+      type: textarea
+      label: Email Addresses
+      help: Enter email addresses separated by commas, semicolons, or new lines
+      validate:
+        required: true
+
+    message:
+      type: textarea
+      label: Personal Message
+      help: Optional message to include in the invitation email
+
+  buttons:
+    - type: submit
+      value: Send Invitations
+
+  process:
+    - message: "Invitations sent successfully!"
+    - reset: true
+---
+
+# Invite Users
+
+Use this form to invite new users to register on the site.
+```
+
+> **Important:** The `form.meta.invite` section controls invitation behavior. The `expiration` sets how long the token remains valid (in seconds), and `account` defines the default access permissions applied to the new user upon registration.
+
+The form requires two key fields:
+- **`emails`**: A text/textarea field where the admin enters email addresses (separated by commas, semicolons, or spaces)
+- **`message`** *(optional)*: A custom message to include in the invitation email
+
+The form must trigger the `login.invite` task, which happens automatically when the form is submitted with `task: login.invite` as the action, or you can configure your form button accordingly.
+
+## Invitation Email
+
+The invitation email includes:
+- A subject line: "You have been invited to join [Site Name]"
+- The optional custom message from the admin
+- A "Create Your Account Now" button linking to the registration page
+- The name of the admin who sent the invitation
+
+The email template is located at `templates/emails/login/invite.html.twig` and can be overridden in your theme.
+
+## Registration via Invitation
+
+When a user clicks the invitation link:
+
+- They are directed to the registration route (default: `/user_register`) with the invitation token
+- The email field is pre-filled and the user fills in the remaining fields (username, password, etc.)
+- Registration is permitted **even if `user_registration.enabled` is set to `false`** — a valid invitation token bypasses this setting
+- Upon successful registration, the invitation's `account` permissions are applied to the new user
+- The invitation token is deleted (single-use)
+
+## Configuration Options
+
+Invitation behavior is configured in the form blueprint's `meta.invite` section:
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `expiration` | `86400` (24 hours) | How long the invitation token remains valid, in seconds |
+| `account.access` | `site.login: true` | Default access permissions granted to the invited user |
+
+You can customize the account permissions to grant different access levels:
+
+```yaml
+form:
+  meta:
+    invite:
+      expiration: 604800      # 7 days
+      account:
+        access:
+          site:
+            login: true
+            premium: true
+        groups:
+          - members
+```
+
+## Data Storage
+
+Active invitations are stored in `user/data/accounts/invites.yaml`. Each invitation entry contains:
+
+```yaml
+<unique-token>:
+  email: user@example.com
+  created_by: admin@example.com
+  created_timestamp: 1634000000
+  expiration_timestamp: 1634086400
+  account:
+    access:
+      site:
+        login: true
+```
+
+## Important Notes
+
+- The **Email plugin** must be installed and properly configured for invitation emails to be sent
+- Re-inviting the same email address **replaces** any existing pending invitation for that address
+- Expired invitations are automatically rejected when a user tries to use them
+- Invitations are **single-use** — the token is deleted once the user completes registration
+- There are no CLI commands for managing invitations; they are managed via form submission or by editing the `invites.yaml` file directly
+- The `route_register` login plugin setting determines the base URL for invitation links
+
 # Known issues
 
 When updating from an older version, pre-october 2015, you might have an error `Class 'Grav\Login\Controller' Not Found`. The problem is during the update, since a file name was changed from lowercase to capitalized. Solution: reinstall the Login plugin, or change the file name `user/plugins/login/classes/controller.php` to `user/plugins/login/classes/Controller.php` (notice the capital `C`).
