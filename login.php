@@ -809,7 +809,10 @@ class LoginPlugin extends Plugin
         }
 
         if (null === $this->invitation && !$this->config->get('plugins.login.user_registration.enabled')) {
-            throw new \RuntimeException($language->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'));
+            $event->stopPropagation();
+            $this->grav['messages']->add($language->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'), 'error');
+            $this->grav->redirect("/");
+            return;
         }
 
         $form->validate();

@@ -26,6 +26,7 @@ form:
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
 
     password1:
+      id: password1
       type: password
       label: PLUGIN_LOGIN.ENTER_PASSWORD
       validate:
@@ -34,6 +35,7 @@ form:
         config-pattern@: system.pwd_regex
 
     password2:
+      id: password2
       type: password
       label: PLUGIN_LOGIN.ENTER_PASSWORD_AGAIN
       validate:
