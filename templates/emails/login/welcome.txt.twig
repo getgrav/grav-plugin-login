@@ -1,0 +1,6 @@
+{# Welcome email (plain text) #}
+{%- set subject = 'PLUGIN_LOGIN.WELCOME_EMAIL_SUBJECT'|t(site_name) -%}
+{%- do email.message.setSubject(subject) -%}
+{{ 'PLUGIN_LOGIN.WELCOME_EMAIL_BODY'|t(user.fullname ?? user.username, base_url_absolute, site_name, author)|striptags|trim }}
+
+{{ base_url_absolute }}

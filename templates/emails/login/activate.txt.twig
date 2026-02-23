@@ -1,0 +1,8 @@
+{# Activation email (plain text) #}
+{%- set subject = 'PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT'|t(site_name) -%}
+{%- do email.message.setSubject(subject) -%}
+{{ 'PLUGIN_LOGIN.HOST_WARNING'|t(site_host)|striptags|trim }}
+
+{{ 'PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY'|t(user.fullname, activation_link, site_name, author)|striptags|trim }}
+
+{{ activation_link }}

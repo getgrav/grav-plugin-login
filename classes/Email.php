@@ -235,10 +235,25 @@ class Email
             'author' => $config->get('site.author.name', ''),
         ];
 
-        $params += [
-            'body' => '',
-            'template' => "emails/login/{$template}.html.twig",
-        ];
+        if (!isset($params['body']) && !isset($params['template'])) {
+            $body = [
+                [
+                    'content_type' => 'text/html',
+                    'template' => "emails/login/{$template}.html.twig",
+                    'body' => '',
+                ],
+            ];
+
+            if (static::templateExists("emails/login/{$template}.txt.twig")) {
+                $body[] = [
+                    'content_type' => 'text/plain',
+                    'template' => "emails/login/{$template}.txt.twig",
+                    'body' => '',
+                ];
+            }
+
+            $params['body'] = $body;
+        }
 
         $email = static::getEmail();
 
@@ -299,5 +314,18 @@ class Email
     protected static function getLanguage(): Language
     {
         return Grav::instance()['language'];
+    }
+
+    protected static function templateExists(string $template): bool
+    {
+        $twig = Grav::instance()['twig'];
+        $twig->init();
+
+        try {
+            $loader = $twig->twig()->getLoader();
+            return method_exists($loader, 'exists') ? $loader->exists($template) : false;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 }
