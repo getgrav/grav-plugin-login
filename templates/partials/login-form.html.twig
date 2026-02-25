@@ -57,8 +57,14 @@
 
                     {% set forgot_button = form.login.forgot_button ?? true %}
                     {% set forgot_route = grav.login.getRoute('forgot') %}
+                    {% set magic_enabled = config.plugins.login.magic_link.enabled ?? false %}
+                    {% set magic_route = grav.login.getRoute('magic') %}
                     {% if forgot_button and forgot_route %}
                     <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ forgot_route }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
+                    {% endif %}
+
+                    {% if magic_enabled and magic_route %}
+                    <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ magic_route }}"><i class="fa fa-link"></i> {{ 'PLUGIN_LOGIN.BTN_MAGIC_LINK'|t }}</a>
                     {% endif %}
 
                     <button class="{{ form_button_classes ?: 'button primary' }}" type="submit"  name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>

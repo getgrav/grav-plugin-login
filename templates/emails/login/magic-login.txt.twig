@@ -1,0 +1,7 @@
+{# Magic login email (plain text) #}
+{%- set subject = 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_SUBJECT'|t(site_name) -%}
+{%- set message = message ?? 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_MESSAGE'|t -%}
+{%- do email.message.setSubject(subject) -%}
+{{ 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_BODY'|t(site_name, message, login_link, author)|striptags|trim }}
+
+{{ login_link }}
