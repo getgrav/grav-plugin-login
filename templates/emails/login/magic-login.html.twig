@@ -8,7 +8,7 @@
 {%- do email.message.setSubject(subject) %}
 
 {%- block content -%}
-  {{ 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_BODY'|t(site_name, message, login_link, actor.fullname)|raw }}
+  {{ 'PLUGIN_LOGIN.MAGIC_LOGIN_EMAIL_BODY'|t(site_name, message, login_link, author)|raw }}
 {%- endblock content -%}
 
 {# https://workos.com/blog/a-guide-to-magic-links

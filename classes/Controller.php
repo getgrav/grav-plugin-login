@@ -419,6 +419,107 @@ class Controller
     }
 
     /**
+     * Handle sending one-time magic login links.
+     *
+     * Uses strict anti-enumeration behavior by always returning a neutral message.
+     *
+     * @return bool True if the action was performed.
+     */
+    protected function taskMagicRequest()
+    {
+        /** @var Config $config */
+        $config = $this->grav['config'];
+        $data = $this->post;
+
+        /** @var Language $language */
+        $language = $this->grav['language'];
+        $messages = $this->grav['messages'];
+
+        $redirect = $config->get('plugins.login.magic_link.redirect_after_request');
+        if (!$redirect) {
+            $redirect = $this->login->getRoute('after_login') ?: '/';
+        }
+
+        $this->setRedirect($redirect);
+
+        if (!$config->get('plugins.login.magic_link.enabled', false)) {
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_SENT'), 'info');
+            return true;
+        }
+
+        if (!isset($this->grav['Email']) || !$config->get('plugins.email.from')) {
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_EMAIL_NOT_CONFIGURED'), 'error');
+            $this->setRedirect($this->login->getRoute('magic') ?? '/');
+            return true;
+        }
+
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['accounts'];
+        $email = $data['email'] ?? '';
+
+        // Sanitize $email
+        $email = htmlspecialchars(strip_tags((string)$email), ENT_QUOTES, 'UTF-8');
+
+        // Register IP-based rate limiting regardless of account existence.
+        $rateLimiter = $this->login->getRateLimiter('magic_links');
+        $ipKey = $this->login->getIpKey();
+        $rateLimiter->registerRateLimitedAction($ipKey, 'ip');
+
+        if ($rateLimiter->isRateLimited($ipKey, 'ip')) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.MAGIC_LINK_RATE_LIMITED', $rateLimiter->getInterval()]), 'warning');
+            return true;
+        }
+
+        // Neutral message for all remaining cases (no account, inactive, etc.) to avoid user enumeration.
+        $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_SENT'), 'info');
+
+        $user = filter_var($email, FILTER_VALIDATE_EMAIL) ? $users->find($email, ['email']) : null;
+        if (!$user || !$user->exists()) {
+            return true;
+        }
+
+        $userKey = (string)$user->username;
+        $rateLimiter->registerRateLimitedAction($userKey);
+        if ($rateLimiter->isRateLimited($userKey)) {
+            return true;
+        }
+
+        $state = (string)($user->state ?? '');
+        // Use direct access check: authorize() returns false for non-session Flex users.
+        $hasLoginAccess = (bool)$user->get('access.site.login');
+        $isActivated = empty($user->activation_token);
+        $isEnabledState = ($state === '' || $state === 'enabled');
+        if (!$hasLoginAccess || !$isActivated || !$isEnabledState) {
+            return true;
+        }
+
+        if (!isset($this->grav['Email']) || !$config->get('plugins.email.from')) {
+            return true;
+        }
+
+        try {
+            $token = bin2hex(random_bytes(32));
+        } catch (\Exception $e) {
+            $token = hash('sha256', uniqid((string)mt_rand(), true));
+        }
+
+        $hashed = hash('sha256', $token);
+        $ttlMinutes = (int)$config->get('plugins.login.magic_link.ttl', 10);
+        $expire = time() + max(1, $ttlMinutes) * 60;
+
+        $user->magic_login = $hashed . '::' . $expire;
+        $user->save();
+
+        try {
+            $this->login->sendMagicLoginEmail($user, $token);
+        } catch (\Throwable $e) {
+            // Email plugin handles its own logging.
+        }
+
+        return true;
+    }
+
+    /**
      * Handle the reset password action.
      *
      * @return bool True if the action was performed.

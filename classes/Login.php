@@ -532,6 +532,29 @@ class Login
     }
 
     /**
+     * Handle the email to login user by one-time link.
+     *
+     * @param UserInterface $user
+     * @param string $token
+     * @return bool True if the action was performed.
+     * @throws \RuntimeException
+     */
+    public function sendMagicLoginEmail(UserInterface $user, string $token)
+    {
+        if (empty($user->email)) {
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.USER_NEEDS_EMAIL_FIELD'));
+        }
+
+        try {
+            Email::sendMagicLoginEmail($user, $token);
+        } catch (\Exception $e) {
+            throw new \RuntimeException($this->language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'));
+        }
+
+        return true;
+    }
+
+    /**
      * Gets and sets the RememberMe class
      *
      * @param  mixed $var A rememberMe instance to set
@@ -610,6 +633,10 @@ class Login
                     $maxCount = $this->grav['config']->get('plugins.login.max_pw_resets_count', 2);
                     $interval = $this->grav['config']->get('plugins.login.max_pw_resets_interval', 60);
                     break;
+                case 'magic_links':
+                    $maxCount = $this->grav['config']->get('plugins.login.magic_link.max_requests_count', 3);
+                    $interval = $this->grav['config']->get('plugins.login.magic_link.max_requests_interval', 60);
+                    break;
             }
             $this->rateLimiters[$context] = new RateLimiter($context, $maxCount, $interval);
         }
@@ -680,8 +707,8 @@ class Login
     /**
      * Get route to a given login page.
      *
-     * @param string $type Use one of: login, activate, forgot, reset, profile, unauthorized, after_login, after_logout,
-     *                     register, after_registration, after_activation
+     * @param string $type Use one of: login, activate, forgot, reset, magic, magic_login, profile, unauthorized,
+     *                     after_login, after_logout, register, after_registration, after_activation
      * @param bool|null $enabled
      * @return string|null Returns route or null if the route has been disabled.
      */
@@ -694,6 +721,8 @@ class Login
             case 'activate':
             case 'forgot':
             case 'reset':
+            case 'magic':
+            case 'magic_login':
             case 'profile':
                 $route = $this->config->get('plugins.login.route_' . $type);
                 break;
