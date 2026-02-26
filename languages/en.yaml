@@ -28,6 +28,7 @@ PLUGIN_LOGIN:
   MAGIC_LINK_SENT: "If an account exists, a sign-in link has been sent via email"
   MAGIC_LINK_RATE_LIMITED: "Too many requests. Please wait %s minutes before trying again."
   MAGIC_LINK_EMAIL_NOT_CONFIGURED: "Cannot send login link. This site is not configured to send emails."
+  MAGIC_LINK_EMAIL_NOT_UNIQUE: "Multiple accounts were found for this email. Sign-in by link is temporarily unavailable. Please contact the administrator."
   MAGIC_LINK_INVALID: "Invalid login link used, please try again"
   MAGIC_LINK_EXPIRED: "Login link has expired, please request a new one"
   MAGIC_PAGE_TITLE: "Login by email link"
