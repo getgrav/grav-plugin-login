@@ -10,6 +10,7 @@
 namespace Grav\Plugin\Login;
 
 use Grav\Common\Config\Config;
+use Grav\Common\Flex\Types\Users\UserObject;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
 use Grav\Common\Page\Pages;
@@ -416,6 +417,259 @@ class Controller
         $this->setRedirect($this->login->getRoute('login') ?? '/');
 
         return true;
+    }
+
+    /**
+     * Handle sending one-time magic login links.
+     *
+     * Uses neutral responses for unknown/invalid emails while preserving explicit UX feedback
+     * for operational errors such as rate limits or duplicate-email conflicts.
+     *
+     * @return bool True if the action was performed.
+     */
+    protected function taskMagicRequest()
+    {
+        /** @var Config $config */
+        $config = $this->grav['config'];
+        $data = $this->post;
+
+        /** @var Language $language */
+        $language = $this->grav['language'];
+        $messages = $this->grav['messages'];
+
+        $redirect = $config->get('plugins.login.magic_link.redirect_after_request');
+        if (!$redirect) {
+            $redirect = $this->login->getRoute('after_login') ?: '/';
+        }
+
+        $this->setRedirect($redirect);
+
+        if (!$config->get('plugins.login.magic_link.enabled', false)) {
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_SENT'), 'info');
+            return true;
+        }
+
+        if (!isset($this->grav['Email']) || !$config->get('plugins.email.from')) {
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_EMAIL_NOT_CONFIGURED'), 'error');
+            $this->setRedirect($this->login->getRoute('magic') ?? '/');
+            return true;
+        }
+
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['accounts'];
+        $email = $data['email'] ?? '';
+
+        // Sanitize $email
+        $email = htmlspecialchars(strip_tags((string)$email), ENT_QUOTES, 'UTF-8');
+
+        // Register IP-based rate limiting regardless of account existence.
+        $rateLimiter = $this->login->getRateLimiter('magic_links');
+        $ipKey = $this->login->getIpKey();
+        $rateLimiter->registerRateLimitedAction($ipKey, 'ip');
+
+        if ($rateLimiter->isRateLimited($ipKey, 'ip')) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.MAGIC_LINK_RATE_LIMITED', $rateLimiter->getInterval()]), 'warning');
+            return true;
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Neutral message for invalid / unknown emails to avoid user enumeration.
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_SENT'), 'info');
+            return true;
+        }
+
+        $matchedUsers = $this->findUsersByEmail($users, $email);
+        if (count($matchedUsers) > 1) {
+            $this->grav['log']->warning(sprintf(
+                'plugin.login: magic-link request blocked: duplicate email "%s" matches users [%s]',
+                $email,
+                implode(', ', array_keys($matchedUsers))
+            ));
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_EMAIL_NOT_UNIQUE'), 'error');
+            $this->setRedirect($this->login->getRoute('magic') ?? '/');
+            return true;
+        }
+
+        if (count($matchedUsers) === 0) {
+            // Neutral message for unknown emails to avoid user enumeration.
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_SENT'), 'info');
+            return true;
+        }
+
+        /** @var UserInterface $user */
+        $user = reset($matchedUsers);
+
+        $userKey = (string)$user->username;
+        $rateLimiter->registerRateLimitedAction($userKey);
+        if ($rateLimiter->isRateLimited($userKey)) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.MAGIC_LINK_RATE_LIMITED', $rateLimiter->getInterval()]), 'warning');
+            return true;
+        }
+
+        $state = (string)($user->state ?? '');
+        $hasLoginAccess = $this->hasPreLoginSiteLoginAccess($user);
+        $isActivated = empty($user->activation_token);
+        $isEnabledState = ($state === '' || $state === 'enabled');
+        if (!$hasLoginAccess || !$isActivated || !$isEnabledState) {
+            $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_SENT'), 'info');
+            return true;
+        }
+
+        try {
+            $token = bin2hex(random_bytes(32));
+        } catch (\Throwable $e) {
+            $this->grav['log']->error('plugin.login: failed to generate secure magic-link token: ' . $e->getMessage());
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'), 'error');
+            $this->setRedirect($this->login->getRoute('magic') ?? '/');
+
+            return true;
+        }
+
+        $hashed = hash('sha256', $token);
+        $ttlMinutes = (int)$config->get('plugins.login.magic_link.ttl', 10);
+        $expire = time() + max(1, $ttlMinutes) * 60;
+
+        $user->magic_login = $hashed . '::' . $expire;
+        $user->save();
+
+        try {
+            $this->login->sendMagicLoginEmail($user, $token);
+        } catch (\Throwable $e) {
+            // Email plugin handles its own logging.
+        }
+
+        $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_SENT'), 'info');
+
+        return true;
+    }
+
+    /**
+     * Find all users matching email, across legacy and flex collections.
+     *
+     * @return array<string,UserInterface> Keyed by username.
+     */
+    private function findUsersByEmail(UserCollectionInterface $users, string $email): array
+    {
+        $needle = mb_strtolower(trim($email));
+        if ($needle === '') {
+            return [];
+        }
+
+        $matches = [];
+
+        // Flex collections/indexes are iterable; this catches modern installs efficiently.
+        if (is_iterable($users)) {
+            foreach ($users as $candidate) {
+                if (!$candidate instanceof UserInterface || !$candidate->exists()) {
+                    continue;
+                }
+
+                $candidateEmail = mb_strtolower((string)$candidate->get('email'));
+                if ($candidateEmail !== '' && $candidateEmail === $needle) {
+                    $matches[(string)$candidate->get('username')] = $candidate;
+                }
+            }
+
+            return $matches;
+        }
+
+        // Legacy DataUser collection is not iterable; scan account files and load users.
+        $locator = $this->grav['locator'];
+        $accountDir = $locator->findResource('account://');
+        if (!is_string($accountDir)) {
+            return [];
+        }
+
+        $files = array_diff(scandir($accountDir) ?: [], ['.', '..']);
+        foreach ($files as $file) {
+            if (!Utils::endsWith($file, YAML_EXT)) {
+                continue;
+            }
+
+            $username = trim(Utils::pathinfo($file, PATHINFO_FILENAME));
+            $candidate = $users->load($username);
+            if (!$candidate->exists()) {
+                continue;
+            }
+
+            $candidateEmail = mb_strtolower((string)$candidate->get('email'));
+            if ($candidateEmail !== '' && $candidateEmail === $needle) {
+                $matches[(string)$candidate->get('username')] = $candidate;
+            }
+        }
+
+        return $matches;
+    }
+
+    /**
+     * Pre-login ACL check for site.login.
+     *
+     * Flex users support authorize(..., 'test') which evaluates ACL without requiring authenticated=true.
+     * Legacy users do not support that mode, so we fall back to direct user/group ACL lookup.
+     */
+    private function hasPreLoginSiteLoginAccess(UserInterface $user): bool
+    {
+        if ($user instanceof UserObject) {
+            $authorized = $user->authorize('site.login', 'test');
+            if (is_bool($authorized)) {
+                return $authorized;
+            }
+        }
+
+        return $this->hasLegacyPreLoginSiteAccess($user);
+    }
+
+    /**
+     * Legacy pre-login ACL check for site.login using direct user access and configured groups.
+     */
+    private function hasLegacyPreLoginSiteAccess(UserInterface $user): bool
+    {
+        $userAccess = $this->normalizeAclBoolean($user->get('access.site.login'));
+        if ($userAccess !== null) {
+            return $userAccess;
+        }
+
+        $authorized = false;
+        $groups = (array)$user->get('groups');
+        $config = $this->grav['config'];
+
+        foreach ($groups as $group) {
+            if (!is_string($group) || $group === '') {
+                continue;
+            }
+
+            $groupAccess = $this->normalizeAclBoolean($config->get("groups.{$group}.access.site.login"));
+            if ($groupAccess === null) {
+                continue;
+            }
+
+            $authorized = $groupAccess;
+            if ($authorized === true) {
+                break;
+            }
+        }
+
+        return $authorized;
+    }
+
+    /**
+     * Normalize Grav ACL values to bool/null preserving "unset" state.
+     */
+    private function normalizeAclBoolean($value): ?bool
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return (int)$value === 1;
+        }
+
+        return filter_var((string)$value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
     }
 
     /**

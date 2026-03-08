@@ -187,6 +187,13 @@ max_login_count: 5                          # Number of failed login attempts in
 max_login_interval: 10                      # Time in minutes to track login attempts
 ipv6_subnet_size: 64                        # Size of IPv6 block to track login attempts
 
+magic_link:
+  enabled: false                            # Enable Magic Link (passwordless) login
+  ttl: 10                                   # Link expiry in minutes (default: 10)
+  redirect_after_request:                   # Route to redirect to after requesting a link (default: route_after_login)
+  max_requests_count: 5                     # Max magic link requests per interval (0 = unlimited)
+  max_requests_interval: 15                 # Time in minutes to track magic link requests
+
 user_registration:
   enabled: false                            # Enable User Registration Process
 
@@ -269,6 +276,61 @@ redirect_after_login: '/profile'
 ```
 
 This will always take you to the `/profile` route after a successful login.
+
+# Magic Link Login
+
+Magic Link login (also known as passwordless login) allows users to sign in via a one-time link sent to their email, without entering a password.
+
+## Enabling Magic Link
+
+Add the following to your `user/config/plugins/login.yaml`:
+
+```yaml
+magic_link:
+  enabled: true
+  ttl: 10                    # Link expiry in minutes
+  max_requests_count: 5      # Max requests per IP per interval
+  max_requests_interval: 15  # Interval in minutes
+```
+
+The email plugin must also be installed and configured with a valid `from` address.
+
+Two additional routes control the magic link flow:
+
+```yaml
+route_magic: '/magic_login'       # Page with the email request form
+route_magic_login: '/magic_link'  # Callback URL embedded in the sent email
+```
+
+## How it works
+
+1. User visits the magic link request page (`route_magic`) and enters their email.
+2. If an account exists and is activated, a one-time login link containing a random token is emailed to them.
+3. Clicking the link logs the user in immediately — no password required.
+4. The link is invalidated on first use or when it expires.
+
+A "Login by link" button is automatically shown on the standard login page when `magic_link.enabled: true`.
+
+## Security
+
+- Tokens are cryptographically random (`random_bytes(32)`) — only their SHA-256 hash is stored.
+- Links expire after `ttl` minutes (default: 10).
+- Links are strictly one-time — the token is deleted before the login pipeline runs.
+- The request flow uses neutral responses for unknown or invalid emails.
+- Rate limiting applies per IP and per user account. When the limit is exceeded, an explicit "wait N minutes" message is shown.
+- If multiple accounts share the same email address, magic-link sign-in is blocked for that email and the user is asked to contact an administrator.
+- 2FA is respected if `twofa_enabled: true` in the plugin configuration.
+- `remember_me` is never set via magic link login.
+
+## Customizing the request page
+
+The plugin provides a default request page served at `route_magic`. To customize its content create a page in your site matching that route:
+
+```
+user/pages/magic_login/magic_login.md
+```
+
+Set `template: magic` in the frontmatter so the plugin's template and form are used. Any body content you add will be rendered above the email form.
 
 # Logout
 

@@ -81,6 +81,7 @@ class LoginPlugin extends Plugin
             'onTask.login.twofa'        => ['loginController', 0],
             'onTask.login.twofa_cancel' => ['loginController', 0],
             'onTask.login.forgot'       => ['loginController', 0],
+            'onTask.login.magicRequest' => ['loginController', 0],
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
@@ -93,7 +94,7 @@ class LoginPlugin extends Plugin
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
             'onFormProcessed'           => ['onFormProcessed', 0],
-            'onUserLoginAuthenticate'   => [['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
+            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByMagic', 10004], ['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
             'onUserLoginFailure'        => ['userLoginGuest', 0],
             'onUserLoginGuest'          => ['userLoginGuest', 0],
@@ -255,9 +256,26 @@ class LoginPlugin extends Plugin
             $this->enable([
                 'onPagesInitialized' => ['addForgotPage', 0],
             ]);
+        } elseif ($path === $this->login->getRoute('magic')) {
+            // If route_magic and route_magic_login are the same, dispatch by token presence.
+            $magicLoginRoute = $this->login->getRoute('magic_login');
+            if ($magicLoginRoute === $path) {
+                $uri = $this->grav['uri'];
+                if ($uri->param('token') !== false && $uri->param('username') !== false) {
+                    $this->enable(['onPagesInitialized' => ['handleMagicLogin', 0]]);
+                } else {
+                    $this->enable(['onPagesInitialized' => ['addMagicPage', 0]]);
+                }
+            } else {
+                $this->enable(['onPagesInitialized' => ['addMagicPage', 0]]);
+            }
         } elseif ($path === $this->login->getRoute('reset')) {
             $this->enable([
                 'onPagesInitialized' => ['addResetPage', 0],
+            ]);
+        } elseif ($path === $this->login->getRoute('magic_login')) {
+            $this->enable([
+                'onPagesInitialized' => ['handleMagicLogin', 0],
             ]);
         } elseif ($path === $this->login->getRoute('register', true)) {
             $this->enable([
@@ -320,6 +338,8 @@ class LoginPlugin extends Plugin
             $this->login->getRoute('activate') ?: '/activate_user',
             $this->login->getRoute('forgot') ?: '/forgot_password',
             $this->login->getRoute('reset') ?: '/reset_password',
+            $this->login->getRoute('magic') ?: '/magic_login',
+            $this->login->getRoute('magic_login') ?: '/magic_link',
         ];
 
         /** @var Uri $uri */
@@ -368,6 +388,20 @@ class LoginPlugin extends Plugin
     public function addForgotPage(): void
     {
         $this->login->addPage('forgot');
+    }
+
+    /**
+     * Add Magic Link request page.
+     */
+    public function addMagicPage(): void
+    {
+        if (!$this->config->get('plugins.login.magic_link.enabled', false)) {
+            $loginRoute = $this->login->getRoute('login') ?: '/login';
+            $this->grav->redirectLangSafe($loginRoute);
+            return;
+        }
+
+        $this->login->addPage('magic');
     }
 
     /**
@@ -497,6 +531,111 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Handle magic login links.
+     */
+    public function handleMagicLogin(): void
+    {
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['accounts'];
+
+        $magicEnabled = $this->config->get('plugins.login.magic_link.enabled', false);
+        $magicRequestRoute = $magicEnabled
+            ? ($this->login->getRoute('magic') ?: ($this->login->getRoute('login') ?: '/'))
+            : ($this->login->getRoute('login') ?: '/');
+
+        if (!$magicEnabled) {
+            $this->grav->redirectLangSafe($magicRequestRoute);
+            return;
+        }
+
+        $username = (string)$uri->param('username');
+        $token = (string)$uri->param('token');
+        if ($username === '' || $token === '') {
+            $this->grav->redirectLangSafe($magicRequestRoute);
+            return;
+        }
+
+        $user = $users->load($username);
+        if (is_callable([$user, 'refresh'])) {
+            $user->refresh(true);
+        }
+
+        $magicData = (string)($user->magic_login ?? '');
+        if (!$user || !$user->exists() || !str_contains($magicData, '::')) {
+            $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.MAGIC_LINK_INVALID'), 'error');
+            $this->grav->redirectLangSafe($magicRequestRoute);
+            return;
+        }
+
+        [$storedHash, $expires] = explode('::', $magicData, 2);
+        $expiresAt = (int)$expires;
+        if ($expiresAt && time() > $expiresAt) {
+            unset($user->magic_login);
+            $user->save();
+            $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.MAGIC_LINK_EXPIRED'), 'error');
+            $this->grav->redirectLangSafe($magicRequestRoute);
+            return;
+        }
+
+        $tokenHash = hash('sha256', $token);
+        if (!hash_equals($storedHash, $tokenHash)) {
+            $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.MAGIC_LINK_INVALID'), 'error');
+            $this->grav->redirectLangSafe($magicRequestRoute);
+            return;
+        }
+
+        // Invalidate token before authorization to prevent race-condition reuse.
+        unset($user->magic_login);
+        $user->save();
+
+        $event = $this->login->login(
+            ['username' => $user->username],
+            [
+                'magic_link' => true,
+                'rate_limit' => false,
+                'remember_me' => false,
+                'twofa' => $this->config->get('plugins.login.twofa_enabled', false)
+            ],
+            ['user' => $user, 'return_event' => true]
+        );
+
+        $message = $event->getMessage();
+        if ($message) {
+            $messages->add($this->grav['language']->translate($message), $event->getMessageType());
+        }
+
+        $redirect = null;
+        $redirectCode = null;
+        $loggedUser = $event->getUser();
+        if ($loggedUser->authenticated) {
+            if ($loggedUser->authorized) {
+                if (!$message) {
+                    $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'), 'info');
+                }
+                $redirect = $this->grav['session']->redirect_after_login ?: $this->login->getRoute('after_login') ?: '/';
+            } else {
+                $redirect = $this->login->getRoute('login') ?: '/';
+            }
+        } else {
+            if (!$message) {
+                $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.LOGIN_FAILED'), 'error');
+            }
+            $redirect = $magicRequestRoute;
+        }
+
+        if ($event->getRedirect()) {
+            $redirect = $event->getRedirect();
+            $redirectCode = $event->getRedirectCode();
+        }
+
+        $this->grav->redirectLangSafe($redirect ?: '/', $redirectCode);
+    }
+
+    /**
      * Initialize login controller
      */
     public function loginController(): void
@@ -522,6 +661,13 @@ class LoginPlugin extends Plugin
             case 'forgot':
                 if (!isset($post['forgot-form-nonce']) || !Utils::verifyNonce($post['forgot-form-nonce'], 'forgot-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'),'info');
+                    return;
+                }
+                break;
+
+            case 'magicRequest':
+                if (!isset($post['magic-form-nonce']) || !Utils::verifyNonce($post['magic-form-nonce'], 'magic-form')) {
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
                     return;
                 }
                 break;
@@ -588,7 +734,7 @@ class LoginPlugin extends Plugin
 
         // Only applies to the page templates defined by login plugin.
         $template = $page->template();
-        if (!in_array($template, ['forgot', 'login', 'profile', 'register', 'reset', 'unauthorized'])) {
+        if (!in_array($template, ['forgot', 'login', 'magic', 'profile', 'register', 'reset', 'unauthorized'])) {
             return;
         }
 
@@ -973,7 +1119,7 @@ class LoginPlugin extends Plugin
     /**
      * Save user profile information
      *
-     * @param Form $form
+     * @param FormInterface $form
      * @param Event $event
      * @return bool
      */
@@ -1195,6 +1341,24 @@ class LoginPlugin extends Plugin
 
             $event->setUser($users->find($username));
         }
+    }
+
+    public function userLoginAuthenticateByMagic(UserLoginEvent $event): void
+    {
+        if (!$event->getOption('magic_link')) {
+            return;
+        }
+
+        $user = $event->getUser();
+        if (!$user->exists()) {
+            $event->setStatus($event::AUTHENTICATION_FAILURE);
+            $event->stopPropagation();
+
+            return;
+        }
+
+        $event->setStatus($event::AUTHENTICATION_SUCCESS);
+        $event->stopPropagation();
     }
 
     public function userLoginAuthenticate(UserLoginEvent $event): void

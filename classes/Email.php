@@ -215,6 +215,54 @@ class Email
         }
     }
 
+    /**
+     * @param UserInterface $user
+     * @param string $token
+     * @param UserInterface|null $actor
+     * @return void
+     * @throws \Exception
+     */
+    public static function sendMagicLoginEmail(UserInterface $user, string $token, ?UserInterface $actor = null): void
+    {
+        if (!$user->email || $token === '') {
+            return;
+        }
+
+        try {
+            $config = static::getConfig();
+            $param_sep = $config->get('system.param_sep', ':');
+            $magicRoute = static::getLogin()->getRoute('magic_login');
+            if (!$magicRoute) {
+                throw new \RuntimeException('Magic login route does not exist!');
+            }
+
+            $site_host = $config->get('plugins.login.site_host');
+            if (!empty($site_host)) {
+                $magicRoute = rtrim($site_host, '/') . '/' . ltrim($magicRoute, '/');
+            }
+
+            $loginLink = Utils::url(
+                "{$magicRoute}/token{$param_sep}{$token}/username{$param_sep}{$user->username}",
+                true,
+                true
+            );
+
+            $context = [
+                'login_link' => $loginLink,
+            ];
+
+            $params = [
+                'to' => $user->email,
+            ];
+
+            static::sendEmail('magic-login', $context, $params, $user, $actor);
+        } catch (\Exception $e) {
+            static::getLogger()->error($e->getMessage());
+
+            throw $e;
+        }
+    }
+
     protected static function sendEmail(string $template, array $context, array $params, ?UserInterface $user = null, ?UserInterface $actor = null): void
     {
         $actor = $actor ?? static::getUser();
