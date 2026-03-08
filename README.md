@@ -305,7 +305,7 @@ route_magic_login: '/magic_link'  # Callback URL embedded in the sent email
 ## How it works
 
 1. User visits the magic link request page (`route_magic`) and enters their email.
-2. If an account exists and is activated, a one-time signed link is emailed to them.
+2. If an account exists and is activated, a one-time login link containing a random token is emailed to them.
 3. Clicking the link logs the user in immediately — no password required.
 4. The link is invalidated on first use or when it expires.
 
@@ -316,8 +316,9 @@ A "Login by link" button is automatically shown on the standard login page when 
 - Tokens are cryptographically random (`random_bytes(32)`) — only their SHA-256 hash is stored.
 - Links expire after `ttl` minutes (default: 10).
 - Links are strictly one-time — the token is deleted before the login pipeline runs.
-- Anti-enumeration: the same neutral response is returned whether or not an account exists.
-- Rate limiting applies per IP and per user account. When the limit is exceeded the user receives an explicit "wait N minutes" message.
+- The request flow uses neutral responses for unknown or invalid emails.
+- Rate limiting applies per IP and per user account. When the limit is exceeded, an explicit "wait N minutes" message is shown.
+- If multiple accounts share the same email address, magic-link sign-in is blocked for that email and the user is asked to contact an administrator.
 - 2FA is respected if `twofa_enabled: true` in the plugin configuration.
 - `remember_me` is never set via magic link login.
 

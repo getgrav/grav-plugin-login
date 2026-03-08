@@ -422,7 +422,8 @@ class Controller
     /**
      * Handle sending one-time magic login links.
      *
-     * Uses strict anti-enumeration behavior by always returning a neutral message.
+     * Uses neutral responses for unknown/invalid emails while preserving explicit UX feedback
+     * for operational errors such as rate limits or duplicate-email conflicts.
      *
      * @return bool True if the action was performed.
      */
@@ -501,6 +502,7 @@ class Controller
         $userKey = (string)$user->username;
         $rateLimiter->registerRateLimitedAction($userKey);
         if ($rateLimiter->isRateLimited($userKey)) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.MAGIC_LINK_RATE_LIMITED', $rateLimiter->getInterval()]), 'warning');
             return true;
         }
 
@@ -513,14 +515,14 @@ class Controller
             return true;
         }
 
-        if (!isset($this->grav['Email']) || !$config->get('plugins.email.from')) {
-            return true;
-        }
-
         try {
             $token = bin2hex(random_bytes(32));
-        } catch (\Exception $e) {
-            $token = hash('sha256', uniqid((string)mt_rand(), true));
+        } catch (\Throwable $e) {
+            $this->grav['log']->error('plugin.login: failed to generate secure magic-link token: ' . $e->getMessage());
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_SENDING_FAILURE'), 'error');
+            $this->setRedirect($this->login->getRoute('magic') ?? '/');
+
+            return true;
         }
 
         $hashed = hash('sha256', $token);
