@@ -810,7 +810,9 @@ class LoginPlugin extends Plugin
 
         if (null === $this->invitation && !$this->config->get('plugins.login.user_registration.enabled')) {
             $event->stopPropagation();
-            $this->grav['messages']->add($language->translate('PLUGIN_LOGIN.USER_REGISTRATION_DISABLED'), 'error');
+            $token = $this->grav['uri']->param('');
+            $message_key = $token ? 'PLUGIN_LOGIN.USER_INVITATION_INVALID' : 'PLUGIN_LOGIN.USER_REGISTRATION_DISABLED';
+            $this->grav['messages']->add($language->translate($message_key), 'error');
             $this->grav->redirectLangSafe($this->grav['uri']->rootUrl(), 302);
             return;
         }
