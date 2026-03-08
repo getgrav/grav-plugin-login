@@ -235,9 +235,27 @@ class Email
             'author' => $config->get('site.author.name', ''),
         ];
 
-        $params += [
-            'body' => '',
+        $textTemplate = "emails/login/{$template}.txt.twig";
+
+        // Build multipart body: text/plain first, text/html last (per RFC 2046).
+        $body = [];
+
+        if (static::templateExists($textTemplate)) {
+            $body[] = [
+                'content_type' => 'text/plain',
+                'template' => $textTemplate,
+                'body' => '',
+            ];
+        }
+
+        $body[] = [
+            'content_type' => 'text/html',
             'template' => "emails/login/{$template}.html.twig",
+            'body' => '',
+        ];
+
+        $params += [
+            'body' => $body,
         ];
 
         $email = static::getEmail();
@@ -250,6 +268,24 @@ class Email
             $language = static::getLanguage();
 
             throw new \RuntimeException($language->translate(['PLUGIN_LOGIN.FAILED_TO_SEND_EMAILS', implode(', ', $failedRecipients)]));
+        }
+    }
+
+    /**
+     * Check if a Twig template exists.
+     *
+     * @param string $template
+     * @return bool
+     */
+    protected static function templateExists(string $template): bool
+    {
+        try {
+            $twig = Grav::instance()['twig'];
+            $twig->init();
+
+            return $twig->loader()->exists($template);
+        } catch (\Exception $e) {
+            return false;
         }
     }
 

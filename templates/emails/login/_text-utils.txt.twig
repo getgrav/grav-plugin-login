@@ -1,0 +1,21 @@
+{#
+  Plain-text formatting utilities for login email templates.
+
+  Usage:
+    {% import 'emails/login/_text-utils.txt.twig' as text %}
+    {{ text.from_html(html_string) }}
+#}
+
+{% macro from_html(html) %}
+{% apply spaceless %}
+{%- set text = html %}
+{%- set text = text|replace({'<br>': "\n", '<br/>': "\n", '<br />': "\n"}) %}
+{%- set text = text|replace({'</p>': "\n\n", '</h1>': "\n\n", '</h2>': "\n\n", '</h3>': "\n\n"}) %}
+{%- set text = text|replace({'<li>': "  - "}) %}
+{%- set text = text|replace({'</li>': "\n"}) %}
+{%- set text = text|replace({'</ul>': "\n", '</ol>': "\n"}) %}
+{%- set text = text|striptags %}
+{%- set text = text|replace({"\n\n\n": "\n\n"}) %}
+{{ text|trim }}
+{% endapply %}
+{% endmacro %}
