@@ -1,6 +1,7 @@
 {# Notification email (plain text) #}
+{%- import 'emails/login/_text-utils.txt.twig' as text -%}
 {%- set subject = 'PLUGIN_LOGIN.NOTIFICATION_EMAIL_SUBJECT'|t(site_name) -%}
 {%- do email.message.setSubject(subject) -%}
-{{ 'PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY'|t(site_name, user.username, user.email, base_url_absolute)|striptags|trim }}
+{{ text.from_html('PLUGIN_LOGIN.NOTIFICATION_EMAIL_BODY'|t(site_name, user.username, user.email, base_url_absolute)) }}
 
 {{ base_url_absolute }}

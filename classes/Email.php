@@ -318,11 +318,12 @@ class Email
 
     protected static function templateExists(string $template): bool
     {
-        $twig = Grav::instance()['twig'];
-        $twig->init();
-
         try {
+            $twig = Grav::instance()['twig'];
+            $twig->init();
+
             $loader = $twig->twig()->getLoader();
+
             return method_exists($loader, 'exists') ? $loader->exists($template) : false;
         } catch (\Throwable $e) {
             return false;

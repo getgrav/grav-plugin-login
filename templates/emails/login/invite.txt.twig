@@ -1,7 +1,8 @@
 {# Invitation email (plain text) #}
+{%- import 'emails/login/_text-utils.txt.twig' as text -%}
 {%- set subject = 'PLUGIN_LOGIN.INVITATION_EMAIL_SUBJECT'|t(site_name) -%}
 {%- set message = message ?? 'PLUGIN_LOGIN.INVITATION_EMAIL_MESSAGE'|t -%}
 {%- do email.message.setSubject(subject) -%}
-{{ 'PLUGIN_LOGIN.INVITATION_EMAIL_BODY'|t(site_name, message, invitation_link, actor.fullname)|striptags|trim }}
+{{ text.from_html('PLUGIN_LOGIN.INVITATION_EMAIL_BODY'|t(site_name, message, invitation_link, actor.fullname)) }}
 
 {{ invitation_link }}
