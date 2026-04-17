@@ -1,6 +1,6 @@
 # Grav Login Plugin
 
-The **login plugin** for [Grav](http://github.com/getgrav/grav) adds login, basic ACL, and session wide messages to Grav.  It is designed to provide a way to secure front-end and admin content throughout Grav.
+The **login plugin** for [Grav](https://github.com/getgrav/grav) adds login, basic ACL, and session wide messages to Grav.  It is designed to provide a way to secure front-end and admin content throughout Grav.
 
 # Installation
 
@@ -187,6 +187,13 @@ max_login_count: 5                          # Number of failed login attempts in
 max_login_interval: 10                      # Time in minutes to track login attempts
 ipv6_subnet_size: 64                        # Size of IPv6 block to track login attempts
 
+magic_link:
+  enabled: false                            # Enable Magic Link (passwordless) login
+  ttl: 10                                   # Link expiry in minutes (default: 10)
+  redirect_after_request:                   # Route to redirect to after requesting a link (default: route_after_login)
+  max_requests_count: 5                     # Max magic link requests per interval (0 = unlimited)
+  max_requests_interval: 15                 # Time in minutes to track magic link requests
+
 user_registration:
   enabled: false                            # Enable User Registration Process
 
@@ -269,6 +276,61 @@ redirect_after_login: '/profile'
 ```
 
 This will always take you to the `/profile` route after a successful login.
+
+# Magic Link Login
+
+Magic Link login (also known as passwordless login) allows users to sign in via a one-time link sent to their email, without entering a password.
+
+## Enabling Magic Link
+
+Add the following to your `user/config/plugins/login.yaml`:
+
+```yaml
+magic_link:
+  enabled: true
+  ttl: 10                    # Link expiry in minutes
+  max_requests_count: 5      # Max requests per IP per interval
+  max_requests_interval: 15  # Interval in minutes
+```
+
+The email plugin must also be installed and configured with a valid `from` address.
+
+Two additional routes control the magic link flow:
+
+```yaml
+route_magic: '/magic_login'       # Page with the email request form
+route_magic_login: '/magic_link'  # Callback URL embedded in the sent email
+```
+
+## How it works
+
+1. User visits the magic link request page (`route_magic`) and enters their email.
+2. If an account exists and is activated, a one-time login link containing a random token is emailed to them.
+3. Clicking the link logs the user in immediately — no password required.
+4. The link is invalidated on first use or when it expires.
+
+A "Login by link" button is automatically shown on the standard login page when `magic_link.enabled: true`.
+
+## Security
+
+- Tokens are cryptographically random (`random_bytes(32)`) — only their SHA-256 hash is stored.
+- Links expire after `ttl` minutes (default: 10).
+- Links are strictly one-time — the token is deleted before the login pipeline runs.
+- The request flow uses neutral responses for unknown or invalid emails.
+- Rate limiting applies per IP and per user account. When the limit is exceeded, an explicit "wait N minutes" message is shown.
+- If multiple accounts share the same email address, magic-link sign-in is blocked for that email and the user is asked to contact an administrator.
+- 2FA is respected if `twofa_enabled: true` in the plugin configuration.
+- `remember_me` is never set via magic link login.
+
+## Customizing the request page
+
+The plugin provides a default request page served at `route_magic`. To customize its content create a page in your site matching that route:
+
+```
+user/pages/magic_login/magic_login.md
+```
+
+Set `template: magic` in the frontmatter so the plugin's template and form are used. Any body content you add will be rendered above the email form.
 
 # Logout
 
@@ -556,6 +618,145 @@ login:
 ```
 
 This will ensure the `access:` options on the page are satisfied in order for this page to be `visible` and therefore displayed in the menu structure.
+
+# User Invitations
+
+Added in **v3.6.0**, the invitation system allows administrators to invite users to register on the site via email. This is particularly useful when public user registration is disabled — invited users can still register through a unique, time-limited invitation link.
+
+## How It Works
+
+1. An admin submits an invitation form with one or more email addresses
+2. The system generates a unique token for each email and stores it in `user/data/accounts/invites.yaml`
+3. An invitation email is sent to each address with a registration link
+4. The recipient clicks the link and is taken to the registration page with their email pre-filled
+5. Once registered, the invitation token is consumed and deleted
+6. The new user account is created with the permissions defined in the invitation
+
+## Setting Up an Invitation Form
+
+To use invitations, you need to create a page with a form that triggers the `login.invite` task. Create a page (e.g., `invite/form.md`) with the following content:
+
+```yaml
+---
+title: Invite Users
+access:
+  admin.login: true
+
+form:
+  name: invite-form
+
+  meta:
+    invite:
+      expiration: 86400       # Token expiration in seconds (default: 86400 = 24 hours)
+      account:                # Default permissions for invited users
+        access:
+          site:
+            login: true
+
+  fields:
+    emails:
+      type: textarea
+      label: Email Addresses
+      help: Enter email addresses separated by commas, semicolons, or new lines
+      validate:
+        required: true
+
+    message:
+      type: textarea
+      label: Personal Message
+      help: Optional message to include in the invitation email
+
+  buttons:
+    - type: submit
+      value: Send Invitations
+
+  process:
+    - message: "Invitations sent successfully!"
+    - reset: true
+---
+
+# Invite Users
+
+Use this form to invite new users to register on the site.
+```
+
+> **Important:** The `form.meta.invite` section controls invitation behavior. The `expiration` sets how long the token remains valid (in seconds), and `account` defines the default access permissions applied to the new user upon registration.
+
+The form requires two key fields:
+- **`emails`**: A text/textarea field where the admin enters email addresses (separated by commas, semicolons, or spaces)
+- **`message`** *(optional)*: A custom message to include in the invitation email
+
+The form must trigger the `login.invite` task, which happens automatically when the form is submitted with `task: login.invite` as the action, or you can configure your form button accordingly.
+
+## Invitation Email
+
+The invitation email includes:
+- A subject line: "You have been invited to join [Site Name]"
+- The optional custom message from the admin
+- A "Create Your Account Now" button linking to the registration page
+- The name of the admin who sent the invitation
+
+The email template is located at `templates/emails/login/invite.html.twig` and can be overridden in your theme.
+
+## Registration via Invitation
+
+When a user clicks the invitation link:
+
+- They are directed to the registration route (default: `/user_register`) with the invitation token
+- The email field is pre-filled and the user fills in the remaining fields (username, password, etc.)
+- Registration is permitted **even if `user_registration.enabled` is set to `false`** — a valid invitation token bypasses this setting
+- Upon successful registration, the invitation's `account` permissions are applied to the new user
+- The invitation token is deleted (single-use)
+
+## Configuration Options
+
+Invitation behavior is configured in the form blueprint's `meta.invite` section:
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `expiration` | `86400` (24 hours) | How long the invitation token remains valid, in seconds |
+| `account.access` | `site.login: true` | Default access permissions granted to the invited user |
+
+You can customize the account permissions to grant different access levels:
+
+```yaml
+form:
+  meta:
+    invite:
+      expiration: 604800      # 7 days
+      account:
+        access:
+          site:
+            login: true
+            premium: true
+        groups:
+          - members
+```
+
+## Data Storage
+
+Active invitations are stored in `user/data/accounts/invites.yaml`. Each invitation entry contains:
+
+```yaml
+<unique-token>:
+  email: user@example.com
+  created_by: admin@example.com
+  created_timestamp: 1634000000
+  expiration_timestamp: 1634086400
+  account:
+    access:
+      site:
+        login: true
+```
+
+## Important Notes
+
+- The **Email plugin** must be installed and properly configured for invitation emails to be sent
+- Re-inviting the same email address **replaces** any existing pending invitation for that address
+- Expired invitations are automatically rejected when a user tries to use them
+- Invitations are **single-use** — the token is deleted once the user completes registration
+- There are no CLI commands for managing invitations; they are managed via form submission or by editing the `invites.yaml` file directly
+- The `route_register` login plugin setting determines the base URL for invitation links
 
 # Known issues
 

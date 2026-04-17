@@ -1,0 +1,9 @@
+{# Activation email (plain text) #}
+{%- import 'emails/login/_text-utils.txt.twig' as text -%}
+{%- set subject = 'PLUGIN_LOGIN.ACTIVATION_EMAIL_SUBJECT'|t(site_name) -%}
+{%- do email.message.setSubject(subject) -%}
+{{ text.from_html('PLUGIN_LOGIN.HOST_WARNING'|t(site_host)) }}
+
+{{ text.from_html('PLUGIN_LOGIN.ACTIVATION_EMAIL_BODY'|t(user.fullname, activation_link, site_name, author)) }}
+
+{{ activation_link }}

@@ -1,23 +1,25 @@
 name: Login
 slug: login
 type: plugin
-version: 3.8.0
+version: 3.8.1
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
 author:
   name: Team Grav
   email: devs@getgrav.org
-  url: http://getgrav.org
+  url: https://getgrav.org
 homepage: https://github.com/getgrav/grav-plugin-login
 keywords: login, authentication, admin, security
 bugs: https://github.com/getgrav/grav-plugin-login/issues
 license: MIT
+compatibility:
+  grav: ['1.7', '2.0']
 
 dependencies:
   - { name: grav, version: '>=1.7.41' }
-  - { name: form, version: '>=6.0.0' }
-  - { name: email, version: '>=3.1.6' }
+  - { name: form, version: '>=8.0.0' }
+  - { name: email, version: '>=5.0.0' }
 
 form:
   validation: loose
@@ -156,6 +158,18 @@ form:
               validate:
                 type: bool
 
+            magic_link.enabled:
+              type: toggle
+              label: PLUGIN_LOGIN.MAGIC_LINK_ENABLED
+              help: PLUGIN_LOGIN.MAGIC_LINK_ENABLED_HELP
+              highlight: 0
+              default: 0
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
             rememberme:
               type: section
               title: PLUGIN_LOGIN.REMEMBER_ME
@@ -220,6 +234,25 @@ form:
               size: medium
               label: PLUGIN_LOGIN.ROUTE_FORGOT
               placeholder: "/forgot_password"
+
+            route_magic:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_MAGIC
+              placeholder: "/magic_login"
+
+            route_magic_login:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_MAGIC_LOGIN
+              placeholder: "/magic_link"
+
+            magic_link.redirect_after_request:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.MAGIC_LINK_REDIRECT_AFTER_REQUEST
+              help: PLUGIN_LOGIN.MAGIC_LINK_REDIRECT_AFTER_REQUEST_HELP
+              placeholder: "/"
 
             route_reset:
               type: text
@@ -466,3 +499,37 @@ form:
               validate:
                 type: number
                 min: 1
+
+            magic_link_section:
+              type: section
+              title: PLUGIN_LOGIN.MAGIC_LINK
+              fields:
+                magic_link.ttl:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAGIC_LINK_TTL
+                  help: PLUGIN_LOGIN.MAGIC_LINK_TTL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
+                magic_link.max_requests_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_COUNT
+                  help: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 0
+
+                magic_link.max_requests_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL
+                  help: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1

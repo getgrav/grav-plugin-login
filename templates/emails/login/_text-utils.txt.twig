@@ -1,0 +1,29 @@
+{# Utilities for plain text login emails #}
+{%- macro from_html(content) -%}
+{{- content
+    |replace({
+        '<br>': "\n",
+        '<br/>': "\n",
+        '<br />': "\n",
+        '<p>': '',
+        '</p>': "\n\n",
+        '<h1>': '',
+        '<h2>': '',
+        '<h3>': '',
+        '</h1>': "\n\n",
+        '</h2>': "\n\n",
+        '</h3>': "\n\n",
+        '<ul>': "\n",
+        '</ul>': "\n",
+        '<ol>': "\n",
+        '</ol>': "\n",
+        '<li>': ' * ',
+        '</li>': "\n",
+        '<div>': '',
+        '</div>': "\n\n",
+        '&nbsp;': ' '
+    })
+    |striptags
+    |trim
+-}}
+{%- endmacro -%}
