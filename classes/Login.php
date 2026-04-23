@@ -19,6 +19,7 @@ use Grav\Common\Language\LanguageCodes;
 use Grav\Common\Page\Interfaces\PageInterface;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
+use Grav\Common\Security;
 use Grav\Common\Session;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
@@ -349,8 +350,13 @@ class Login
         $isIPv4 = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
         $ipKey = $isIPv4 ? $ip : Utils::getSubnet($ip, $this->grav['config']->get('plugins.login.ipv6_subnet_size'));
 
-        // Pseudonymization of the IP
-        return sha1($ipKey . $this->grav['config']->get('security.salt'));
+        // Pseudonymization of the IP. Grav 2.0 moved the HMAC key out of Config
+        // (GHSA-3f29-pqwf-v4j4); fall back to the legacy key on Grav 1.7.
+        $key = method_exists(Security::class, 'getNonceKey')
+            ? Security::getNonceKey()
+            : (string) $this->grav['config']->get('security.salt');
+
+        return sha1($ipKey . $key);
     }
 
     /**
@@ -581,9 +587,13 @@ class Login
             $this->rememberMe->setExpireTime($timeout);
 
             // Hardening cookies with user-agent and random salt or
-            // fallback to use system based cache key
+            // fallback to use system based cache key. Grav 2.0 moved the HMAC key
+            // out of Config (GHSA-3f29-pqwf-v4j4); use it when available.
             $server_agent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
-            $data = $server_agent . $config->get('security.salt', $this->grav['cache']->getKey());
+            $saltKey = method_exists(Security::class, 'getNonceKey')
+                ? Security::getNonceKey()
+                : (string) $config->get('security.salt', $this->grav['cache']->getKey());
+            $data = $server_agent . $saltKey;
             $this->rememberMe->setSalt(hash('sha512', $data));
 
             // Set cookie with correct base path of Grav install

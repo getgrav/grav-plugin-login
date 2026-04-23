@@ -1023,6 +1023,13 @@ class LoginPlugin extends Plugin
 
         $fields = (array)$this->config->get('plugins.login.user_registration.fields', []);
 
+        // Privilege fields must never be sourced from public registration form input —
+        // honoring attacker-supplied values would grant instant super-admin even if an
+        // administrator mistakenly added them to `user_registration.fields`
+        // (GHSA-pxm6-mhxr-q4mj). Server-side `default_values`, invitations, and the
+        // `plugins.login.user_registration.{groups,access}` config remain authoritative.
+        $privilegeFields = ['groups', 'access'];
+
         foreach ($fields as $field) {
             // Process value of field if set in the page process.register_user
             $default_values = (array)$this->config->get('plugins.login.user_registration.default_values');
@@ -1038,6 +1045,17 @@ class LoginPlugin extends Plugin
                         $data[$field] = $values;
                     }
                 }
+            }
+
+            if (in_array($field, $privilegeFields, true)) {
+                if ($form_data->get($field) !== null) {
+                    $this->grav['log']->warning(sprintf(
+                        'Login registration: ignored client-supplied "%s" from form submission (username=%s)',
+                        $field,
+                        is_string($username) ? $username : '<invalid>'
+                    ));
+                }
+                continue;
             }
 
             if (!isset($data[$field]) && $form_data->get($field)) {
