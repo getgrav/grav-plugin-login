@@ -65,7 +65,13 @@ class NewUserCommand extends ConsoleCommand
                 'permissions',
                 'P',
                 InputOption::VALUE_REQUIRED,
-                'The user permissions. It can be either `a` for Admin access only, `s` for Site access only and `b` for both Admin and Site access.'
+                'The user permissions. It can be either `a` for Admin access only, `s` for Site access only, or `b` for Admin and Site access.'
+            )
+            ->addOption(
+                'admin-type',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Which admin permission type to grant when permissions include Admin: `admin` (classic Admin plugin, admin.*), `api` (Admin2, api.*), or `both`. If omitted, auto-detects from which admin plugin is installed.'
             )
             ->addOption(
                 'fullname',
@@ -109,6 +115,7 @@ class NewUserCommand extends ConsoleCommand
             'email'       => $this->input->getOption('email'),
             'language'    => $this->input->getOption('language'),
             'permissions' => $this->input->getOption('permissions'),
+            'admin-type'  => $this->input->getOption('admin-type'),
             'fullname'    => $this->input->getOption('fullname'),
             'title'       => $this->input->getOption('title'),
             'state'       => $this->input->getOption('state')
@@ -206,14 +213,66 @@ class NewUserCommand extends ConsoleCommand
             $permissions_choice = $this->options['permissions'];
         }
 
+        // When "Admin" is selected — either alone or combined with "Site" — we
+        // need to decide which admin permission type(s) to grant:
+        //   - `admin` : legacy classic-Admin tree (admin.login / admin.super),
+        //               consumed by the Admin plugin on Grav 1.7.
+        //   - `api`   : newer Admin2 tree (api.login / api.super), consumed
+        //               by the Admin2 plugin on Grav 2.0.
+        //   - `both`  : write both, so the user can log into whichever admin
+        //               the site is running now or migrates to later.
+        //
+        // Auto-detection peeks at `user/plugins/` to infer which admin is
+        // installed (grav-plugin-login#329). The non-interactive `--admin-type`
+        // CLI option overrides the auto-detected default.
+        $admin_type = null;
+        if (in_array($permissions_choice, ['a', 'b'], true)) {
+            $detected = $this->detectAdminTree();
+            $admin_type = $this->options['admin-type'];
+
+            if ($admin_type === null) {
+                // Interactive iff --permissions wasn't supplied on the CLI.
+                // A script passing --permissions but not --admin-type gets the
+                // auto-detected default silently.
+                if ($this->options['permissions']) {
+                    $admin_type = $detected;
+                } else {
+                    $detectedLabel = [
+                        'admin' => 'classic Admin only (admin.*)',
+                        'api'   => 'Admin2 only (api.*)',
+                        'both'  => 'classic Admin + Admin2 (admin.* + api.*)',
+                    ][$detected];
+                    $this->output->writeln("<yellow>Detected admin installation:</yellow> {$detectedLabel}");
+
+                    $question = new ChoiceQuestion(
+                        'Please choose an <yellow>admin permission type</yellow>:',
+                        [
+                            'admin' => 'Classic Admin plugin (admin.*)',
+                            'api'   => 'Admin2 plugin (api.*)',
+                            'both'  => 'Both — grant admin.* and api.*',
+                        ],
+                        $detected
+                    );
+                    $question->setErrorMessage('Admin tree %s is invalid.');
+                    $admin_type = $helper->ask($this->input, $this->output, $question);
+                }
+            }
+
+            if (!in_array($admin_type, ['admin', 'api', 'both'], true)) {
+                throw new \RuntimeException("Invalid --admin-type value '{$admin_type}'. Must be one of: admin, api, both.");
+            }
+        }
+
+        $adminAccess = ['login' => true, 'super' => true];
         switch ($permissions_choice) {
             case 'a':
-                $access = [
-                    'admin' => [
-                        'login' => true,
-                        'super' => true
-                    ]
-                ];
+                $access = [];
+                if ($admin_type === 'admin' || $admin_type === 'both') {
+                    $access['admin'] = $adminAccess;
+                }
+                if ($admin_type === 'api' || $admin_type === 'both') {
+                    $access['api'] = $adminAccess;
+                }
                 break;
             case 's':
                 $access = [
@@ -223,15 +282,14 @@ class NewUserCommand extends ConsoleCommand
                 ];
                 break;
             case 'b':
-                $access = [
-                    'admin' => [
-                        'login' => true,
-                        'super' => true
-                    ],
-                    'site' => [
-                        'login' => true
-                    ]
-                ];
+                $access = [];
+                if ($admin_type === 'admin' || $admin_type === 'both') {
+                    $access['admin'] = $adminAccess;
+                }
+                if ($admin_type === 'api' || $admin_type === 'both') {
+                    $access['api'] = $adminAccess;
+                }
+                $access['site'] = ['login' => true];
         }
 
         if (isset($access)) {
@@ -320,5 +378,36 @@ class NewUserCommand extends ConsoleCommand
         $question->setHidden(true);
         $question->setHiddenFallback(true);
         return $helper->ask($this->input, $this->output, $question);
+    }
+
+    /**
+     * Infer which admin permission type the site expects by looking at which
+     * admin plugin is installed under user/plugins/.
+     *
+     *   - both installed → 'both'
+     *   - only classic Admin → 'admin'
+     *   - only Admin2 → 'api'
+     *   - neither installed → 'both' (safe default; user can prune the YAML
+     *     later, and "both" means the account will work if either plugin is
+     *     installed afterward)
+     *
+     * @return string One of 'admin' | 'api' | 'both'.
+     */
+    protected function detectAdminTree(): string
+    {
+        $root = defined('GRAV_ROOT') ? GRAV_ROOT : getcwd();
+        $hasClassic = is_dir($root . '/user/plugins/admin');
+        $hasAdmin2  = is_dir($root . '/user/plugins/admin2');
+
+        if ($hasClassic && $hasAdmin2) {
+            return 'both';
+        }
+        if ($hasAdmin2) {
+            return 'api';
+        }
+        if ($hasClassic) {
+            return 'admin';
+        }
+        return 'both';
     }
 }
