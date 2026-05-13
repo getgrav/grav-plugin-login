@@ -6,25 +6,21 @@ namespace Composer\Autoload;
 
 class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
 {
-    public static $files = array (
-        '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
-        'R' => 
+        'R' =>
         array (
             'RobThree\\Auth\\' => 14,
         ),
-        'G' => 
+        'G' =>
         array (
             'Grav\\Plugin\\Login\\' => 18,
             'Grav\\Plugin\\Console\\' => 20,
         ),
-        'D' => 
+        'D' =>
         array (
             'DASPRiD\\Enum\\' => 13,
         ),
-        'B' => 
+        'B' =>
         array (
             'Birke\\' => 6,
             'BaconQrCode\\' => 12,
@@ -32,27 +28,27 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
     );
 
     public static $prefixDirsPsr4 = array (
-        'RobThree\\Auth\\' => 
+        'RobThree\\Auth\\' =>
         array (
             0 => __DIR__ . '/..' . '/robthree/twofactorauth/lib',
         ),
-        'Grav\\Plugin\\Login\\' => 
+        'Grav\\Plugin\\Login\\' =>
         array (
             0 => __DIR__ . '/../..' . '/classes',
         ),
-        'Grav\\Plugin\\Console\\' => 
+        'Grav\\Plugin\\Console\\' =>
         array (
             0 => __DIR__ . '/../..' . '/cli',
         ),
-        'DASPRiD\\Enum\\' => 
+        'DASPRiD\\Enum\\' =>
         array (
             0 => __DIR__ . '/..' . '/dasprid/enum/src',
         ),
-        'Birke\\' => 
+        'Birke\\' =>
         array (
             0 => __DIR__ . '/..' . '/mober/rememberme/src',
         ),
-        'BaconQrCode\\' => 
+        'BaconQrCode\\' =>
         array (
             0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
