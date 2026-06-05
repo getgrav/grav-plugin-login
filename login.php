@@ -671,6 +671,16 @@ class LoginPlugin extends Plugin
                     return;
                 }
                 break;
+
+            case 'twofa_cancel':
+                // The 2FA form carries the `login-form` nonce, so verify it here
+                // too — `twofa_cancel` was previously unguarded, letting it run
+                // (and act on a client `_redirect`) without a nonce.
+                if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+                    return;
+                }
+                break;
         }
 
         $controller = new Controller($this->grav, $task, $post);

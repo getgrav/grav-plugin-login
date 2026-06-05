@@ -108,7 +108,11 @@ class Controller
             $this->grav['log']->error('plugin.login: '. $e->getMessage());
         }
 
-        if (!$this->redirect && $redirect) {
+        // Never honor a client-supplied `_redirect` that points off-site. This
+        // closes the open-redirect across every login task (e.g. `twofa_cancel`,
+        // which returns without setting its own redirect), not just the one that
+        // was reported. Server-side redirects set by a task are unaffected.
+        if (!$this->redirect && $redirect && !Uri::isExternal($redirect)) {
             $this->setRedirect($redirect, 303);
         }
 

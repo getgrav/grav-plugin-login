@@ -1,3 +1,9 @@
+# v3.8.5
+## 06/05/2026
+
+1. [](#bugfix)
+    * [security] The login form no longer follows an off-site `_redirect` target, closing an open redirect that an unauthenticated request could trigger through the `twofa_cancel` task (CWE-601). Thanks to @iliaal for the report.
+
 # v3.8.4
 ## 05/13/2026
 
