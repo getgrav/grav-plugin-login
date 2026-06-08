@@ -1,3 +1,9 @@
+# v3.8.5
+## 06/08/2026
+
+1. [](#bugfix)
+    * [security] The login form no longer follows an off-site `_redirect` target, closing an open redirect that an unauthenticated request could trigger through the `twofa_cancel` task (CWE-601). Thanks to @iliaal for the report.
+
 # v3.8.4
 ## 05/13/2026
 
@@ -89,7 +95,7 @@
 ## 05/09/2023
 
 1. [](#improved)
-   * Removed `FILTER_SANITIZE_STRING` input filter in favor of `htmlspecialchars(strip_tags())` 
+   * Removed `FILTER_SANITIZE_STRING` input filter in favor of `htmlspecialchars(strip_tags())`
    * Require Grav `v1.7.41` for new  `UserGroupObject::groupNames` to address deprecation message
    * Updated to BaconQRCode `v2.0.8`
 
@@ -172,7 +178,7 @@
 ## 08/31/2021
 
 1. [](#bugfix)
-   * Fixed white-page during new install with admin 
+   * Fixed white-page during new install with admin
 
 # v3.5.0
 ## 08/31/2021
@@ -225,7 +231,7 @@
    * Prevent information leak on every ACL protected page by always setting Cache-Control [#264](https://github.com/getgrav/grav-plugin-login/issues/264))
 1. [](#improved)
    * Allow browser caching for all login/profile pages
-   * Composer update 
+   * Composer update
 
 # v3.3.8
 ## 12/11/2020
@@ -244,7 +250,7 @@
 
 1. [](#bugfix)
     * Fixed typos causing invalid config for logout
-    * Fixed cache issues with user login pages [#264](https://github.com/getgrav/grav-plugin-login/issues/264) 
+    * Fixed cache issues with user login pages [#264](https://github.com/getgrav/grav-plugin-login/issues/264)
 
 # v3.3.5
 ## 06/10/2020
@@ -304,7 +310,7 @@
     * CHANGE: `redirect_to_login` and `redirect_after_logout` are now boolean, with accompanying `route_after_login` and `route_after_logout` options.  NOTE: Compatibility is maintained with existing config.
 1. [](#improved)
     * Improved configuration layout
-    * Better handling of login route when that page doesn't exist 
+    * Better handling of login route when that page doesn't exist
 1. [](#bugfix)
     * Fixed guest only pages requiring login
     * Fixed issue when logging out, not redirecting, and attempting to log right back in
@@ -371,7 +377,7 @@
 
 1. [](#new)
     * Added **2-Factor Authentication** support for front-end (2FA)
-    * New CLI command to `lookup` users 
+    * New CLI command to `lookup` users
     * Check requirements to use new `lookup` command
     * Added support for the new `Flex User` object
 1. [](#improved)
@@ -382,12 +388,12 @@
     * Invalidate cache when modifying users from CLI
     * Updated code to PHP 7.1 features
 1. [](#bugfix)
-    * Fix login on registration (FlexUsers)      
+    * Fix login on registration (FlexUsers)
 
 # v2.8.4
 ## 03/20/2019
 
-1. [](#improved)  
+1. [](#improved)
   * Enable "brute force" protection by default [#195](https://github.com/getgrav/grav-plugin-login/pull/195)
   * UPdated various language translations
 1. [](#bugfix)
@@ -396,19 +402,19 @@
 
 # v2.8.3
 ## 01/25/2019
-  
+
 1. [](#new)
-  * Wrap data in `onUserLoginRegisterData` event in object to allow reference  
-1. [](#improved)  
+  * Wrap data in `onUserLoginRegisterData` event in object to allow reference
+1. [](#improved)
   * IP pseudonymization for rate limiter [#196](https://github.com/getgrav/grav-plugin-login/pull/196)
   * Made some error lang strings more generic to relfect ability to change username/password requirements
 1. [](#bugfix)
-  * Fix redirectLangSafe in login controller [#192](https://github.com/getgrav/grav-plugin-login/pull/192)      
+  * Fix redirectLangSafe in login controller [#192](https://github.com/getgrav/grav-plugin-login/pull/192)
 
 # v2.8.2
 ## 12/14/2018
-  
-1. [](#new)  
+
+1. [](#new)
   * Fire `onUserLoginRegisteredUser()` event to allow manipulation of User object after registration
 
 # v2.8.1
@@ -469,7 +475,7 @@
     * Show denied message only when authenticated but not authorized
 1. [](#bugfix)
     * Don't allow Profile saving if a Grav user account doesn't exist (OAuth/LDAP users for example)
-    * Don't allow PW reset if no current password exists (OAuth/LDAP users for example) 
+    * Don't allow PW reset if no current password exists (OAuth/LDAP users for example)
 
 # v2.6.3
 ## 04/12/2018
@@ -485,8 +491,8 @@
     * Added support for `Login::login()` and `Login::logout()` to return `UserLoginEvent` instance instead of `User`
     * Added support for custom login messages and redirects set in `UserLoginEvent`
 1. [](#bugfix)
-    * Fixed typo in activation email body [#151](https://github.com/getgrav/grav-plugin-login/issues/151) 
-    
+    * Fixed typo in activation email body [#151](https://github.com/getgrav/grav-plugin-login/issues/151)
+
 # v2.6.1
 ## 03/19/2018
 
@@ -583,7 +589,7 @@
 1. [](#bugfix)
     * Set cookie path to `/` if `base_url_relative` is empty [#102](https://github.com/getgrav/grav-plugin-login/issues/102)
     * Fixed some redirect logic
-    
+
 # v2.2.1
 ## 01/24/2017
 
