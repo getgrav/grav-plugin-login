@@ -38,6 +38,7 @@ use Grav\Plugin\Login\Invitations\Invitation;
 use Grav\Plugin\Login\Invitations\Invitations;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\Controller;
+use Grav\Plugin\Login\Email;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
@@ -93,6 +94,8 @@ class LoginPlugin extends Plugin
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
+            'onAdminTwigTemplatePaths'  => ['onAdminUntrustedHostNotice', 0],
+            'onApiDashboardNotifications' => ['onApiDashboardNotifications', 0],
             'onFormProcessed'           => ['onFormProcessed', 0],
             'onUserLoginAuthenticate'   => [['userLoginAuthenticateByMagic', 10004], ['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
@@ -1536,5 +1539,62 @@ class LoginPlugin extends Plugin
         }
 
         return $login->getRoute('after_logout') ?? false;
+    }
+
+    /**
+     * [onAdminTwigTemplatePaths] Admin-classic notice.
+     *
+     * Fires only in admin-classic. When neither plugins.login.site_host nor
+     * system.custom_base_url is set, password reset and activation email links
+     * are built from the (spoofable) request host (GHSA-46jp-rc59-w2gc). Surface
+     * a warning banner to the logged-in admin via the messages system so the
+     * weak configuration is visible to the person who can fix it.
+     *
+     * @return void
+     */
+    public function onAdminUntrustedHostNotice(): void
+    {
+        if (Email::isTrustedHostConfigured()) {
+            return;
+        }
+
+        $user = $this->grav['user'] ?? null;
+        if (!$user || !$user->authenticated || !$user->authorize('admin.login')) {
+            return;
+        }
+
+        $this->grav['messages']->add(
+            $this->grav['language']->translate('PLUGIN_LOGIN.UNTRUSTED_HOST_NOTICE'),
+            'warning'
+        );
+    }
+
+    /**
+     * [onApiDashboardNotifications] Admin-next (admin2) notice.
+     *
+     * Contributes the same untrusted-host warning as a persistent, dismissible
+     * dashboard banner in the `top` location. Dismissal and reappearance flow
+     * through the API plugin's standard notification handling.
+     *
+     * @param Event $event
+     * @return void
+     */
+    public function onApiDashboardNotifications(Event $event): void
+    {
+        if (Email::isTrustedHostConfigured()) {
+            return;
+        }
+
+        $notifications = $event['notifications'] ?? [];
+        $notifications['top'][] = [
+            'id'             => 'login-untrusted-host',
+            'date'           => date('c'),
+            'level'          => 'warning',
+            'icon'           => 'shield-alert',
+            'location'       => ['top'],
+            'message'        => $this->grav['language']->translate('PLUGIN_LOGIN.UNTRUSTED_HOST_NOTICE'),
+            'reappear_after' => '+7 days',
+        ];
+        $event['notifications'] = $notifications;
     }
 }

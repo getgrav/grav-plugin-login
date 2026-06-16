@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.8.5
+version: 3.8.6
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -450,6 +450,17 @@ form:
               label: PLUGIN_LOGIN.SITE_HOST
               help: PLUGIN_LOGIN.SITE_HOST_HELP
               placeholder: "https://example.com"
+            require_trusted_host:
+              type: toggle
+              label: PLUGIN_LOGIN.REQUIRE_TRUSTED_HOST
+              help: PLUGIN_LOGIN.REQUIRE_TRUSTED_HOST_HELP
+              highlight: 0
+              default: 0
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
             max_pw_resets_count:
               type: number
               size: x-small

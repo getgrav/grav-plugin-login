@@ -176,6 +176,10 @@ PLUGIN_LOGIN:
   HOST_WARNING: '<div style="background-color: #FFEDAD; color: #725F1C; border: 1px solid #FFD74E; padding: 10px; margin: 10px 0; border-radius: 5px;">NOTE: If you did not initiate this email or you don''t recognize the originating site: <strong>"%s"</strong> please ignore or delete this email.</div>'
   SITE_HOST: "Site Host"
   SITE_HOST_HELP: "For extra security, force this URL to be used in all password reset and activation emails. Leave empty to use the default site URL"
+  REQUIRE_TRUSTED_HOST: "Require Trusted Host"
+  REQUIRE_TRUSTED_HOST_HELP: "When enabled, password reset emails are not sent unless a Site Host (or the core Custom Base URL) is configured, instead of falling back to the request host. Prevents reset links from being pointed at a spoofed host"
+  FORGOT_TEMPORARILY_UNAVAILABLE: "Password reset is temporarily unavailable. Please contact the site administrator."
+  UNTRUSTED_HOST_NOTICE: "Login security: no trusted host is configured, so password reset and activation email links are built from the request host and can be spoofed. Set a <strong>Site Host</strong> in the Login plugin settings, or a <strong>Custom Base URL</strong> in System settings."
   MAGIC_LINK_ENABLED: "Enable magic-link login"
   MAGIC_LINK_ENABLED_HELP: "Allow users to request a one-time login link by email"
   MAGIC_LINK: "Magic Link"

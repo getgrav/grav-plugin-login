@@ -1,3 +1,11 @@
+# v3.8.6
+## 06/16/2026
+
+1. [](#new)
+    * Added a "Require Trusted Host" security option that refuses to send password reset emails unless a Site Host (or the core Custom Base URL) is configured, instead of falling back to the request host.
+2. [](#improved)
+    * [security] The admin now shows a warning banner (in both the classic admin and Admin 2.0), and a line is written to the log, whenever password reset, activation, or magic-login email links are being built from the request host because neither the Site Host nor the core Custom Base URL is set, since a spoofed host could otherwise redirect those links to an attacker. Thanks to @n00o00b for the report.
+
 # v3.8.5
 ## 06/08/2026
 
