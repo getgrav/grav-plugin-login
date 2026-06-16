@@ -356,6 +356,20 @@ class Controller
         $language = $this->grav['language'];
         $messages = $this->grav['messages'];
 
+        // When the admin has opted into requiring a trusted host, refuse to
+        // generate a reset link from the request Host while no canonical host
+        // is configured. This fails closed at the exact point the spoofable
+        // link would be created (GHSA-46jp-rc59-w2gc). The message is
+        // deliberately generic so an unauthenticated requester learns nothing
+        // about account existence or the site's configuration.
+        if ($config->get('plugins.login.require_trusted_host', false) && !Email::isTrustedHostConfigured()) {
+            $this->grav['log']->error('login: password reset refused because require_trusted_host is enabled but neither plugins.login.site_host nor system.custom_base_url is set.');
+            $messages->add($language->translate('PLUGIN_LOGIN.FORGOT_TEMPORARILY_UNAVAILABLE'), 'error');
+            $this->setRedirect($this->login->getRoute('forgot') ?? '/');
+
+            return true;
+        }
+
         /** @var UserCollectionInterface $users */
         $users = $this->grav['accounts'];
         $email = $data['email'] ?? '';
