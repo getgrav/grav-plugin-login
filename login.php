@@ -42,6 +42,7 @@ use Grav\Plugin\Login\Email;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
+use Twig\TwigFunction;
 use function is_array;
 
 /**
@@ -92,6 +93,9 @@ class LoginPlugin extends Plugin
             'onDisplayErrorPage.403'    => ['onDisplayErrorPage403', -1],
             'onPageInitialized'         => [['authorizeLoginPage', 10], ['authorizePage', 0]],
             'onPageFallBackUrl'         => ['authorizeFallBackUrl', 0],
+            'onTwigInitialized'         => ['onTwigInitialized', 0],
+            'onBuildTwigSandboxPolicy'  => ['onBuildTwigSandboxPolicy', 0],
+            'onShortcodeHandlers'       => ['onShortcodeHandlers', 0],
             'onTwigTemplatePaths'       => ['onTwigTemplatePaths', 0],
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
             'onAdminTwigTemplatePaths'  => ['onAdminUntrustedHostNotice', 0],
@@ -887,6 +891,46 @@ class LoginPlugin extends Plugin
 
             $this->setUnauthorizedPage();
         }
+    }
+
+    /**
+     * [onTwigInitialized] Register the `authenticated()` Twig helper.
+     *
+     * Lets templates and page content ask whether the current visitor is
+     * logged in — and, optionally, whether they hold a given permission or
+     * belong to a given group — without touching the `grav.user` object, which
+     * the content Twig sandbox blocks.
+     */
+    public function onTwigInitialized(): void
+    {
+        $this->grav['twig']->twig()->addFunction(
+            new TwigFunction('authenticated', $this->grav['login']->isAuthenticated(...))
+        );
+    }
+
+    /**
+     * [onBuildTwigSandboxPolicy] Allow `authenticated()` inside the content
+     * sandbox so editor-authored page content can use `{% if authenticated() %}`.
+     * The helper only ever returns a boolean about the current visitor, so it is
+     * safe to expose.
+     */
+    public function onBuildTwigSandboxPolicy(Event $event): void
+    {
+        $functions = $event['functions'];
+        $functions[] = 'authenticated';
+        $event['functions'] = $functions;
+    }
+
+    /**
+     * [onShortcodeHandlers] Register the optional `[authenticated]` / `[guest]`
+     * shortcodes. This event is fired only by the shortcode-core plugin, so the
+     * shortcodes are added when it is installed without the Login plugin
+     * depending on it; the same checks are always available via the
+     * `authenticated()` Twig function.
+     */
+    public function onShortcodeHandlers(): void
+    {
+        $this->grav['shortcode']->registerAllShortcodes(__DIR__ . '/classes/shortcodes');
     }
 
     /**
