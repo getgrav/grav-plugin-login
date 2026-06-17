@@ -1,3 +1,9 @@
+# v3.8.7
+## 06/17/2026
+
+1. [](#improved)
+    * The password reset page now shows the username through a `[uri param="user" /]` shortcode instead of Twig in content, so it works out of the box on Grav 2 where Twig in content is disabled by default (adds a shortcode-core dependency).
+
 # v3.8.6
 ## 06/16/2026
 
