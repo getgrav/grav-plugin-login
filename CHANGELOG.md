@@ -1,3 +1,12 @@
+# v3.8.7
+## 06/17/2026
+
+1. [](#new)
+    * Added an `authenticated()` Twig function that lets page content check whether the current visitor is logged in, optionally requiring a given permission or group, working inside the Grav 2 content sandbox where the `grav.user` object is blocked.
+    * Added optional `[authenticated]` and `[guest]` shortcodes that run the same login, permission and group checks for sites that use shortcodes instead of Twig in content.
+2. [](#improved)
+    * The password reset page now shows the username through a `[uri param="user" /]` shortcode instead of Twig in content, so it works out of the box on Grav 2 where Twig in content is disabled by default (adds a shortcode-core dependency).
+
 # v3.8.6
 ## 06/16/2026
 

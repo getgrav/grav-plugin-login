@@ -245,6 +245,43 @@ Because the admin user contains an `admin.login: true` reference he will be able
 
 Enabling the setting "Use parent access rules" (`parent_acl` in login.yaml) allows you to create private areas where you set the access level on the parent page, and all the subpages inherit that requirement.
 
+## Checking the logged-in user in Twig
+
+The plugin registers an `authenticated()` Twig function so you can show or hide parts of a page depending on whether the visitor is logged in, and optionally on their permissions or groups:
+
+```twig
+{% if authenticated() %}
+    Welcome back!
+{% else %}
+    Please <a href="/login">log in</a>.
+{% endif %}
+```
+
+Pass a permission as the first argument to also require that the user is authorized for it, or a group with the `group` named argument to require membership. Each accepts a single value or a list and matches if the user satisfies any one of them; pass both to require both:
+
+```twig
+{% if authenticated('admin.super') %} ... {% endif %}
+{% if authenticated(['admin.login', 'admin.pages']) %} ... {% endif %}
+{% if authenticated(group='editors') %} ... {% endif %}
+{% if authenticated('admin.pages', group='editors') %} ... {% endif %}
+```
+
+Unlike reading `grav.user` directly, `authenticated()` works inside page content on Grav 2, where the Twig content sandbox blocks the `grav.user` object. For pure permission checks you can also use Grav's built-in [`authorize()`](https://learn.getgrav.org/themes/twig-tags#authorize) function, which is allowed in the sandbox as well.
+
+### Shortcode equivalents
+
+If the [Shortcode Core](https://github.com/getgrav/grav-plugin-shortcode-core) plugin is installed, the same checks are available as shortcodes, which is handy when Twig in content is left disabled:
+
+```
+[authenticated]Only logged-in visitors see this.[/authenticated]
+[authenticated=admin.super]Supers only.[/authenticated]
+[authenticated permission="admin.login,admin.pages"]...[/authenticated]
+[authenticated group="editors"]...[/authenticated]
+[guest]Please [log in](/login).[/guest]
+```
+
+`[authenticated]` shows its content only when the checks pass, and `[guest]` is the inverse, shown only when no one is logged in. The `permission` and `group` parameters accept a single value or a comma-separated list and match any one of them; pass both to require both. These shortcodes are registered only when Shortcode Core is present, so the Login plugin does not depend on it.
+
 # Login Page
 
 >> Note: the **frontend site** and **admin plugin** use different sessions so you need to explicitly provide a login on the frontend.

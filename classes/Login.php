@@ -93,6 +93,48 @@ class Login
     }
 
     /**
+     * Whether the current session user is logged in, optionally narrowed to a
+     * permission and/or group. Shared by the `authenticated()` Twig function
+     * and the `[authenticated]` / `[guest]` shortcodes:
+     *
+     *     $grav['login']->isAuthenticated()                  logged in at all
+     *     $grav['login']->isAuthenticated('admin.super')     logged in + authorized
+     *     $grav['login']->isAuthenticated(null, 'editors')   logged in + in group
+     *
+     * `permission` and `group` each accept a single value or a list, and match
+     * if the user satisfies any one of them. When both are given the user must
+     * satisfy both.
+     *
+     * @param string|array|null $permission Permission action(s) to authorize.
+     * @param string|array|null $group      Group name(s) the user must be in.
+     */
+    public function isAuthenticated($permission = null, $group = null): bool
+    {
+        $user = $this->grav['user'] ?? null;
+        if (!$user instanceof UserInterface || !$user->authenticated) {
+            return false;
+        }
+
+        // Group membership: pass if the user is in any of the named groups.
+        if ($group !== null && !array_intersect((array)$group, (array)$user->get('groups', []))) {
+            return false;
+        }
+
+        // Permission: pass if the user is authorized for any of the actions.
+        if ($permission !== null) {
+            foreach ((array)$permission as $action) {
+                if ($user->authorize((string)$action) === true) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Login user.
      *
      * @param array $credentials    Login credentials, eg: ['username' => '', 'password' => '']
