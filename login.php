@@ -903,8 +903,11 @@ class LoginPlugin extends Plugin
      */
     public function onTwigInitialized(): void
     {
+        $login = $this->grav['login'];
         $this->grav['twig']->twig()->addFunction(
-            new TwigFunction('authenticated', $this->grav['login']->isAuthenticated(...))
+            new TwigFunction('authenticated', static function ($permission = null, $group = null) use ($login) {
+                return $login->isAuthenticated($permission, $group);
+            })
         );
     }
 
