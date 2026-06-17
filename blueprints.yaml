@@ -20,7 +20,7 @@ dependencies:
   - { name: grav, version: '>=1.7.41' }
   - { name: form, version: '>=8.0.0' }
   - { name: email, version: '>=5.0.0' }
-  - { name: shortcode-core, version: '>=5.5.0' }
+  - { name: shortcode-core, version: '>=6.0.0' }
 
 form:
   validation: loose
