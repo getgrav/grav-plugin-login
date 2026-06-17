@@ -1,3 +1,9 @@
+# v3.8.8
+## 06/17/2026
+
+1. [](#bugfix)
+    * The new `authenticated()` Twig function no longer uses syntax that only works on PHP 8.1 and newer, so the plugin loads again on Grav 1.7 sites running older PHP instead of failing with a parse error.
+
 # v3.8.7
 ## 06/17/2026
 
