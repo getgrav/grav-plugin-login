@@ -1,3 +1,9 @@
+# v3.8.9
+## 06/19/2026
+
+1. [](#improved)
+    * Simplified the admin warning shown when email links are not pinned to a trusted host, and linked it to a new documentation page that explains the issue and how to fix it.
+
 # v3.8.8
 ## 06/17/2026
 
