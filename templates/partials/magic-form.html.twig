@@ -19,8 +19,8 @@
       {% endif %}
     {% endfor %}
 
-    <div class="form-actions secondary-accent">
-      <button type="submit" class="button primary" name="task" value="login.magicRequest">
+    <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
+      <button type="submit" class="{{ form_button_classes ?: 'button primary' }}" name="task" value="login.magicRequest">
         {{ "PLUGIN_LOGIN.BTN_MAGIC_SEND_LINK"|t }}
       </button>
     </div>
