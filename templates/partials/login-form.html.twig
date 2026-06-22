@@ -11,7 +11,7 @@
         {% if user.authenticated and user.authorized %}
             <h4>{{ 'PLUGIN_LOGIN.WELCOME'|t }} <strong>{{ user.fullname ?: user.username }}</strong></h4>
             <hr>
-            <a class="button logout" href="{{ uri.addNonce(base_url_relative ~ uri.path ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce')|e }}">{{ 'PLUGIN_LOGIN.BTN_LOGOUT'|t }}</a>
+            <a class="{{ form_button_classes ? form_button_classes ~ ' logout' : 'button logout' }}" href="{{ uri.addNonce(base_url_relative ~ uri.path ~ '/task' ~ config.system.param_sep ~ 'login.logout', 'logout-form', 'logout-nonce')|e }}">{{ 'PLUGIN_LOGIN.BTN_LOGOUT'|t }}</a>
 
         {% elseif user.authenticated and user.twofa_enabled %}
             {% include 'partials/login-twofa.html.twig' %}

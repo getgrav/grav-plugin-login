@@ -20,8 +20,8 @@
         {% endif %}
       {% endfor %}
 
-      <div class="form-actions secondary-accent">
-        <button type="submit" class="button primary" name="task" value="login.reset"><i class="fa fa-key"></i> {{ "PLUGIN_LOGIN.BTN_RESET_PASSWORD"|t }}</button>
+      <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
+        <button type="submit" class="{{ form_button_classes ?: 'button primary' }}" name="task" value="login.reset"><i class="fa fa-key"></i> {{ "PLUGIN_LOGIN.BTN_RESET_PASSWORD"|t }}</button>
       </div>
 
       {{ nonce_field('reset-form', 'reset-form-nonce')|raw }}

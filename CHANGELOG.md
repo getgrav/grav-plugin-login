@@ -1,3 +1,9 @@
+# v3.8.10
+## 06/22/2026
+
+1. [](#improved)
+    * The `form_button_classes` and `form_button_outer_classes` theme variables now apply to the forgot, reset, magic-link and logout buttons too, so a theme can restyle every login button by setting them once instead of overriding each template. Thanks to @3e33 for the report.
+
 # v3.8.9
 ## 06/19/2026
 
