@@ -763,7 +763,15 @@ class Controller
             /** @var UserInterface $user */
             $user = $this->grav['user'];
 
-            if ($user->exists()) {
+            // Require a fully authorized session, not merely an existing one.
+            // During the 2FA challenge the session user is authenticated but
+            // NOT authorized (Login sets `authorized = false` while the login is
+            // delayed). Gating on `exists()` alone let a pending attacker mint
+            // and read the victim's new 2FA secret (GHSA-7mgc). Legitimate
+            // first-time enrollment / QR regeneration happens from the account
+            // profile page where the user is fully logged in (authorized=true),
+            // so that flow still passes this gate.
+            if ($user->exists() && $user->authorized === true) {
                 /** @var TwoFactorAuth $twoFa */
                 $twoFa = $this->grav['login']->twoFactorAuth();
                 $secret = $twoFa->createSecret();

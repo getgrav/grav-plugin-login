@@ -8,10 +8,11 @@
         event.preventDefault();
         let element = $(this);
         let url = `${config.base_url_relative}/task${config.param_sep}login.regenerate2FASecret`;
+        let nonce = element.closest('.twofa-wrapper').find('input[name="login-form-nonce"]').val();
 
         element.attr('disabled', 'disabled').find('> .fa').addClass('fa-spin');
 
-        jQuery.post(url, function(response) {
+        jQuery.post(url, { 'login-form-nonce': nonce }, function(response) {
             $('[data-2fa-image]').attr('src', response.image);
             $('[data-2fa-secret]').text(response.secret);
             $('[data-2fa-value]').val(response.secret);

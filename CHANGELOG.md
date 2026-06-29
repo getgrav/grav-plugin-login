@@ -1,3 +1,10 @@
+# v3.8.11
+## 06/29/2026
+
+1. [](#bugfix)
+    * [security] Regenerating a user's two-factor secret now requires a fully authorized session, closing a window where someone who had the victim's password could rotate the secret and bypass the second factor (GHSA-7mgc-c7pq-3rr3).
+    * [security] Regenerating a two-factor secret now requires a POST request with a valid form nonce, preventing an off-site page from silently resetting a logged-in user's secret (GHSA-4px8-7p53-282r).
+
 # v3.8.10
 ## 06/22/2026
 

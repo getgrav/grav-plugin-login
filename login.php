@@ -688,6 +688,19 @@ class LoginPlugin extends Plugin
                     return;
                 }
                 break;
+
+            case 'regenerate2FASecret':
+                // CSRF hardening (GHSA-4px8): this task was previously reachable
+                // with no nonce and via a top-level GET (SameSite=Lax). Require
+                // POST to kill the Lax GET vector, and verify the `login-form`
+                // nonce that the 2FA setup field now sends.
+                if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST'
+                    || !isset($post['login-form-nonce'])
+                    || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+                    return;
+                }
+                break;
         }
 
         $controller = new Controller($this->grav, $task, $post);
