@@ -1269,8 +1269,26 @@ class LoginPlugin extends Plugin
 
         $fields = (array)$this->config->get('plugins.login.user_registration.fields', []);
 
+        // Privilege fields must never be sourced from self-service profile input, the
+        // same defence the registration handler applies (GHSA-pxm6-mhxr-q4mj). On the
+        // default DataUser backend `update()` is a raw merge with no field-level
+        // security gate, so an attacker-supplied `access`/`groups` would otherwise
+        // persist straight to the account and grant super-admin (GHSA-h33v-82r9-v8pm).
+        $privilegeFields = ['groups', 'access'];
+
         $data = [];
         foreach ($fields as $field) {
+            if (in_array($field, $privilegeFields, true)) {
+                if ($form_data->get($field) !== null) {
+                    $this->grav['log']->warning(sprintf(
+                        'Login profile: ignored client-supplied "%s" from form submission (username=%s)',
+                        $field,
+                        is_string($user->get('username')) ? $user->get('username') : '<invalid>'
+                    ));
+                }
+                continue;
+            }
+
             $data_field = $form_data->get($field);
             if (!isset($data[$field]) && isset($data_field)) {
                 $data[$field] = $form_data->get($field);
