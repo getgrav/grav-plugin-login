@@ -1,3 +1,9 @@
+# v3.8.12
+## 07/08/2026
+
+1. [](#bugfix)
+    * [security] The profile self-update form now ignores client-supplied `groups` and `access` fields, closing a privilege-escalation gap where a logged-in user could grant themselves super-admin if an administrator had added those fields to the registration allowlist (GHSA-h33v-82r9-v8pm). Thanks to zx (Jace) for the report.
+
 # v3.8.11
 ## 06/29/2026
 
