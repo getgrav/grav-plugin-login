@@ -1,3 +1,9 @@
+# v3.8.13
+## 07/14/2026
+
+1. [](#bugfix)
+    * [security] Remember Me login tokens now actually expire after the configured timeout, closing a gap where a captured cookie stayed valid indefinitely instead of the default 7 days (GHSA-mj78-8gwc-vxjj). Thanks to chakrapani150 for the report.
+
 # v3.8.12
 ## 07/08/2026
 

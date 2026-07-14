@@ -58,12 +58,21 @@ class TokenStorage implements StorageInterface
         $file = $this->getFile($credential);
         $tokens = (array)$file->content();
 
-        if (!isset($tokens[$persistentToken]) || $tokens[$persistentToken] < time() + $this->timeout) {
+        $entry = $tokens[$persistentToken] ?? null;
+        if (!is_array($entry) || !$entry) {
             return self::TRIPLET_NOT_FOUND;
         }
 
-        $stored = key($tokens[$persistentToken]);
-        if ($stored !== $token) {
+        // The entry is stored as [hashedToken => storedTimestamp]. Reject the triplet once it is older than the
+        // configured timeout. The previous check compared the whole array against a scalar, which PHP always treats
+        // as "array is greater", so the expiry branch was dead and tokens never expired server-side.
+        $storedTime = (int)current($entry);
+        if ($this->timeout > 0 && $storedTime + $this->timeout < time()) {
+            return self::TRIPLET_NOT_FOUND;
+        }
+
+        $stored = (string)key($entry);
+        if (!hash_equals($stored, $token)) {
             return self::TRIPLET_INVALID;
         }
 
