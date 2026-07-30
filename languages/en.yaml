@@ -191,3 +191,8 @@ PLUGIN_LOGIN:
   MAGIC_LINK_MAX_REQUESTS_INTERVAL_HELP: "Time interval for max magic-link requests count"
   MAGIC_LINK_REDIRECT_AFTER_REQUEST: "After magic-link request route"
   MAGIC_LINK_REDIRECT_AFTER_REQUEST_HELP: "Route to redirect to after requesting a magic login link"
+  LOCKOUT_COLUMN_LABEL: "Lockout"
+  LOCKOUT_COLUMN_VALUE: "Locked (%s attempts)"
+  LOCKOUT_UNLOCK_LABEL: "Clear login lockout"
+  LOCKOUT_UNLOCKED: 'Cleared the login lockout for "%s"'
+  LOCKOUT_NOT_LOCKED: '"%s" was not locked out'

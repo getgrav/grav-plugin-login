@@ -99,6 +99,12 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 |`change-pass`||Changes password of the specified user (User file must exist)
 || [ -u, --user=USER ]               | The username.                                                   |
 || [ -p, --password=PASSWORD ]       | The new password. Ensure the password respects Grav's password policy. **Note that this option is not recommended because the password will be visible by users listing the processes.** |
+|||
+|`unlock-user`||Clears the temporary lockout applied after too many failed logins (see [Login Lockouts](#login-lockouts))
+|| [ -l, --list ]                    | List the lockouts currently in effect and exit.                 |
+|| [ -u, --user=USER ]               | Unlock this username, along with the IP counters it tripped.    |
+|| [ -i, --ip=IP ]                   | Unlock this IP address.                                         |
+|| [ -a, --all ]                     | Clear every lockout on the site.                                |
 
 
 ### CLI Example
@@ -149,6 +155,53 @@ access:
 ```
 
 >> Note: the username is based on the name of the YAML file.
+
+# Login Lockouts
+
+After `max_login_count` failed login attempts, the plugin temporarily blocks further attempts for `max_login_interval` minutes. Two counters are kept: one against the username and one against the IP address the attempts came from, and either one being over the limit is enough to block a login. Both live in the cache, under `cache/login/`, so nothing on the account itself records that it is locked.
+
+Lockouts expire on their own, but you can clear one early either from the admin or from the command line. The command line is the way in when the lockout is keeping *you* out of the site.
+
+### Seeing who is locked out
+
+```
+> bin/plugin login unlock-user --list
+
+login_attempts
+--------------
+
+ ------------------- ---------- --------------------- -------------------
+  Locked              Attempts   Last attempt          Accounts tried
+ ------------------- ---------- --------------------- -------------------
+  IP (df2c0757…)      8          2026-07-30 10:24:49   joeuser
+  joeuser             8          2026-07-30 10:24:49   -
+ ------------------- ---------- --------------------- -------------------
+```
+
+IP addresses are stored hashed rather than in the clear, so the listing shows a short fingerprint plus the accounts that were tried from it. Pass the real address to `--ip` and the command will hash it for you.
+
+### Clearing a lockout
+
+```
+> bin/plugin login unlock-user -u joeuser
+ [OK] Unlocked "joeuser" (cleared 2 counters).
+```
+
+Unlocking by username also clears the IP counters that account tripped, which is normally what you want: clearing the username alone leaves the IP counter in place and the user still blocked. To clear an address on its own, use `-i`:
+
+```
+> bin/plugin login unlock-user -i 203.0.113.4
+```
+
+And to wipe every lockout on the site, across failed logins, password resets and magic-link requests:
+
+```
+> bin/plugin login unlock-user --all
+```
+
+### From the admin
+
+In Grav 2.0's admin, the Users list (table view) has a **Lockout** column marking any account that is currently blocked, and a padlock button in the row's actions to clear it. Clearing a lockout requires the `api.users.write` permission.
 
 # Default Configuration
 
