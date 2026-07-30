@@ -100,6 +100,10 @@ class LoginPlugin extends Plugin
             'onTwigSiteVariables'       => ['onTwigSiteVariables', -100000],
             'onAdminTwigTemplatePaths'  => ['onAdminUntrustedHostNotice', 0],
             'onApiDashboardNotifications' => ['onApiDashboardNotifications', 0],
+            'onApiUserListColumns'      => ['onApiUserListColumns', 0],
+            'onApiUserListColumnData'   => ['onApiUserListColumnData', 0],
+            'onApiUserListRowActions'   => ['onApiUserListRowActions', 0],
+            'onApiUserListRowAction'    => ['onApiUserListRowAction', 0],
             'onFormProcessed'           => ['onFormProcessed', 0],
             'onUserLoginAuthenticate'   => [['userLoginAuthenticateByMagic', 10004], ['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
@@ -1674,5 +1678,137 @@ class LoginPlugin extends Plugin
             'reappear_after' => '+7 days',
         ];
         $event['notifications'] = $notifications;
+    }
+
+    /**
+     * [onApiUserListColumns] Declare the "Login" column on the Admin Next Users list.
+     *
+     * Shows a badge on accounts currently locked out by the failed-login rate
+     * limiter, which is otherwise invisible to an administrator — the lockout
+     * lives in the cache, not on the account.
+     *
+     * @param Event $event
+     * @return void
+     */
+    public function onApiUserListColumns(Event $event): void
+    {
+        $columns = $event['columns'] ?? [];
+        $columns[] = [
+            'id' => 'login-lockout',
+            'plugin' => 'login',
+            'label' => $this->grav['language']->translate('PLUGIN_LOGIN.LOCKOUT_COLUMN_LABEL'),
+            'field' => 'login.lockout',
+            'formatter' => 'badge',
+            'sortable' => false,
+            'priority' => 10,
+            'authorize' => 'api.users.read',
+        ];
+        $event['columns'] = $columns;
+    }
+
+    /**
+     * [onApiUserListColumnData] Fill in the lockout badge for the served page of users.
+     *
+     * Resolves the whole locked set in one sweep and then looks each username up,
+     * so the cost is independent of how many users the page lists.
+     *
+     * @param Event $event
+     * @return void
+     */
+    public function onApiUserListColumnData(Event $event): void
+    {
+        $usernames = $event['usernames'] ?? [];
+        if (!is_array($usernames) || !$usernames) {
+            return;
+        }
+
+        $locked = $this->getLoginInstance()->getLockedAccounts();
+        if (!$locked) {
+            return;
+        }
+
+        $language = $this->grav['language'];
+        $data = $event['data'] ?? [];
+        foreach ($usernames as $username) {
+            if (!isset($locked[$username])) {
+                continue;
+            }
+
+            $data[$username]['login.lockout'] = $language->translate([
+                'PLUGIN_LOGIN.LOCKOUT_COLUMN_VALUE',
+                $locked[$username]['attempts'],
+            ]);
+        }
+        $event['data'] = $data;
+    }
+
+    /**
+     * [onApiUserListRowActions] Declare the per-user Unlock button.
+     *
+     * @param Event $event
+     * @return void
+     */
+    public function onApiUserListRowActions(Event $event): void
+    {
+        $actions = $event['actions'] ?? [];
+        $actions[] = [
+            'id' => 'login-unlock',
+            'plugin' => 'login',
+            'label' => $this->grav['language']->translate('PLUGIN_LOGIN.LOCKOUT_UNLOCK_LABEL'),
+            'icon' => 'fa-unlock',
+            'action' => 'unlock',
+            'priority' => 10,
+            'authorize' => 'api.users.write',
+        ];
+        $event['actions'] = $actions;
+    }
+
+    /**
+     * [onApiUserListRowAction] Clear an account's failed-login lockout.
+     *
+     * The API plugin re-checks this action's declared `authorize` against the
+     * caller before dispatching, and resolves the username against a real
+     * account, so by the time we get here the request is already vetted.
+     *
+     * @param Event $event
+     * @return void
+     */
+    public function onApiUserListRowAction(Event $event): void
+    {
+        if (($event['id'] ?? '') !== 'login-unlock') {
+            return;
+        }
+
+        $username = $event['username'] ?? '';
+        if (!is_string($username) || $username === '') {
+            return;
+        }
+
+        $language = $this->grav['language'];
+        $cleared = $this->getLoginInstance()->unlockUser($username);
+
+        $event['result'] = [
+            'status' => 'success',
+            'message' => $cleared
+                ? $language->translate(['PLUGIN_LOGIN.LOCKOUT_UNLOCKED', $username])
+                : $language->translate(['PLUGIN_LOGIN.LOCKOUT_NOT_LOCKED', $username]),
+        ];
+    }
+
+    /**
+     * The Login service, instantiated on demand.
+     *
+     * The Users list is served by the API plugin, which doesn't necessarily run
+     * the front-end bootstrap that registers `login` in the container.
+     *
+     * @return Login
+     */
+    protected function getLoginInstance(): Login
+    {
+        if (!isset($this->grav['login'])) {
+            $this->grav['login'] = new Login($this->grav);
+        }
+
+        return $this->grav['login'];
     }
 }

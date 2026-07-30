@@ -1,3 +1,10 @@
+# v3.9.0
+## 07/30/2026
+
+1. [](#new)
+    * Added a `bin/plugin login unlock-user` command to clear the temporary lockout applied after too many failed logins, by username, by IP address, or all at once.
+    * The Admin Next users list now shows which accounts are locked out, with a button to clear the lockout.
+
 # v3.8.13
 ## 07/14/2026
 
