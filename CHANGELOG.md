@@ -4,6 +4,8 @@
 1. [](#bugfix)
     * [security] Password reset and account activation links are now checked with a routine that takes the same amount of time whichever characters differ, so the check can no longer hint at how much of a guess was right ([GHSA-x239-6jqx-5hjh](https://github.com/getgrav/grav/security/advisories/GHSA-x239-6jqx-5hjh)).
     * [security] Repeatedly submitting a wrong password reset or activation link for the same account is now refused after a handful of tries, configurable under the plugin's security settings.
+    * [security] When registration finishes over email, submitting an address that already has an account now gives the same answer as any other address, and a notice goes to the account holder instead, so the form no longer confirms who is registered ([GHSA-crh8-xm27-j9g9](https://github.com/getgrav/grav/security/advisories/GHSA-crh8-xm27-j9g9)).
+    * [security] Registration attempts from one address are now capped over a time window, configurable under the plugin's user registration settings.
 
 # v3.9.0
 ## 07/30/2026

@@ -391,7 +391,7 @@ class Login
      */
     public static function getRateLimitContexts(): array
     {
-        return ['login_attempts', 'pw_resets', 'magic_links', 'token_attempts'];
+        return ['login_attempts', 'pw_resets', 'magic_links', 'token_attempts', 'registrations'];
     }
 
     /**
@@ -698,6 +698,33 @@ class Login
     }
 
     /**
+     * Tell the owner of an address that someone tried to register with it.
+     *
+     * Sent instead of telling the person at the registration form that the
+     * address is taken (GHSA-crh8-xm27-j9g9). A delivery failure must not
+     * change what that person sees, so it is logged rather than thrown.
+     *
+     * @param UserInterface $user
+     * @return bool True if the action was performed.
+     */
+    public function sendAlreadyRegisteredEmail(UserInterface $user)
+    {
+        if (empty($user->email)) {
+            return false;
+        }
+
+        try {
+            Email::sendAlreadyRegisteredEmail($user);
+        } catch (\Exception $e) {
+            $this->grav['log']->error('plugin.login: could not send already-registered notice: ' . $e->getMessage());
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Handle the email to invite user.
      *
      * @param Invitation $invitation
@@ -826,6 +853,10 @@ class Login
                 case 'token_attempts':
                     $maxCount = $this->grav['config']->get('plugins.login.max_token_attempts_count', 5);
                     $interval = $this->grav['config']->get('plugins.login.max_token_attempts_interval', 60);
+                    break;
+                case 'registrations':
+                    $maxCount = $this->grav['config']->get('plugins.login.user_registration.max_attempts_count', 10);
+                    $interval = $this->grav['config']->get('plugins.login.user_registration.max_attempts_interval', 60);
                     break;
                 case 'magic_links':
                     $maxCount = $this->grav['config']->get('plugins.login.magic_link.max_requests_count', 3);

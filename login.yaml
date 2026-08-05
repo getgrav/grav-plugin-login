@@ -45,6 +45,8 @@ magic_link:
 
 user_registration:
   enabled: false                            # Enable User Registration Process
+  max_attempts_count: 10                    # Number of registration attempts allowed from one address in a specific time frame (0 = unlimited)
+  max_attempts_interval: 60                 # Time in minutes to track registration attempts
 
   fields:                                   # List of fields to validate and store during user registration
     - 'username'                            # This should match up with your registration form definition
