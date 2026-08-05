@@ -1,3 +1,10 @@
+# v3.9.1
+## 08/05/2026
+
+1. [](#bugfix)
+    * [security] Password reset and account activation links are now checked with a routine that takes the same amount of time whichever characters differ, so the check can no longer hint at how much of a guess was right ([GHSA-x239-6jqx-5hjh](https://github.com/getgrav/grav/security/advisories/GHSA-x239-6jqx-5hjh)).
+    * [security] Repeatedly submitting a wrong password reset or activation link for the same account is now refused after a handful of tries, configurable under the plugin's security settings.
+
 # v3.9.0
 ## 07/30/2026
 

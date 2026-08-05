@@ -487,13 +487,29 @@ class LoginPlugin extends Plugin
         $redirect_route = $this->config->get('plugins.login.user_registration.redirect_after_activation');
         $redirect_code = null;
 
+        // Activation is the second unauthenticated endpoint that compares a
+        // secret token, so it gets the same treatment as password reset:
+        // a counter on failed attempts (GHSA-x239-6jqx-5hjh).
+        $rateLimiter = $this->login->getRateLimiter('token_attempts');
+        $userKey = (string)$username;
+
+        if ($rateLimiter->isRateLimited($userKey)) {
+            $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
+            $messages->add($message, 'error');
+            $this->grav->redirectLangSafe($redirect_route ?: '/', $redirect_code);
+
+            return;
+        }
+
         if (empty($user->activation_token)) {
             $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
             $messages->add($message, 'error');
         } else {
             [$good_token, $expire] = explode('::', $user->activation_token, 2);
 
-            if ($good_token === $token) {
+            // Constant-time: a plain === leaks how many leading characters
+            // of the token were right through its early exit.
+            if (hash_equals($good_token, (string)$token)) {
                 if (time() > $expire) {
                     $message = $this->grav['language']->translate('PLUGIN_LOGIN.ACTIVATION_LINK_EXPIRED');
                     $messages->add($message, 'error');
@@ -533,6 +549,8 @@ class LoginPlugin extends Plugin
                     $this->grav->fireEvent('onUserActivated', new Event(['user' => $user]));
                 }
             } else {
+                $rateLimiter->registerRateLimitedAction($userKey);
+
                 $message = $this->grav['language']->translate('PLUGIN_LOGIN.INVALID_REQUEST');
                 $messages->add($message, 'error');
             }
