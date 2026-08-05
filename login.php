@@ -1066,6 +1066,25 @@ class LoginPlugin extends Plugin
         /** @var UserCollectionInterface $users */
         $users = $this->grav['accounts'];
 
+        // Registration is an unauthenticated endpoint that answers "is this
+        // address already taken?", so it gets a per-IP counter to stop it
+        // being walked through a list of addresses (GHSA-crh8-xm27-j9g9).
+        $registrationLimiter = $this->login->getRateLimiter('registrations');
+        $ipKey = $this->login->getIpKey();
+        $registrationLimiter->registerRateLimitedAction($ipKey, 'ip');
+
+        if ($registrationLimiter->isRateLimited($ipKey, 'ip')) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate([
+                    'PLUGIN_LOGIN.TOO_MANY_REGISTRATION_ATTEMPTS',
+                    $registrationLimiter->getInterval()
+                ])
+            ]));
+            $event->stopPropagation();
+            return;
+        }
+
         // Check for existing username
         $username = $form_data->get('username');
         $existing_username = $users->find($username, ['username']);
@@ -1085,6 +1104,28 @@ class LoginPlugin extends Plugin
         $email    = $form_data->get('email');
         $existing_email = $users->find($email, ['email']);
         if ($existing_email->exists()) {
+            // When registration finishes over email anyway, answer exactly as
+            // a fresh address would be answered and tell the real owner
+            // instead, so the form stops confirming which addresses have an
+            // account (GHSA-crh8-xm27-j9g9). Without activation email the
+            // account is usable immediately, so a silent non-answer would
+            // leave a legitimate visitor stuck — keep the explicit message
+            // there.
+            if ($this->config->get('plugins.login.user_registration.options.send_activation_email', false)) {
+                $this->login->sendAlreadyRegisteredEmail($existing_email);
+
+                $fullname = $form_data->get('fullname') ?: $form_data->get('username');
+                $messages->add(
+                    $language->translate(['PLUGIN_LOGIN.ACTIVATION_NOTICE_MSG', $fullname]),
+                    'info'
+                );
+
+                $event->stopPropagation();
+                $redirect = $this->config->get('plugins.login.user_registration.redirect_after_registration');
+                $this->grav->redirectLangSafe($redirect ?: $this->grav['uri']->rootUrl(), 302);
+                return;
+            }
+
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
                 'message' => $language->translate([

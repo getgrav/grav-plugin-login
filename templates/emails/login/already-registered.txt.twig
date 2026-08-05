@@ -1,0 +1,7 @@
+{# Already-registered notice (plain text) #}
+{%- import 'emails/login/_text-utils.txt.twig' as text -%}
+{%- set subject = 'PLUGIN_LOGIN.ALREADY_REGISTERED_EMAIL_SUBJECT'|t(site_name) -%}
+{%- do email.message.setSubject(subject) -%}
+{{ text.from_html('PLUGIN_LOGIN.ALREADY_REGISTERED_EMAIL_BODY'|t(site_name, forgot_link, author)) }}
+
+{{ forgot_link }}

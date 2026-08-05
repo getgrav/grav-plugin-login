@@ -124,6 +124,48 @@ class Email
     }
 
     /**
+     * Tell the owner of an address that someone tried to register with it.
+     *
+     * This is what the registration form sends instead of answering "that
+     * address is already taken" back to whoever submitted it
+     * (GHSA-crh8-xm27-j9g9).
+     *
+     * @param UserInterface $user
+     * @param UserInterface|null $actor
+     * @return void
+     * @throws \Exception
+     */
+    public static function sendAlreadyRegisteredEmail(UserInterface $user, ?UserInterface $actor = null): void
+    {
+        if (!$user->email) {
+            return;
+        }
+
+        try {
+            $forgotRoute = static::getLogin()->getRoute('forgot') ?: '/';
+
+            $site_host = static::getConfig()->get('plugins.login.site_host');
+            if (!empty($site_host)) {
+                $forgotRoute = rtrim($site_host, '/') . '/' . ltrim($forgotRoute, '/');
+            }
+
+            $context = [
+                'forgot_link' => Utils::url($forgotRoute, null, true),
+            ];
+
+            $params = [
+                'to' => $user->email,
+            ];
+
+            static::sendEmail('already-registered', $context, $params, $user, $actor);
+        } catch (\Exception $e) {
+            static::getLogger()->error($e->getMessage());
+
+            throw $e;
+        }
+    }
+
+    /**
      * @param UserInterface $user
      * @param UserInterface|null $actor
      * @return void

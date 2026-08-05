@@ -1,0 +1,11 @@
+{% extends 'email/base.html.twig' %}
+
+{# Sent to the owner of an address someone tried to register a second time #}
+
+{%- set subject = 'PLUGIN_LOGIN.ALREADY_REGISTERED_EMAIL_SUBJECT'|t(site_name) %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.ALREADY_REGISTERED_EMAIL_BODY'|t(site_name, forgot_link, author)|raw }}
+{%- endblock content -%}
