@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.9.0
+version: 3.9.1
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -312,6 +312,26 @@ form:
               validate:
                   type: bool
 
+            user_registration.max_attempts_count:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_REGISTRATIONS_COUNT
+              help: PLUGIN_LOGIN.MAX_REGISTRATIONS_COUNT_HELP
+              append: PLUGIN_LOGIN.ATTEMPTS
+              validate:
+                type: number
+                min: 0
+
+            user_registration.max_attempts_interval:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_REGISTRATIONS_INTERVAL
+              help: PLUGIN_LOGIN.MAX_REGISTRATIONS_INTERVAL_HELP
+              append: PLUGIN_LOGIN.MINUTES
+              validate:
+                type: number
+                min: 1
+
             registration_fields:
               type: section
               title: PLUGIN_LOGIN.REGISTRATION_FIELDS
@@ -477,6 +497,26 @@ form:
               size: x-small
               label: PLUGIN_LOGIN.MAX_RESETS_INTERVAL
               help: PLUGIN_LOGIN.MAX_RESETS_INTERVAL_HELP
+              append: PLUGIN_LOGIN.MINUTES
+              validate:
+                type: number
+                min: 1
+
+            max_token_attempts_count:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_COUNT
+              help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_COUNT_HELP
+              append: PLUGIN_LOGIN.ATTEMPTS
+              validate:
+                type: number
+                min: 0
+
+            max_token_attempts_interval:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL
+              help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL_HELP
               append: PLUGIN_LOGIN.MINUTES
               validate:
                 type: number
