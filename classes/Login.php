@@ -391,7 +391,7 @@ class Login
      */
     public static function getRateLimitContexts(): array
     {
-        return ['login_attempts', 'pw_resets', 'magic_links'];
+        return ['login_attempts', 'pw_resets', 'magic_links', 'token_attempts'];
     }
 
     /**
@@ -822,6 +822,10 @@ class Login
                 case 'pw_resets':
                     $maxCount = $this->grav['config']->get('plugins.login.max_pw_resets_count', 2);
                     $interval = $this->grav['config']->get('plugins.login.max_pw_resets_interval', 60);
+                    break;
+                case 'token_attempts':
+                    $maxCount = $this->grav['config']->get('plugins.login.max_token_attempts_count', 5);
+                    $interval = $this->grav['config']->get('plugins.login.max_token_attempts_interval', 60);
                     break;
                 case 'magic_links':
                     $maxCount = $this->grav['config']->get('plugins.login.magic_link.max_requests_count', 3);

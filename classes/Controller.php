@@ -711,10 +711,26 @@ class Controller
             $password = $data['password'] ?? null;
             $token = $data['token'] ?? null;
 
+            // The `pw_resets` limiter above only covers asking for a reset
+            // email. Token submission is the endpoint an attacker would
+            // actually hammer, so it gets its own counter, incremented on
+            // failed attempts only (GHSA-x239-6jqx-5hjh).
+            $rateLimiter = $this->login->getRateLimiter('token_attempts');
+            $userKey = (string)($username ?? '');
+
+            if ($rateLimiter->isRateLimited($userKey)) {
+                $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
+                $this->grav->redirectLangSafe($this->login->getRoute('forgot') ?? '/');
+
+                return true;
+            }
+
             if ($user && !empty($user->reset) && $user->exists()) {
                 [$good_token, $expire] = explode('::', $user->reset);
 
-                if ($good_token === $token) {
+                // Constant-time: a plain === leaks how many leading characters
+                // of the token were right through its early exit.
+                if (hash_equals($good_token, (string)$token)) {
                     if (time() > $expire) {
                         $messages->add($language->translate('PLUGIN_LOGIN.RESET_LINK_EXPIRED'), 'error');
                         $this->grav->redirectLangSafe($this->login->getRoute('forgot') ?? '/');
@@ -732,6 +748,8 @@ class Controller
                     return true;
                 }
             }
+
+            $rateLimiter->registerRateLimitedAction($userKey);
 
             $messages->add($language->translate('PLUGIN_LOGIN.RESET_INVALID_LINK'), 'error');
             $this->grav->redirectLangSafe($this->login->getRoute('forgot') ?? '/');
