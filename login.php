@@ -31,6 +31,7 @@ use Grav\Framework\Flex\Interfaces\FlexObjectInterface;
 use Grav\Framework\Form\Interfaces\FormInterface;
 use Grav\Framework\Psr7\Response;
 use Grav\Framework\Session\SessionInterface;
+use Grav\Plugin\Api\Exceptions\ForbiddenException;
 use Grav\Plugin\Form\Form;
 use Grav\Plugin\Login\Events\PageAuthorizeEvent;
 use Grav\Plugin\Login\Events\UserLoginEvent;
@@ -1843,6 +1844,20 @@ class LoginPlugin extends Plugin
             return;
         }
 
+        // This handler's own half of the row-action contract. Unlocking clears
+        // every rate limit standing against an account, so a caller who is not a
+        // super admin must not do it to one. The API plugin enforces the same
+        // floor before dispatching; this is the belt to its braces, and only ever
+        // runs underneath it, so ForbiddenException is always loaded by the time
+        // we could throw. (GHSA-985r-mpj8-5rqw)
+        $caller = $event['user'] ?? null;
+        $target = $this->grav['accounts']->load($username);
+        $callerIsSuper = $caller instanceof UserInterface
+            && ($caller->authorize('admin.super') === true || $caller->authorize('api.super') === true);
+        if ($target && $target->exists() && !$callerIsSuper && $this->accessGrantsSuper($target)) {
+            throw new ForbiddenException("Only super admins can clear a super admin account's lockout.");
+        }
+
         $language = $this->grav['language'];
         $cleared = $this->getLoginInstance()->unlockUser($username);
 
@@ -1852,6 +1867,35 @@ class LoginPlugin extends Plugin
                 ? $language->translate(['PLUGIN_LOGIN.LOCKOUT_UNLOCKED', $username])
                 : $language->translate(['PLUGIN_LOGIN.LOCKOUT_NOT_LOCKED', $username]),
         ];
+    }
+
+    /**
+     * Does this account's own `access` map confer super-admin authority, under
+     * either flag? A classic `admin.super` account may not carry `api.super`, and
+     * vice versa, so both count.
+     *
+     * Reads the raw access map rather than calling authorize() on purpose: an
+     * account loaded from disk is neither authenticated nor authorized, so
+     * UserObject::authorize() returns false for it whatever its ACL actually
+     * says. This mirrors the API plugin's own accessGrantsSuper().
+     *
+     * @param UserInterface $user
+     * @return bool
+     */
+    protected function accessGrantsSuper(UserInterface $user): bool
+    {
+        $access = $user->get('access');
+        if (!is_array($access)) {
+            return false;
+        }
+
+        foreach (['admin', 'api'] as $scope) {
+            if (!empty($access[$scope]['super']) || !empty($access["{$scope}.super"])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
