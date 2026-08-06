@@ -1,3 +1,12 @@
+# v3.9.2
+## 08/06/2026
+
+1. [](#bugfix)
+    * [security] Invitation emails now honour the Site Host setting like the other login emails do, so an invitation link can no longer be pointed at a spoofed host by the address the request arrived on ([GHSA-69vf-mjxw-x79j](https://github.com/getgrav/grav/security/advisories/GHSA-69vf-mjxw-x79j)).
+    * [security] With Require Trusted Host enabled, activation, magic login and invitation emails are now held back as well, where previously only password reset emails were ([GHSA-69vf-mjxw-x79j](https://github.com/getgrav/grav/security/advisories/GHSA-69vf-mjxw-x79j)).
+    * [security] An account that can manage users but is not a super admin can no longer clear a super admin's login lockout from the Users list ([GHSA-985r-mpj8-5rqw](https://github.com/getgrav/grav/security/advisories/GHSA-985r-mpj8-5rqw)).
+    * The Site Host and Require Trusted Host settings now describe every kind of email they affect, rather than naming only password reset and activation.
+
 # v3.9.1
 ## 08/05/2026
 
