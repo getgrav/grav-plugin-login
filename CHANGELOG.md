@@ -1,5 +1,5 @@
 # v3.9.2
-## 08/06/2026
+## 08/07/2026
 
 1. [](#bugfix)
     * [security] Invitation emails now honour the Site Host setting like the other login emails do, so an invitation link can no longer be pointed at a spoofed host by the address the request arrived on ([GHSA-69vf-mjxw-x79j](https://github.com/getgrav/grav/security/advisories/GHSA-69vf-mjxw-x79j)).
