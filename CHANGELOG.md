@@ -1,5 +1,5 @@
 # v3.9.3
-## 08/20/2026
+## 08/21/2026
 
 1. [](#bugfix)
     * [security] The two-factor step now limits how many wrong codes may be submitted for an account, with its own counter that a fresh password login does not reset, so a six-digit code can no longer be guessed without limit by someone who already has the password ([GHSA-9j6w-2q6c-q3q8](https://github.com/getgrav/grav-plugin-login/security/advisories/GHSA-9j6w-2q6c-q3q8)).
