@@ -201,6 +201,24 @@ class Controller
 
         $code = $this->post['2fa_code'] ?? null;
         $secret = $user->twofa_secret ?? null;
+        $username = (string)$user->get('username');
+
+        // Cap wrong codes. This uses its own counter, not login_attempts: that
+        // one is cleared as soon as the password verifies, and re-doing the
+        // password to obtain a fresh challenge is exactly what an attacker
+        // guessing the code does on every cycle (GHSA-9j6w-2q6c-q3q8).
+        $rateLimiter = $this->login->getRateLimiter('twofa_attempts');
+        if ($rateLimiter->isRateLimited($username)) {
+            $messages->add($t->translate(['PLUGIN_LOGIN.TOO_MANY_2FA_ATTEMPTS', $rateLimiter->getInterval()]), 'error');
+
+            $user->authenticated = false;
+            $user->authorized = false;
+            $this->grav['session']->invalidate()->start();
+
+            $this->setRedirect($this->login->getRoute('login') ?? '/', 303);
+
+            return true;
+        }
 
         $eventOptions = [
             'credentials' => ['username' => $user->get('username')],
@@ -212,6 +230,8 @@ class Controller
         $event->setUser($user);
 
         if (!$code || !$secret || !$twoFa->verifyCode($secret, $code)) {
+            $rateLimiter->registerRateLimitedAction($username);
+
             $event->setStatus(UserLoginEvent::AUTHENTICATION_FAILURE | UserLoginEvent::AUTHORIZATION_CHALLENGE);
             $event->setMessage($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
 
@@ -232,6 +252,7 @@ class Controller
                 );
             }
         } else {
+            $rateLimiter->resetRateLimit($username);
 
             $event->setStatus(UserLoginEvent::AUTHENTICATION_SUCCESS | UserLoginEvent::AUTHORIZATION_CHALLENGE);
             $event->setMessage($t->translate('PLUGIN_LOGIN.LOGIN_SUCCESSFUL'),  'info');

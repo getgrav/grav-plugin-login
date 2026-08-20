@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.9.2
+version: 3.9.3
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -517,6 +517,26 @@ form:
               size: x-small
               label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL
               help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL_HELP
+              append: PLUGIN_LOGIN.MINUTES
+              validate:
+                type: number
+                min: 1
+
+            max_twofa_count:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_2FA_COUNT
+              help: PLUGIN_LOGIN.MAX_2FA_COUNT_HELP
+              append: PLUGIN_LOGIN.ATTEMPTS
+              validate:
+                type: number
+                min: 0
+
+            max_twofa_interval:
+              type: number
+              size: x-small
+              label: PLUGIN_LOGIN.MAX_2FA_INTERVAL
+              help: PLUGIN_LOGIN.MAX_2FA_INTERVAL_HELP
               append: PLUGIN_LOGIN.MINUTES
               validate:
                 type: number

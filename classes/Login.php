@@ -391,7 +391,7 @@ class Login
      */
     public static function getRateLimitContexts(): array
     {
-        return ['login_attempts', 'pw_resets', 'magic_links', 'token_attempts', 'registrations'];
+        return ['login_attempts', 'twofa_attempts', 'pw_resets', 'magic_links', 'token_attempts', 'registrations'];
     }
 
     /**
@@ -853,6 +853,15 @@ class Login
                 case 'token_attempts':
                     $maxCount = $this->grav['config']->get('plugins.login.max_token_attempts_count', 5);
                     $interval = $this->grav['config']->get('plugins.login.max_token_attempts_interval', 60);
+                    break;
+                case 'twofa_attempts':
+                    // The 2FA code is six digits with three valid windows, so the
+                    // throttle IS the second factor's boundary, not depth behind
+                    // it. It needs its own counter: login_attempts is cleared the
+                    // moment the password verifies, which is exactly what an
+                    // attacker re-doing the password to get a fresh challenge does.
+                    $maxCount = $this->grav['config']->get('plugins.login.max_twofa_count', 5);
+                    $interval = $this->grav['config']->get('plugins.login.max_twofa_interval', 10);
                     break;
                 case 'registrations':
                     $maxCount = $this->grav['config']->get('plugins.login.user_registration.max_attempts_count', 10);

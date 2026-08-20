@@ -1884,14 +1884,26 @@ class LoginPlugin extends Plugin
      */
     protected function accessGrantsSuper(UserInterface $user): bool
     {
-        $access = $user->get('access');
-        if (!is_array($access)) {
-            return false;
+        // Own access map plus every group's. Core authorizes group access before
+        // the account's own, and a group carrying admin.super authorizes every
+        // action for its members, so an account that is super only by membership
+        // was invisible here while being fully super at authorization time
+        // (GHSA-vv8m-jqpm-38x4).
+        $maps = [$user->get('access')];
+        foreach ((array) $user->get('groups', []) as $group) {
+            if (is_string($group)) {
+                $maps[] = $this->grav['config']->get("groups.{$group}.access");
+            }
         }
 
-        foreach (['admin', 'api'] as $scope) {
-            if (!empty($access[$scope]['super']) || !empty($access["{$scope}.super"])) {
-                return true;
+        foreach ($maps as $access) {
+            if (!is_array($access)) {
+                continue;
+            }
+            foreach (['admin', 'api'] as $scope) {
+                if (!empty($access[$scope]['super']) || !empty($access["{$scope}.super"])) {
+                    return true;
+                }
             }
         }
 
