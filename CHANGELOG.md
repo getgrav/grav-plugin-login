@@ -1,3 +1,11 @@
+# v3.9.4
+## 08/24/2026
+
+1. [](#new)
+    * Added German and French translations for the magic-link login screens, emails and settings. Thanks to @nerdyjan for contributing the German and French wording [#337](https://github.com/getgrav/grav-plugin-login/issues/337)
+1. [](#bugfix)
+    * The German and French "password reset sent" message no longer confirms whether an account exists for the address entered, matching the English wording
+
 # v3.9.3
 ## 08/21/2026
 
