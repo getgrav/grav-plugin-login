@@ -1,3 +1,11 @@
+# v3.9.5
+## 09/02/2026
+
+1. [](#improved)
+    * The German login screens no longer show English for the profile-updated message, the email and password field labels, and the two Submit buttons. Thanks to @nerdyjan [#338](https://github.com/getgrav/grav-plugin-login/issues/338)
+1. [](#bugfix)
+    * A stray quotation mark no longer appears after the German label for protecting media on login-protected pages.
+
 # v3.9.4
 ## 08/24/2026
 
