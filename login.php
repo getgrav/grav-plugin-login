@@ -1574,7 +1574,9 @@ class LoginPlugin extends Plugin
         $user = $event->getUser();
         foreach ($event->getAuthorize() as $authorize) {
             if (!$user->authorize($authorize)) {
-                if ($user->state !== 'enabled') {
+                // Match the default core `authorize()` applies (UserTrait,
+                // UserObject): an account with no explicit state is enabled.
+                if ($user->get('state', 'enabled') !== 'enabled') {
                     $event->setMessage($this->grav['language']->translate('PLUGIN_LOGIN.USER_ACCOUNT_DISABLED'), 'error');
                 }
                 $event->setStatus($event::AUTHORIZATION_DENIED);
