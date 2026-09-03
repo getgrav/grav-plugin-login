@@ -1,3 +1,9 @@
+# v3.9.6
+## 09/03/2026
+
+1. [](#improved)
+    * An account file with no `state` set is treated as enabled when a login is refused, matching how Grav itself reads it, so the refusal message is right either way
+
 # v3.9.5
 ## 09/02/2026
 
