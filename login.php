@@ -736,13 +736,32 @@ class LoginPlugin extends Plugin
      */
     public function authorizeFallBackUrl(): void
     {
-        if ($this->config->get('plugins.login.protect_protected_page_media', false)) {
-            $page_url = \dirname($this->grav['uri']->path());
-            $page = $this->grav['pages']->find($page_url);
-            unset($this->grav['page']);
-            $this->grav['page'] = $page;
-            $this->authorizePage();
+        if (!$this->config->get('plugins.login.protect_protected_page_media', false)) {
+            return;
         }
+
+        $page_url = \dirname($this->grav['uri']->path());
+
+        // Resolve the page the same way `Grav::fallbackUrl()` does, so the rules
+        // being checked belong to the page core is about to serve the file from.
+        // Without `$all`, a `site.routes` entry can hand back a different page.
+        $page = $this->grav['pages']->find($page_url, true);
+
+        // Media stored inside a module folder (`_module`) belongs to the page that
+        // includes the module, so climb to the nearest non-module ancestor and apply
+        // that page's `access` rules. `authorizePage()` skips modules outright, which
+        // left module media served to anyone. getgrav/grav-plugin-login#294
+        while ($page instanceof PageInterface && $page->isModule()) {
+            $page = $page->parent();
+        }
+
+        if (!$page instanceof PageInterface) {
+            return;
+        }
+
+        unset($this->grav['page']);
+        $this->grav['page'] = $page;
+        $this->authorizePage();
     }
 
     /**
