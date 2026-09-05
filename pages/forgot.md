@@ -17,6 +17,6 @@ form:
 ---
 
 
-# Recover your password
+# [translate=PLUGIN_LOGIN.FORGOT_PAGE_HEADING /]
 
-Enter your email to recover your password
+[translate=PLUGIN_LOGIN.FORGOT_PAGE_DESC /]

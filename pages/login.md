@@ -39,4 +39,4 @@ forms:
           placeholder: PLUGIN_LOGIN.2FA_CODE_INPUT
 ---
 
-# User Login
+# [translate=PLUGIN_LOGIN.LOGIN_PAGE_HEADING /]

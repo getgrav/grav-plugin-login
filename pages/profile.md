@@ -78,4 +78,4 @@ form:
       message: PLUGIN_LOGIN.PROFILE_UPDATED
 ---
 
-# Profile
+# [translate=PLUGIN_LOGIN.PROFILE_PAGE_TITLE /]

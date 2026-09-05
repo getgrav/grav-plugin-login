@@ -27,6 +27,6 @@ form:
           type: hidden
 ---
 
-# Password Reset
+# [translate=PLUGIN_LOGIN.RESET_PAGE_HEADING /]
 
-### Username: [uri param="user" /]
+## [translate=PLUGIN_LOGIN.USERNAME /]: [uri param="user" /]

@@ -905,6 +905,7 @@ class Login
             $page->init(new \SplFileInfo('plugin://login/pages/' . $type . '.md'));
             $page->route($route);
             $page->slug(basename($route));
+            $this->translatePageTitle($page, $type);
         }
 
         // Login page may not have the correct Cache-Control header set, force no-store for the proxies.
@@ -914,6 +915,46 @@ class Login
         }
 
         return $page;
+    }
+
+    /**
+     * Translate the title of a page the plugin provides itself.
+     *
+     * Page frontmatter is plain YAML: `title:` is never run through the
+     * translator, and Twig in frontmatter is gated off by default on Grav 2, so
+     * there is no in-content equivalent for the title the way there is for the
+     * body ([translate] shortcode). Only pages the plugin built are touched: a
+     * page the site provides at the same route keeps its own title.
+     *
+     * @param PageInterface $page
+     * @param string $type
+     * @return void
+     */
+    protected function translatePageTitle(PageInterface $page, string $type): void
+    {
+        $keys = [
+            'login' => 'PLUGIN_LOGIN.LOGIN_PAGE_TITLE',
+            'forgot' => 'PLUGIN_LOGIN.FORGOT_PAGE_TITLE',
+            'magic' => 'PLUGIN_LOGIN.MAGIC_PAGE_TITLE',
+            'reset' => 'PLUGIN_LOGIN.RESET_PAGE_TITLE',
+            'register' => 'PLUGIN_LOGIN.REGISTER_PAGE_TITLE',
+            'profile' => 'PLUGIN_LOGIN.PROFILE_PAGE_TITLE',
+            'unauthorized' => 'PLUGIN_LOGIN.UNAUTHORIZED_PAGE_TITLE',
+        ];
+
+        $key = $keys[$type] ?? null;
+        if (null === $key) {
+            return;
+        }
+
+        /** @var Language $language */
+        $language = $this->grav['language'];
+        $title = $language->translate([$key]);
+
+        // translate() hands back the key itself when nothing matched.
+        if ($title !== $key && $title !== '') {
+            $page->title($title);
+        }
     }
 
     /**

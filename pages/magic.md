@@ -15,4 +15,4 @@ form:
         type: email
 ---
 
-Enter your email address to receive a one-time sign-in link.
+[translate=PLUGIN_LOGIN.MAGIC_PAGE_DESC /]
