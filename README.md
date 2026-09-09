@@ -225,7 +225,7 @@ route_unauthorized: '/user_unauthorized'    # Route for a page to display if use
 twofa_enabled: false                        # Two factor authentication enabled
 dynamic_page_visibility: false              # Integrate access into page visibility so things can be shown or hidden in the menu
 parent_acl: false                           # Look to parent `access` rules for access requirements
-protect_protected_page_media: false         # Take `access` rules into account when directly accessing a page's media
+protect_protected_page_media: false         # Apply `access` rules to page media requested through the page route. Route only: a direct request to user/pages/<folder>/<file> is served by the web server without invoking Grav and cannot be blocked from PHP
 
 site_host:                                  # Optionally used in password reset and activation emails, to avoid "password poisoning attacks", this should be the URL of your site including the protocol.  e.g. https://foo.com
 

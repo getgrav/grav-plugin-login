@@ -724,6 +724,19 @@ class LoginPlugin extends Plugin
                     return;
                 }
                 break;
+
+            case 'logout':
+                // CSRF hardening (GHSA-cmm3-j4qp-472x): `logout` had neither a nonce
+                // nor a method check, so a cross-site top-level GET carried the
+                // session cookie (SameSite=Lax sends it on navigations) and forced
+                // the victim out. Worse, when that browser held no valid remember-me
+                // cookie, userLogout() falls through to cleanAllTriplets() and wipes
+                // the account's persistent login on *every* device.
+                if (!$this->isSelfInitiatedLogout($uri, $post)) {
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+                    return;
+                }
+                break;
         }
 
         $controller = new Controller($this->grav, $task, $post);
@@ -732,17 +745,105 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * Decide whether a `login.logout` request was started by the user rather than
+     * forged by a third-party page.
+     *
+     * Logout is deliberately more permissive than the other tasks. The plugin has
+     * always accepted a plain link, and third-party themes rely on that -- several
+     * ship a bare `<a href="...?task=login.logout">` with no nonce at all, and this
+     * plugin's own 2FA cancel button posts the task carrying `login-form-nonce`
+     * rather than `logout-nonce`. Forcing every theme onto a nonced POST would break
+     * working sites for an issue whose whole impact is an unwanted sign-out, so this
+     * accepts any credible proof the request is the user's own.
+     *
+     * @param Uri   $uri
+     * @param array $post
+     * @return bool
+     */
+    protected function isSelfInitiatedLogout(Uri $uri, array $post): bool
+    {
+        // 1. The canonical logout link this plugin renders. login-status.html.twig
+        //    and login-form.html.twig have always called
+        //    uri.addNonce(..., 'logout-form', 'logout-nonce'); nothing ever verified it.
+        $nonce = $post['logout-nonce'] ?? $uri->param('logout-nonce');
+        if (is_string($nonce) && $nonce !== '' && Utils::verifyNonce($nonce, 'logout-form')) {
+            return true;
+        }
+
+        // 2. The 2FA screen's cancel button posts task=login.logout from the login
+        //    form, so it carries the `login-form` nonce instead.
+        if (isset($post['login-form-nonce']) && Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+            return true;
+        }
+
+        // 3. No nonce. Ask the browser where the request came from. Every engine that
+        //    supports fetch metadata sends Sec-Fetch-Site on navigations: `cross-site`
+        //    is the forged case, and `none` means the user typed the URL or followed a
+        //    bookmark. This is what keeps a theme's bare <a> working on a same-origin
+        //    click while rejecting the attacker's cross-site navigation.
+        $fetchSite = $_SERVER['HTTP_SEC_FETCH_SITE'] ?? null;
+        if (is_string($fetchSite) && $fetchSite !== '') {
+            return in_array(strtolower($fetchSite), ['same-origin', 'same-site', 'none'], true);
+        }
+
+        // 4. A browser too old to send fetch metadata. Compare the referring origin:
+        //    the strict-origin-when-cross-origin policy browsers now default to still
+        //    sends the origin across sites.
+        $referrer = $_SERVER['HTTP_REFERER'] ?? null;
+        if (is_string($referrer) && $referrer !== '') {
+            $parts = parse_url($referrer);
+            if (!isset($parts['scheme'], $parts['host'])) {
+                return false;
+            }
+
+            $origin = $parts['scheme'] . '://' . $parts['host'];
+            if (isset($parts['port'])) {
+                $origin .= ':' . $parts['port'];
+            }
+
+            // Uri::base() is the scheme://host[:port] origin; Uri::rootUrl(true)
+            // would also carry any subdirectory, which is not part of an origin.
+            return rtrim($origin, '/') === rtrim($uri->base(), '/');
+        }
+
+        // 5. No nonce, no fetch metadata, no referrer: a bare navigation from a
+        //    pre-2020 browser. Allow it rather than stranding those visitors with no
+        //    way to sign out. The nonced link above closes the vector for every
+        //    current browser, and the impact here is a sign-out, not a compromise.
+        return true;
+    }
+
+    /**
      * Authorize the Page fallback url (page media accessed through the page route)
      */
     public function authorizeFallBackUrl(): void
     {
-        if ($this->config->get('plugins.login.protect_protected_page_media', false)) {
-            $page_url = \dirname($this->grav['uri']->path());
-            $page = $this->grav['pages']->find($page_url);
-            unset($this->grav['page']);
-            $this->grav['page'] = $page;
-            $this->authorizePage();
+        if (!$this->config->get('plugins.login.protect_protected_page_media', false)) {
+            return;
         }
+
+        $page_url = \dirname($this->grav['uri']->path());
+
+        // Resolve the page the same way `Grav::fallbackUrl()` does, so the rules
+        // being checked belong to the page core is about to serve the file from.
+        // Without `$all`, a `site.routes` entry can hand back a different page.
+        $page = $this->grav['pages']->find($page_url, true);
+
+        // Media stored inside a module folder (`_module`) belongs to the page that
+        // includes the module, so climb to the nearest non-module ancestor and apply
+        // that page's `access` rules. `authorizePage()` skips modules outright, which
+        // left module media served to anyone. getgrav/grav-plugin-login#294
+        while ($page instanceof PageInterface && $page->isModule()) {
+            $page = $page->parent();
+        }
+
+        if (!$page instanceof PageInterface) {
+            return;
+        }
+
+        unset($this->grav['page']);
+        $this->grav['page'] = $page;
+        $this->authorizePage();
     }
 
     /**

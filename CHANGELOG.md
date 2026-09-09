@@ -1,3 +1,18 @@
+# v3.9.7
+## 09/09/2026
+
+1. [](#improved)
+    * **Content hidden behind the `authenticated()` Twig function or the `[authenticated]` shortcode is no longer shown to someone who has entered a correct password but has not yet answered the two-factor prompt.** Thanks to @geoffrey-diederichs and @AlpetGexha
+    * **Logging out now requires the request to have come from your own site**, so another site can no longer sign your visitors out by linking to it. This also stopped a forged link from clearing a person's "remember me" login on their other devices. Thanks to @manus-use
+
+1. [](#new)
+    * The titles and headings on the login, forgot, reset, register, profile and unauthorized pages now come from translation keys, so they follow the visitor's language instead of always showing English. Thanks to @NoNoNo [#300](https://github.com/getgrav/grav-plugin-login/issues/300)
+1. [](#bugfix)
+    * Media stored in a modular subfolder of a login-protected page is no longer served to visitors who are not logged in. Thanks to @clesmian [#294](https://github.com/getgrav/grav-plugin-login/issues/294)
+    * The password reset page no longer jumps from a first-level to a third-level heading
+1. [](#improved)
+    * The description of the "Protect a login-protected page media" setting now explains that it covers media requested through the page route, and cannot cover a request made straight to the file's own path. Thanks to @complanar [#45](https://github.com/getgrav/grav-plugin-login/issues/45)
+
 # v3.9.6
 ## 09/03/2026
 
