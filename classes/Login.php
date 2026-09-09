@@ -97,13 +97,17 @@ class Login
      * permission and/or group. Shared by the `authenticated()` Twig function
      * and the `[authenticated]` / `[guest]` shortcodes:
      *
-     *     $grav['login']->isAuthenticated()                  logged in at all
+     *     $grav['login']->isAuthenticated()                  fully logged in
      *     $grav['login']->isAuthenticated('admin.super')     logged in + authorized
      *     $grav['login']->isAuthenticated(null, 'editors')   logged in + in group
      *
      * `permission` and `group` each accept a single value or a list, and match
      * if the user satisfies any one of them. When both are given the user must
      * satisfy both.
+     *
+     * A session which has passed the password step but has not yet answered the
+     * two-factor challenge is `authenticated` but not `authorized`, and is not
+     * logged in for any of these checks.
      *
      * @param string|array|null $permission Permission action(s) to authorize.
      * @param string|array|null $group      Group name(s) the user must be in.
@@ -112,6 +116,14 @@ class Login
     {
         $user = $this->grav['user'] ?? null;
         if (!$user instanceof UserInterface || !$user->authenticated) {
+            return false;
+        }
+
+        // Two-factor challenge still open: the password step alone is not a login.
+        // The permission branch below inherits this from UserObject::authorize(), but
+        // the no-argument and group forms never reach it, so gate all three here.
+        // Same test as Login::isUserAuthorizedForPage(). (GHSA-636m-8598-45r9)
+        if (!$user->authorized) {
             return false;
         }
 
