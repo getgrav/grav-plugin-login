@@ -1,5 +1,9 @@
 # v3.9.7
-## 09/04/2026
+## 09/09/2026
+
+1. [](#improved)
+    * **Content hidden behind the `authenticated()` Twig function or the `[authenticated]` shortcode is no longer shown to someone who has entered a correct password but has not yet answered the two-factor prompt.** Thanks to @geoffrey-diederichs and @AlpetGexha
+    * **Logging out now requires the request to have come from your own site**, so another site can no longer sign your visitors out by linking to it. This also stopped a forged link from clearing a person's "remember me" login on their other devices. Thanks to @manus-use
 
 1. [](#new)
     * The titles and headings on the login, forgot, reset, register, profile and unauthorized pages now come from translation keys, so they follow the visitor's language instead of always showing English. Thanks to @NoNoNo [#300](https://github.com/getgrav/grav-plugin-login/issues/300)
