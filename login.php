@@ -173,9 +173,14 @@ class LoginPlugin extends Plugin
 
         $user = $session->user ?? null;
         if ($user && $user->exists() && ($this->config()['session_user_sync'] ?? false)) {
+            $sessionState = array_intersect_key($user->toArray(), ['authenticated' => true, 'authorized' => true]);
+            $username = $user->username;
             // User is stored into the filesystem.
             if ($user instanceof FlexObjectInterface && version_compare(GRAV_VERSION, '1.7.13', '>=')) {
-                $user->refresh(true);
+                $user->refresh(false);
+                // Refresh bypasses the user constructor, which supplies these defaults.
+                $user->def('username', $username);
+                $user->def('state', 'enabled');
             } else {
                 // TODO: remove when removing legacy support.
                 /** @var UserCollectionInterface $accounts */
@@ -192,11 +197,23 @@ class LoginPlugin extends Plugin
 
                 if ($stored && $stored->exists()) {
                     // User still exists, update user object in the session.
-                    $user->update($stored->jsonSerialize());
+                    $storedData = $stored->jsonSerialize();
+                    foreach (array_keys($user->toArray()) as $field) {
+                        $user->undef($field);
+                    }
+                    $user->update($storedData);
                 } else {
                     // User doesn't exist anymore, prepare for session invalidation.
                     $user->state = 'disabled';
                 }
+            }
+
+            // Authentication belongs to this session, not to the account file.
+            foreach (['authenticated', 'authorized'] as $field) {
+                $user->undef($field);
+            }
+            foreach ($sessionState as $field => $value) {
+                $user->set($field, $value);
             }
 
             if ($user->state !== 'enabled') {
