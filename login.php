@@ -192,6 +192,10 @@ class LoginPlugin extends Plugin
                         $stored->refresh(true);
                     }
                 } else {
+                    // Older Grav versions serialize cached file contents with the session user.
+                    if ($user instanceof Data && $user->file()) {
+                        $user->file()->free();
+                    }
                     $stored = $accounts->load($user->username);
                 }
 
