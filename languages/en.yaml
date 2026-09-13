@@ -172,6 +172,7 @@ PLUGIN_LOGIN:
   IPV6_SUBNET_SIZE: "IPv6 Subnet Size"
   IPV6_SUBNET_SIZE_HELP: "The number of IPv6 addresses typically assigned to a machine"
   PROFILE_UPDATED: "Your profile has been updated"
+  PROFILE_NOT_UPDATED: "Your profile could not be updated"
   ENTER_EMAIL: "Enter your email"
   ENTER_NEW_PASSWORD: "Enter new password"
   ENTER_PASSWORD: "Enter a password"

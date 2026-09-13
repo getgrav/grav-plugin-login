@@ -1,3 +1,10 @@
+# v3.9.8
+## 09/13/2026
+
+1. [](#bugfix)
+    * Clearing an optional field on the frontend profile form now actually clears it, instead of silently keeping the previous value. Thanks @sridharkalaibala [#340](https://github.com/getgrav/grav-plugin-login/pull/340)
+    * A profile form that fails validation now says so, rather than reporting the profile as updated while discarding the changes
+
 # v3.9.7
 ## 09/09/2026
 

@@ -1391,6 +1391,15 @@ class LoginPlugin extends Plugin
         // operations when validation filters the data a second time.
         $form_data->setMissingValuesAsNull(true);
         if (!$form->validate()) {
+            // Match the returns below: without firing the event and stopping
+            // propagation, Form::process() carries on to the `message` action and
+            // reports the profile as updated when nothing was saved.
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'     => $form,
+                'message'  => $form->getError() ?: $language->translate('PLUGIN_LOGIN.PROFILE_NOT_UPDATED'),
+                'messages' => $form->getErrors()
+            ]));
+            $event->stopPropagation();
             return false;
         }
 
