@@ -1441,6 +1441,8 @@ class LoginPlugin extends Plugin
         // persist straight to the account and grant super-admin (GHSA-h33v-82r9-v8pm).
         $privilegeFields = ['groups', 'access'];
 
+        $formValues = $form_data->toArray();
+        $missing = new \stdClass();
         $data = [];
         foreach ($fields as $field) {
             if (in_array($field, $privilegeFields, true)) {
@@ -1454,9 +1456,20 @@ class LoginPlugin extends Plugin
                 continue;
             }
 
-            $data_field = $form_data->get($field);
-            if (!isset($data[$field]) && isset($data_field)) {
-                $data[$field] = $form_data->get($field);
+            // Preserve dot-path lookup while distinguishing a cleared value from an absent field.
+            $data_field = $formValues;
+            foreach (explode('.', $field) as $segment) {
+                if (is_object($data_field) && isset($data_field->{$segment})) {
+                    $data_field = $data_field->{$segment};
+                } elseif (is_array($data_field) && array_key_exists($segment, $data_field)) {
+                    $data_field = $data_field[$segment];
+                } else {
+                    $data_field = $missing;
+                    break;
+                }
+            }
+            if (!array_key_exists($field, $data) && $data_field !== $missing) {
+                $data[$field] = $data_field;
             }
         }
 
