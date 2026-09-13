@@ -173,7 +173,7 @@ class LoginPlugin extends Plugin
 
         $user = $session->user ?? null;
         if ($user && $user->exists() && ($this->config()['session_user_sync'] ?? false)) {
-            $sessionState = array_intersect_key($user->toArray(), ['authenticated' => true, 'authorized' => true]);
+            $sessionState = array_intersect_key($user->jsonSerialize(), ['authenticated' => true, 'authorized' => true]);
             $username = $user->username;
             // User is stored into the filesystem.
             if ($user instanceof FlexObjectInterface && version_compare(GRAV_VERSION, '1.7.13', '>=')) {
@@ -202,8 +202,12 @@ class LoginPlugin extends Plugin
                 if ($stored && $stored->exists()) {
                     // User still exists, update user object in the session.
                     $storedData = $stored->jsonSerialize();
+                    // Serialization hides account secrets; retain them for subsequent profile saves.
+                    $hidden = ['hashed_password' => true, 'secret' => true, 'twofa_secret' => true];
                     foreach (array_keys($user->toArray()) as $field) {
-                        $user->undef($field);
+                        if (!isset($hidden[$field])) {
+                            $user->undef($field);
+                        }
                     }
                     $user->update($storedData);
                 } else {
