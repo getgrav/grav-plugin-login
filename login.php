@@ -1385,10 +1385,14 @@ class LoginPlugin extends Plugin
         $user     = $this->grav['user'];
         $language = $this->grav['language'];
 
-        $form->validate();
-
         /** @var Data $form_data */
         $form_data = $form->getData();
+        // The form has already filtered empty strings to null. Keep those clear
+        // operations when validation filters the data a second time.
+        $form_data->setMissingValuesAsNull(true);
+        if (!$form->validate()) {
+            return false;
+        }
 
         // Don't save if user doesn't exist
         if (!$user->exists()) {
