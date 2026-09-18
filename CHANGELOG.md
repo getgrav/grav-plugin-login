@@ -1,3 +1,11 @@
+# v3.9.9
+## 09/17/2026
+
+1. [](#bugfix)
+    * **[security] Someone who has entered a correct password but not yet answered the two-factor prompt can no longer change the account's profile.** The profile form only checked that a user was in the session, not that they had finished logging in, so the second factor could be sidestepped by editing the account it protects. Thanks to @redwolf1919
+    * **[security] "Remember me" no longer skips the two-factor prompt.** The cookie was written as soon as the password was accepted, and returning with it logged you straight in. It is now written only after the second factor succeeds, and restoring a session from it asks for the code again. Devices remembered before this release will ask for a code on their next visit. Thanks to @redwolf1919
+    * **[security] The password reset page is now always the one this plugin ships.** A reset link carries a credential in its URL, and a page authored in the site's own content could be placed on that route and read it. Any custom body on the reset page is no longer rendered. Thanks to @redwolf1919
+
 # v3.9.8
 ## 09/13/2026
 
