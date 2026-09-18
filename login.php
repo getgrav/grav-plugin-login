@@ -111,6 +111,7 @@ class LoginPlugin extends Plugin
             'onUserLoginFailure'        => ['userLoginGuest', 0],
             'onUserLoginGuest'          => ['userLoginGuest', 0],
             'onUserLogin'               => [['userLoginResetRateLimit', 1000], ['userLogin', 10]],
+            'onUserLoginAuthorized'     => ['userLoginAuthorized', 0],
             'onUserLogout'              => ['userLogout', 0],
         ];
     }
@@ -229,7 +230,12 @@ class LoginPlugin extends Plugin
                 // Try remember me login.
                 $session->user = $c['login']->login(
                     ['username' => ''],
-                    ['remember_me' => true, 'remember_me_login' => true, 'failureEvent' => 'onUserLoginGuest']
+                    [
+                        'remember_me' => true,
+                        'remember_me_login' => true,
+                        'twofa' => $c['config']->get('plugins.login.twofa_enabled', false),
+                        'failureEvent' => 'onUserLoginGuest'
+                    ]
                 );
             }
 
@@ -1413,6 +1419,18 @@ class LoginPlugin extends Plugin
             return false;
         }
 
+        // A user who has supplied the correct password but has not completed
+        // the second-factor challenge exists in the session, but is not yet
+        // authorized to change account data.
+        if ($user->authorized !== true) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.PROFILE_NOT_UPDATED')
+            ]));
+            $event->stopPropagation();
+            return false;
+        }
+
         // Stop overloading of username
         $username = $form->data('username');
         if (isset($username)) {
@@ -1725,6 +1743,7 @@ class LoginPlugin extends Plugin
         $user = $users->load('');
 
         $event->setUser($user);
+        unset($this->grav['session']->remember_me_pending);
         $this->grav['session']->user = $user;
     }
 
@@ -1758,8 +1777,29 @@ class LoginPlugin extends Plugin
             // If the user wants to be remembered, create Rememberme cookie.
             $username = $user->get('username');
             if ($event->getCredential('rememberme')) {
-                $login->rememberMe()->createCookie($username);
+                if ($event->isDelayed()) {
+                    // Defer issuance until the second factor succeeds.
+                    $session->remember_me_pending = $username;
+                } else {
+                    $login->rememberMe()->createCookie($username);
+                }
             }
+        }
+    }
+
+    /**
+     * Complete a deferred remember-me request after the second factor succeeds.
+     */
+    public function userLoginAuthorized(UserLoginEvent $event): void
+    {
+        /** @var SessionInterface $session */
+        $session = $this->grav['session'];
+        $pending = $session->remember_me_pending ?? null;
+        unset($session->remember_me_pending);
+
+        $username = (string)$event->getUser()->get('username');
+        if (is_string($pending) && $pending !== '' && hash_equals($pending, $username)) {
+            $this->grav['login']->rememberMe()->createCookie($username);
         }
     }
 

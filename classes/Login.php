@@ -903,7 +903,14 @@ class Login
             return null;
         }
 
-        if ($page) {
+        // Password-reset URLs carry a bearer credential. Never render a
+        // user-authored page at that route: page content is sandboxed, but it
+        // can still read request parameters and ordinary template variables.
+        // The bundled page and trusted template are the only renderers allowed
+        // to receive the reset request.
+        if ($type === 'reset') {
+            $page = null;
+        } elseif ($page) {
             $page->route($route);
             $page->slug(basename($route));
         } else {
@@ -911,6 +918,7 @@ class Login
             $pages = $this->grav['pages'];
             $page = $pages->find($route);
         }
+
         if (!$page instanceof PageInterface) {
             // Only add login page if it hasn't already been defined.
             $page = new Page();
