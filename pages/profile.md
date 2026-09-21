@@ -10,11 +10,13 @@ form:
       type: avatar
 
     username:
+      id: username
       type: text
       readonly: true
       disabled: true
 
     email:
+      id: email
       type: email
       placeholder: PLUGIN_LOGIN.ENTER_EMAIL
       validate:
@@ -22,12 +24,15 @@ form:
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
 
     fullname:
+      id: fullname
       type: text
 
     title:
+      id: title
       type: text
 
     password:
+      id: password
       type: password
       label: PLUGIN_LOGIN.ENTER_NEW_PASSWORD
       validate:
