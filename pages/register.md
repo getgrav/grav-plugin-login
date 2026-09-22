@@ -7,12 +7,14 @@ form:
 
   fields:
     fullname:
+      id: fullname
       type: text
       validate:
         required: true
 
 
     username:
+      id: username
       type: text
       validate:
         required: true
@@ -20,6 +22,7 @@ form:
         config-pattern@: system.username_regex
 
     email:
+      id: email
       type: email
       validate:
         required: true
