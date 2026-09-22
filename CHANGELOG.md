@@ -1,3 +1,15 @@
+# v3.9.10
+## 09/22/2026
+
+1. [](#new)
+    * The German translation now covers the rest of the plugin's messages. Thanks @Tanzzwerg [#342](https://github.com/getgrav/grav-plugin-login/pull/342)
+
+1. [](#improved)
+    * The fields on the registration, profile, forgot-password and magic-link pages carry an id, so clicking a field's label puts the cursor in it and screen readers announce the two together. Thanks @Tanzzwerg [#342](https://github.com/getgrav/grav-plugin-login/pull/342)
+
+1. [](#bugfix)
+    * The two-factor setup on the profile page works on themes that write their scripts into the page head. The jQuery library it needs was registered too late to reach those pages, so the button that generates a new secret did nothing. Thanks @onetrev [grav-plugin-form#656](https://github.com/getgrav/grav-plugin-form/issues/656)
+
 # v3.9.9
 ## 09/17/2026
 
