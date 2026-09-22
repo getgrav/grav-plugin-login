@@ -6,7 +6,8 @@ login_redirect_here: false
 
 form:
   fields:
-    - name: email
+    - id: email
+      name: email
       type: email
       placeholder: PLUGIN_LOGIN.ENTER_EMAIL
       autofocus: true

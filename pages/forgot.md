@@ -7,7 +7,8 @@ login_redirect_here: false
 form:
 
     fields:
-        - name: email
+        - id: email
+          name: email
           type: email
           label: PLUGIN_LOGIN.EMAIL
           autofocus: true
