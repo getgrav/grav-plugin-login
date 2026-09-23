@@ -68,6 +68,10 @@ class LoginPlugin extends Plugin
 
     protected $temp_redirect;
     protected $temp_messages;
+    /** @var string|null The page to return to after login, kept until a waiting session starts (system.session.lazy). */
+    protected $lazy_redirect;
+    /** @var UserInterface|null The guest user, kept until a waiting session starts (system.session.lazy). */
+    protected $lazy_user;
 
     /**
      * @return array
@@ -171,6 +175,19 @@ class LoginPlugin extends Plugin
             $session->messages = $this->temp_messages;
             unset($this->temp_messages);
         }
+        // What this request would have stored while the session was still waiting to start.
+        if (isset($this->lazy_user)) {
+            if (empty($session->user)) {
+                $session->user = $this->lazy_user;
+            }
+            unset($this->lazy_user);
+        }
+        if (isset($this->lazy_redirect)) {
+            if (empty($session->redirect_after_login)) {
+                $session->redirect_after_login = $this->lazy_redirect;
+            }
+            unset($this->lazy_redirect);
+        }
 
         $user = $session->user ?? null;
         if ($user && $user->exists() && ($this->config()['session_user_sync'] ?? false)) {
@@ -223,12 +240,13 @@ class LoginPlugin extends Plugin
         }
 
         // Define current user service.
-        $this->grav['user'] = static function (Grav $c) {
+        $plugin = $this;
+        $this->grav['user'] = static function (Grav $c) use ($plugin) {
             $session = $c['session'];
 
             if (empty($session->user)) {
                 // Try remember me login.
-                $session->user = $c['login']->login(
+                $user = $c['login']->login(
                     ['username' => ''],
                     [
                         'remember_me' => true,
@@ -237,6 +255,17 @@ class LoginPlugin extends Plugin
                         'failureEvent' => 'onUserLoginGuest'
                     ]
                 );
+
+                // A guest has nothing worth keeping, and storing one would start a session
+                // that is waiting for its first write (system.session.lazy). The same guest is
+                // stored if the session starts later in this request.
+                if (!$user->authenticated && self::isSessionWaiting($session)) {
+                    $plugin->lazy_user = $user;
+
+                    return $user;
+                }
+
+                $session->user = $user;
             }
 
             return $session->user;
@@ -389,7 +418,87 @@ class LoginPlugin extends Plugin
             $redirect = $this->grav['session']->redirect_after_login;
         }
 
+        // A session waiting for its first write (system.session.lazy): keep the page in memory
+        // and store it only if the session starts, so an ordinary page view sets no cookie.
+        if (self::isSessionWaiting($this->grav['session'])) {
+            if (!$redirect && !$this->login->getRoute('after_login') && in_array($current_route, $invalid_redirect_routes, true)) {
+                // Nothing was stored on the way here, so on the login page the page to go back
+                // to is the one the visitor came from.
+                $redirect = $this->referrerRedirect($invalid_redirect_routes);
+            }
+            $this->lazy_redirect = $redirect ?: null;
+
+            return;
+        }
+
         $this->grav['session']->redirect_after_login = $redirect;
+    }
+
+    /**
+     * The page named by the Referer header, when it is a page of this site that a visitor
+     * may be sent back to after login.
+     *
+     * @param string[] $invalid_redirect_routes
+     * @return string|null
+     */
+    protected function referrerRedirect(array $invalid_redirect_routes): ?string
+    {
+        $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+        if (!is_string($referrer) || $referrer === '') {
+            return null;
+        }
+
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+        // The route relative to this site, without a language prefix. A referrer from another
+        // site gives the current route, which is one of the invalid routes.
+        // Not parse_url(): it rejects a path with a Grav param in it (`/blog/page:2`).
+        $path = explode('#', explode('?', (string)$uri->referrer(null, null, true), 2)[0], 2)[0];
+
+        $sep = (string)$this->config->get('system.param_sep', ':');
+        $route = '';
+        $params = '';
+        foreach (explode('/', $path) as $part) {
+            if ($part === '') {
+                continue;
+            }
+            if ($sep !== '' && str_contains($part, $sep)) {
+                $key = rawurldecode(explode($sep, $part, 2)[0]);
+                if (!in_array($key, ['task', 'nonce', 'login-nonce', 'logout-nonce'], true)) {
+                    $params .= '/' . $part;
+                }
+            } elseif ($params === '') {
+                $route .= '/' . rawurldecode($part);
+            }
+        }
+        $route = $route ?: '/';
+
+        if (in_array($route, $invalid_redirect_routes, true)) {
+            return null;
+        }
+
+        /** @var Pages $pages */
+        $pages = $this->grav['pages'];
+        $page = $pages->find($route);
+        if (!$page || !$page->routable() || ($page->header()->login_redirect_here ?? true) !== true) {
+            return null;
+        }
+
+        $redirect = $page->route();
+
+        return in_array($redirect, $invalid_redirect_routes, true) ? null : $redirect . $params;
+    }
+
+    /**
+     * True while the session waits for its first write to start (system.session.lazy,
+     * Grav 2.2+). Always false on older cores and with lazy sessions off.
+     *
+     * @param mixed $session
+     * @return bool
+     */
+    protected static function isSessionWaiting($session): bool
+    {
+        return is_object($session) && method_exists($session, 'isPending') && $session->isPending();
     }
 
     /**
@@ -1013,6 +1122,11 @@ class LoginPlugin extends Plugin
         $authenticated = $user->authenticated && $user->authorized;
         $login_route = $this->login->getRoute('login');
         if (!$authenticated && $this->redirect_to_login && $login_route) {
+            // The visitor is off to log in, so a session waiting for its first write
+            // (system.session.lazy) starts here to remember which page to come back to.
+            if (isset($this->lazy_redirect)) {
+                $this->grav['session']->redirect_after_login = $this->lazy_redirect;
+            }
             $this->grav->redirectLangSafe($login_route, 302);
         }
 
@@ -1743,6 +1857,13 @@ class LoginPlugin extends Plugin
         $user = $users->load('');
 
         $event->setUser($user);
+
+        // A session waiting for its first write (system.session.lazy) holds nothing to
+        // clear, and a guest is not worth starting one for.
+        if (self::isSessionWaiting($this->grav['session'])) {
+            return;
+        }
+
         unset($this->grav['session']->remember_me_pending);
         $this->grav['session']->user = $user;
     }
