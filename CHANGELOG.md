@@ -1,5 +1,5 @@
 # v3.9.11
-## 09/22/2026
+## 09/23/2026
 
 1. [](#improved)
     * With Grav 2.2's lazy sessions turned on, visitors who are only reading pages no longer get a session cookie from the login plugin, so a proxy or CDN can cache those pages.
