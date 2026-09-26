@@ -89,7 +89,30 @@ class RateLimiter
      */
     public function getAttempts($key, $type = 'username')
     {
-        return (array) $this->cache->get($type . $key, []);
+        $since = time() - $this->interval * 60;
+
+        return array_values(array_filter((array) $this->cache->get($type . $key, []), static function ($time) use ($since) {
+            return $time > $since;
+        }));
+    }
+
+    /**
+     * Seconds until the key drops back under the limit, or 0 if it is not limited.
+     *
+     * @param string $key
+     * @param string $type
+     * @return int
+     */
+    public function getRetryAfter($key, $type = 'username'): int
+    {
+        if (!$this->isRateLimited($key, $type)) {
+            return 0;
+        }
+
+        $attempts = $this->getAttempts($key, $type);
+        sort($attempts);
+
+        return max(1, $attempts[\count($attempts) - $this->maxCount - 1] + $this->interval * 60 - time());
     }
 
     /**
@@ -105,7 +128,7 @@ class RateLimiter
     public function registerRateLimitedAction($key, $type = 'username', array $links = [])
     {
         if ($key && $this->interval) {
-            $tries = (array)$this->cache->get($type . $key, []);
+            $tries = $this->getAttempts($key, $type);
             $tries[] = time();
 
             $this->cache->set($type . $key, $tries);

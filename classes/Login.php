@@ -370,19 +370,26 @@ class Login
     {
         $ipKey = $this->getIpKey($ip);
         $rateLimiter = $this->getRateLimiter('login_attempts');
-        // Link the IP counter to the username so an administrator unlocking the
-        // account can clear the IP side too, which is what the check below hits
-        // first.
-        $rateLimiter->registerRateLimitedAction($ipKey, 'ip', ['username' => $username])
-            ->registerRateLimitedAction($username);
 
-        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
-        $attempts = \count($rateLimiter->getAttempts($ipKey, 'ip'));
-        if ($rateLimiter->isRateLimited($ipKey, 'ip') || ($attempts && $rateLimiter->isRateLimited($username))) {
-            return $rateLimiter->getInterval();
+        // Attempts made while already locked out are not counted, otherwise
+        // retrying would keep pushing the end of the lockout further away.
+        if (!$rateLimiter->isRateLimited($ipKey, 'ip') && !$rateLimiter->isRateLimited($username)) {
+            // Link the IP counter to the username so an administrator unlocking the
+            // account can clear the IP side too, which is what the check below hits
+            // first.
+            $rateLimiter->registerRateLimitedAction($ipKey, 'ip', ['username' => $username])
+                ->registerRateLimitedAction($username);
+
+            // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
+            $attempts = \count($rateLimiter->getAttempts($ipKey, 'ip'));
+            if (!$rateLimiter->isRateLimited($ipKey, 'ip') && !($attempts && $rateLimiter->isRateLimited($username))) {
+                return 0;
+            }
         }
 
-        return 0;
+        $seconds = max($rateLimiter->getRetryAfter($ipKey, 'ip'), $rateLimiter->getRetryAfter($username));
+
+        return (int)ceil($seconds / 60);
     }
 
     /**
