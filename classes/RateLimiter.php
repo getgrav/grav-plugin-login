@@ -81,6 +81,22 @@ class RateLimiter
     }
 
     /**
+     * Check if the key has used up its attempts, so the next action should be refused before it is registered.
+     *
+     * @param string $key
+     * @param string $type
+     * @return bool
+     */
+    public function hasReachedLimit($key, $type = 'username'): bool
+    {
+        if (!$key || !$this->interval) {
+            return false;
+        }
+
+        return $this->maxCount && \count($this->getAttempts($key, $type)) >= $this->maxCount;
+    }
+
+    /**
      *
      *
      * @param string $key
@@ -97,7 +113,7 @@ class RateLimiter
     }
 
     /**
-     * Seconds until the key drops back under the limit, or 0 if it is not limited.
+     * Seconds until the key may make another attempt, or 0 if it has not reached the limit.
      *
      * @param string $key
      * @param string $type
@@ -105,14 +121,14 @@ class RateLimiter
      */
     public function getRetryAfter($key, $type = 'username'): int
     {
-        if (!$this->isRateLimited($key, $type)) {
+        if (!$this->hasReachedLimit($key, $type)) {
             return 0;
         }
 
         $attempts = $this->getAttempts($key, $type);
         sort($attempts);
 
-        return max(1, $attempts[\count($attempts) - $this->maxCount - 1] + $this->interval * 60 - time());
+        return max(1, $attempts[\count($attempts) - $this->maxCount] + $this->interval * 60 - time());
     }
 
     /**
@@ -227,9 +243,10 @@ class RateLimiter
      *
      * @param string|null $type Restrict to one key type, or null for all.
      * @param bool $limitedOnly Only return keys that are currently over the limit.
+     * @param bool $atLimit Treat keys that have reached the limit as limited, for callers that refuse at the limit without registering.
      * @return array<int, array<string, mixed>> Each: type, key, attempts, first, last, limited, links
      */
-    public function getRegisteredKeys(?string $type = null, bool $limitedOnly = false): array
+    public function getRegisteredKeys(?string $type = null, bool $limitedOnly = false, bool $atLimit = false): array
     {
         $entries = [];
         foreach ($this->getIndex() as $entry) {
@@ -237,7 +254,9 @@ class RateLimiter
                 continue;
             }
 
-            $limited = $this->isRateLimited($entry['key'], $entry['type']);
+            $limited = $atLimit
+                ? $this->hasReachedLimit($entry['key'], $entry['type'])
+                : $this->isRateLimited($entry['key'], $entry['type']);
             if ($limitedOnly && !$limited) {
                 continue;
             }

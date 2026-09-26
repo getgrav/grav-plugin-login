@@ -371,25 +371,21 @@ class Login
         $ipKey = $this->getIpKey($ip);
         $rateLimiter = $this->getRateLimiter('login_attempts');
 
-        // Attempts made while already locked out are not counted, otherwise
-        // retrying would keep pushing the end of the lockout further away.
-        if (!$rateLimiter->isRateLimited($ipKey, 'ip') && !$rateLimiter->isRateLimited($username)) {
+        // Refuse at the limit without registering the attempt, so retrying while
+        // locked out can't keep pushing the end of the lockout further away.
+        if (!$rateLimiter->hasReachedLimit($ipKey, 'ip') && !$rateLimiter->hasReachedLimit($username)) {
             // Link the IP counter to the username so an administrator unlocking the
-            // account can clear the IP side too, which is what the check below hits
-            // first.
+            // account can clear the IP side too.
             $rateLimiter->registerRateLimitedAction($ipKey, 'ip', ['username' => $username])
                 ->registerRateLimitedAction($username);
 
-            // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
-            $attempts = \count($rateLimiter->getAttempts($ipKey, 'ip'));
-            if (!$rateLimiter->isRateLimited($ipKey, 'ip') && !($attempts && $rateLimiter->isRateLimited($username))) {
-                return 0;
-            }
+            return 0;
         }
 
         $seconds = max($rateLimiter->getRetryAfter($ipKey, 'ip'), $rateLimiter->getRetryAfter($username));
 
-        return (int)ceil($seconds / 60);
+        // The oldest attempt can expire between the check above and this one.
+        return max(1, (int)ceil($seconds / 60));
     }
 
     /**
@@ -417,7 +413,7 @@ class Login
      * Every account currently locked out of logging in.
      *
      * Mirrors checkLoginRateLimit(): an account counts as locked when its own
-     * counter is over the limit, or when an IP it has been tried from is. The
+     * counter has reached the limit, or when an IP it has been tried from has. The
      * whole set is resolved in one sweep of the index so that listing N accounts
      * costs one pass, not N.
      *
@@ -428,7 +424,7 @@ class Login
         $rateLimiter = $this->getRateLimiter('login_attempts');
 
         $locked = [];
-        foreach ($rateLimiter->getRegisteredKeys(null, true) as $entry) {
+        foreach ($rateLimiter->getRegisteredKeys(null, true, true) as $entry) {
             if ($entry['type'] === 'username') {
                 $existing = $locked[$entry['key']] ?? ['attempts' => 0, 'last' => null, 'by_ip' => false];
                 $locked[$entry['key']] = [
@@ -528,7 +524,7 @@ class Login
     {
         $out = [];
         foreach (static::getRateLimitContexts() as $context) {
-            $entries = $this->getRateLimiter($context)->getRegisteredKeys(null, $limitedOnly);
+            $entries = $this->getRateLimiter($context)->getRegisteredKeys(null, $limitedOnly, $context === 'login_attempts');
             if ($entries) {
                 $out[$context] = $entries;
             }
