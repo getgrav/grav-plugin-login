@@ -155,6 +155,23 @@ class RateLimiter
     }
 
     /**
+     * Link other keys to an existing counter without registering an attempt.
+     *
+     * @param string $key
+     * @param string $type
+     * @param array<string, string> $links
+     * @return $this
+     */
+    public function addLinks($key, $type = 'username', array $links = [])
+    {
+        if ($key && $this->interval && $links && $this->cache->has($type . $key)) {
+            $this->indexKey($key, $type, $links);
+        }
+
+        return $this;
+    }
+
+    /**
      * Reset the user rate limit counter.
      *
      * @param string $key

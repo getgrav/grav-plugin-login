@@ -382,6 +382,10 @@ class Login
             return 0;
         }
 
+        // Still record which account was tried from a locked IP, without counting
+        // the attempt, so the lockout lists and unlock-user can find it.
+        $rateLimiter->addLinks($ipKey, 'ip', ['username' => $username]);
+
         $seconds = max($rateLimiter->getRetryAfter($ipKey, 'ip'), $rateLimiter->getRetryAfter($username));
 
         // The oldest attempt can expire between the check above and this one.
