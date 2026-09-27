@@ -81,6 +81,22 @@ class RateLimiter
     }
 
     /**
+     * Check if the key has used up its attempts, so the next action should be refused before it is registered.
+     *
+     * @param string $key
+     * @param string $type
+     * @return bool
+     */
+    public function hasReachedLimit($key, $type = 'username'): bool
+    {
+        if (!$key || !$this->interval) {
+            return false;
+        }
+
+        return $this->maxCount && \count($this->getAttempts($key, $type)) >= $this->maxCount;
+    }
+
+    /**
      *
      *
      * @param string $key
@@ -89,7 +105,30 @@ class RateLimiter
      */
     public function getAttempts($key, $type = 'username')
     {
-        return (array) $this->cache->get($type . $key, []);
+        $since = time() - $this->interval * 60;
+
+        return array_values(array_filter((array) $this->cache->get($type . $key, []), static function ($time) use ($since) {
+            return $time > $since;
+        }));
+    }
+
+    /**
+     * Seconds until the key may make another attempt, or 0 if it has not reached the limit.
+     *
+     * @param string $key
+     * @param string $type
+     * @return int
+     */
+    public function getRetryAfter($key, $type = 'username'): int
+    {
+        if (!$this->hasReachedLimit($key, $type)) {
+            return 0;
+        }
+
+        $attempts = $this->getAttempts($key, $type);
+        sort($attempts);
+
+        return max(1, $attempts[\count($attempts) - $this->maxCount] + $this->interval * 60 - time());
     }
 
     /**
@@ -105,7 +144,7 @@ class RateLimiter
     public function registerRateLimitedAction($key, $type = 'username', array $links = [])
     {
         if ($key && $this->interval) {
-            $tries = (array)$this->cache->get($type . $key, []);
+            $tries = $this->getAttempts($key, $type);
             $tries[] = time();
 
             $this->cache->set($type . $key, $tries);
@@ -204,9 +243,10 @@ class RateLimiter
      *
      * @param string|null $type Restrict to one key type, or null for all.
      * @param bool $limitedOnly Only return keys that are currently over the limit.
+     * @param bool $atLimit Treat keys that have reached the limit as limited, for callers that refuse at the limit without registering.
      * @return array<int, array<string, mixed>> Each: type, key, attempts, first, last, limited, links
      */
-    public function getRegisteredKeys(?string $type = null, bool $limitedOnly = false): array
+    public function getRegisteredKeys(?string $type = null, bool $limitedOnly = false, bool $atLimit = false): array
     {
         $entries = [];
         foreach ($this->getIndex() as $entry) {
@@ -214,7 +254,9 @@ class RateLimiter
                 continue;
             }
 
-            $limited = $this->isRateLimited($entry['key'], $entry['type']);
+            $limited = $atLimit
+                ? $this->hasReachedLimit($entry['key'], $entry['type'])
+                : $this->isRateLimited($entry['key'], $entry['type']);
             if ($limitedOnly && !$limited) {
                 continue;
             }
