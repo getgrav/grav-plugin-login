@@ -1673,12 +1673,12 @@ class LoginPlugin extends Plugin
         $credentials = $event->getCredentials();
         $username = $credentials['username'];
 
-        // Check rate limit for both IP and user, but allow each IP a single try even if user is already rate limited.
+        // Refuse while either the IP or the username has used up its attempts.
         if ($interval = $this->login->checkLoginRateLimit($username)) {
             /** @var Language $t */
             $t = $this->grav['language'];
 
-            $event->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS', $interval]), 'error');
+            $event->setMessage($t->translate(['PLUGIN_LOGIN.TOO_MANY_LOGIN_ATTEMPTS_RETRY', $interval]), 'error');
             $event->setRedirect($this->login->getRoute('login') ?? '/');
             $event->setStatus(UserLoginEvent::AUTHENTICATION_CANCELLED);
             $event->stopPropagation();

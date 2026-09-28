@@ -1,3 +1,9 @@
+# v3.9.12
+## 09/28/2026
+
+1. [](#bugfix)
+    * Retrying a login while locked out no longer extends the lockout, and the error now says how many minutes are actually left. Thanks @wakqasahmed [#343](https://github.com/getgrav/grav-plugin-login/pull/343) [#335](https://github.com/getgrav/grav-plugin-login/issues/335)
+
 # v3.9.11
 ## 09/23/2026
 
