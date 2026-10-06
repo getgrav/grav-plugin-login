@@ -1,3 +1,9 @@
+# v3.9.13
+## 10/06/2026
+
+1. [](#bugfix)
+    * An invitation form can now only be sent by a signed-in user who manages accounts, and only a super user can invite someone into super access or into groups
+
 # v3.9.12
 ## 09/28/2026
 
