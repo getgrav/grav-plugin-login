@@ -856,6 +856,17 @@ class Controller
             return false;
         }
 
+        // An invitation decides what access a new account gets, so only a signed-in
+        // user who manages accounts may send one. The form itself is not enough:
+        // anyone who can load the page can submit it.
+        if (!$this->login->isAuthenticated(['admin.super', 'api.super', 'admin.users', 'api.users.write'])) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form' => $form,
+                'message' => $t->translate('PLUGIN_LOGIN.ACCESS_DENIED'),
+            ]));
+            return false;
+        }
+
         $data = $form->getData();
         $emails = $data['emails'] ?? null;
         $emails = array_unique(preg_split('/[\s,;]+/mu', $emails));
@@ -876,6 +887,10 @@ class Controller
 
         /** @var UserInterface $user */
         $user = $this->grav['user'];
+        // Only a super user may invite someone into super access or into groups.
+        if ($user->authorize('admin.super') !== true && $user->authorize('api.super') !== true) {
+            $invite['account'] = static::stripSuperGrants((array)($invite['account'] ?? []));
+        }
         $issuer = $user->email;
         $invitations = Invitations::getInstance();
         $list = [];
@@ -903,6 +918,36 @@ class Controller
         }
 
         return true;
+    }
+
+    /**
+     * Remove super access and group membership from an invitation's account settings.
+     * Groups go too, because a group can carry any permission.
+     *
+     * @param array $account
+     * @return array
+     */
+    public static function stripSuperGrants(array $account): array
+    {
+        unset($account['groups']);
+
+        $access = $account['access'] ?? null;
+        if (!is_array($access)) {
+            unset($account['access']);
+
+            return $account;
+        }
+
+        foreach (['admin', 'api'] as $scope) {
+            // A scalar parent grant (`admin: true`) covers `super` as well.
+            if (isset($access[$scope]) && !is_array($access[$scope])) {
+                unset($access[$scope]);
+            }
+            unset($access[$scope]['super'], $access["{$scope}.super"]);
+        }
+        $account['access'] = $access;
+
+        return $account;
     }
 
     /**

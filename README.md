@@ -730,7 +730,7 @@ To use invitations, you need to create a page with a form that triggers the `log
 ---
 title: Invite Users
 access:
-  admin.login: true
+  admin.users: true
 
 form:
   name: invite-form
@@ -769,6 +769,8 @@ form:
 
 Use this form to invite new users to register on the site.
 ```
+
+> **Important:** Only a signed-in user who manages accounts (`admin.users` or `api.users.write`, or a super user) can send invitations, whatever the page's own `access` says. Only a super user can invite someone into super access or into groups; for anyone else those are removed from the invitation.
 
 > **Important:** The `form.meta.invite` section controls invitation behavior. The `expiration` sets how long the token remains valid (in seconds), and `account` defines the default access permissions applied to the new user upon registration.
 
