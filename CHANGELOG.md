@@ -1,3 +1,9 @@
+# v3.9.14
+## 10/10/2026
+
+1. [](#bugfix)
+    * Registering with an email address that the browser accepts but the server rejects, such as `test@test`, now shows the "Must be a valid email address" message instead of a 500 error [#302](https://github.com/getgrav/grav-plugin-login/issues/302)
+
 # v3.9.13
 ## 10/06/2026
 
