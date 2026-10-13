@@ -1307,6 +1307,19 @@ class LoginPlugin extends Plugin
             return;
         }
 
+        // The HTML5 email field accepts addresses such as "test@test" that
+        // fail the server-side check in Login::register(), which would
+        // otherwise end up as a 500 error.
+        $email = $form_data->get('email');
+        if (!is_string($email) || !filter_var(trim($email), FILTER_VALIDATE_EMAIL)) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
+            ]));
+            $event->stopPropagation();
+            return;
+        }
+
         // Check for existing username
         $username = $form_data->get('username');
         $existing_username = $users->find($username, ['username']);
@@ -1323,7 +1336,6 @@ class LoginPlugin extends Plugin
         }
 
         // Check for existing email
-        $email    = $form_data->get('email');
         $existing_email = $users->find($email, ['email']);
         if ($existing_email->exists()) {
             // When registration finishes over email anyway, answer exactly as
