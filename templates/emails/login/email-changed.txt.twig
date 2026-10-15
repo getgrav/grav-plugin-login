@@ -1,0 +1,5 @@
+{# Email changed notice (plain text) #}
+{%- import 'emails/login/_text-utils.txt.twig' as text -%}
+{%- set subject = 'PLUGIN_LOGIN.EMAIL_CHANGED_EMAIL_SUBJECT'|t(site_name) -%}
+{%- do email.message.setSubject(subject) -%}
+{{ text.from_html('PLUGIN_LOGIN.EMAIL_CHANGED_EMAIL_BODY'|t(user.fullname ?: user.username, site_name, new_email, author)) }}

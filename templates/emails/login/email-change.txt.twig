@@ -1,0 +1,9 @@
+{# Confirmation link for a new email address (plain text) #}
+{%- import 'emails/login/_text-utils.txt.twig' as text -%}
+{%- set subject = 'PLUGIN_LOGIN.EMAIL_CHANGE_EMAIL_SUBJECT'|t(site_name) -%}
+{%- do email.message.setSubject(subject) -%}
+{{ text.from_html('PLUGIN_LOGIN.HOST_WARNING'|t(site_host)) }}
+
+{{ text.from_html('PLUGIN_LOGIN.EMAIL_CHANGE_EMAIL_BODY'|t(user.fullname ?: user.username, confirm_link, site_name, author)) }}
+
+{{ confirm_link }}

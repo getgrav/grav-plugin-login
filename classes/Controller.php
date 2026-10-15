@@ -837,6 +837,86 @@ class Controller
     }
 
     /**
+     * Mail the confirmation link for a waiting email change again, with a fresh
+     * token so the link's day starts over.
+     *
+     * @return bool
+     */
+    public function taskResendEmailChange()
+    {
+        /** @var UserInterface $user */
+        $user = $this->grav['user'];
+        $language = $this->grav['language'];
+        $messages = $this->grav['messages'];
+
+        $this->setRedirect($this->login->getRoute('profile') ?: '/');
+
+        if (!$user->exists() || $user->authorized !== true) {
+            $messages->add($language->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
+
+            return false;
+        }
+
+        $this->login->refreshEmailFields($user);
+
+        $pending = (string)$user->get('email_pending', '');
+        if ($pending === '') {
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_CHANGE_NOTHING_WAITING'), 'info');
+
+            return false;
+        }
+
+        $limiter = $this->login->getRateLimiter('email_changes');
+        if ($limiter->hasReachedLimit($user->username)) {
+            $messages->add($language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_TOO_MANY', $limiter->getInterval()]), 'error');
+
+            return false;
+        }
+
+        $limiter->registerRateLimitedAction($user->username);
+        $this->login->requestEmailChange($user, $pending);
+        $messages->add($language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_SENT', htmlspecialchars($pending, ENT_QUOTES, 'UTF-8')]), 'info');
+
+        return true;
+    }
+
+    /**
+     * Drop a waiting email change. The account keeps its current address.
+     *
+     * @return bool
+     */
+    public function taskCancelEmailChange()
+    {
+        /** @var UserInterface $user */
+        $user = $this->grav['user'];
+        $language = $this->grav['language'];
+        $messages = $this->grav['messages'];
+
+        $this->setRedirect($this->login->getRoute('profile') ?: '/');
+
+        if (!$user->exists() || $user->authorized !== true) {
+            $messages->add($language->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'error');
+
+            return false;
+        }
+
+        $this->login->refreshEmailFields($user);
+
+        if ((string)$user->get('email_pending', '') === '') {
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_CHANGE_NOTHING_WAITING'), 'info');
+
+            return false;
+        }
+
+        $this->login->clearEmailChange($user);
+        $user->save();
+
+        $messages->add($language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_CANCELLED', htmlspecialchars((string)$user->get('email', ''), ENT_QUOTES, 'UTF-8')]), 'info');
+
+        return true;
+    }
+
+    /**
      * @return bool
      */
     public function taskInvite()

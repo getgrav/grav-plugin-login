@@ -84,3 +84,10 @@
     white-space: nowrap;
     vertical-align: middle;
 }
+.email-change-pending .notice p {
+    margin: 0 0 0.5rem 0;
+}
+
+.email-change-actions .button {
+    margin: 0 0.5rem 0.5rem 0;
+}

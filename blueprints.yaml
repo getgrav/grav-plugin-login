@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.9.14
+version: 3.10.0
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -171,6 +171,18 @@ form:
               validate:
                 type: bool
 
+            profile.verify_email_change:
+              type: toggle
+              label: PLUGIN_LOGIN.VERIFY_EMAIL_CHANGE
+              help: PLUGIN_LOGIN.VERIFY_EMAIL_CHANGE_HELP
+              highlight: 1
+              default: 1
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
             rememberme:
               type: section
               title: PLUGIN_LOGIN.REMEMBER_ME
@@ -272,6 +284,12 @@ form:
               size: medium
               label: PLUGIN_LOGIN.ROUTE_ACTIVATE
               placeholder: '/activate_user'
+
+            route_confirm_email:
+              type: text
+              size: medium
+              label: PLUGIN_LOGIN.ROUTE_CONFIRM_EMAIL
+              placeholder: '/confirm_email'
 
             user_registration.redirect_after_activation:
               type: text

@@ -1,3 +1,11 @@
+# v3.10.0
+## 10/14/2026
+
+1. [](#new)
+    * Changing your email on the profile page now sends a confirmation link to the new address, and the account only switches over once the link is opened. Until then the profile shows the waiting change, with buttons to send the link again or cancel it, and the old address gets a notice once the change goes through. On by default, with a new `profile.verify_email_change` setting to turn it off
+    * Accounts now record the confirmed address in `email_verified` and `email_verified_at` when an email change or account activation link is opened, and `$grav['login']->isEmailVerified($user)` tells a plugin whether the current address is the confirmed one
+    * New `onUserEmailChanged` event, fired with the account and the old and new address once an email change is confirmed
+
 # v3.9.14
 ## 10/13/2026
 

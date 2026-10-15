@@ -74,6 +74,105 @@ class Email
 
 
     /**
+     * Mail the confirmation link for a waiting email change to the new address.
+     *
+     * @param UserInterface $user
+     * @param UserInterface|null $actor
+     * @return void
+     * @throws \Exception
+     */
+    public static function sendEmailChangeEmail(UserInterface $user, ?UserInterface $actor = null): void
+    {
+        $email = (string)$user->get('email_pending', '');
+        $token = (string)$user->get('email_change_token', '');
+
+        if (!$email || !str_contains($token, '::')) {
+            return;
+        }
+
+        [$token, $expire] = explode('::', $token, 2);
+
+        try {
+            $config = static::getConfig();
+
+            $param_sep = $config->get('system.param_sep', ':');
+            $confirmRoute = static::getLogin()->getRoute('confirm_email');
+            if (!$confirmRoute) {
+                throw new \RuntimeException('Email change confirmation route does not exist!');
+            }
+
+            $site_host = $config->get('plugins.login.site_host');
+            if (!empty($site_host)) {
+                $confirmRoute = rtrim($site_host, '/') . '/' . ltrim($confirmRoute, '/');
+            }
+
+            if (static::refuseIfUntrustedHost('email change')) {
+                return;
+            }
+
+            static::warnIfUntrustedHost('email change');
+
+            $confirmLink = Utils::url(
+                $confirmRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username,
+                true,
+                true
+            );
+
+            $context = [
+                'confirm_link' => $confirmLink,
+                'new_email' => $email,
+                'expire' => $expire,
+            ];
+
+            $params = [
+                'to' => $email,
+            ];
+
+            static::sendEmail('email-change', $context, $params, $user, $actor);
+        } catch (\Exception $e) {
+            static::getLogger()->error($e->getMessage());
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Tell the old address that the account's email address has changed.
+     *
+     * @param UserInterface $user
+     * @param string $oldEmail
+     * @param UserInterface|null $actor
+     * @return void
+     * @throws \Exception
+     */
+    public static function sendEmailChangedNotice(UserInterface $user, string $oldEmail, ?UserInterface $actor = null): void
+    {
+        if ($oldEmail === '') {
+            return;
+        }
+
+        try {
+            // No token in this mail, so it only warns about an untrusted host.
+            static::warnIfUntrustedHost('email changed notice');
+
+            $context = [
+                'old_email' => $oldEmail,
+                'new_email' => (string)$user->get('email', ''),
+            ];
+
+            $params = [
+                'to' => $oldEmail,
+            ];
+
+            static::sendEmail('email-changed', $context, $params, $user, $actor);
+        } catch (\Exception $e) {
+            static::getLogger()->error($e->getMessage());
+
+            throw $e;
+        }
+    }
+
+    /**
      * @param UserInterface $user
      * @param UserInterface|null $actor
      * @return void

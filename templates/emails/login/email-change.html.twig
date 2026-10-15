@@ -1,0 +1,12 @@
+{% extends 'email/base.html.twig' %}
+
+{# Confirmation link for a new email address, sent to that new address #}
+
+{%- set subject = 'PLUGIN_LOGIN.EMAIL_CHANGE_EMAIL_SUBJECT'|t(site_name) %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.HOST_WARNING'|t(site_host)|raw }}
+  {{ 'PLUGIN_LOGIN.EMAIL_CHANGE_EMAIL_BODY'|t((user.fullname ?: user.username)|e, confirm_link, site_name|e, author|e)|raw }}
+{%- endblock content -%}

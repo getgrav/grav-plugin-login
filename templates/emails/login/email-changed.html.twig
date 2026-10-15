@@ -1,0 +1,11 @@
+{% extends 'email/base.html.twig' %}
+
+{# Sent to the old address once an email change has been confirmed #}
+
+{%- set subject = 'PLUGIN_LOGIN.EMAIL_CHANGED_EMAIL_SUBJECT'|t(site_name) %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.EMAIL_CHANGED_EMAIL_BODY'|t((user.fullname ?: user.username)|e, site_name|e, new_email|e, author|e)|raw }}
+{%- endblock content -%}
