@@ -1,0 +1,22 @@
+{% extends "forms/field.html.twig" %}
+
+{# Shows a waiting email change on the profile form, with buttons to send the
+   link again or cancel it. Renders nothing when no change is waiting. #}
+
+{% block field %}
+    {% set account = form.object ?? grav.user %}
+    {% set pending = account.email_pending %}
+    {% if pending %}
+        {% set task_url = base_url_relative ~ grav.login.getRoute('profile') ~ '/task' ~ config.system.param_sep %}
+        <div class="form-field email-change-pending {{ field.classes }}">
+            <div class="notice info">
+                <p>{{ 'PLUGIN_LOGIN.EMAIL_CHANGE_WAITING'|t(pending|e, account.email|e)|raw }}</p>
+                <div class="email-change-actions">
+                    {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+                    <button type="submit" class="button button-small" formnovalidate formaction="{{ task_url ~ 'login.resendEmailChange' }}">{{ 'PLUGIN_LOGIN.EMAIL_CHANGE_RESEND'|t }}</button>
+                    <button type="submit" class="button button-small secondary" formnovalidate formaction="{{ task_url ~ 'login.cancelEmailChange' }}">{{ 'PLUGIN_LOGIN.EMAIL_CHANGE_CANCEL'|t }}</button>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

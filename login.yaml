@@ -11,6 +11,7 @@ route: '/login'                             # Specific route for Login page (def
 route_after_login: '/'                      # Route to go to after login if enabled
 route_after_logout: '/'                     # Route to logout to if enabled
 route_activate: '/activate_user'            # Route for the user activation process
+route_confirm_email: '/confirm_email'       # Route for the link that confirms a changed email address
 route_forgot: '/forgot_password'            # Route for the forgot password process
 route_reset: '/reset_password'              # Route for the reset password process
 route_magic: '/magic_login'                 # Route for requesting a magic login link (request form)
@@ -36,6 +37,11 @@ max_login_interval: 10                      # Time in minutes to track login att
 max_token_attempts_count: 5                 # Number of failed password-reset / activation token submissions in a specific time frame (0 = unlimited)
 max_token_attempts_interval: 60             # Time in minutes to track failed token submissions
 ipv6_subnet_size: 64                        # Size of IPv6 block to track login attempts
+profile:
+  verify_email_change: true                 # A changed email only takes effect once the link mailed to the new address is opened
+  max_email_changes_count: 5                # Number of email change links one account can request in a specific time frame (0 = unlimited)
+  max_email_changes_interval: 60            # Time in minutes to track email change requests
+
 magic_link:
   enabled: false                            # Enable login by one-time email link
   ttl: 10                                   # Token lifetime in minutes

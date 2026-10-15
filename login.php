@@ -92,6 +92,8 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
+            'onTask.login.resendEmailChange' => ['loginController', 0],
+            'onTask.login.cancelEmailChange' => ['loginController', 0],
             'onPageTask.login.invite'    => ['loginController', 0],
             'onPagesInitialized'        => ['storeReferrerPage', 0],
             'onDisplayErrorPage.401'    => ['onDisplayErrorPage401', -1],
@@ -226,6 +228,17 @@ class LoginPlugin extends Plugin
                 $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.USER_ACCOUNT_DISABLED'), 'error');
             }
         }
+
+        // Whatever session_user_sync says, the session's copy of the account must
+        // not carry stale email fields into a later save. A change confirmed in
+        // another browser only reached the stored account, and saving the old copy
+        // (a profile save, a 2FA secret, another plugin) would put the old address
+        // and the used confirmation token back. Only these fields are touched, so
+        // the sign-in and 2FA state stay as they are.
+        $user = $session->user ?? null;
+        if ($user && $user->exists()) {
+            $this->getLoginInstance()->refreshEmailFields($user);
+        }
     }
 
     /**
@@ -332,6 +345,10 @@ class LoginPlugin extends Plugin
             $this->enable([
                 'onPagesInitialized' => ['handleUserActivation', 0],
             ]);
+        } elseif ($path === $this->login->getRoute('confirm_email')) {
+            $this->enable([
+                'onPagesInitialized' => ['handleEmailChangeConfirmation', 0],
+            ]);
         } elseif ($path === $this->login->getRoute('profile')) {
             $this->enable([
                 'onPagesInitialized' => ['addProfilePage', 0],
@@ -383,6 +400,7 @@ class LoginPlugin extends Plugin
             $this->login->getRoute('login') ?: '/login',
             $this->login->getRoute('register', true) ?: '/register',
             $this->login->getRoute('activate') ?: '/activate_user',
+            $this->login->getRoute('confirm_email') ?: '/confirm_email',
             $this->login->getRoute('forgot') ?: '/forgot_password',
             $this->login->getRoute('reset') ?: '/reset_password',
             $this->login->getRoute('magic') ?: '/magic_login',
@@ -561,6 +579,9 @@ class LoginPlugin extends Plugin
      */
     public function addProfilePage(): void
     {
+        // An email change confirmed in another browser only reached the stored
+        // account, so show the profile from that.
+        $this->login->refreshEmailFields($this->grav['user']);
         $this->login->addPage('profile');
         $this->storeReferrerPage();
     }
@@ -638,7 +659,21 @@ class LoginPlugin extends Plugin
                     }
 
                     $messages->add($message, 'info');
-                    unset($user->activation_token);
+
+                    // Opening the link proves the address it was mailed to, the
+                    // same as confirming an email change does. If the account's
+                    // address changed after the link went out (an administrator
+                    // edited it), or the token has no address on record because
+                    // it was issued before that was kept, the account is still
+                    // activated but the current address is left unproven.
+                    $mailedTo = trim((string)$user->get('activation_email', ''));
+                    $currentEmail = trim((string)$user->get('email', ''));
+                    $addressProven = $mailedTo !== '' && mb_strtolower($mailedTo) === mb_strtolower($currentEmail);
+
+                    unset($user->activation_token, $user->activation_email);
+                    if ($addressProven) {
+                        $this->login->markEmailVerified($user);
+                    }
                     $user->save();
 
                     if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
@@ -673,6 +708,117 @@ class LoginPlugin extends Plugin
         }
 
         $this->grav->redirectLangSafe($redirect_route ?: '/', $redirect_code);
+    }
+
+    /**
+     * Handle the link that confirms a changed email address.
+     *
+     * Works whether or not the visitor is signed in, since the token is the
+     * proof. Only here does the account's `email` change.
+     */
+    public function handleEmailChangeConfirmation(): void
+    {
+        /** @var Uri $uri */
+        $uri = $this->grav['uri'];
+
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+
+        $language = $this->grav['language'];
+
+        /** @var UserCollectionInterface $users */
+        $users = $this->grav['accounts'];
+
+        $username = (string)$uri->param('username');
+        $token = (string)$uri->param('token');
+
+        /** @var UserInterface $current */
+        $current = $this->grav['user'];
+        $signedInAsOwner = $username !== '' && $current->exists() && $current->authorized === true && $current->username === $username;
+        $redirect_route = $signedInAsOwner ? $this->login->getRoute('profile') : $this->login->getRoute('login');
+        $redirect_route = $redirect_route ?: '/';
+
+        // Same throttle as activation: an unauthenticated endpoint that
+        // compares a secret token (GHSA-x239-6jqx-5hjh).
+        $rateLimiter = $this->login->getRateLimiter('token_attempts');
+        if ($username === '' || $rateLimiter->isRateLimited($username)) {
+            $messages->add($language->translate('PLUGIN_LOGIN.INVALID_REQUEST'), 'error');
+            $this->grav->redirectLangSafe($redirect_route);
+
+            return;
+        }
+
+        $user = $users->load($username);
+        if (is_callable([$user, 'refresh'])) {
+            $user->refresh(true);
+        }
+
+        $stored = (string)$user->get('email_change_token', '');
+        $newEmail = (string)$user->get('email_pending', '');
+
+        if (!$user->exists() || $newEmail === '' || !str_contains($stored, '::')) {
+            // Already used, cancelled or never there.
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_CHANGE_LINK_INVALID'), 'error');
+            $this->grav->redirectLangSafe($redirect_route);
+
+            return;
+        }
+
+        [$good_token, $expire] = explode('::', $stored, 2);
+
+        if (!hash_equals($good_token, $token)) {
+            // An older link replaced by a newer request lands here too.
+            $rateLimiter->registerRateLimitedAction($username);
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_CHANGE_LINK_INVALID'), 'error');
+            $this->grav->redirectLangSafe($redirect_route);
+
+            return;
+        }
+
+        if (time() > (int)$expire) {
+            // Keep the waiting change so the profile can send a fresh link.
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_CHANGE_LINK_EXPIRED'), 'error');
+            $this->grav->redirectLangSafe($redirect_route);
+
+            return;
+        }
+
+        // Someone may have taken the address since the link was sent.
+        if ($this->login->emailBelongsToAnother($user, $newEmail)) {
+            $this->login->clearEmailChange($user);
+            $user->save();
+            $messages->add($language->translate(['PLUGIN_LOGIN.EMAIL_NOT_AVAILABLE', htmlspecialchars($newEmail, ENT_QUOTES, 'UTF-8')]), 'error');
+            $this->grav->redirectLangSafe($redirect_route);
+
+            return;
+        }
+
+        $oldEmail = (string)$user->get('email', '');
+
+        $user->email = $newEmail;
+        $this->login->clearEmailChange($user);
+        $this->login->markEmailVerified($user);
+        $user->save();
+
+        // The session keeps its own copy of the account; bring it up to date
+        // so the profile page shows the new address straight away.
+        if ($current->exists() && $current !== $user && $current->username === $username) {
+            $current->email = $newEmail;
+            $this->login->clearEmailChange($current);
+            $current->email_verified = $user->get('email_verified');
+            $current->email_verified_at = $user->get('email_verified_at');
+        }
+
+        $this->login->sendEmailChangedNotice($user, $oldEmail);
+
+        $this->grav->fireEvent('onUserEmailChanged', new Event([
+            'user' => $user,
+            'old_email' => $oldEmail,
+            'new_email' => $newEmail,
+        ]));
+
+        $messages->add($language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_CONFIRMED', htmlspecialchars($newEmail, ENT_QUOTES, 'UTF-8')]), 'info');
+        $this->grav->redirectLangSafe($redirect_route);
     }
 
     /**
@@ -822,6 +968,18 @@ class LoginPlugin extends Plugin
                 // too — `twofa_cancel` was previously unguarded, letting it run
                 // (and act on a client `_redirect`) without a nonce.
                 if (!isset($post['login-form-nonce']) || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+                    $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
+                    return;
+                }
+                break;
+
+            case 'resendEmailChange':
+            case 'cancelEmailChange':
+                // Both change the account, so they take a POST with the
+                // `login-form` nonce the profile form's email_change field sends.
+                if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST'
+                    || !isset($post['login-form-nonce'])
+                    || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
                     $this->grav['messages']->add($this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED'), 'info');
                     return;
                 }
@@ -1557,6 +1715,10 @@ class LoginPlugin extends Plugin
             return false;
         }
 
+        // Pick up an email change confirmed in another browser, so this save
+        // doesn't write the old address back.
+        $this->login->refreshEmailFields($user);
+
         // Stop overloading of username
         $username = $form->data('username');
         if (isset($username)) {
@@ -1574,10 +1736,18 @@ class LoginPlugin extends Plugin
         /** @var UserCollectionInterface $users */
         $users = $this->grav['accounts'];
 
+        $verifyEmailChange = (bool)$this->config->get('plugins.login.profile.verify_email_change', true);
+
         // Check for existing email
         $email = $form->getData('email');
         $existing_email = $users->find($email, ['email']);
-        if ($user->username !== $existing_email->username && $existing_email->exists()) {
+        // With email changes confirmed and registration finishing over email,
+        // registration doesn't say whether an address is taken
+        // (GHSA-crh8-xm27-j9g9), so neither does this form: the change shows
+        // as waiting and no link goes out.
+        $hideTakenEmail = $verifyEmailChange
+            && $this->config->get('plugins.login.user_registration.options.send_activation_email', false);
+        if (!$hideTakenEmail && $user->username !== $existing_email->username && $existing_email->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
                 'message' => $language->translate([
@@ -1630,6 +1800,43 @@ class LoginPlugin extends Plugin
             }
         }
 
+        // A new address is only kept as pending until the link mailed to it is
+        // opened (handleEmailChangeConfirmation). The account keeps its old,
+        // proven address in the meantime.
+        $pendingEmail = null;
+        if (array_key_exists('email', $data) && is_string($data['email'])) {
+            $newEmail = trim($data['email']);
+            $oldEmail = trim((string)$user->get('email', ''));
+            $changed = $newEmail !== '' && mb_strtolower($newEmail) !== mb_strtolower($oldEmail);
+
+            if ($changed && $verifyEmailChange) {
+                if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+                    $this->grav->fireEvent('onFormValidationError', new Event([
+                        'form'    => $form,
+                        'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
+                    ]));
+                    $event->stopPropagation();
+                    return false;
+                }
+
+                $limiter = $this->login->getRateLimiter('email_changes');
+                if ($limiter->hasReachedLimit($user->username)) {
+                    $this->grav->fireEvent('onFormValidationError', new Event([
+                        'form'    => $form,
+                        'message' => $language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_TOO_MANY', $limiter->getInterval()])
+                    ]));
+                    $event->stopPropagation();
+                    return false;
+                }
+
+                unset($data['email']);
+                $pendingEmail = $newEmail;
+            } elseif ($changed) {
+                // Saved straight away, so any waiting change is out of date.
+                $this->login->clearEmailChange($user);
+            }
+        }
+
         try {
             $flash = $form->getFlash();
             $user->update($data, $flash->getFilesByFields(true));
@@ -1638,6 +1845,15 @@ class LoginPlugin extends Plugin
             if ($user instanceof FlexObjectInterface) {
                 $flash->clearFiles();
                 $flash->save();
+            }
+
+            if ($pendingEmail !== null) {
+                $this->login->getRateLimiter('email_changes')->registerRateLimitedAction($user->username);
+                $this->login->requestEmailChange($user, $pendingEmail);
+                $this->grav['messages']->add(
+                    $language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_SENT', htmlspecialchars($pendingEmail, ENT_QUOTES, 'UTF-8')]),
+                    'info'
+                );
             }
         } catch (\Exception $e) {
             $form->setMessage($e->getMessage(), 'error');

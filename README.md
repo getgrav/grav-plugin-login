@@ -216,6 +216,7 @@ route: '/login'                             # Specific route for Login page (def
 route_after_login:                          # Route to go to after login if enabled
 route_after_logout:                         # Route to logout to if enabled
 route_activate: '/activate_user'            # Route for the user activation process
+route_confirm_email: '/confirm_email'       # Route for the link that confirms a changed email address
 route_forgot: '/forgot_password'            # Route for the forgot password process
 route_reset: '/reset_password'              # Route for the reset password process
 route_profile: '/user_profile'              # Route for the user profile page
@@ -236,6 +237,10 @@ rememberme:
 
 max_pw_resets_count: 2                      # Number of password resets in a specific time frame (0 = unlimited)
 max_pw_resets_interval: 60                  # Time in minutes to track password resets
+profile:
+  verify_email_change: true                 # A changed email only takes effect once the link mailed to the new address is opened
+  max_email_changes_count: 5                # Number of email change links one account can request in a specific time frame (0 = unlimited)
+  max_email_changes_interval: 60            # Time in minutes to track email change requests
 max_login_count: 5                          # Number of failed login attempts in a specific time frame (0 = unlimited)
 max_login_interval: 10                      # Time in minutes to track login attempts
 ipv6_subnet_size: 64                        # Size of IPv6 block to track login attempts
@@ -421,6 +426,67 @@ user/pages/magic_login/magic_login.md
 ```
 
 Set `template: magic` in the frontmatter so the plugin's template and form are used. Any body content you add will be rendered above the email form.
+
+# Changing Your Email Address
+
+When a signed-in user changes their email on the profile page, the new address doesn't replace the old one straight away. The plugin keeps it as a waiting change, mails a confirmation link to the new address, and only switches the account over once that link is opened. It then sends a short notice to the old address to say the email has changed.
+
+Until the link is opened, the account keeps its old address and the profile page says which address is waiting, with buttons to send the link again or cancel the change. The link works for 24 hours. Opening it works whether or not the user is signed in, and changing the email a second time replaces the first waiting change, so only the newest link works.
+
+If the new address already belongs to another account, the profile form answers the same way the registration form does. With `user_registration.options.send_activation_email` turned on, it doesn't say the address is taken: the change shows as waiting and no link is sent.
+
+This is on by default. To save a new address straight away, as older versions did, turn it off:
+
+```yaml
+profile:
+  verify_email_change: false
+```
+
+An administrator changing somebody's email in the admin isn't affected.
+
+If your site uses its own profile page instead of the one in this plugin, add the `email_change` field under the `email` field so the waiting change and its buttons show up:
+
+```yaml
+    email_change:
+      type: email_change
+```
+
+## Checking that an address was confirmed
+
+When a user opens an email change link, or the activation link sent at registration, the plugin records the confirmed address on the account:
+
+* `email_verified` is the address that was confirmed
+* `email_verified_at` is when, as a Unix timestamp
+
+Compare the two with the account's current `email`, because an administrator can still change the email directly. The plugin does that for you:
+
+```php
+$verified = $this->grav['login']->isEmailVerified($user);
+```
+
+It's true only when the account's current email is the one that was confirmed.
+
+An activation link only counts for the address it was mailed to. If an administrator changes the account's email while the link is still out, opening the link still activates the account but leaves the new address unconfirmed. Links sent before this was recorded do the same.
+
+## The onUserEmailChanged event
+
+Once an email change is confirmed, the plugin fires `onUserEmailChanged` with the account and both addresses:
+
+```php
+public static function getSubscribedEvents(): array
+{
+    return ['onUserEmailChanged' => ['onUserEmailChanged', 0]];
+}
+
+public function onUserEmailChanged(Event $event): void
+{
+    $user = $event['user'];
+    $old = $event['old_email'];
+    $new = $event['new_email'];
+}
+```
+
+It isn't fired when an administrator edits the email in the admin, or when `verify_email_change` is off.
 
 # Logout
 

@@ -23,6 +23,9 @@ form:
         required: true
         message: PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE
 
+    email_change:
+      type: email_change
+
     fullname:
       id: fullname
       type: text

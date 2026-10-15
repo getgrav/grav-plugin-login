@@ -1,3 +1,14 @@
+# v3.10.0
+## 10/14/2026
+
+1. [](#new)
+    * Changing your email on the profile page now sends a confirmation link to the new address, and the account only switches over once the link is opened. Until then the profile shows the waiting change, with buttons to send the link again or cancel it, and the old address gets a notice once the change goes through. On by default, with a new `profile.verify_email_change` setting to turn it off
+    * Accounts now record the confirmed address in `email_verified` and `email_verified_at` when an email change or account activation link is opened (an activation link only counts for the address it was mailed to, so one that is opened after an administrator changed the email activates the account but leaves the new address unconfirmed), and `$grav['login']->isEmailVerified($user)` tells a plugin whether the current address is the confirmed one
+    * New `onUserEmailChanged` event, fired with the account and the old and new address once an email change is confirmed
+    * A signed-in browser keeps its own copy of the account, so a change confirmed in another browser used to be written back (the old address and the used link) by the next save from the old copy, such as regenerating the 2FA secret. The email fields of the session's copy are now refreshed from the stored account when a request starts, with either account storage
+2. [](#bugfix)
+    * The links in the account activation email and in the already registered notice (which points to the password reset page) are now full web addresses, so they work from the mail client, instead of a path like `/activate_user/...` unless `site_host` was set
+
 # v3.9.14
 ## 10/13/2026
 
