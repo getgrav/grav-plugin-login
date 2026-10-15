@@ -51,7 +51,7 @@ class Email
 
             $activationLink = Utils::url(
                 $activationRoute . '/token' . $param_sep . $token . '/username' . $param_sep . $user->username,
-                null,
+                true,
                 true
             );
 
