@@ -6,7 +6,7 @@
     * Accounts now record the confirmed address in `email_verified` and `email_verified_at` when an email change or account activation link is opened, and `$grav['login']->isEmailVerified($user)` tells a plugin whether the current address is the confirmed one
     * New `onUserEmailChanged` event, fired with the account and the old and new address once an email change is confirmed
 2. [](#bugfix)
-    * The link in the account activation email is now a full web address, so it works from the mail client, instead of a path like `/activate_user/...` unless `site_host` was set
+    * The links in the account activation email and in the already registered notice (which points to the password reset page) are now full web addresses, so they work from the mail client, instead of a path like `/activate_user/...` unless `site_host` was set
 
 # v3.9.14
 ## 10/13/2026

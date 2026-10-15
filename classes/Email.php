@@ -263,7 +263,7 @@ class Email
             static::warnIfUntrustedHost('already registered notice');
 
             $context = [
-                'forgot_link' => Utils::url($forgotRoute, null, true),
+                'forgot_link' => Utils::url($forgotRoute, true, true),
             ];
 
             $params = [
