@@ -466,6 +466,8 @@ $verified = $this->grav['login']->isEmailVerified($user);
 
 It's true only when the account's current email is the one that was confirmed.
 
+An activation link only counts for the address it was mailed to. If an administrator changes the account's email while the link is still out, opening the link still activates the account but leaves the new address unconfirmed. Links sent before this was recorded do the same.
+
 ## The onUserEmailChanged event
 
 Once an email change is confirmed, the plugin fires `onUserEmailChanged` with the account and both addresses:

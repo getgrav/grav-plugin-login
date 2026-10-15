@@ -708,6 +708,8 @@ class Login
         $token = md5(uniqid($random_bytes, true));
         $expire = time() + 604800; // next week
         $user->activation_token = $token . '::' . $expire;
+        // The link only proves the address it was mailed to, so remember which one.
+        $user->activation_email = (string)$user->email;
         $user->save();
 
         try {

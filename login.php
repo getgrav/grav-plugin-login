@@ -228,6 +228,17 @@ class LoginPlugin extends Plugin
                 $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.USER_ACCOUNT_DISABLED'), 'error');
             }
         }
+
+        // Whatever session_user_sync says, the session's copy of the account must
+        // not carry stale email fields into a later save. A change confirmed in
+        // another browser only reached the stored account, and saving the old copy
+        // (a profile save, a 2FA secret, another plugin) would put the old address
+        // and the used confirmation token back. Only these fields are touched, so
+        // the sign-in and 2FA state stay as they are.
+        $user = $session->user ?? null;
+        if ($user && $user->exists()) {
+            $this->getLoginInstance()->refreshEmailFields($user);
+        }
     }
 
     /**
@@ -648,10 +659,21 @@ class LoginPlugin extends Plugin
                     }
 
                     $messages->add($message, 'info');
-                    unset($user->activation_token);
-                    // Opening the activation link proves the address, the same
-                    // as confirming an email change does.
-                    $this->login->markEmailVerified($user);
+
+                    // Opening the link proves the address it was mailed to, the
+                    // same as confirming an email change does. If the account's
+                    // address changed after the link went out (an administrator
+                    // edited it), or the token has no address on record because
+                    // it was issued before that was kept, the account is still
+                    // activated but the current address is left unproven.
+                    $mailedTo = trim((string)$user->get('activation_email', ''));
+                    $currentEmail = trim((string)$user->get('email', ''));
+                    $addressProven = $mailedTo !== '' && mb_strtolower($mailedTo) === mb_strtolower($currentEmail);
+
+                    unset($user->activation_token, $user->activation_email);
+                    if ($addressProven) {
+                        $this->login->markEmailVerified($user);
+                    }
                     $user->save();
 
                     if ($this->config->get('plugins.login.user_registration.options.send_welcome_email', false)) {
