@@ -38,10 +38,7 @@ class Email
                 throw new \RuntimeException('User activation route does not exist!');
             }
 
-            $site_host = $config->get('plugins.login.site_host');
-            if (!empty($site_host)) {
-                $activationRoute = rtrim($site_host, '/') . '/' . ltrim($activationRoute, '/');
-            }
+            $activationRoute = static::withSiteBase($activationRoute);
 
             if (static::refuseIfUntrustedHost('account activation')) {
                 return;
@@ -101,10 +98,7 @@ class Email
                 throw new \RuntimeException('Email change confirmation route does not exist!');
             }
 
-            $site_host = $config->get('plugins.login.site_host');
-            if (!empty($site_host)) {
-                $confirmRoute = rtrim($site_host, '/') . '/' . ltrim($confirmRoute, '/');
-            }
+            $confirmRoute = static::withSiteBase($confirmRoute);
 
             if (static::refuseIfUntrustedHost('email change')) {
                 return;
@@ -196,10 +190,7 @@ class Email
                 throw new \RuntimeException('Password reset route does not exist!');
             }
 
-            $site_host = static::getConfig()->get('plugins.login.site_host');
-            if (!empty($site_host)) {
-                $resetRoute = rtrim($site_host, '/') . '/' . ltrim($resetRoute, '/');
-            }
+            $resetRoute = static::withSiteBase($resetRoute);
 
             if (static::refuseIfUntrustedHost('password reset')) {
                 return;
@@ -251,10 +242,7 @@ class Email
         try {
             $forgotRoute = static::getLogin()->getRoute('forgot') ?: '/';
 
-            $site_host = static::getConfig()->get('plugins.login.site_host');
-            if (!empty($site_host)) {
-                $forgotRoute = rtrim($site_host, '/') . '/' . ltrim($forgotRoute, '/');
-            }
+            $forgotRoute = static::withSiteBase($forgotRoute);
 
             // Warn only, deliberately no refuseIfUntrustedHost() here. This mail
             // carries no token, and not sending it would make registration behave
@@ -359,10 +347,7 @@ class Email
             // against the Host-derived rootUrl(), so setting site_host had no effect
             // on invitation links at all while isTrustedHostConfigured() still
             // reported the site as protected. (GHSA-69vf-mjxw-x79j)
-            $site_host = $config->get('plugins.login.site_host');
-            if (!empty($site_host)) {
-                $inviteRoute = rtrim($site_host, '/') . '/' . ltrim($inviteRoute, '/');
-            }
+            $inviteRoute = static::withSiteBase($inviteRoute);
 
             // An invitation is sent by an authenticated actor, so unlike a password
             // reset there is no account to enumerate and refusing quietly would just
@@ -415,10 +400,7 @@ class Email
                 throw new \RuntimeException('Magic login route does not exist!');
             }
 
-            $site_host = $config->get('plugins.login.site_host');
-            if (!empty($site_host)) {
-                $magicRoute = rtrim($site_host, '/') . '/' . ltrim($magicRoute, '/');
-            }
+            $magicRoute = static::withSiteBase($magicRoute);
 
             if (static::refuseIfUntrustedHost('magic login')) {
                 return;
@@ -446,6 +428,27 @@ class Email
 
             throw $e;
         }
+    }
+
+    /**
+     * Pin a route to `site_host`, or add the multisite base path that Utils::url()
+     * does not add for routes that are not a page. (#241)
+     */
+    protected static function withSiteBase(string $route): string
+    {
+        $site_host = static::getConfig()->get('plugins.login.site_host');
+        if (!empty($site_host)) {
+            return rtrim($site_host, '/') . '/' . ltrim($route, '/');
+        }
+
+        $pages = Grav::instance()['pages'];
+        $base = (string)$pages->base();
+        $page = $pages->find($route, true);
+        if ($base === '' || ($page && $page->routable())) {
+            return $route;
+        }
+
+        return rtrim($base, '/') . '/' . ltrim($route, '/');
     }
 
     protected static function sendEmail(string $template, array $context, array $params, ?UserInterface $user = null, ?UserInterface $actor = null): void
