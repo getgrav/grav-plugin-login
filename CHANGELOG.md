@@ -1,3 +1,9 @@
+# v3.10.1
+## 10/16/2026
+
+1. [](#bugfix)
+    * Activation, password reset, email change, magic login and invitation links now include the sub-directory on multisite installs that use one, when `site_host` is not set [#241](https://github.com/getgrav/grav-plugin-login/issues/241)
+
 # v3.10.0
 ## 10/14/2026
 
