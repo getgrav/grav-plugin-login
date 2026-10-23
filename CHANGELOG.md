@@ -4,6 +4,7 @@
 1. [](#bugfix)
     * [security] An account that has set up 2-Factor Authentication is now asked for its code at the site login, by a remember-me cookie and by a magic link even when the global 2-Factor Authentication setting is off, matching the Admin sign-in. The setting now only decides whether the profile page offers the setup. Thanks @onetrev
     * Turning 2-Factor Authentication on from the profile page without a saved secret now asks you to press Regenerate first, instead of saving an account that is never asked for a code
+    * [security] An invitation link can only create one account, even when several registrations arrive at the same moment. Thanks @yssoe
 
 # v3.10.1
 ## 10/16/2026

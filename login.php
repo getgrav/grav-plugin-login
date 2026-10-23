@@ -1597,6 +1597,18 @@ class LoginPlugin extends Plugin
             $data['state'] = 'enabled';
         }
         if ($this->invitation) {
+            // Use up the invitation before the account exists, so one invitation
+            // link sent by several requests at once creates a single account.
+            if (!Invitations::getInstance()->take($this->invitation->token)) {
+                $this->invitation = null;
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $language->translate('PLUGIN_LOGIN.USER_INVITATION_INVALID')
+                ]));
+                $event->stopPropagation();
+
+                return;
+            }
             $data += $this->invitation->account;
         }
         $data_object = (object) $data;
@@ -1609,13 +1621,8 @@ class LoginPlugin extends Plugin
             $flash->save();
         }
 
-        // Remove invitation after it has been used.
-        if ($this->invitation) {
-            $invitations = Invitations::getInstance();
-            $invitations->remove($this->invitation);
-            $invitations->save();
-            $this->invitation = null;
-        }
+        // The invitation was used up before the account was registered.
+        $this->invitation = null;
 
         $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
 

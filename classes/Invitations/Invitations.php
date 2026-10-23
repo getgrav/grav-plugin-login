@@ -10,7 +10,9 @@
 namespace Grav\Plugin\Login\Invitations;
 
 use Grav\Common\File\CompiledYamlFile;
+use Grav\Common\Grav;
 use Grav\Common\Utils;
+use RocketTheme\Toolbox\File\YamlFile;
 use RocketTheme\Toolbox\ArrayTraits\ArrayAccess;
 use RocketTheme\Toolbox\ArrayTraits\Countable;
 use RocketTheme\Toolbox\ArrayTraits\Iterator;
@@ -118,6 +120,56 @@ class Invitations implements \Countable, \Iterator, \ArrayAccess
     public function remove(Invitation $invitation): void
     {
         $this->offsetUnset($invitation->token);
+    }
+
+    /**
+     * Remove an invitation and return it, or null when it is already gone.
+     *
+     * The file is re-read and written back under an exclusive lock on a
+     * sidecar `invites.yaml.lock` (the save replaces the YAML file by rename,
+     * so the lock can't live on the file itself). Of several requests
+     * redeeming one token at the same moment, only one gets it back.
+     */
+    public function take(string $token): ?Invitation
+    {
+        $path = (string)Grav::instance()['locator']->findResource($this->inviteFile, true, true);
+        $dir = dirname($path);
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+            throw new \RuntimeException(sprintf('Unable to create directory "%s"', $dir));
+        }
+
+        $lock = @fopen($path . '.lock', 'c');
+        if ($lock === false) {
+            throw new \RuntimeException(sprintf('Unable to open "%s.lock"', $path));
+        }
+
+        try {
+            if (!flock($lock, LOCK_EX)) {
+                throw new \RuntimeException(sprintf('Unable to lock "%s.lock"', $path));
+            }
+
+            $file = YamlFile::instance($path);
+            $file->free();
+            $items = (array)$file->content();
+            $data = $items[$token] ?? null;
+            if (!is_array($data)) {
+                $file->free();
+
+                return null;
+            }
+
+            unset($items[$token]);
+            $file->save($items);
+            $file->free();
+
+            $this->items = $items;
+            $this->emails = null;
+
+            return new Invitation($token, $data);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
     }
 
     public function removeExpired(): int
