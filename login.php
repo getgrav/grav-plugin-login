@@ -264,7 +264,7 @@ class LoginPlugin extends Plugin
                     [
                         'remember_me' => true,
                         'remember_me_login' => true,
-                        'twofa' => $c['config']->get('plugins.login.twofa_enabled', false),
+                        'twofa' => true,
                         'failureEvent' => 'onUserLoginGuest'
                     ]
                 );
@@ -889,7 +889,7 @@ class LoginPlugin extends Plugin
                 'magic_link' => true,
                 'rate_limit' => false,
                 'remember_me' => false,
-                'twofa' => $this->config->get('plugins.login.twofa_enabled', false)
+                'twofa' => true
             ],
             ['user' => $user, 'return_event' => true]
         );
@@ -1798,6 +1798,18 @@ class LoginPlugin extends Plugin
             if (!array_key_exists($field, $data) && $data_field !== $missing) {
                 $data[$field] = $data_field;
             }
+        }
+
+        // The secret shown on the profile page is only stored by Regenerate, so
+        // switching two-factor on without one would save an account that reads
+        // as protected but is never asked for a code.
+        if (!empty($data['twofa_enabled']) && !$user->get('twofa_secret')) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
+            ]));
+            $event->stopPropagation();
+            return false;
         }
 
         // A new address is only kept as pending until the link mailed to it is

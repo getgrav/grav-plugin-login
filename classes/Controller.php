@@ -135,11 +135,10 @@ class Controller
         // Remove login nonce from the form.
         $form = array_diff_key($this->post, ['login-form-nonce' => true]);
 
-        // Is twofa enabled?
-        $twofa = $this->grav['config']->get('plugins.login.twofa_enabled', false);
-
-        // Fire Login process.
-        $event = $this->login->login($form, ['rate_limit' => true, 'remember_me' => true, 'twofa' => $twofa], ['return_event' => true]);
+        // An account that has set up two-factor is always asked for its code.
+        // `plugins.login.twofa_enabled` only decides whether the profile page
+        // offers the setup, the same rule the API sign-in follows.
+        $event = $this->login->login($form, ['rate_limit' => true, 'remember_me' => true, 'twofa' => true], ['return_event' => true]);
         $user = $event->getUser();
 
         $login_redirect = $this->login->getRoute('after_login');
@@ -190,11 +189,6 @@ class Controller
 
         /** @var Message $messages */
         $messages = $this->grav['messages'];
-        if (!$config->get('plugins.login.twofa_enabled', false)) {
-            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
-
-            return true;
-        }
 
         $twoFa = $this->login->twoFactorAuth();
         $user = $this->grav['user'];
@@ -294,11 +288,6 @@ class Controller
 
         /** @var Message $messages */
         $messages = $this->grav['messages'];
-        if (!$config->get('plugins.login.twofa_enabled', false)) {
-            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
-
-            return true;
-        }
 
         $user = $this->grav['user'];
         $eventOptions = [
