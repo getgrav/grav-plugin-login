@@ -126,6 +126,8 @@ class ChangePasswordCommand extends ConsoleCommand
         }
         //Set the password field to new password
         $user->set('password', $data['password']);
+        // Signs the account out of every browser and API token.
+        $this->login->endOtherSessions($user, false);
         $user->save();
 
         $this->invalidateCache();
