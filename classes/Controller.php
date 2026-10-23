@@ -750,6 +750,8 @@ class Controller
 
                     unset($user->hashed_password, $user->reset);
                     $user->password = $password;
+                    // Whoever knew the old password is signed out everywhere.
+                    $this->login->endOtherSessions($user);
                     $user->save();
 
                     $messages->add($language->translate('PLUGIN_LOGIN.RESET_PASSWORD_RESET'), 'info');
@@ -800,6 +802,18 @@ class Controller
             // profile page where the user is fully logged in (authorized=true),
             // so that flow still passes this gate.
             if ($user->exists() && $user->authorized === true) {
+                // Replacing an active second factor takes a current code, so a
+                // signed-in session alone can't swap in a secret of its own.
+                // First-time setup (2FA not on yet) needs none.
+                if ($this->login->hasActiveTwoFactor($user)) {
+                    $error = $this->login->twoFactorCodeError($user, $this->post['twofa_code'] ?? null);
+                    if ($error !== null) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['status' => 'error', 'message' => $error]);
+                        exit;
+                    }
+                }
+
                 /** @var TwoFactorAuth $twoFa */
                 $twoFa = $this->grav['login']->twoFactorAuth();
                 $secret = $twoFa->createSecret();
