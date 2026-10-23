@@ -1,3 +1,19 @@
+# v3.11.0
+## 10/23/2026
+
+1. [](#improved)
+    * The profile page asks for your current password before a new one, and for the new one twice, while an account with no password yet (one made by a sign-in service) can set its first without one
+    * [security] Wrong current passwords on the profile page count toward the same lockout as failed sign-ins, so the form can't be used to guess a password
+    * Changing or resetting your password signs your account out of every other browser, API token and remember-me cookie, and the browser you changed it in stays signed in
+    * A site with its own profile form needs a `current_password` field (type `current_password`) for its members to keep changing their password, and gets the check on a repeated password by adding `password_confirm`
+    * [security] Turning off 2-Factor Authentication on the profile page, or regenerating its secret while it is on, now takes the current code from your authenticator app, so a signed-in session alone can't remove or replace it
+    * A site with its own profile form adds a `twofa_code` field (type `twofa_code`) to its 2-Factor Authentication section so members can still turn it off or regenerate it
+2. [](#bugfix)
+    * The profile page shows 2-Factor Authentication as it is stored after it was turned on or off in the admin or another browser, instead of writing the old setting back on the next save
+    * [security] An account that has set up 2-Factor Authentication is now asked for its code at the site login, by a remember-me cookie and by a magic link even when the global 2-Factor Authentication setting is off, matching the Admin sign-in. The setting now only decides whether the profile page offers the setup
+    * Turning 2-Factor Authentication on from the profile page without a saved secret now asks you to press Regenerate first, instead of saving an account that is never asked for a code
+    * [security] An invitation link can only create one account, even when several registrations arrive at the same moment. Thanks @yssoe
+
 # v3.10.1
 ## 10/16/2026
 

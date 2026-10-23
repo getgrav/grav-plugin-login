@@ -191,7 +191,20 @@ class LoginPlugin extends Plugin
             unset($this->lazy_redirect);
         }
 
+        // A browser that signed in before the account's password was changed
+        // (here, in the admin or through the API) is signed out. Checked before
+        // session_user_sync, which would copy the new stamp onto the session.
         $user = $session->user ?? null;
+        if ($user instanceof UserInterface && $this->getLoginInstance()->isSessionOutdated($user)) {
+            $session->invalidate()->start();
+
+            /** @var Message $messages */
+            $messages = $this->grav['messages'];
+            $messages->add($this->grav['language']->translate('PLUGIN_LOGIN.SIGNED_OUT_PASSWORD_CHANGED'), 'info');
+
+            return;
+        }
+
         if ($user && $user->exists() && ($this->config()['session_user_sync'] ?? false)) {
             // User is stored into the filesystem.
             if ($user instanceof FlexObjectInterface && version_compare(GRAV_VERSION, '1.7.13', '>=')) {
@@ -238,6 +251,7 @@ class LoginPlugin extends Plugin
         $user = $session->user ?? null;
         if ($user && $user->exists()) {
             $this->getLoginInstance()->refreshEmailFields($user);
+            $this->getLoginInstance()->refreshTwoFactorFields($user);
         }
     }
 
@@ -264,7 +278,7 @@ class LoginPlugin extends Plugin
                     [
                         'remember_me' => true,
                         'remember_me_login' => true,
-                        'twofa' => $c['config']->get('plugins.login.twofa_enabled', false),
+                        'twofa' => true,
                         'failureEvent' => 'onUserLoginGuest'
                     ]
                 );
@@ -889,7 +903,7 @@ class LoginPlugin extends Plugin
                 'magic_link' => true,
                 'rate_limit' => false,
                 'remember_me' => false,
-                'twofa' => $this->config->get('plugins.login.twofa_enabled', false)
+                'twofa' => true
             ],
             ['user' => $user, 'return_event' => true]
         );
@@ -1597,6 +1611,18 @@ class LoginPlugin extends Plugin
             $data['state'] = 'enabled';
         }
         if ($this->invitation) {
+            // Use up the invitation before the account exists, so one invitation
+            // link sent by several requests at once creates a single account.
+            if (!Invitations::getInstance()->take($this->invitation->token)) {
+                $this->invitation = null;
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $language->translate('PLUGIN_LOGIN.USER_INVITATION_INVALID')
+                ]));
+                $event->stopPropagation();
+
+                return;
+            }
             $data += $this->invitation->account;
         }
         $data_object = (object) $data;
@@ -1609,13 +1635,8 @@ class LoginPlugin extends Plugin
             $flash->save();
         }
 
-        // Remove invitation after it has been used.
-        if ($this->invitation) {
-            $invitations = Invitations::getInstance();
-            $invitations->remove($this->invitation);
-            $invitations->save();
-            $this->invitation = null;
-        }
+        // The invitation was used up before the account was registered.
+        $this->invitation = null;
 
         $this->grav->fireEvent('onUserLoginRegisteredUser', new Event(['user' => &$user]));
 
@@ -1800,6 +1821,55 @@ class LoginPlugin extends Plugin
             }
         }
 
+        // The secret shown on the profile page is only stored by Regenerate, so
+        // switching two-factor on without one would save an account that reads
+        // as protected but is never asked for a code.
+        if (!empty($data['twofa_enabled']) && !$user->get('twofa_secret')) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
+            ]));
+            $event->stopPropagation();
+            return false;
+        }
+
+        // A `twofa_enabled` that came through empty is no change, not a request
+        // to switch 2FA off.
+        if (array_key_exists('twofa_enabled', $data) && $data['twofa_enabled'] === null) {
+            unset($data['twofa_enabled']);
+        }
+
+        // Turning off an active second factor takes a current code, so a
+        // signed-in session alone can't remove it.
+        if (array_key_exists('twofa_enabled', $data) && empty($data['twofa_enabled'])
+            && $this->login->hasActiveTwoFactor($user)) {
+            $twofaError = $this->login->twoFactorCodeError($user, $form->getData('twofa_code'));
+            if ($twofaError !== null) {
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $twofaError
+                ]));
+                $event->stopPropagation();
+                return false;
+            }
+        }
+
+        // A new password needs the current one (unless the account has none yet,
+        // such as one created by a sign-in service) and, when the form asks for
+        // it twice, the same password both times.
+        $passwordChanged = isset($data['password']) && is_string($data['password']) && $data['password'] !== '';
+        if ($passwordChanged) {
+            $passwordError = $this->checkPasswordChange($user, $form, $data['password']);
+            if ($passwordError !== null) {
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $passwordError
+                ]));
+                $event->stopPropagation();
+                return false;
+            }
+        }
+
         // A new address is only kept as pending until the link mailed to it is
         // opened (handleEmailChangeConfirmation). The account keeps its old,
         // proven address in the meantime.
@@ -1838,9 +1908,18 @@ class LoginPlugin extends Plugin
         }
 
         try {
+            if ($passwordChanged) {
+                // Signs out every other browser and API token of this account.
+                $this->login->endOtherSessions($user);
+            }
+
             $flash = $form->getFlash();
             $user->update($data, $flash->getFilesByFields(true));
             $user->save();
+
+            if ($passwordChanged) {
+                $this->grav['messages']->add($language->translate('PLUGIN_LOGIN.PASSWORD_CHANGED'), 'info');
+            }
 
             if ($user instanceof FlexObjectInterface) {
                 $flash->clearFiles();
@@ -1861,6 +1940,46 @@ class LoginPlugin extends Plugin
         }
 
         return true;
+    }
+
+    /**
+     * Check a password change on the profile form. Returns the message to show
+     * when it is refused, or null when it may go ahead.
+     *
+     * @param UserInterface $user
+     * @param FormInterface $form
+     * @param string $password
+     * @return string|null
+     */
+    private function checkPasswordChange(UserInterface $user, FormInterface $form, string $password): ?string
+    {
+        $language = $this->grav['language'];
+
+        // The confirmation is only checked when the form has the field, so a
+        // site's own profile form without one keeps working.
+        $confirmField = $form->getBlueprint()->schema()->getProperty('password_confirm');
+        if (is_array($confirmField) && $form->getData('password_confirm') !== $password) {
+            return $language->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH');
+        }
+
+        if (!$this->login->hasPassword($user)) {
+            return null;
+        }
+
+        $current = $form->getData('current_password');
+        if (!is_string($current) || $current === '') {
+            return $language->translate('PLUGIN_LOGIN.CURRENT_PASSWORD_REQUIRED');
+        }
+
+        $result = $this->login->verifyCurrentPassword($user, $current);
+        if ($result > 0) {
+            return $language->translate(['PLUGIN_LOGIN.CURRENT_PASSWORD_TOO_MANY', $result]);
+        }
+        if ($result < 0) {
+            return $language->translate('PLUGIN_LOGIN.CURRENT_PASSWORD_WRONG');
+        }
+
+        return null;
     }
 
     /**

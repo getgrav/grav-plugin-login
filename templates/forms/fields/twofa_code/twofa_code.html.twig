@@ -1,0 +1,18 @@
+{% extends "forms/fields/text/text.html.twig" %}
+
+{# The current 2FA code, asked for on the profile form while the account has
+   2-Factor Authentication on: turning it off or regenerating the secret needs
+   it. Left out otherwise. #}
+
+{% block field %}
+    {% set account = form.object ?? grav.user %}
+    {% if grav.login.hasActiveTwoFactor(account) %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block input_attributes %}
+    inputmode="numeric"
+    data-2fa-code
+    {{ parent() }}
+{% endblock %}

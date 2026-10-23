@@ -135,11 +135,10 @@ class Controller
         // Remove login nonce from the form.
         $form = array_diff_key($this->post, ['login-form-nonce' => true]);
 
-        // Is twofa enabled?
-        $twofa = $this->grav['config']->get('plugins.login.twofa_enabled', false);
-
-        // Fire Login process.
-        $event = $this->login->login($form, ['rate_limit' => true, 'remember_me' => true, 'twofa' => $twofa], ['return_event' => true]);
+        // An account that has set up two-factor is always asked for its code.
+        // `plugins.login.twofa_enabled` only decides whether the profile page
+        // offers the setup, the same rule the API sign-in follows.
+        $event = $this->login->login($form, ['rate_limit' => true, 'remember_me' => true, 'twofa' => true], ['return_event' => true]);
         $user = $event->getUser();
 
         $login_redirect = $this->login->getRoute('after_login');
@@ -190,11 +189,6 @@ class Controller
 
         /** @var Message $messages */
         $messages = $this->grav['messages'];
-        if (!$config->get('plugins.login.twofa_enabled', false)) {
-            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
-
-            return true;
-        }
 
         $twoFa = $this->login->twoFactorAuth();
         $user = $this->grav['user'];
@@ -294,11 +288,6 @@ class Controller
 
         /** @var Message $messages */
         $messages = $this->grav['messages'];
-        if (!$config->get('plugins.login.twofa_enabled', false)) {
-            $messages->add($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
-
-            return true;
-        }
 
         $user = $this->grav['user'];
         $eventOptions = [
@@ -761,6 +750,8 @@ class Controller
 
                     unset($user->hashed_password, $user->reset);
                     $user->password = $password;
+                    // Whoever knew the old password is signed out everywhere.
+                    $this->login->endOtherSessions($user);
                     $user->save();
 
                     $messages->add($language->translate('PLUGIN_LOGIN.RESET_PASSWORD_RESET'), 'info');
@@ -811,6 +802,18 @@ class Controller
             // profile page where the user is fully logged in (authorized=true),
             // so that flow still passes this gate.
             if ($user->exists() && $user->authorized === true) {
+                // Replacing an active second factor takes a current code, so a
+                // signed-in session alone can't swap in a secret of its own.
+                // First-time setup (2FA not on yet) needs none.
+                if ($this->login->hasActiveTwoFactor($user)) {
+                    $error = $this->login->twoFactorCodeError($user, $this->post['twofa_code'] ?? null);
+                    if ($error !== null) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['status' => 'error', 'message' => $error]);
+                        exit;
+                    }
+                }
+
                 /** @var TwoFactorAuth $twoFa */
                 $twoFa = $this->grav['login']->twoFactorAuth();
                 $secret = $twoFa->createSecret();
