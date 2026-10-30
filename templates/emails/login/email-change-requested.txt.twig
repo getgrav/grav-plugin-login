@@ -1,0 +1,7 @@
+{# Email change requested notice, with the cancel link (plain text) #}
+{%- import 'emails/login/_text-utils.txt.twig' as text -%}
+{%- set subject = 'PLUGIN_LOGIN.EMAIL_CHANGE_REQUESTED_EMAIL_SUBJECT'|t(site_name) -%}
+{%- do email.message.setSubject(subject) -%}
+{{ text.from_html('PLUGIN_LOGIN.EMAIL_CHANGE_REQUESTED_EMAIL_BODY'|t(user.fullname ?: user.username, site_name, masked_email, cancel_link, author)) }}
+
+{{ cancel_link }}
