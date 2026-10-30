@@ -431,11 +431,13 @@ Set `template: magic` in the frontmatter so the plugin's template and form are u
 
 When a signed-in user changes their email on the profile page, the new address doesn't replace the old one straight away. The plugin keeps it as a waiting change, mails a confirmation link to the new address, and only switches the account over once that link is opened. It then sends a short notice to the old address to say the email has changed.
 
+The profile page asks for the current password before it takes a new address, the same way it does before a new password. An account with no password yet (one made by a sign-in service or a magic link) isn't asked. When the change is asked for, the old address gets a notice too, with the new address partly hidden (`an***@example.com`) and a link that cancels the change, so the owner can stop someone who got into their account. The cancel link works once, and the confirm link stops working with it. When the change is confirmed, every other browser, API token and remember-me cookie of the account is signed out, and the browser that opened the link stays signed in if it's the account's own.
+
 Until the link is opened, the account keeps its old address and the profile page says which address is waiting, with buttons to send the link again or cancel the change. The link works for 24 hours. Opening it works whether or not the user is signed in, and changing the email a second time replaces the first waiting change, so only the newest link works.
 
 If the new address already belongs to another account, the profile form answers the same way the registration form does. With `user_registration.options.send_activation_email` turned on, it doesn't say the address is taken: the change shows as waiting and no link is sent.
 
-This is on by default. To save a new address straight away, as older versions did, turn it off:
+This is on by default. To save a new address straight away, as older versions did, turn it off. The current password is still asked for, but no notices or links are sent:
 
 ```yaml
 profile:
