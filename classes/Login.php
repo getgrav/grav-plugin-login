@@ -1004,9 +1004,14 @@ class Login
      * the link is opened. A second request replaces the first one, so an older
      * link stops working.
      *
-     * When the address already belongs to another account nothing is mailed,
-     * but the account still shows the change as waiting, so the profile form
-     * answers the same way it does for a free address.
+     * A request for a new address also tells the current address, with a link
+     * to cancel it (sendEmailChangeRequestedNotice()). Sending the link again
+     * for the same address keeps the cancel link already mailed, so it isn't
+     * mailed twice.
+     *
+     * When the address already belongs to another account nothing is mailed
+     * to it, but the account still shows the change as waiting, so the profile
+     * form answers the same way it does for a free address.
      *
      * @param UserInterface $user
      * @param string $email
@@ -1015,17 +1020,22 @@ class Login
      */
     public function requestEmailChange(UserInterface $user, string $email)
     {
-        try {
-            $token = bin2hex(random_bytes(16));
-        } catch (\Exception $e) {
-            $token = md5(uniqid((string)mt_rand(), true));
-        }
-
         $expire = time() + static::EMAIL_CHANGE_TTL;
 
+        $newRequest = mb_strtolower((string)$user->get('email_pending', '')) !== mb_strtolower($email)
+            || (string)$user->get('email_change_cancel_token', '') === '';
+
         $user->email_pending = $email;
-        $user->email_change_token = $token . '::' . $expire;
+        $user->email_change_token = static::newToken() . '::' . $expire;
+        if ($newRequest) {
+            // Its own token, so the confirm link can't be worked out from it.
+            $user->email_change_cancel_token = static::newToken();
+        }
         $user->save();
+
+        if ($newRequest) {
+            $this->sendEmailChangeRequestedNotice($user);
+        }
 
         if ($this->emailBelongsToAnother($user, $email)) {
             $this->grav['log']->info(sprintf('plugin.login: email change for "%s" not mailed, the address belongs to another account', $user->username));
@@ -1054,7 +1064,7 @@ class Login
      */
     public function refreshEmailFields(UserInterface $user): void
     {
-        $this->refreshStoredFields($user, ['email', 'email_pending', 'email_change_token', 'email_verified', 'email_verified_at']);
+        $this->refreshStoredFields($user, ['email', 'email_pending', 'email_change_token', 'email_change_cancel_token', 'email_verified', 'email_verified_at']);
     }
 
     /**
@@ -1110,7 +1120,59 @@ class Login
      */
     public function clearEmailChange(UserInterface $user): void
     {
-        unset($user->email_pending, $user->email_change_token);
+        unset($user->email_pending, $user->email_change_token, $user->email_change_cancel_token);
+    }
+
+    /**
+     * Tell the current address that a change to a new one was asked for, with
+     * a link to cancel it. A delivery failure is logged, since the request
+     * itself has gone through.
+     *
+     * @param UserInterface $user
+     * @return bool True if the action was performed.
+     */
+    public function sendEmailChangeRequestedNotice(UserInterface $user)
+    {
+        if ((string)$user->get('email', '') === '') {
+            return false;
+        }
+
+        try {
+            Email::sendEmailChangeRequestedNotice($user);
+        } catch (\Exception $e) {
+            $this->grav['log']->error('plugin.login: could not send email change requested notice: ' . $e->getMessage());
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * A random token for an emailed link.
+     *
+     * @return string
+     */
+    public static function newToken(): string
+    {
+        try {
+            return bin2hex(random_bytes(16));
+        } catch (\Exception $e) {
+            return md5(uniqid((string)mt_rand(), true));
+        }
+    }
+
+    /**
+     * Whether a token from a link matches the one stored on the account. An
+     * empty token never matches, so a cleared one can't be used.
+     *
+     * @param string $stored
+     * @param string $given
+     * @return bool
+     */
+    public static function tokenMatches(string $stored, string $given): bool
+    {
+        return $stored !== '' && $given !== '' && hash_equals($stored, $given);
     }
 
     /**

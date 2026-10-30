@@ -1,0 +1,13 @@
+{% extends 'email/base.html.twig' %}
+
+{# Sent to the current address when a change to a new one is asked for, with a link to cancel it.
+   No HOST_WARNING: it tells the reader to ignore a mail they didn't ask for, the
+   opposite of what this one needs. #}
+
+{%- set subject = 'PLUGIN_LOGIN.EMAIL_CHANGE_REQUESTED_EMAIL_SUBJECT'|t(site_name) %}
+
+{%- do email.message.setSubject(subject) %}
+
+{%- block content -%}
+  {{ 'PLUGIN_LOGIN.EMAIL_CHANGE_REQUESTED_EMAIL_BODY'|t((user.fullname ?: user.username)|e, site_name|e, masked_email|e, cancel_link, author|e)|raw }}
+{%- endblock content -%}

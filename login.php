@@ -725,10 +725,12 @@ class LoginPlugin extends Plugin
     }
 
     /**
-     * Handle the link that confirms a changed email address.
+     * Handle the link that confirms a changed email address, and the link in
+     * the notice to the old address that cancels it.
      *
      * Works whether or not the visitor is signed in, since the token is the
-     * proof. Only here does the account's `email` change.
+     * proof. Only here does the account's `email` change, and every other
+     * session of the account is signed out when it does.
      */
     public function handleEmailChangeConfirmation(): void
     {
@@ -765,6 +767,13 @@ class LoginPlugin extends Plugin
         $user = $users->load($username);
         if (is_callable([$user, 'refresh'])) {
             $user->refresh(true);
+        }
+
+        $cancelToken = (string)$uri->param('cancel');
+        if ($cancelToken !== '') {
+            $this->cancelEmailChangeFromLink($user, $current, $cancelToken, $redirect_route);
+
+            return;
         }
 
         $stored = (string)$user->get('email_change_token', '');
@@ -812,6 +821,9 @@ class LoginPlugin extends Plugin
         $user->email = $newEmail;
         $this->login->clearEmailChange($user);
         $this->login->markEmailVerified($user);
+        // Ends a session someone else may hold on the account. The browser that
+        // opened the link stays signed in when it's the owner's.
+        $this->login->endOtherSessions($user, $signedInAsOwner);
         $user->save();
 
         // The session keeps its own copy of the account; bring it up to date
@@ -832,6 +844,45 @@ class LoginPlugin extends Plugin
         ]));
 
         $messages->add($language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_CONFIRMED', htmlspecialchars($newEmail, ENT_QUOTES, 'UTF-8')]), 'info');
+        $this->grav->redirectLangSafe($redirect_route);
+    }
+
+    /**
+     * Cancel a waiting email change from the link in the notice sent to the
+     * old address. The link works once: cancelling clears the change and its
+     * tokens, so the confirm link stops working as well.
+     *
+     * @param UserInterface $user
+     * @param UserInterface $current
+     * @param string $token
+     * @param string $redirect_route
+     * @return void
+     */
+    private function cancelEmailChangeFromLink(UserInterface $user, UserInterface $current, string $token, string $redirect_route): void
+    {
+        /** @var Message $messages */
+        $messages = $this->grav['messages'];
+        $language = $this->grav['language'];
+
+        $stored = (string)$user->get('email_change_cancel_token', '');
+        if (!$user->exists() || (string)$user->get('email_pending', '') === '' || !Login::tokenMatches($stored, $token)) {
+            if ($stored !== '') {
+                $this->login->getRateLimiter('token_attempts')->registerRateLimitedAction($user->username);
+            }
+            $messages->add($language->translate('PLUGIN_LOGIN.EMAIL_CHANGE_CANCEL_LINK_INVALID'), 'error');
+            $this->grav->redirectLangSafe($redirect_route);
+
+            return;
+        }
+
+        $this->login->clearEmailChange($user);
+        $user->save();
+
+        if ($current->exists() && $current !== $user && $current->username === $user->username) {
+            $this->login->clearEmailChange($current);
+        }
+
+        $messages->add($language->translate(['PLUGIN_LOGIN.EMAIL_CHANGE_CANCELLED_BY_LINK', htmlspecialchars((string)$user->get('email', ''), ENT_QUOTES, 'UTF-8')]), 'info');
         $this->grav->redirectLangSafe($redirect_route);
     }
 
@@ -1879,6 +1930,20 @@ class LoginPlugin extends Plugin
             $oldEmail = trim((string)$user->get('email', ''));
             $changed = $newEmail !== '' && mb_strtolower($newEmail) !== mb_strtolower($oldEmail);
 
+            // A new address needs the current password too, under the same rule
+            // as a new password. When both change it was checked above.
+            if ($changed && !$passwordChanged) {
+                $passwordError = $this->checkCurrentPassword($user, $form, 'PLUGIN_LOGIN.CURRENT_PASSWORD_REQUIRED_EMAIL');
+                if ($passwordError !== null) {
+                    $this->grav->fireEvent('onFormValidationError', new Event([
+                        'form'    => $form,
+                        'message' => $passwordError
+                    ]));
+                    $event->stopPropagation();
+                    return false;
+                }
+            }
+
             if ($changed && $verifyEmailChange) {
                 if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
                     $this->grav->fireEvent('onFormValidationError', new Event([
@@ -1962,13 +2027,31 @@ class LoginPlugin extends Plugin
             return $language->translate('PLUGIN_LOGIN.PASSWORDS_DO_NOT_MATCH');
         }
 
+        return $this->checkCurrentPassword($user, $form, 'PLUGIN_LOGIN.CURRENT_PASSWORD_REQUIRED');
+    }
+
+    /**
+     * Check the current password the profile form asks for before a new
+     * password or email address. Returns the message to show when it is
+     * refused, or null when it may go ahead. An account with no password yet
+     * (one created by a sign-in service or a magic link) isn't asked.
+     *
+     * @param UserInterface $user
+     * @param FormInterface $form
+     * @param string $requiredMessage Language key shown when the field is empty.
+     * @return string|null
+     */
+    private function checkCurrentPassword(UserInterface $user, FormInterface $form, string $requiredMessage): ?string
+    {
+        $language = $this->grav['language'];
+
         if (!$this->login->hasPassword($user)) {
             return null;
         }
 
         $current = $form->getData('current_password');
         if (!is_string($current) || $current === '') {
-            return $language->translate('PLUGIN_LOGIN.CURRENT_PASSWORD_REQUIRED');
+            return $language->translate($requiredMessage);
         }
 
         $result = $this->login->verifyCurrentPassword($user, $current);

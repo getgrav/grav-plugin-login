@@ -123,6 +123,83 @@ class Email
     }
 
     /**
+     * Tell the current address that a change to a new one was asked for, with
+     * a link that cancels it. The new address is masked, so the mail doesn't
+     * give out in full an address that may belong to someone who took over
+     * the session.
+     *
+     * @param UserInterface $user
+     * @param UserInterface|null $actor
+     * @return void
+     * @throws \Exception
+     */
+    public static function sendEmailChangeRequestedNotice(UserInterface $user, ?UserInterface $actor = null): void
+    {
+        $email = (string)$user->get('email', '');
+        $pending = (string)$user->get('email_pending', '');
+        $token = (string)$user->get('email_change_cancel_token', '');
+
+        if (!$email || !$pending || $token === '') {
+            return;
+        }
+
+        try {
+            $config = static::getConfig();
+
+            $param_sep = $config->get('system.param_sep', ':');
+            $confirmRoute = static::getLogin()->getRoute('confirm_email');
+            if (!$confirmRoute) {
+                throw new \RuntimeException('Email change confirmation route does not exist!');
+            }
+
+            if (static::refuseIfUntrustedHost('email change requested notice')) {
+                return;
+            }
+
+            static::warnIfUntrustedHost('email change requested notice');
+
+            $cancelLink = static::siteUrl(
+                $confirmRoute . '/cancel' . $param_sep . $token . '/username' . $param_sep . $user->username
+            );
+
+            $context = [
+                'cancel_link' => $cancelLink,
+                'masked_email' => static::maskEmail($pending),
+            ];
+
+            $params = [
+                'to' => $email,
+            ];
+
+            static::sendEmail('email-change-requested', $context, $params, $user, $actor);
+        } catch (\Exception $e) {
+            static::getLogger()->error($e->getMessage());
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Hide most of an address's name part, keeping the domain:
+     * `andy@example.com` becomes `an***@example.com`.
+     *
+     * @param string $email
+     * @return string
+     */
+    public static function maskEmail(string $email): string
+    {
+        $at = strrpos($email, '@');
+        if ($at === false || $at === 0) {
+            return '***';
+        }
+
+        $name = substr($email, 0, $at);
+        $keep = min(2, intdiv(mb_strlen($name), 2));
+
+        return mb_substr($name, 0, $keep) . '***' . substr($email, $at);
+    }
+
+    /**
      * Tell the old address that the account's email address has changed.
      *
      * @param UserInterface $user
