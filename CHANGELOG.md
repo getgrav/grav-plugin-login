@@ -3,7 +3,7 @@
 
 1. [](#improved)
     * [security] The profile page asks for your current password before a new email address, the same way it does before a new password, while an account with no password yet (one made by a sign-in service or a magic link) can still change its email without one. A site with its own profile form needs the `current_password` field for this, as it does for password changes
-    * [security] Asking for a new email address now sends the old address a notice with the new one partly hidden (`an***@example.com`) and a link that cancels the change. The link works once and stops the confirm link working too. Sent only when `profile.verify_email_change` is on
+    * [security] Asking for a new email address now sends the old address a notice with the new one partly hidden (`an***@example.com`) and a link that cancels the change. The link works once, stops the confirm link working too, and signs the account out everywhere else, since "this wasn't me" means someone else may be signed in. Sent only when `profile.verify_email_change` is on
 2. [](#bugfix)
     * [security] Confirming an email change now signs the account out of every other browser, API token and remember-me cookie, so a session someone else took over ends once the owner confirms. The browser that opened the link stays signed in when it's the owner's
 

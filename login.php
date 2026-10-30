@@ -771,7 +771,7 @@ class LoginPlugin extends Plugin
 
         $cancelToken = (string)$uri->param('cancel');
         if ($cancelToken !== '') {
-            $this->cancelEmailChangeFromLink($user, $current, $cancelToken, $redirect_route);
+            $this->cancelEmailChangeFromLink($user, $current, $cancelToken, $redirect_route, $signedInAsOwner);
 
             return;
         }
@@ -852,13 +852,18 @@ class LoginPlugin extends Plugin
      * old address. The link works once: cancelling clears the change and its
      * tokens, so the confirm link stops working as well.
      *
+     * The owner saying "this wasn't me" means somebody else may hold a session
+     * on the account, so every other session is signed out, as on confirming.
+     * The browser that opened the link stays signed in when it's the owner's.
+     *
      * @param UserInterface $user
      * @param UserInterface $current
      * @param string $token
      * @param string $redirect_route
+     * @param bool $signedInAsOwner
      * @return void
      */
-    private function cancelEmailChangeFromLink(UserInterface $user, UserInterface $current, string $token, string $redirect_route): void
+    private function cancelEmailChangeFromLink(UserInterface $user, UserInterface $current, string $token, string $redirect_route, bool $signedInAsOwner): void
     {
         /** @var Message $messages */
         $messages = $this->grav['messages'];
@@ -876,6 +881,7 @@ class LoginPlugin extends Plugin
         }
 
         $this->login->clearEmailChange($user);
+        $this->login->endOtherSessions($user, $signedInAsOwner);
         $user->save();
 
         if ($current->exists() && $current !== $user && $current->username === $user->username) {
