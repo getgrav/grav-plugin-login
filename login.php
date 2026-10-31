@@ -1539,7 +1539,7 @@ class LoginPlugin extends Plugin
         // fail the server-side check in Login::register(), which would
         // otherwise end up as a 500 error.
         $email = $form_data->get('email');
-        if (!is_string($email) || !filter_var(trim($email), FILTER_VALIDATE_EMAIL)) {
+        if (!Login::isAcceptableEmail($email)) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
                 'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
@@ -1949,16 +1949,17 @@ class LoginPlugin extends Plugin
                 }
             }
 
-            if ($changed && $verifyEmailChange) {
-                if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
-                    $this->grav->fireEvent('onFormValidationError', new Event([
-                        'form'    => $form,
-                        'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
-                    ]));
-                    $event->stopPropagation();
-                    return false;
-                }
+            // Twig syntax is refused whether or not the change waits for a confirmation link.
+            if ($changed && (Login::hasTemplateSyntax($newEmail) || ($verifyEmailChange && !filter_var($newEmail, FILTER_VALIDATE_EMAIL)))) {
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
+                ]));
+                $event->stopPropagation();
+                return false;
+            }
 
+            if ($changed && $verifyEmailChange) {
                 $limiter = $this->login->getRateLimiter('email_changes');
                 if ($limiter->hasReachedLimit($user->username)) {
                     $this->grav->fireEvent('onFormValidationError', new Event([

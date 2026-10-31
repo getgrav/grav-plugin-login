@@ -789,6 +789,35 @@ class Login
     }
 
     /**
+     * Whether a value holds the opening of a Twig expression, statement or comment.
+     *
+     * @param string $value
+     * @return bool
+     */
+    public static function hasTemplateSyntax(string $value): bool
+    {
+        return (bool)preg_match('/\{[{%#]/', $value);
+    }
+
+    /**
+     * Whether a value is an email address Login accepts: a valid address that
+     * doesn't contain Twig syntax, since addresses end up in page and email templates.
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    public static function isAcceptableEmail($value): bool
+    {
+        if (!is_string($value)) {
+            return false;
+        }
+
+        $value = trim($value);
+
+        return $value !== '' && !static::hasTemplateSyntax($value) && filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    /**
      * @param string $type
      * @param mixed  $value
      * @param string $extra
@@ -834,7 +863,7 @@ class Login
 
             case 'email':
                 $value = \is_string($value) ? trim($value) : '';
-                if ($value === '' || !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                if (!static::isAcceptableEmail($value)) {
                     throw new \RuntimeException('Not a valid email address');
                 }
 
