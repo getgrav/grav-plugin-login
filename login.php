@@ -1159,19 +1159,18 @@ class LoginPlugin extends Plugin
 
     /**
      * Authorize the Page fallback url (page media accessed through the page route)
+     *
+     * @param Event $event
      */
-    public function authorizeFallBackUrl(): void
+    public function authorizeFallBackUrl(Event $event): void
     {
         if (!$this->config->get('plugins.login.protect_protected_page_media', false)) {
             return;
         }
 
-        $page_url = \dirname($this->grav['uri']->path());
-
-        // Resolve the page the same way `Grav::fallbackUrl()` does, so the rules
-        // being checked belong to the page core is about to serve the file from.
-        // Without `$all`, a `site.routes` entry can hand back a different page.
-        $page = $this->grav['pages']->find($page_url, true);
+        // Check the page core is about to serve the file from, as the event hands it
+        // over, rather than looking one up again from the request path.
+        $page = $event['page'];
 
         // Media stored inside a module folder (`_module`) belongs to the page that
         // includes the module, so climb to the nearest non-module ancestor and apply
