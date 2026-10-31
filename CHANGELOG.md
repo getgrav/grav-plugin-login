@@ -1,3 +1,13 @@
+# v3.11.2
+## 10/31/2026
+
+1. [](#bugfix)
+    * [security] The security fixes below were found by Anthropic's OSS Scanner
+    * [security] The 2-Factor Authentication secret and QR code now show only on a member's own account
+    * [security] Different spellings of one account name, such as capital letters or its email address, now share one sign-in attempt limit
+    * [security] Email addresses containing template code are no longer accepted when registering, saving a profile or changing an email address
+    * [security] Protected page media is now checked against the page that file is served from
+
 # v3.11.1
 ## 10/29/2026
 
