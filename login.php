@@ -1159,19 +1159,18 @@ class LoginPlugin extends Plugin
 
     /**
      * Authorize the Page fallback url (page media accessed through the page route)
+     *
+     * @param Event $event
      */
-    public function authorizeFallBackUrl(): void
+    public function authorizeFallBackUrl(Event $event): void
     {
         if (!$this->config->get('plugins.login.protect_protected_page_media', false)) {
             return;
         }
 
-        $page_url = \dirname($this->grav['uri']->path());
-
-        // Resolve the page the same way `Grav::fallbackUrl()` does, so the rules
-        // being checked belong to the page core is about to serve the file from.
-        // Without `$all`, a `site.routes` entry can hand back a different page.
-        $page = $this->grav['pages']->find($page_url, true);
+        // Check the page core is about to serve the file from, as the event hands it
+        // over, rather than looking one up again from the request path.
+        $page = $event['page'];
 
         // Media stored inside a module folder (`_module`) belongs to the page that
         // includes the module, so climb to the nearest non-module ancestor and apply
@@ -1540,7 +1539,7 @@ class LoginPlugin extends Plugin
         // fail the server-side check in Login::register(), which would
         // otherwise end up as a 500 error.
         $email = $form_data->get('email');
-        if (!is_string($email) || !filter_var(trim($email), FILTER_VALIDATE_EMAIL)) {
+        if (!Login::isAcceptableEmail($email)) {
             $this->grav->fireEvent('onFormValidationError', new Event([
                 'form'    => $form,
                 'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
@@ -1950,16 +1949,17 @@ class LoginPlugin extends Plugin
                 }
             }
 
-            if ($changed && $verifyEmailChange) {
-                if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
-                    $this->grav->fireEvent('onFormValidationError', new Event([
-                        'form'    => $form,
-                        'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
-                    ]));
-                    $event->stopPropagation();
-                    return false;
-                }
+            // Twig syntax is refused whether or not the change waits for a confirmation link.
+            if ($changed && (Login::hasTemplateSyntax($newEmail) || ($verifyEmailChange && !filter_var($newEmail, FILTER_VALIDATE_EMAIL)))) {
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $language->translate('PLUGIN_LOGIN.EMAIL_VALIDATION_MESSAGE')
+                ]));
+                $event->stopPropagation();
+                return false;
+            }
 
+            if ($changed && $verifyEmailChange) {
                 $limiter = $this->login->getRateLimiter('email_changes');
                 if ($limiter->hasReachedLimit($user->username)) {
                     $this->grav->fireEvent('onFormValidationError', new Event([
@@ -2107,7 +2107,9 @@ class LoginPlugin extends Plugin
         }
 
         $credentials = $event->getCredentials();
-        $username = $credentials['username'];
+
+        // Count against the stored account's username, so every spelling of it shares one counter.
+        $username = $this->login->rateLimitName((string)$credentials['username'], $event->getUser());
 
         // Refuse while either the IP or the username has used up its attempts.
         if ($interval = $this->login->checkLoginRateLimit($username)) {
