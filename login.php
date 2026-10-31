@@ -2107,7 +2107,9 @@ class LoginPlugin extends Plugin
         }
 
         $credentials = $event->getCredentials();
-        $username = $credentials['username'];
+
+        // Count against the stored account's username, so every spelling of it shares one counter.
+        $username = $this->login->rateLimitName((string)$credentials['username'], $event->getUser());
 
         // Refuse while either the IP or the username has used up its attempts.
         if ($interval = $this->login->checkLoginRateLimit($username)) {

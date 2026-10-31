@@ -818,6 +818,28 @@ class Login
     }
 
     /**
+     * The name a login counter is kept under: the stored account's username
+     * when the submitted name opens one, so spellings of one account (case,
+     * or its email address) share a counter, otherwise the submitted name.
+     *
+     * @param string $submitted
+     * @param UserInterface|null $user The account the submitted name opened.
+     * @return string
+     */
+    public function rateLimitName(string $submitted, $user = null): string
+    {
+        if (!$user || !$user->exists()) {
+            /** @var UserCollectionInterface $accounts */
+            $accounts = $this->grav['accounts'];
+            $user = $submitted !== '' ? $accounts->find($submitted, ['email']) : null;
+        }
+
+        $stored = $user && $user->exists() ? (string)$user->get('username') : '';
+
+        return $stored !== '' ? $stored : $submitted;
+    }
+
+    /**
      * @param string $type
      * @param mixed  $value
      * @param string $extra
