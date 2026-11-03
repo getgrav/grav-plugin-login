@@ -1,13 +1,13 @@
 <?php return array(
     'root' => array(
         'name' => 'getgrav/grav-plugin-login',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => 'f06cdc61db00772e11ac8059ce5328c3b7868429',
+        'pretty_version' => 'dev-develop',
+        'version' => 'dev-develop',
+        'reference' => '35104f8423c8924e28952d74e4d596080d9c262c',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'dev' => true,
+        'dev' => false,
     ),
     'versions' => array(
         'bacon/bacon-qr-code' => array(
@@ -29,11 +29,20 @@
             'dev_requirement' => false,
         ),
         'getgrav/grav-plugin-login' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => 'f06cdc61db00772e11ac8059ce5328c3b7868429',
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => '35104f8423c8924e28952d74e4d596080d9c262c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'lbuchs/webauthn' => array(
+            'pretty_version' => 'v2.2.0',
+            'version' => '2.2.0.0',
+            'reference' => '20adb4a240c3997bd8cac7dc4dde38ab0bea0ed1',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../lbuchs/webauthn',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

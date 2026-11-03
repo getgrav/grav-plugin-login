@@ -1,3 +1,15 @@
+# v3.12.0
+## 11/03/2026
+
+1. [](#new)
+    * Passkeys (Grav 2 only, off by default: `passkeys.enabled`). An account adds passkeys on its profile page and signs in with one, from 1Password, iCloud Keychain, Google Password Manager, Windows Hello or a security key, without its password. A passkey is both steps at once, so it skips the 2-Factor Authentication code, and at the 2FA step after a password it can stand in for the code. Passkeys are stored on the account, so the same passkey signs in to the site and to Admin2
+    * The login form offers passkeys in the username field's autofill and as a "Sign in with a passkey" button, shown only in browsers that can use one (HTTPS)
+    * Adding or removing a passkey asks for the current password (or, for an account without one, the current 2FA code), and `passkeys`/`webauthn_id` can't be set through the profile form
+    * New settings: `passkeys.rp_id` and `passkeys.origin` for sites behind a proxy or sharing passkeys across subdomains, and per-IP limits for failed and started passkey ceremonies (`passkey_attempts`, `passkey_options`)
+    * `Login::passkeys()` gives other plugins the passkey service, and the `onUserPasskeyAdded` / `onUserPasskeyRemoved` events fire on changes
+1. [](#improved)
+    * Ships lbuchs/webauthn for the passkey checks. It is only loaded on Grav 2 with PHP 8, so the plugin still installs and runs on Grav 1.7 and PHP 7.3
+
 # v3.11.2
 ## 10/31/2026
 

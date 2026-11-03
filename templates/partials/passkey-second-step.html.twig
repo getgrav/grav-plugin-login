@@ -1,0 +1,10 @@
+{# The 2FA step: an account with a passkey can use it in place of the code. #}
+{% if passkeys_enabled and grav.user.passkeys is not empty %}
+    {% include 'partials/passkeys-root.html.twig' %}
+    <div class="passkey-second-step" data-passkey-box hidden>
+        <button type="button" class="{{ form_button_classes ?: 'button secondary' }} passkey-button" data-passkey-second-step>
+            <i class="fa fa-key"></i> {{ 'PLUGIN_LOGIN.PASSKEY_USE_INSTEAD'|t }}
+        </button>
+        <p class="form-errors passkey-error" data-passkey-error role="alert" style="display:none;"></p>
+    </div>
+{% endif %}

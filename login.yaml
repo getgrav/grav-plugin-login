@@ -42,6 +42,15 @@ profile:
   max_email_changes_count: 5                # Number of email change links one account can request in a specific time frame (0 = unlimited)
   max_email_changes_interval: 60            # Time in minutes to track email change requests
 
+passkeys:
+  enabled: false                            # Let accounts add passkeys and sign in with them (Grav 2 only)
+  rp_id: ''                                 # Host passkeys belong to. Empty = this site's host
+  origin: ''                                # Origin browsers report, e.g. https://example.com. Empty = system.custom_base_url, else the request
+  max_attempts_count: 10                    # Passkey answers that fail, per IP, in a specific time frame
+  max_attempts_interval: 10                 # Time in minutes to track failed passkey answers
+  max_options_count: 60                     # Passkey sign-ins and additions started, per IP, in a specific time frame
+  max_options_interval: 10                  # Time in minutes to track passkey ceremonies started
+
 magic_link:
   enabled: false                            # Enable login by one-time email link
   ttl: 10                                   # Token lifetime in minutes

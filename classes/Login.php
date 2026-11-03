@@ -28,6 +28,7 @@ use Grav\Common\Utils;
 use Grav\Plugin\Login\Events\PageAuthorizeEvent;
 use Grav\Plugin\Login\Events\UserLoginEvent;
 use Grav\Plugin\Login\Invitations\Invitation;
+use Grav\Plugin\Login\Passkeys\Passkeys;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use Grav\Plugin\Login\RememberMe\TokenStorage;
 use Grav\Plugin\Login\TwoFactorAuth\TwoFactorAuth;
@@ -63,6 +64,9 @@ class Login
 
     /** @var TwoFactorAuth */
     protected $twoFa;
+
+    /** @var Passkeys|null|false false until first asked */
+    protected $passkeys = false;
 
     /** @var RateLimiter[] */
     protected $rateLimiters = [];
@@ -640,7 +644,7 @@ class Login
      */
     public static function getRateLimitContexts(): array
     {
-        return ['login_attempts', 'twofa_attempts', 'pw_resets', 'magic_links', 'token_attempts', 'registrations', 'email_changes'];
+        return ['login_attempts', 'twofa_attempts', 'pw_resets', 'magic_links', 'token_attempts', 'registrations', 'email_changes', 'passkey_attempts', 'passkey_options'];
     }
 
     /**
@@ -1387,6 +1391,24 @@ class Login
     }
 
     /**
+     * Passkeys, when this site offers them: Grav 2 (Passkeys::supported())
+     * and `passkeys.enabled` on. Null otherwise, and always null on Grav 1.7,
+     * so callers never reach the WebAuthn code there.
+     *
+     * @return Passkeys|null
+     */
+    public function passkeys()
+    {
+        if ($this->passkeys === false) {
+            $this->passkeys = Passkeys::supported() && $this->grav['config']->get('plugins.login.passkeys.enabled', false)
+                ? new Passkeys($this->grav)
+                : null;
+        }
+
+        return $this->passkeys;
+    }
+
+    /**
      * @param string $context
      * @param int $maxCount
      * @param int $interval
@@ -1424,6 +1446,16 @@ class Login
                 case 'magic_links':
                     $maxCount = $this->grav['config']->get('plugins.login.magic_link.max_requests_count', 3);
                     $interval = $this->grav['config']->get('plugins.login.magic_link.max_requests_interval', 60);
+                    break;
+                case 'passkey_attempts':
+                    // Passkey answers that didn't check out, per IP.
+                    $maxCount = $this->grav['config']->get('plugins.login.passkeys.max_attempts_count', 10);
+                    $interval = $this->grav['config']->get('plugins.login.passkeys.max_attempts_interval', 10);
+                    break;
+                case 'passkey_options':
+                    // Passkey ceremonies started, per IP (each stores a challenge).
+                    $maxCount = $this->grav['config']->get('plugins.login.passkeys.max_options_count', 60);
+                    $interval = $this->grav['config']->get('plugins.login.passkeys.max_options_interval', 10);
                     break;
                 case 'email_changes':
                     $maxCount = $this->grav['config']->get('plugins.login.profile.max_email_changes_count', 5);

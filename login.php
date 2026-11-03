@@ -40,6 +40,7 @@ use Grav\Plugin\Login\Invitations\Invitations;
 use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\Controller;
 use Grav\Plugin\Login\Email;
+use Grav\Plugin\Login\Passkeys\SiteController as PasskeySiteController;
 use Grav\Plugin\Login\RememberMe\RememberMe;
 use RocketTheme\Toolbox\Event\Event;
 use RocketTheme\Toolbox\Session\Message;
@@ -94,6 +95,7 @@ class LoginPlugin extends Plugin
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
             'onTask.login.resendEmailChange' => ['loginController', 0],
             'onTask.login.cancelEmailChange' => ['loginController', 0],
+            'onTask.login.passkey'      => ['passkeyController', 0],
             'onPageTask.login.invite'    => ['loginController', 0],
             'onPagesInitialized'        => ['storeReferrerPage', 0],
             'onDisplayErrorPage.401'    => ['onDisplayErrorPage401', -1],
@@ -112,7 +114,7 @@ class LoginPlugin extends Plugin
             'onApiUserListRowActions'   => ['onApiUserListRowActions', 0],
             'onApiUserListRowAction'    => ['onApiUserListRowAction', 0],
             'onFormProcessed'           => ['onFormProcessed', 0],
-            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByMagic', 10004], ['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
+            'onUserLoginAuthenticate'   => [['userLoginAuthenticateByPasskey', 10005], ['userLoginAuthenticateByMagic', 10004], ['userLoginAuthenticateRateLimit', 10003], ['userLoginAuthenticateByRegistration', 10002], ['userLoginAuthenticateByRememberMe', 10001], ['userLoginAuthenticateByEmail', 10000], ['userLoginAuthenticate', 0]],
             'onUserLoginAuthorize'      => ['userLoginAuthorize', 0],
             'onUserLoginFailure'        => ['userLoginGuest', 0],
             'onUserLoginGuest'          => ['userLoginGuest', 0],
@@ -1089,6 +1091,33 @@ class LoginPlugin extends Plugin
     }
 
     /**
+     * [onTask.login.passkey] Passkey ceremonies for the login form, the 2FA
+     * step and the profile page. JSON in and out; POST with the `login-form`
+     * nonce. Answers 404 where passkeys are off or unsupported (Grav 1.7).
+     */
+    public function passkeyController(): void
+    {
+        $passkeys = $this->login->passkeys();
+        $post = !empty($_POST) ? $_POST : [];
+
+        if ($passkeys === null) {
+            [$status, $body] = [404, ['error' => 'Passkeys are not available on this site.']];
+        } elseif (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST'
+            || !isset($post['login-form-nonce'])
+            || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
+            [$status, $body] = [403, ['error' => $this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED')]];
+        } else {
+            [$status, $body] = (new PasskeySiteController($this->grav, $this->login, $passkeys, $post))->handle();
+        }
+
+        http_response_code($status);
+        header('Content-Type: application/json');
+        header('Cache-Control: no-store');
+        echo json_encode($body);
+        exit;
+    }
+
+    /**
      * Decide whether a `login.logout` request was started by the user rather than
      * forged by a third-party page.
      *
@@ -1447,6 +1476,8 @@ class LoginPlugin extends Plugin
             $twig->template = "login.{$extension}.twig";
         }
 
+        $twig->twig_vars['passkeys_enabled'] = $this->login->passkeys() !== null;
+
         // add CSS for frontend if required
         if (!$this->isAdmin() && $this->config->get('plugins.login.built_in_css')) {
             $this->grav['assets']->add('plugin://login/css/login.css');
@@ -1626,7 +1657,10 @@ class LoginPlugin extends Plugin
         // administrator mistakenly added them to `user_registration.fields`
         // (GHSA-pxm6-mhxr-q4mj). Server-side `default_values`, invitations, and the
         // `plugins.login.user_registration.{groups,access}` config remain authoritative.
-        $privilegeFields = ['groups', 'access'];
+        // Passkeys are added only through the passkey ceremony (Passkeys), never
+        // from form input. Matched on the first segment so a dotted field such
+        // as `access.admin.super` or `passkeys.0.id` is caught too.
+        $privilegeFields = ['groups', 'access', 'passkeys', 'webauthn_id'];
 
         foreach ($fields as $field) {
             // Process value of field if set in the page process.register_user
@@ -1645,7 +1679,7 @@ class LoginPlugin extends Plugin
                 }
             }
 
-            if (in_array($field, $privilegeFields, true)) {
+            if (in_array(explode('.', (string)$field)[0], $privilegeFields, true)) {
                 if ($form_data->get($field) !== null) {
                     $this->grav['log']->warning(sprintf(
                         'Login registration: ignored client-supplied "%s" from form submission (username=%s)',
@@ -1843,13 +1877,13 @@ class LoginPlugin extends Plugin
         // default DataUser backend `update()` is a raw merge with no field-level
         // security gate, so an attacker-supplied `access`/`groups` would otherwise
         // persist straight to the account and grant super-admin (GHSA-h33v-82r9-v8pm).
-        $privilegeFields = ['groups', 'access'];
+        $privilegeFields = ['groups', 'access', 'passkeys', 'webauthn_id'];
 
         $formValues = $form_data->toArray();
         $missing = new \stdClass();
         $data = [];
         foreach ($fields as $field) {
-            if (in_array($field, $privilegeFields, true)) {
+            if (in_array(explode('.', (string)$field)[0], $privilegeFields, true)) {
                 if ($form_data->get($field) !== null) {
                     $this->grav['log']->warning(sprintf(
                         'Login profile: ignored client-supplied "%s" from form submission (username=%s)',
@@ -2211,6 +2245,29 @@ class LoginPlugin extends Plugin
 
             $event->setUser($users->find($username));
         }
+    }
+
+    /**
+     * A passkey sign-in: Passkeys::verifyAssertion() has already proven the
+     * account (see SiteController and the API's passkey sign-in), so the
+     * event arrives with that account and the `passkey` option set.
+     */
+    public function userLoginAuthenticateByPasskey(UserLoginEvent $event): void
+    {
+        if (!$event->getOption('passkey')) {
+            return;
+        }
+
+        $user = $event->getUser();
+        if (!$user->exists()) {
+            $event->setStatus($event::AUTHENTICATION_FAILURE);
+            $event->stopPropagation();
+
+            return;
+        }
+
+        $event->setStatus($event::AUTHENTICATION_SUCCESS);
+        $event->stopPropagation();
     }
 
     public function userLoginAuthenticateByMagic(UserLoginEvent $event): void

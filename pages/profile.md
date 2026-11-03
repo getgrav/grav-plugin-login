@@ -97,6 +97,21 @@ form:
             sublabel: PLUGIN_LOGIN.2FA_SECRET_HELP
 
 
+    passkeys_check:
+      type: conditional
+      # True only where passkeys run: switched on, on Grav 2.
+      condition: passkeys_enabled
+
+      fields:
+
+        passkeys_section:
+          title: PLUGIN_LOGIN.PASSKEYS
+          type: section
+          underline: true
+
+        passkeys:
+          type: passkeys
+
   buttons:
       -
           type: submit
