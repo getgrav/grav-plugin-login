@@ -1740,4 +1740,79 @@ class Login
     {
         return $this->provider_login_templates;
     }
+
+    /**
+     * Whether the site login page shows the username and password form. The show_password_form setting turns it off,
+     * and a plugin can turn it off for the request (e.g. Login OAuth2's "Enforce OAuth2"). The setting may be a string
+     * such as 'false' or 'off' (hand-edited YAML, an environment override): anything not clearly false (null, a typo,
+     * an array) keeps the form. Turned off, the form still shows while the page offers no other way in: a provider's
+     * buttons (addProviderLoginTemplate()), an older plugin's buttons that can sign in (getLegacyLoginOptions()) or a
+     * Login by link that can send (isMagicLinkAvailable()). Passkeys don't count: their button shows only in browsers that can use
+     * one, and only accounts that already added a passkey can sign in with it.
+     *
+     * Ask after onLoginPage, where plugins add their buttons. A theme that overrides partials/login-form.html.twig
+     * honours the setting by showing its password fields only while this is true.
+     */
+    public function showPasswordForm(): bool
+    {
+        $value = $this->config->get('plugins.login.show_password_form');
+
+        // filter_var() reads null as false, so it is handled first.
+        if ($value === null || (filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? true)) {
+            return true;
+        }
+
+        return !($this->getProviderLoginTemplates()
+            || $this->getLegacyLoginOptions()
+            || $this->isMagicLinkAvailable());
+    }
+
+    /**
+     * The older plugins' login templates (plugins_hooked_loginPage, by plugin) that offer a way in. Their buttons
+     * submit the login form, so the login page keeps it while there are any. Login OAuth v1 ('LoginOauth') adds its
+     * template even without a provider it can use, and then only asks to enable one: it counts only with a provider
+     * that is enabled and has credentials, the ones Login OAuth v1 shows.
+     *
+     * @return array<string, string>
+     */
+    public function getLegacyLoginOptions(): array
+    {
+        $twig = $this->grav['twig'] ?? null;
+        $templates = (array)($twig->plugins_hooked_loginPage ?? []);
+
+        if (isset($templates['LoginOauth']) && !$this->hasLoginOauthProvider()) {
+            unset($templates['LoginOauth']);
+        }
+
+        return $templates;
+    }
+
+    /**
+     * Whether Login OAuth v1 has a provider to show: one that is enabled and has credentials, as its
+     * onTwigSiteVariables picks them for its template.
+     */
+    protected function hasLoginOauthProvider(): bool
+    {
+        foreach ((array)$this->config->get('plugins.login-oauth.providers', []) as $options) {
+            if (is_array($options) && !empty($options['enabled']) && isset($options['credentials'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether Login by link can send a link: magic_link.enabled is on, both its routes are set (the request page and
+     * the link in the email) and the Email plugin can send (it is enabled and plugins.email.from is set). The login
+     * page and the request handler (Controller::taskMagicRequest()) both check this, so they can't disagree.
+     */
+    public function isMagicLinkAvailable(): bool
+    {
+        return $this->config->get('plugins.login.magic_link.enabled', false)
+            && $this->getRoute('magic') !== null
+            && $this->getRoute('magic_login') !== null
+            && isset($this->grav['Email'])
+            && $this->config->get('plugins.email.from');
+    }
 }

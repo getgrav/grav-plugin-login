@@ -44,6 +44,8 @@ PLUGIN_LOGIN:
   REMEMBER_ME_STOLEN_COOKIE: "Someone else has used your login information to access this page! All sessions were logged out. Please log in with your credentials and check your data."
   BUILTIN_CSS: "Use built in CSS"
   BUILTIN_CSS_HELP: "Include the CSS provided by the admin plugin"
+  SHOW_PASSWORD_FORM: "Show Password Form"
+  SHOW_PASSWORD_FORM_HELP: "Show the username and password form on the site login page; the admin login screens aren't affected (Admin2 has its own setting in the API plugin). Turn it off to offer only other login options, such as single sign-on buttons or Login by link; the form still shows if there are none. Hiding it doesn't block password logins. Other plugins can override this setting."
   ROUTE: "Login route"
   ROUTE_HELP: "Custom route to a custom login page that your theme provides"
   ROUTE_REGISTER: "Registration route"

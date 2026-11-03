@@ -208,6 +208,7 @@ In Grav 2.0's admin, the Users list (table view) has a **Lockout** column markin
 ```yaml
 enabled: true                               # Enable the plugin
 built_in_css: true                          # Use built-in CSS
+show_password_form: true                    # Show the username and password form on the site login page; plugins can turn it off (e.g. Login OAuth2's 'Enforce OAuth2'). Shown anyway while no other login option is offered
 redirect_to_login: false                    # If you try to access a page you don't have access to, should you redirect to login route
 redirect_after_login: true                  # Path to redirect to after a successful login
 redirect_after_logout: true                 # Path to redirect to after a successful logout
@@ -353,6 +354,12 @@ route: /user-login
 ```
 
 You would then need to provide a suitable login form, probably based on the one that is provided with the plugin.
+
+## Showing only other login options
+
+Turn off `show_password_form` to hide the username and password form, so the login page offers only other login options, such as single sign-on buttons or Login by link. The form still shows while none of them is offered (Login by link counts only once the Email plugin can send its link). Hiding the form doesn't block password logins. It applies to the site login page only: Admin2's login screen has its own setting in the API plugin (`login.show_password_form`).
+
+If your theme overrides `partials/login-form.html.twig`, show the password fields only while `grav.login.showPasswordForm()` is true. It holds the whole rule, including the fallback.
 
 ## Redirection after Login
 

@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.12.0
+version: 3.12.1
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -55,6 +55,18 @@ form:
               highlight: 1
               default: 1
               help: PLUGIN_LOGIN.BUILTIN_CSS_HELP
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
+            show_password_form:
+              type: toggle
+              label: PLUGIN_LOGIN.SHOW_PASSWORD_FORM
+              help: PLUGIN_LOGIN.SHOW_PASSWORD_FORM_HELP
+              highlight: 1
+              default: 1
               options:
                 1: PLUGIN_ADMIN.ENABLED
                 0: PLUGIN_ADMIN.DISABLED
