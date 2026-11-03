@@ -2,7 +2,7 @@
 ## 11/03/2026
 
 1. [](#new)
-    * New **Password Login Form** setting to hide the username and password form on the login page, to offer only other login options such as single sign-on buttons. It only hides the form; password logins still work
+    * New **Show Password Form** setting (`show_password_form`) to hide the username and password form on the login page, to offer only other login options such as single sign-on buttons. It only hides the form; password logins still work
 
 # v3.12.0
 ## 11/03/2026

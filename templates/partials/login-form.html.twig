@@ -29,8 +29,8 @@
             {% set magic_route = grav.login.getRoute('magic') %}
             {% set magic_enabled = (config.plugins.login.magic_link.enabled ?? false) and magic_route %}
 
-            {# The password form can be turned off (password_login), but not while no other login option is offered #}
-            {% if (config.plugins.login.password_login ?? true) or not (grav.login.getProviderLoginTemplates or magic_enabled) %}
+            {# The password form can be turned off (show_password_form), but not while no other login option is offered #}
+            {% if (config.plugins.login.show_password_form ?? true) or not (grav.login.getProviderLoginTemplates or magic_enabled) %}
             <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }} login-form">
 
                 {# OLD WAY OF INCLUDING 3RD PARTY LOGIN OPTIONS #}

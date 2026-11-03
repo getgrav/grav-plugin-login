@@ -61,10 +61,10 @@ form:
               validate:
                 type: bool
 
-            password_login:
+            show_password_form:
               type: toggle
-              label: PLUGIN_LOGIN.PASSWORD_LOGIN
-              help: PLUGIN_LOGIN.PASSWORD_LOGIN_HELP
+              label: PLUGIN_LOGIN.SHOW_PASSWORD_FORM
+              help: PLUGIN_LOGIN.SHOW_PASSWORD_FORM_HELP
               highlight: 1
               default: 1
               options:
