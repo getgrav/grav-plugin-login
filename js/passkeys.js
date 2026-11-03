@@ -161,7 +161,9 @@
                     waiting = new AbortController();
                     get('sign-in', { rememberme: rememberBox && rememberBox.checked ? 1 : 0 }, 'conditional', waiting.signal)
                         .then(go)
-                        .catch(function (e) { if (!cancelled(e)) showError(slot, message(e)); });
+                        // Autofill is a quiet extra: a browser that can't do it
+                        // here says nothing. Only a refused sign-in is shown.
+                        .catch(function (e) { if (e && e.status) showError(slot, message(e)); });
                 }).catch(function () {});
             }
 
