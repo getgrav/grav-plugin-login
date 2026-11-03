@@ -7,6 +7,9 @@
             <i class="fa fa-key"></i> {{ 'PLUGIN_LOGIN.BTN_PASSKEY'|t }}
         </button>
         <p class="form-errors passkey-error" data-passkey-error role="alert" style="display:none;"></p>
+        {# "or" only above a login form: show_password_form can leave none (login-form.html.twig sets show_form) #}
+        {% if show_form ?? true %}
         <div class="passkey-or"><span>{{ 'PLUGIN_LOGIN.PASSKEY_OR'|t }}</span></div>
+        {% endif %}
     </div>
 {% endif %}

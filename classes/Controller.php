@@ -477,7 +477,8 @@ class Controller
             return true;
         }
 
-        if (!isset($this->grav['Email']) || !$config->get('plugins.email.from')) {
+        // The same check that lets the login page count Login by link as a login option.
+        if (!$this->login->isMagicLinkAvailable()) {
             $messages->add($language->translate('PLUGIN_LOGIN.MAGIC_LINK_EMAIL_NOT_CONFIGURED'), 'error');
             $this->setRedirect($this->login->getRoute('magic') ?? '/');
             return true;

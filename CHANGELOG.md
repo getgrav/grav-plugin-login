@@ -1,8 +1,10 @@
 # v3.12.1
-## 11/03/2026
+## xx/xx/2026
 
 1. [](#new)
-    * New **Show Password Form** setting (`show_password_form`) to hide the username and password form on the login page, to offer only other login options such as single sign-on buttons. It only hides the form; password logins still work
+    * New **Show Password Form** setting (`show_password_form`) to hide the username and password form on the site login page, to offer only other login options such as single sign-on buttons. It only hides the form; password logins still work, and the "Sign in with a passkey" button stays
+1. [](#improved)
+    * The "Login by link" button shows only while the Email plugin can send the link
 
 # v3.12.0
 ## 11/03/2026

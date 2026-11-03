@@ -24,13 +24,19 @@
                 {% include template %}
             {% endfor %}
 
+            {% set magic_route = grav.login.getRoute('magic') %}
+            {% set magic_enabled = grav.login.isMagicLinkAvailable() %}
+            {# Older plugins' buttons that can sign in; they submit this form #}
+            {% set legacy_options = grav.login.getLegacyLoginOptions() %}
+            {# show_password_form can turn the password parts off, but not while no other login option is offered #}
+            {% set show_password = grav.login.showPasswordForm() %}
+            {# The form stays while older plugins' buttons or Login by link are offered #}
+            {% set show_form = show_password or legacy_options or magic_enabled %}
+
+            {# Its "or" shows only while the form below it does (show_form) #}
             {% include 'partials/passkey-signin.html.twig' %}
 
-            {% set magic_route = grav.login.getRoute('magic') %}
-            {% set magic_enabled = (config.plugins.login.magic_link.enabled ?? false) and magic_route %}
-
-            {# The password form can be turned off (show_password_form), but not while no other login option is offered #}
-            {% if (config.plugins.login.show_password_form ?? true) or not (grav.login.getProviderLoginTemplates or magic_enabled) %}
+            {% if show_form %}
             <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }} login-form">
 
                 {# OLD WAY OF INCLUDING 3RD PARTY LOGIN OPTIONS #}
@@ -40,6 +46,7 @@
                     {% endfor %}
                 {% endif %}
 
+                {% if show_password %}
                 {% for field in form.fields %}
                     {% set field = prepare_form_field(field, field_name) %}
                     {% if field %}
@@ -51,8 +58,10 @@
                       {% endblock %}
                     {% endif %}
                 {% endfor %}
+                {% endif %}
 
                 <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
+                    {% if show_password %}
                     {% if config.plugins.login.rememberme.enabled and form.login.rememberme ?? true %}
                         <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
                             <div class="form-input-wrapper">
@@ -67,21 +76,19 @@
                     {% if forgot_button and forgot_route %}
                     <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ forgot_route }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
                     {% endif %}
+                    {% endif %}
 
                     {% if magic_enabled %}
                     <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ magic_route }}"><i class="fa fa-link"></i> {{ 'PLUGIN_LOGIN.BTN_MAGIC_LINK'|t }}</a>
                     {% endif %}
 
+                    {% if show_password %}
                     <button class="{{ form_button_classes ?: 'button primary' }}" type="submit"  name="task" value="login.login"><i class="fa fa-sign-in"></i> {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>
+                    {% endif %}
                 </div>
 
                 {{ nonce_field('login-form', 'login-form-nonce')|raw }}
             </form>
-            {% elseif magic_enabled %}
-            {# Login by link is a login option of its own: keep its button while the password form is turned off #}
-            <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
-                <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ magic_route }}"><i class="fa fa-link"></i> {{ 'PLUGIN_LOGIN.BTN_MAGIC_LINK'|t }}</a>
-            </div>
             {% endif %}
 
         {% endif %}
