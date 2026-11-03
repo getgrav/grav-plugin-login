@@ -50,9 +50,9 @@ form:
               validate:
                 type: bool
 
-            login_section:
+            login_methods_section:
               type: section
-              title: PLUGIN_LOGIN.LOGIN_SECTION
+              title: PLUGIN_LOGIN.LOGIN_METHODS
 
               fields:
 
@@ -90,24 +90,24 @@ form:
                     type: number
                     min: 1
 
-                twofa_enabled:
-                  type: toggle
-                  label: PLUGIN_LOGIN.2FA_ENABLED
-                  highlight: 0
-                  default: 0
-                  help: PLUGIN_LOGIN.2FA_ENABLED_HELP
-                  options:
-                    1: PLUGIN_ADMIN.ENABLED
-                    0: PLUGIN_ADMIN.DISABLED
-                  validate:
-                    type: bool
-
                 passkeys.enabled:
                   type: toggle
                   label: PLUGIN_LOGIN.PASSKEYS_ENABLED
                   highlight: 0
                   default: 0
                   help: PLUGIN_LOGIN.PASSKEYS_ENABLED_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
+                twofa_enabled:
+                  type: toggle
+                  label: PLUGIN_LOGIN.2FA_ENABLED
+                  highlight: 0
+                  default: 0
+                  help: PLUGIN_LOGIN.2FA_ENABLED_HELP
                   options:
                     1: PLUGIN_ADMIN.ENABLED
                     0: PLUGIN_ADMIN.DISABLED
@@ -218,9 +218,9 @@ form:
                   validate:
                     type: bool
 
-            advanced_section:
+            appearance_section:
               type: section
-              title: PLUGIN_LOGIN.ADVANCED_SECTION
+              title: PLUGIN_LOGIN.APPEARANCE
 
               fields:
 
@@ -358,7 +358,7 @@ form:
 
             registration_routes_section:
               type: section
-              title: PLUGIN_LOGIN.USER_REGISTRATION
+              title: PLUGIN_LOGIN.REGISTRATION_SECTION
 
               fields:
 
@@ -444,6 +444,17 @@ form:
                   placeholder_key: PLUGIN_LOGIN.ADDITIONAL_PARAM_KEY
                   placeholder_value: PLUGIN_LOGIN.ADDITIONAL_PARAM_VALUE
 
+                user_registration.options.validate_password1_and_password2:
+                  type: toggle
+                  label: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2
+                  help: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2_HELP
+                  highlight: 1
+                  options:
+                      1: PLUGIN_ADMIN.YES
+                      0: PLUGIN_ADMIN.NO
+                  validate:
+                      type: bool
+
             access_levels:
                 title: PLUGIN_ADMIN.ACCESS_LEVELS
                 type: section
@@ -468,34 +479,6 @@ form:
                         multiple: false
                         validate:
                             type: array
-
-            options:
-              type: section
-              title: PLUGIN_LOGIN.OPTIONS
-
-              fields:
-
-                user_registration.options.validate_password1_and_password2:
-                  type: toggle
-                  label: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2
-                  help: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2_HELP
-                  highlight: 1
-                  options:
-                      1: PLUGIN_ADMIN.YES
-                      0: PLUGIN_ADMIN.NO
-                  validate:
-                      type: bool
-
-                user_registration.options.login_after_registration:
-                  type: toggle
-                  label: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION
-                  help: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION_HELP
-                  highlight: 0
-                  options:
-                      1: PLUGIN_ADMIN.YES
-                      0: PLUGIN_ADMIN.NO
-                  validate:
-                      type: bool
 
             activation_section:
               type: section
@@ -535,6 +518,17 @@ form:
                     0: PLUGIN_ADMIN.NO
                   validate:
                     type: bool
+
+                user_registration.options.login_after_registration:
+                  type: toggle
+                  label: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION
+                  help: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION_HELP
+                  highlight: 0
+                  options:
+                      1: PLUGIN_ADMIN.YES
+                      0: PLUGIN_ADMIN.NO
+                  validate:
+                      type: bool
 
             registration_emails_section:
               type: section
@@ -659,6 +653,45 @@ form:
                     type: number
                     min: 1
 
+                passkeys.max_attempts_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_COUNT
+                  help: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 1
+
+                passkeys.max_attempts_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_INTERVAL
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
+                magic_link.max_requests_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_COUNT
+                  help: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 0
+
+                magic_link.max_requests_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL
+                  help: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
                 max_pw_resets_count:
                   type: number
                   size: x-small
@@ -694,45 +727,6 @@ form:
                   size: x-small
                   label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL
                   help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL_HELP
-                  append: PLUGIN_LOGIN.MINUTES
-                  validate:
-                    type: number
-                    min: 1
-
-                magic_link.max_requests_count:
-                  type: number
-                  size: x-small
-                  label: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_COUNT
-                  help: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_COUNT_HELP
-                  append: PLUGIN_LOGIN.ATTEMPTS
-                  validate:
-                    type: number
-                    min: 0
-
-                magic_link.max_requests_interval:
-                  type: number
-                  size: x-small
-                  label: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL
-                  help: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL_HELP
-                  append: PLUGIN_LOGIN.MINUTES
-                  validate:
-                    type: number
-                    min: 1
-
-                passkeys.max_attempts_count:
-                  type: number
-                  size: x-small
-                  label: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_COUNT
-                  help: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_COUNT_HELP
-                  append: PLUGIN_LOGIN.ATTEMPTS
-                  validate:
-                    type: number
-                    min: 1
-
-                passkeys.max_attempts_interval:
-                  type: number
-                  size: x-small
-                  label: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_INTERVAL
                   append: PLUGIN_LOGIN.MINUTES
                   validate:
                     type: number

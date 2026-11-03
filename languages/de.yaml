@@ -41,7 +41,7 @@ PLUGIN_LOGIN:
   REMEMBER_ME_HELP: "Speichert einen Cookie im Browser, welcher eine fortwährende Anmeldung sicherstellt."
   REMEMBER_ME_STOLEN_COOKIE: "Jemand anderes hat Ihre Zugangsdaten verwendet, um auf diese Seite zuzugreifen! Alle Sitzungen wurden ausgeloggt. Bitte melden Sie sich mit Ihren Zugangsdaten an und überprüfen Sie Ihre Daten."
   BUILTIN_CSS: "Nutze das integrierte Plugin CSS"
-  BUILTIN_CSS_HELP: "Nutze das CSS, welches vom Admin Plugin bereitgestellt werden"
+  BUILTIN_CSS_HELP: "Bindet das CSS des Login-Plugins auf den Seiten der Website ein, das sein Anmeldeformular und seine Meldungen gestaltet. Der Admin-Bereich ist davon nicht betroffen. Deaktivieren Sie es, um diese in Ihrem Theme selbst zu gestalten."
   ROUTE: "Anmeldepfad"
   ROUTE_HELP: "Route zu einer benutzerdefinierten Anmeldeseite, die von Ihrem Theme bereitgestellt wird."
   ROUTE_REGISTER: "Registrierungspfad"
