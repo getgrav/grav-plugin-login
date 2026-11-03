@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
 {
     public static $prefixLengthsPsr4 = array (
+        'l' =>
+        array (
+            'lbuchs\\WebAuthn\\' => 16,
+        ),
         'R' =>
         array (
             'RobThree\\Auth\\' => 14,
@@ -28,6 +32,10 @@ class ComposerStaticIniteed5e5cf0aa1e2139f2db7445511e366
     );
 
     public static $prefixDirsPsr4 = array (
+        'lbuchs\\WebAuthn\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/lbuchs/webauthn/src',
+        ),
         'RobThree\\Auth\\' =>
         array (
             0 => __DIR__ . '/..' . '/robthree/twofactorauth/lib',

@@ -91,3 +91,56 @@
 .email-change-actions .button {
     margin: 0 0.5rem 0.5rem 0;
 }
+
+/* Passkeys */
+#grav-login .passkey-signin,
+#grav-login .passkey-second-step {
+    margin: 0 0 1rem 0;
+}
+#grav-login .passkey-button {
+    width: 100%;
+}
+#grav-login .passkey-or {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0 0 0;
+    opacity: 0.65;
+    font-size: 0.875rem;
+}
+#grav-login .passkey-or::before,
+#grav-login .passkey-or::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid currentColor;
+    opacity: 0.35;
+}
+.passkeys-list {
+    list-style: none;
+    margin: 0.5rem 0 1rem 0;
+    padding: 0;
+}
+.passkeys-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.passkeys-list li:first-child {
+    border-top: 0;
+}
+.passkeys-list .passkey-who small {
+    display: block;
+    opacity: 0.7;
+}
+.passkeys-list .passkey-actions {
+    white-space: nowrap;
+}
+.passkey-proof {
+    margin: 0 0 0.75rem 0;
+}
+.passkey-proof label {
+    display: block;
+}

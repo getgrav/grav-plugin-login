@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.11.2
+version: 3.12.0
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -129,6 +129,18 @@ form:
               highlight: 0
               default: 0
               help: PLUGIN_LOGIN.2FA_ENABLED_HELP
+              options:
+                1: PLUGIN_ADMIN.ENABLED
+                0: PLUGIN_ADMIN.DISABLED
+              validate:
+                type: bool
+
+            passkeys.enabled:
+              type: toggle
+              label: PLUGIN_LOGIN.PASSKEYS_ENABLED
+              highlight: 0
+              default: 0
+              help: PLUGIN_LOGIN.PASSKEYS_ENABLED_HELP
               options:
                 1: PLUGIN_ADMIN.ENABLED
                 0: PLUGIN_ADMIN.DISABLED
@@ -589,6 +601,41 @@ form:
               validate:
                 type: number
                 min: 1
+
+            passkeys_section:
+              type: section
+              title: PLUGIN_LOGIN.PASSKEYS
+              fields:
+                passkeys.rp_id:
+                  type: text
+                  label: PLUGIN_LOGIN.PASSKEYS_RP_ID
+                  help: PLUGIN_LOGIN.PASSKEYS_RP_ID_HELP
+                  placeholder: example.com
+
+                passkeys.origin:
+                  type: text
+                  label: PLUGIN_LOGIN.PASSKEYS_ORIGIN
+                  help: PLUGIN_LOGIN.PASSKEYS_ORIGIN_HELP
+                  placeholder: https://example.com
+
+                passkeys.max_attempts_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_COUNT
+                  help: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 1
+
+                passkeys.max_attempts_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.PASSKEYS_MAX_ATTEMPTS_INTERVAL
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
 
             magic_link_section:
               type: section

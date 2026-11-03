@@ -24,6 +24,8 @@
                 {% include template %}
             {% endfor %}
 
+            {% include 'partials/passkey-signin.html.twig' %}
+
             <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }} login-form">
 
                 {# OLD WAY OF INCLUDING 3RD PARTY LOGIN OPTIONS #}

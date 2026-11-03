@@ -1,0 +1,18 @@
+{# Shared by the passkey parts of the login, 2FA and profile pages: where
+   js/passkeys.js posts, the nonce it sends, and its messages. #}
+<div data-passkeys-root hidden
+     data-url="{{ (base_url_relative ~ '/task' ~ config.system.param_sep ~ 'login.passkey')|e('html_attr') }}"
+     data-strings="{{ {
+        waiting: 'PLUGIN_LOGIN.PASSKEY_WAITING'|t,
+        cancelled: 'PLUGIN_LOGIN.PASSKEY_CANCELLED'|t,
+        unsupported: 'PLUGIN_LOGIN.PASSKEY_UNSUPPORTED'|t,
+        alreadySaved: 'PLUGIN_LOGIN.PASSKEY_ALREADY_SAVED'|t,
+        failed: 'PLUGIN_LOGIN.PASSKEY_FAILED'|t,
+        proofPassword: 'PLUGIN_LOGIN.PASSKEY_PROOF_PASSWORD'|t,
+        proofCode: 'PLUGIN_LOGIN.2FA_CODE_REQUIRED'|t,
+        removeConfirm: 'PLUGIN_LOGIN.PASSKEY_REMOVE_CONFIRM'|t,
+        rename: 'PLUGIN_LOGIN.PASSKEY_RENAME'|t
+     }|json_encode|e('html_attr') }}">
+    {{ nonce_field('login-form', 'login-form-nonce')|raw }}
+</div>
+{% do assets.addJs('plugin://login/js/passkeys.js', { 'group': 'bottom', 'loading': 'defer' }) %}

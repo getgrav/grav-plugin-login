@@ -20,6 +20,8 @@
 
   {{ nonce_field('login-form', 'login-form-nonce')|raw }}
 
+  {% include 'partials/passkey-second-step.html.twig' %}
+
   <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
       <div class="form-actions primary-accent">
           <button type="submit" class="{{ form_button_classes ?: 'button primary' }}" name="task" value="login.twofa"><i class="fa fa-sign-in"></i>  {{ 'PLUGIN_LOGIN.BTN_LOGIN'|t }}</button>

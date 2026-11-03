@@ -427,6 +427,44 @@ user/pages/magic_login/magic_login.md
 
 Set `template: magic` in the frontmatter so the plugin's template and form are used. Any body content you add will be rendered above the email form.
 
+# Passkeys
+
+A passkey signs someone in with their fingerprint, face or device PIN instead of a password. It lives in a password manager (1Password, iCloud Keychain, Google Password Manager, Bitwarden and others), in Windows Hello, or on a security key. Passkeys need **Grav 2** and HTTPS, and they are off until you switch them on.
+
+## Enabling passkeys
+
+```yaml
+passkeys:
+  enabled: true
+```
+
+With them on:
+
+- The profile page gets a **Passkeys** section where a signed-in member adds, renames and removes their passkeys. Adding or removing one asks for the current password (or, for an account that has no password, the current 2FA code). A site with its own profile form adds a field of `type: passkeys` to get it.
+- The login form shows **Sign in with a passkey**, and browsers that support it offer passkeys in the username field's autofill. A passkey counts as both steps, so an account with 2-Factor Authentication isn't asked for its code.
+- At the 2-Factor Authentication step after a password, an account with a passkey can use it instead of typing the code.
+- Admin2 (with the API plugin 1.1.10 or later) offers the same: passkey sign-in on its login screen and a Passkeys section on the user page. Passkeys are stored on the account, so one passkey works for the site and for Admin2.
+
+On Grav 1.7 the setting does nothing: the plugin still installs there, but none of the passkey code runs.
+
+## Domains and proxies
+
+A passkey belongs to one host. By default that's the host in `system.custom_base_url`, or else the host of the request. Two settings change it:
+
+```yaml
+passkeys:
+  rp_id: example.com            # let passkeys work on example.com and its subdomains
+  origin: https://example.com   # the address browsers use, when a proxy changes the scheme or port
+```
+
+## Limits
+
+Failed passkey answers are limited per IP (`passkeys.max_attempts_count` in `passkeys.max_attempts_interval` minutes, default 10 in 10), and so are passkey sign-ins and additions started (`passkeys.max_options_count`, default 60 in 10 minutes). A failed passkey at the 2FA step also counts against the account's 2FA limit.
+
+## For developers
+
+`$grav['login']->passkeys()` returns the passkey service, or `null` when passkeys are off or unsupported. The `onUserPasskeyAdded` and `onUserPasskeyRemoved` events fire when a member changes their passkeys on the site. The account fields `passkeys` and `webauthn_id` are written only by that service: never accept them from a form.
+
 # Changing Your Email Address
 
 When a signed-in user changes their email on the profile page, the new address doesn't replace the old one straight away. The plugin keeps it as a waiting change, mails a confirmation link to the new address, and only switches the account over once that link is opened. It then sends a short notice to the old address to say the email has changed.

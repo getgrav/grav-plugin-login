@@ -1,0 +1,60 @@
+{% extends "forms/field.html.twig" %}
+
+{# The profile page's passkeys: list, add, rename, remove. Shown only on the
+   signed-in member's own account, and only where passkeys are on. Posts
+   nothing with the form: every change goes through the login.passkey task. #}
+
+{% block input %}
+    {% set viewer = grav.user %}
+    {% set user = form.object ?? viewer %}
+    {% if passkeys_enabled and viewer.username and user.username == viewer.username %}
+    {% set passkeys = grav.login.passkeys.list(viewer) %}
+    {% set proof = grav.login.hasPassword(viewer) ? 'password' : (grav.login.hasActiveTwoFactor(viewer) ? 'code' : '') %}
+    {% include 'partials/passkeys-root.html.twig' %}
+
+    <div class="form-input-wrapper passkeys-wrapper" data-passkeys-manage>
+        <p class="passkeys-help">{{ 'PLUGIN_LOGIN.PASSKEYS_HELP'|t }}</p>
+
+        {% if passkeys is empty %}
+            <p class="passkeys-none">{{ 'PLUGIN_LOGIN.PASSKEY_NONE'|t }}</p>
+        {% else %}
+            <ul class="passkeys-list">
+                {% for pk in passkeys %}
+                    <li data-passkey-row>
+                        <span class="passkey-who">
+                            <i class="fa fa-key"></i>
+                            <strong data-passkey-name>{{ pk.name }}</strong>
+                            <small>
+                                {{ 'PLUGIN_LOGIN.PASSKEY_ADDED_ON'|t(pk.created ? pk.created|date('Y-m-d') : '—') }}
+                                · {{ pk.last_used ? 'PLUGIN_LOGIN.PASSKEY_LAST_USED'|t(pk.last_used|date('Y-m-d H:i')) : 'PLUGIN_LOGIN.PASSKEY_NEVER_USED'|t }}
+                                {% if pk.synced %}· {{ 'PLUGIN_LOGIN.PASSKEY_SYNCED'|t }}{% endif %}
+                            </small>
+                        </span>
+                        <span class="passkey-actions">
+                            <button type="button" class="button button-small secondary" data-passkey-rename="{{ pk.id }}">{{ 'PLUGIN_LOGIN.PASSKEY_RENAME'|t }}</button>
+                            <button type="button" class="button button-small secondary" data-passkey-remove="{{ pk.id }}">{{ 'PLUGIN_LOGIN.PASSKEY_REMOVE'|t }}</button>
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% if proof %}
+            <div class="passkey-proof" data-passkey-proof="{{ proof }}" hidden>
+                <label for="passkey-proof-input">{{ (proof == 'code' ? 'PLUGIN_LOGIN.PASSKEY_CONFIRM_CODE' : 'PLUGIN_LOGIN.PASSKEY_CONFIRM_PASSWORD')|t }}</label>
+                <input class="no-form" id="passkey-proof-input"
+                       type="{{ proof == 'code' ? 'text' : 'password' }}"
+                       autocomplete="{{ proof == 'code' ? 'one-time-code' : 'current-password' }}"
+                       {% if proof == 'code' %}inputmode="numeric"{% endif %}>
+            </div>
+        {% endif %}
+
+        <p class="form-errors passkey-error" data-passkey-error role="alert" style="display:none;"></p>
+        {% if proof %}
+            <button type="button" class="button button-small primary" data-passkey-add><i class="fa fa-plus"></i> {{ 'PLUGIN_LOGIN.PASSKEY_ADD'|t }}</button>
+        {% else %}
+            <p class="passkeys-none">{{ 'PLUGIN_LOGIN.PASSKEY_PROOF_NONE'|t }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+{% endblock %}

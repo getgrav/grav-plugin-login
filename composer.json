@@ -1,7 +1,12 @@
 {
     "name": "getgrav/grav-plugin-login",
     "description": "Enables user authentication and login screen.",
-    "keywords": ["login", "authentication", "admin", "security"],
+    "keywords": [
+        "login",
+        "authentication",
+        "admin",
+        "security"
+    ],
     "homepage": "https://github.com/getgrav/grav-plugin-login",
     "license": "MIT",
     "authors": [
@@ -29,7 +34,8 @@
         "ext-json": "*",
         "mober/rememberme": "^1.0",
         "robthree/twofactorauth": "^1.8",
-        "bacon/bacon-qr-code": "^2.0"
+        "bacon/bacon-qr-code": "^2.0",
+        "lbuchs/webauthn": "^2.2"
     },
     "autoload": {
         "psr-4": {
@@ -43,6 +49,15 @@
     "config": {
         "platform": {
             "php": "7.3.6"
-        }
+        },
+        "platform-check": false
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "@php build/strip-vendor-demos.php"
+        ],
+        "post-update-cmd": [
+            "@post-install-cmd"
+        ]
     }
 }

@@ -1,0 +1,12 @@
+{# "Sign in with a passkey" above the login form. Hidden until passkeys.js
+   finds a browser that can use one. #}
+{% if passkeys_enabled %}
+    {% include 'partials/passkeys-root.html.twig' %}
+    <div class="passkey-signin" data-passkey-box hidden>
+        <button type="button" class="{{ form_button_classes ?: 'button primary' }} passkey-button" data-passkey-signin>
+            <i class="fa fa-key"></i> {{ 'PLUGIN_LOGIN.BTN_PASSKEY'|t }}
+        </button>
+        <p class="form-errors passkey-error" data-passkey-error role="alert" style="display:none;"></p>
+        <div class="passkey-or"><span>{{ 'PLUGIN_LOGIN.PASSKEY_OR'|t }}</span></div>
+    </div>
+{% endif %}
