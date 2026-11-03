@@ -26,8 +26,11 @@
 
             {% include 'partials/passkey-signin.html.twig' %}
 
+            {% set magic_route = grav.login.getRoute('magic') %}
+            {% set magic_enabled = (config.plugins.login.magic_link.enabled ?? false) and magic_route %}
+
             {# The password form can be turned off (password_login), but not while no other login option is offered #}
-            {% if (config.plugins.login.password_login ?? true) or not grav.login.getProviderLoginTemplates %}
+            {% if (config.plugins.login.password_login ?? true) or not (grav.login.getProviderLoginTemplates or magic_enabled) %}
             <form method="post" action="{{ (base_url_relative ~ uri.path)|e }}" class="{{ form_outer_classes }} login-form">
 
                 {# OLD WAY OF INCLUDING 3RD PARTY LOGIN OPTIONS #}
@@ -61,13 +64,11 @@
 
                     {% set forgot_button = form.login.forgot_button ?? true %}
                     {% set forgot_route = grav.login.getRoute('forgot') %}
-                    {% set magic_enabled = config.plugins.login.magic_link.enabled ?? false %}
-                    {% set magic_route = grav.login.getRoute('magic') %}
                     {% if forgot_button and forgot_route %}
                     <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ forgot_route }}"><i class="fa fa-exclamation-circle"></i> {{ 'PLUGIN_LOGIN.BTN_FORGOT'|t }}</a>
                     {% endif %}
 
-                    {% if magic_enabled and magic_route %}
+                    {% if magic_enabled %}
                     <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ magic_route }}"><i class="fa fa-link"></i> {{ 'PLUGIN_LOGIN.BTN_MAGIC_LINK'|t }}</a>
                     {% endif %}
 
@@ -76,6 +77,11 @@
 
                 {{ nonce_field('login-form', 'login-form-nonce')|raw }}
             </form>
+            {% elseif magic_enabled %}
+            {# Login by link is a login option of its own: keep its button while the password form is turned off #}
+            <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
+                <a class="{{ form_button_classes ?: 'button secondary' }}" href="{{ base_url_relative ~ magic_route }}"><i class="fa fa-link"></i> {{ 'PLUGIN_LOGIN.BTN_MAGIC_LINK'|t }}</a>
+            </div>
             {% endif %}
 
         {% endif %}
