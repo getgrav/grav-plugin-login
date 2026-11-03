@@ -395,7 +395,7 @@ class NewUserCommand extends ConsoleCommand
      */
     protected function detectAdminTree(): string
     {
-        $root = defined('GRAV_ROOT') ? GRAV_ROOT : getcwd();
+        $root = defined('GRAV_WEBROOT') ? GRAV_WEBROOT : getcwd();
         $hasClassic = is_dir($root . '/user/plugins/admin');
         $hasAdmin2  = is_dir($root . '/user/plugins/admin2');
 

@@ -1,3 +1,9 @@
+# v3.12.1
+## 11/03/2026
+
+1. [](#bugfix)
+    * Resolve the admin plugin lookup in the `new-user` command from the webroot so it works when Grav's public folder is separate from the install folder
+
 # v3.12.0
 ## 11/03/2026
 
