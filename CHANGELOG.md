@@ -1,3 +1,21 @@
+# v3.12.1
+## 11/03/2026
+
+1. [](#new)
+    * New **Show Password Form** setting (`show_password_form`) to hide the username and password form on the site login page, to offer only other login options such as single sign-on buttons. It only hides the form; password logins still work, and the "Sign in with a passkey" button stays
+1. [](#improved)
+    * The "Login by link" button shows only while the Email plugin can send the link
+    * The plugin settings are grouped into sections by topic. Settings that moved:
+        * **Redirect to login** and **Redirect after login**: Options → Routes › Login
+        * **Redirect after logout**: Options → Routes › Logout
+        * **Magic-link TTL**: Security › Magic Link → Options › Login Methods
+        * **Max magic-link requests count** and **interval**: Security › Magic Link → Security › Rate Limits
+        * **Failed passkey attempts** and **Failed passkey attempts window**: Security › Passkeys → Security › Rate Limits
+        * **Max registration attempts count** and **interval**: User Registration → Security › Rate Limits
+        * **Validate double entered password**: User Registration › Options → User Registration › Registration fields
+        * **Set the user as disabled**, **Send activation email**, **Manually Enable** and **Login the user after registration**: User Registration › Options → User Registration › Account Activation
+        * **Send notification email** and **Send welcome email**: User Registration › Options → User Registration › Emails
+
 # v3.12.0
 ## 11/03/2026
 

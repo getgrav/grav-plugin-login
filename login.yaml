@@ -1,5 +1,6 @@
 enabled: true                               # Enable the plugin
 built_in_css: true                          # Use built-in CSS
+show_password_form: true                    # Show the username and password form on the site login page; plugins can turn it off (e.g. Login OAuth2's 'Enforce OAuth2'). Shown anyway while no other login option is offered
 redirect_to_login: false                    # If you try to access a page you don't have access to, should you redirect to login route
 redirect_after_login: false                 # Path to redirect to after a successful login
 redirect_after_logout: true                 # Path to redirect to after a successful logout

@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.12.0
+version: 3.12.1
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -32,6 +32,7 @@ form:
       class: subtle
 
       fields:
+
         options:
           type: tab
           title: PLUGIN_LOGIN.OPTIONS
@@ -49,151 +50,69 @@ form:
               validate:
                 type: bool
 
-            built_in_css:
-              type: toggle
-              label: PLUGIN_LOGIN.BUILTIN_CSS
-              highlight: 1
-              default: 1
-              help: PLUGIN_LOGIN.BUILTIN_CSS_HELP
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
+            login_methods_section:
+              type: section
+              title: PLUGIN_LOGIN.LOGIN_METHODS
 
-            redirect_to_login:
-              type: toggle
-              label: PLUGIN_LOGIN.REDIRECT_TO_LOGIN
-              help: PLUGIN_LOGIN.REDIRECT_TO_LOGIN_HELP
-              default: 0
-              highlight: 0
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
+              fields:
 
-            redirect_after_login:
-              type: toggle
-              label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN
-              help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
-              force_bool: true
-              default: 0
-              highlight: 0
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
+                show_password_form:
+                  type: toggle
+                  label: PLUGIN_LOGIN.SHOW_PASSWORD_FORM
+                  help: PLUGIN_LOGIN.SHOW_PASSWORD_FORM_HELP
+                  highlight: 1
+                  default: 1
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
-            redirect_after_logout:
-              type: toggle
-              label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT
-              help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT_HELP
-              force_bool: true
-              default: 1
-              highlight: 1
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
+                magic_link.enabled:
+                  type: toggle
+                  label: PLUGIN_LOGIN.MAGIC_LINK_ENABLED
+                  help: PLUGIN_LOGIN.MAGIC_LINK_ENABLED_HELP
+                  highlight: 0
+                  default: 0
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
-            parent_acl:
-              type: toggle
-              label: PLUGIN_LOGIN.USE_PARENT_ACL_LABEL
-              highlight: 0
-              default: 0
-              help: PLUGIN_LOGIN.USE_PARENT_ACL_HELP
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
+                magic_link.ttl:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAGIC_LINK_TTL
+                  help: PLUGIN_LOGIN.MAGIC_LINK_TTL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
 
-            dynamic_page_visibility:
-              type: toggle
-              label: PLUGIN_LOGIN.DYNAMIC_VISIBILITY
-              highlight: 0
-              default: 0
-              help: PLUGIN_LOGIN.DYNAMIC_VISIBILITY_HELP
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
+                passkeys.enabled:
+                  type: toggle
+                  label: PLUGIN_LOGIN.PASSKEYS_ENABLED
+                  highlight: 0
+                  default: 0
+                  help: PLUGIN_LOGIN.PASSKEYS_ENABLED_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
-            twofa_enabled:
-              type: toggle
-              label: PLUGIN_LOGIN.2FA_ENABLED
-              highlight: 0
-              default: 0
-              help: PLUGIN_LOGIN.2FA_ENABLED_HELP
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
-
-            passkeys.enabled:
-              type: toggle
-              label: PLUGIN_LOGIN.PASSKEYS_ENABLED
-              highlight: 0
-              default: 0
-              help: PLUGIN_LOGIN.PASSKEYS_ENABLED_HELP
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
-
-            protect_protected_page_media:
-              type: toggle
-              label: PLUGIN_LOGIN.PROTECT_PROTECTED_PAGE_MEDIA_LABEL
-              highlight: 0
-              default: 0
-              help: PLUGIN_LOGIN.PROTECT_PROTECTED_PAGE_MEDIA_HELP
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
-
-            session_user_sync:
-              type: toggle
-              label: PLUGIN_LOGIN.SESSION_USER_SYNC
-              highlight: 0
-              default: 0
-              help: PLUGIN_LOGIN.SESSION_USER_SYNC_HELP
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
-
-            magic_link.enabled:
-              type: toggle
-              label: PLUGIN_LOGIN.MAGIC_LINK_ENABLED
-              help: PLUGIN_LOGIN.MAGIC_LINK_ENABLED_HELP
-              highlight: 0
-              default: 0
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
-
-            profile.verify_email_change:
-              type: toggle
-              label: PLUGIN_LOGIN.VERIFY_EMAIL_CHANGE
-              help: PLUGIN_LOGIN.VERIFY_EMAIL_CHANGE_HELP
-              highlight: 1
-              default: 1
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
+                twofa_enabled:
+                  type: toggle
+                  label: PLUGIN_LOGIN.2FA_ENABLED
+                  highlight: 0
+                  default: 0
+                  help: PLUGIN_LOGIN.2FA_ENABLED_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
             rememberme:
               type: section
@@ -227,110 +146,273 @@ form:
                   label: PLUGIN_ADMIN.NAME
                   help: PLUGIN_ADMIN.SESSION_NAME_HELP
 
+            page_access_section:
+              type: section
+              title: PLUGIN_LOGIN.PAGE_ACCESS
+
+              fields:
+
+                parent_acl:
+                  type: toggle
+                  label: PLUGIN_LOGIN.USE_PARENT_ACL_LABEL
+                  highlight: 0
+                  default: 0
+                  help: PLUGIN_LOGIN.USE_PARENT_ACL_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
+                dynamic_page_visibility:
+                  type: toggle
+                  label: PLUGIN_LOGIN.DYNAMIC_VISIBILITY
+                  highlight: 0
+                  default: 0
+                  help: PLUGIN_LOGIN.DYNAMIC_VISIBILITY_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
+                protect_protected_page_media:
+                  type: toggle
+                  label: PLUGIN_LOGIN.PROTECT_PROTECTED_PAGE_MEDIA_LABEL
+                  highlight: 0
+                  default: 0
+                  help: PLUGIN_LOGIN.PROTECT_PROTECTED_PAGE_MEDIA_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
+            user_accounts_section:
+              type: section
+              title: PLUGIN_LOGIN.USER_ACCOUNTS
+
+              fields:
+
+                profile.verify_email_change:
+                  type: toggle
+                  label: PLUGIN_LOGIN.VERIFY_EMAIL_CHANGE
+                  help: PLUGIN_LOGIN.VERIFY_EMAIL_CHANGE_HELP
+                  highlight: 1
+                  default: 1
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
+                session_user_sync:
+                  type: toggle
+                  label: PLUGIN_LOGIN.SESSION_USER_SYNC
+                  highlight: 0
+                  default: 0
+                  help: PLUGIN_LOGIN.SESSION_USER_SYNC_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
+            appearance_section:
+              type: section
+              title: PLUGIN_LOGIN.APPEARANCE
+
+              fields:
+
+                built_in_css:
+                  type: toggle
+                  label: PLUGIN_LOGIN.BUILTIN_CSS
+                  highlight: 1
+                  default: 1
+                  help: PLUGIN_LOGIN.BUILTIN_CSS_HELP
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
+
         routes:
           type: tab
           title: PLUGIN_LOGIN.ROUTES
 
           fields:
 
-            route:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE
-              help: PLUGIN_LOGIN.ROUTE_HELP
-              placeholder: "/login"
+            login_routes_section:
+              type: section
+              title: PLUGIN_LOGIN.LOGIN_SECTION
 
-            route_after_login:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN
-              help: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN_HELP
-              placeholder: "/user_profile"
+              fields:
 
-            route_after_logout:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT
-              help: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT_HELP
-              placeholder: "/"
+                route:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE
+                  help: PLUGIN_LOGIN.ROUTE_HELP
+                  placeholder: "/login"
 
-            route_forgot:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_FORGOT
-              placeholder: "/forgot_password"
+                redirect_to_login:
+                  type: toggle
+                  label: PLUGIN_LOGIN.REDIRECT_TO_LOGIN
+                  help: PLUGIN_LOGIN.REDIRECT_TO_LOGIN_HELP
+                  default: 0
+                  highlight: 0
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
-            route_magic:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_MAGIC
-              placeholder: "/magic_login"
+                redirect_after_login:
+                  type: toggle
+                  label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN
+                  help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGIN_HELP
+                  force_bool: true
+                  default: 0
+                  highlight: 0
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
-            route_magic_login:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_MAGIC_LOGIN
-              placeholder: "/magic_link"
+                route_after_login:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN
+                  help: PLUGIN_LOGIN.ROUTE_AFTER_LOGIN_HELP
+                  placeholder: "/user_profile"
 
-            magic_link.redirect_after_request:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.MAGIC_LINK_REDIRECT_AFTER_REQUEST
-              help: PLUGIN_LOGIN.MAGIC_LINK_REDIRECT_AFTER_REQUEST_HELP
-              placeholder: "/"
+            logout_routes_section:
+              type: section
+              title: PLUGIN_LOGIN.LOGOUT_SECTION
 
-            route_reset:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_RESET
-              placeholder: "/reset_password"
+              fields:
 
-            route_profile:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_PROFILE
-              placeholder: "/user_profile"
+                redirect_after_logout:
+                  type: toggle
+                  label: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT
+                  help: PLUGIN_LOGIN.REDIRECT_AFTER_LOGOUT_HELP
+                  force_bool: true
+                  default: 1
+                  highlight: 1
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
-            route_activate:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_ACTIVATE
-              placeholder: '/activate_user'
+                route_after_logout:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT
+                  help: PLUGIN_LOGIN.ROUTE_AFTER_LOGOUT_HELP
+                  placeholder: "/"
 
-            route_confirm_email:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_CONFIRM_EMAIL
-              placeholder: '/confirm_email'
+            password_reset_routes_section:
+              type: section
+              title: PLUGIN_LOGIN.PASSWORD_RESET
 
-            user_registration.redirect_after_activation:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION
-              help: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION_HELP
-              placeholder: "/page-to-show-after-activation"
+              fields:
 
-            route_register:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.ROUTE_REGISTER
-              help: PLUGIN_LOGIN.ROUTE_REGISTER_HELP
-              placeholder: "/register"
+                route_forgot:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_FORGOT
+                  placeholder: "/forgot_password"
 
-            user_registration.redirect_after_registration:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION
-              help: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION_HELP
-              placeholder: "/page-to-show-after-registration"
+                route_reset:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_RESET
+                  placeholder: "/reset_password"
 
+            magic_link_routes_section:
+              type: section
+              title: PLUGIN_LOGIN.MAGIC_LINK
 
+              fields:
+
+                route_magic:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_MAGIC
+                  placeholder: "/magic_login"
+
+                route_magic_login:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_MAGIC_LOGIN
+                  placeholder: "/magic_link"
+
+                magic_link.redirect_after_request:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.MAGIC_LINK_REDIRECT_AFTER_REQUEST
+                  help: PLUGIN_LOGIN.MAGIC_LINK_REDIRECT_AFTER_REQUEST_HELP
+                  placeholder: "/"
+
+            registration_routes_section:
+              type: section
+              title: PLUGIN_LOGIN.REGISTRATION_SECTION
+
+              fields:
+
+                route_register:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_REGISTER
+                  help: PLUGIN_LOGIN.ROUTE_REGISTER_HELP
+                  placeholder: "/register"
+
+                user_registration.redirect_after_registration:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION
+                  help: PLUGIN_LOGIN.REDIRECT_AFTER_REGISTRATION_HELP
+                  placeholder: "/page-to-show-after-registration"
+
+                route_activate:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_ACTIVATE
+                  placeholder: '/activate_user'
+
+                user_registration.redirect_after_activation:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION
+                  help: PLUGIN_LOGIN.REDIRECT_AFTER_ACTIVATION_HELP
+                  placeholder: "/page-to-show-after-activation"
+
+            profile_routes_section:
+              type: section
+              title: PLUGIN_LOGIN.USER_PROFILE
+
+              fields:
+
+                route_profile:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_PROFILE
+                  placeholder: "/user_profile"
+
+                route_confirm_email:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.ROUTE_CONFIRM_EMAIL
+                  placeholder: '/confirm_email'
 
         registration:
           type: tab
           title: PLUGIN_LOGIN.USER_REGISTRATION
 
           fields:
+
             user_registration.enabled:
               type: toggle
               label: PLUGIN_ADMIN.ENABLED
@@ -341,26 +423,6 @@ form:
                   0: PLUGIN_ADMIN.NO
               validate:
                   type: bool
-
-            user_registration.max_attempts_count:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_REGISTRATIONS_COUNT
-              help: PLUGIN_LOGIN.MAX_REGISTRATIONS_COUNT_HELP
-              append: PLUGIN_LOGIN.ATTEMPTS
-              validate:
-                type: number
-                min: 0
-
-            user_registration.max_attempts_interval:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_REGISTRATIONS_INTERVAL
-              help: PLUGIN_LOGIN.MAX_REGISTRATIONS_INTERVAL_HELP
-              append: PLUGIN_LOGIN.MINUTES
-              validate:
-                type: number
-                min: 1
 
             registration_fields:
               type: section
@@ -381,6 +443,17 @@ form:
                   help: PLUGIN_LOGIN.DEFAULT_VALUES_HELP
                   placeholder_key: PLUGIN_LOGIN.ADDITIONAL_PARAM_KEY
                   placeholder_value: PLUGIN_LOGIN.ADDITIONAL_PARAM_VALUE
+
+                user_registration.options.validate_password1_and_password2:
+                  type: toggle
+                  label: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2
+                  help: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2_HELP
+                  highlight: 1
+                  options:
+                      1: PLUGIN_ADMIN.YES
+                      0: PLUGIN_ADMIN.NO
+                  validate:
+                      type: bool
 
             access_levels:
                 title: PLUGIN_ADMIN.ACCESS_LEVELS
@@ -407,38 +480,16 @@ form:
                         validate:
                             type: array
 
-            options:
+            activation_section:
               type: section
-              title: PLUGIN_LOGIN.OPTIONS
+              title: PLUGIN_LOGIN.ACCOUNT_ACTIVATION
 
               fields:
-
-                user_registration.options.validate_password1_and_password2:
-                  type: toggle
-                  label: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2
-                  help: PLUGIN_LOGIN.VALIDATE_PASSWORD1_AND_PASSWORD2_HELP
-                  highlight: 1
-                  options:
-                      1: PLUGIN_ADMIN.YES
-                      0: PLUGIN_ADMIN.NO
-                  validate:
-                      type: bool
 
                 user_registration.options.set_user_disabled:
                   type: toggle
                   label: PLUGIN_LOGIN.SET_USER_DISABLED
                   help: PLUGIN_LOGIN.SET_USER_DISABLED_HELP
-                  highlight: 0
-                  options:
-                      1: PLUGIN_ADMIN.YES
-                      0: PLUGIN_ADMIN.NO
-                  validate:
-                      type: bool
-
-                user_registration.options.login_after_registration:
-                  type: toggle
-                  label: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION
-                  help: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION_HELP
                   highlight: 0
                   options:
                       1: PLUGIN_ADMIN.YES
@@ -468,6 +519,23 @@ form:
                   validate:
                     type: bool
 
+                user_registration.options.login_after_registration:
+                  type: toggle
+                  label: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION
+                  help: PLUGIN_LOGIN.LOGIN_AFTER_REGISTRATION_HELP
+                  highlight: 0
+                  options:
+                      1: PLUGIN_ADMIN.YES
+                      0: PLUGIN_ADMIN.NO
+                  validate:
+                      type: bool
+
+            registration_emails_section:
+              type: section
+              title: PLUGIN_LOGIN.REGISTRATION_EMAILS
+
+              fields:
+
                 user_registration.options.send_notification_email:
                   type: toggle
                   label: PLUGIN_LOGIN.SEND_NOTIFICATION_EMAIL
@@ -495,117 +563,38 @@ form:
           title: PLUGIN_LOGIN.SECURITY_TAB
 
           fields:
-            site_host:
-              type: text
-              size: medium
-              label: PLUGIN_LOGIN.SITE_HOST
-              help: PLUGIN_LOGIN.SITE_HOST_HELP
-              placeholder: "https://example.com"
-            require_trusted_host:
-              type: toggle
-              label: PLUGIN_LOGIN.REQUIRE_TRUSTED_HOST
-              help: PLUGIN_LOGIN.REQUIRE_TRUSTED_HOST_HELP
-              highlight: 0
-              default: 0
-              options:
-                1: PLUGIN_ADMIN.ENABLED
-                0: PLUGIN_ADMIN.DISABLED
-              validate:
-                type: bool
-            max_pw_resets_count:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_RESETS_COUNT
-              help: PLUGIN_LOGIN.MAX_RESETS_COUNT_HELP
-              append: PLUGIN_LOGIN.RESETS
-              validate:
-                type: number
-                min: 0
 
-            max_pw_resets_interval:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_RESETS_INTERVAL
-              help: PLUGIN_LOGIN.MAX_RESETS_INTERVAL_HELP
-              append: PLUGIN_LOGIN.MINUTES
-              validate:
-                type: number
-                min: 1
+            email_links_section:
+              type: section
+              title: PLUGIN_LOGIN.EMAIL_LINKS
 
-            max_token_attempts_count:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_COUNT
-              help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_COUNT_HELP
-              append: PLUGIN_LOGIN.ATTEMPTS
-              validate:
-                type: number
-                min: 0
+              fields:
 
-            max_token_attempts_interval:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL
-              help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL_HELP
-              append: PLUGIN_LOGIN.MINUTES
-              validate:
-                type: number
-                min: 1
+                site_host:
+                  type: text
+                  size: medium
+                  label: PLUGIN_LOGIN.SITE_HOST
+                  help: PLUGIN_LOGIN.SITE_HOST_HELP
+                  placeholder: "https://example.com"
 
-            max_twofa_count:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_2FA_COUNT
-              help: PLUGIN_LOGIN.MAX_2FA_COUNT_HELP
-              append: PLUGIN_LOGIN.ATTEMPTS
-              validate:
-                type: number
-                min: 0
-
-            max_twofa_interval:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_2FA_INTERVAL
-              help: PLUGIN_LOGIN.MAX_2FA_INTERVAL_HELP
-              append: PLUGIN_LOGIN.MINUTES
-              validate:
-                type: number
-                min: 1
-
-            max_login_count:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_LOGINS_COUNT
-              help: PLUGIN_LOGIN.MAX_LOGINS_COUNT_HELP
-              append: PLUGIN_LOGIN.ATTEMPTS
-              validate:
-                type: number
-                min: 0
-
-            max_login_interval:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL
-              help: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL_HELP
-              append: PLUGIN_LOGIN.MINUTES
-              validate:
-                type: number
-                min: 1
-
-            ipv6_subnet_size:
-              type: number
-              size: x-small
-              label: PLUGIN_LOGIN.IPV6_SUBNET_SIZE
-              help: PLUGIN_LOGIN.IPV6_SUBNET_SIZE_HELP
-              append: PLUGIN_LOGIN.MINUTES
-              validate:
-                type: number
-                min: 1
+                require_trusted_host:
+                  type: toggle
+                  label: PLUGIN_LOGIN.REQUIRE_TRUSTED_HOST
+                  help: PLUGIN_LOGIN.REQUIRE_TRUSTED_HOST_HELP
+                  highlight: 0
+                  default: 0
+                  options:
+                    1: PLUGIN_ADMIN.ENABLED
+                    0: PLUGIN_ADMIN.DISABLED
+                  validate:
+                    type: bool
 
             passkeys_section:
               type: section
               title: PLUGIN_LOGIN.PASSKEYS
+
               fields:
+
                 passkeys.rp_id:
                   type: text
                   label: PLUGIN_LOGIN.PASSKEYS_RP_ID
@@ -617,6 +606,52 @@ form:
                   label: PLUGIN_LOGIN.PASSKEYS_ORIGIN
                   help: PLUGIN_LOGIN.PASSKEYS_ORIGIN_HELP
                   placeholder: https://example.com
+
+            rate_limits_section:
+              type: section
+              title: PLUGIN_LOGIN.RATE_LIMITS
+
+              fields:
+
+                max_login_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_LOGINS_COUNT
+                  help: PLUGIN_LOGIN.MAX_LOGINS_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 0
+
+                max_login_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL
+                  help: PLUGIN_LOGIN.MAX_LOGINS_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
+                max_twofa_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_2FA_COUNT
+                  help: PLUGIN_LOGIN.MAX_2FA_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 0
+
+                max_twofa_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_2FA_INTERVAL
+                  help: PLUGIN_LOGIN.MAX_2FA_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
 
                 passkeys.max_attempts_count:
                   type: number
@@ -637,20 +672,6 @@ form:
                     type: number
                     min: 1
 
-            magic_link_section:
-              type: section
-              title: PLUGIN_LOGIN.MAGIC_LINK
-              fields:
-                magic_link.ttl:
-                  type: number
-                  size: x-small
-                  label: PLUGIN_LOGIN.MAGIC_LINK_TTL
-                  help: PLUGIN_LOGIN.MAGIC_LINK_TTL_HELP
-                  append: PLUGIN_LOGIN.MINUTES
-                  validate:
-                    type: number
-                    min: 1
-
                 magic_link.max_requests_count:
                   type: number
                   size: x-small
@@ -666,6 +687,76 @@ form:
                   size: x-small
                   label: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL
                   help: PLUGIN_LOGIN.MAGIC_LINK_MAX_REQUESTS_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
+                max_pw_resets_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_RESETS_COUNT
+                  help: PLUGIN_LOGIN.MAX_RESETS_COUNT_HELP
+                  append: PLUGIN_LOGIN.RESETS
+                  validate:
+                    type: number
+                    min: 0
+
+                max_pw_resets_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_RESETS_INTERVAL
+                  help: PLUGIN_LOGIN.MAX_RESETS_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
+                max_token_attempts_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_COUNT
+                  help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 0
+
+                max_token_attempts_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL
+                  help: PLUGIN_LOGIN.MAX_TOKEN_ATTEMPTS_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
+                user_registration.max_attempts_count:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_REGISTRATIONS_COUNT
+                  help: PLUGIN_LOGIN.MAX_REGISTRATIONS_COUNT_HELP
+                  append: PLUGIN_LOGIN.ATTEMPTS
+                  validate:
+                    type: number
+                    min: 0
+
+                user_registration.max_attempts_interval:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.MAX_REGISTRATIONS_INTERVAL
+                  help: PLUGIN_LOGIN.MAX_REGISTRATIONS_INTERVAL_HELP
+                  append: PLUGIN_LOGIN.MINUTES
+                  validate:
+                    type: number
+                    min: 1
+
+                ipv6_subnet_size:
+                  type: number
+                  size: x-small
+                  label: PLUGIN_LOGIN.IPV6_SUBNET_SIZE
+                  help: PLUGIN_LOGIN.IPV6_SUBNET_SIZE_HELP
                   append: PLUGIN_LOGIN.MINUTES
                   validate:
                     type: number
