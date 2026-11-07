@@ -105,6 +105,11 @@ The simplest way to create a new user is to simply run the `bin/plugin login new
 || [ -u, --user=USER ]               | Unlock this username, along with the IP counters it tripped.    |
 || [ -i, --ip=IP ]                   | Unlock this IP address.                                         |
 || [ -a, --all ]                     | Clear every lockout on the site.                                |
+|||
+|`sign-out`||Signs accounts out everywhere: browser sessions, "remember me" cookies and API tokens; API keys keep working (see [Signing Users Out](#signing-users-out))
+|| [ -u, --user=USER ]               | Sign out this account. Repeat for several.                      |
+|| [ -a, --all ]                     | Sign out every account. Asks first. Not with `--user`.          |
+|| [ -y, --yes ]                     | With `--all`: don't ask (needed when not run interactively).    |
 
 
 ### CLI Example
@@ -202,6 +207,33 @@ And to wipe every lockout on the site, across failed logins, password resets and
 ### From the admin
 
 In Grav 2.0's admin, the Users list (table view) has a **Lockout** column marking any account that is currently blocked, and a padlock button in the row's actions to clear it. Clearing a lockout requires the `api.users.write` permission.
+
+# Signing Users Out
+
+Signing an account out ends its sessions everywhere, as a password change by an administrator does: its browser sessions end on their next request, telling the user they were signed out everywhere, its "remember me" cookies stop working, and its API tokens (Admin2) are refused. The account and its password stay as they are; the user can log in again right away. Use it after changing who may log in or how, for example after turning on a login requirement, or when a device may be in the wrong hands.
+
+API keys are not affected: they keep working until you revoke them in Admin2 (the user's page, API Keys).
+
+```
+> bin/plugin login sign-out -u joeuser
+  Signed out "joeuser"
+ [OK] Signed 1 account out everywhere.
+ ! [NOTE] API keys keep working: revoke them in Admin2 if needed.
+
+> bin/plugin login sign-out --all
+Sign out every account and every session on this site? [y/N]
+```
+
+`--all` signs out every account, and every session of users without an account file. In scripts, add `--yes`. `--user` and `--all` can't be combined. An account that can't be saved is reported and doesn't stop the others; the command then ends with exit code 1.
+
+In Grav 2.0's admin:
+
+* **One account**: the **Sign out everywhere** button on the user's page, and its icon in the Users list (in each row of the table view, and next to Delete when you open a user in the cards view). Requires `api.users.write`; only super admins can sign out a super admin. On your own account it ends your other sessions, e.g. to kick out a browser you forgot to log out of: only your front-end login in the browser you click it from stays, and Admin2 asks you to log in again.
+* **Every account**: Plugins → Login → Options → Sessions → **Sign out all users**. Super admins only. Your own account is signed out too: only the browser session you click it from stays, and Admin2 asks you to log in again. Accounts that can't be saved are named in the result and in the Grav log; the others are signed out. Each account is saved separately, and with Flex accounts Grav reads its account index again after every save, so on a site with many accounts this takes a while: the request keeps running when the browser stops waiting, but `bin/plugin login sign-out --all` is the better choice there.
+
+Users who log in without an account file, e.g. with OAuth2 while the OAuth2 plugin doesn't save Grav users, can't be signed out one by one: they have no account to name, and Admin2's Users list doesn't show them. **Sign out all users** and `--all` reach them too: once every account is done, every session that logged in before then ends on its next request (except the one you click the button from, when it is signed in as you), so someone who logged in while it ran has to log in once more. The time is kept in `user/data/login/sign-out-all.yaml`; if that file can't be read, it signs no session out, and the error is logged once. If it can't be written, the accounts are still signed out, and the result says the other sessions weren't ended. A session that doesn't know when it logged in (from before this version, or signed in by a plugin that sets the session's user itself instead of logging in through the Login plugin) counts as older while the sign-out is younger than the session timeout (`system.session.timeout`), and after that from its next request on.
+
+Each sign-out is written to the Grav log with who did it and where, e.g. `Login: signed "joeuser" out everywhere (by "admin" through the API)` or `(from the command line)`; signing out everyone logs one line with the number of accounts, e.g. `Login: signed everyone out: every session that logged in before now, and 12 accounts (by "admin" through the API)`, and each account only at debug level. "Remember me" cookies are deleted even while "Remember me" is turned off, so turning it on again doesn't bring them back; the same holds for a password change. Times are stored in whole seconds: an API token issued in the same second as a sign-out keeps working, while a browser session that logged in during the same second as **Sign out all users** finished has to log in again.
 
 # Default Configuration
 

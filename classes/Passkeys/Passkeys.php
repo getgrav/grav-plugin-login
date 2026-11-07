@@ -12,7 +12,7 @@ namespace Grav\Plugin\Login\Passkeys;
 use Grav\Common\Grav;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
-use Grav\Common\Utils;
+use Grav\Plugin\Login\Login;
 use Grav\Plugin\Login\LoginCache;
 use lbuchs\WebAuthn\Binary\ByteBuffer;
 use lbuchs\WebAuthn\WebAuthn;
@@ -72,6 +72,8 @@ class Passkeys
 
     /** @var Grav */
     private $grav;
+    /** @var Login|null */
+    private $login;
     /** @var LoginCache|null */
     private $challenges;
     /** @var LoginCache|null */
@@ -79,9 +81,10 @@ class Passkeys
     /** @var string|null */
     private $usedName;
 
-    public function __construct(Grav $grav)
+    public function __construct(Grav $grav, ?Login $login = null)
     {
         $this->grav = $grav;
+        $this->login = $login;
     }
 
     /**
@@ -588,7 +591,7 @@ class Passkeys
         try {
             $cache->set('rebuilt', time(), 0);
             $map = [];
-            foreach ($this->allAccounts() as $account) {
+            foreach (($this->login ?? $this->grav['login'])->getAccounts() as $account) {
                 foreach ($this->rows($account) as $row) {
                     $map[$row['id']] = (string)$account->get('username');
                 }
@@ -616,36 +619,6 @@ class Passkeys
         if (is_array($map) && isset($map[$id])) {
             unset($map[$id]);
             $this->indexCache()->set(self::INDEX_KEY, $map, 0);
-        }
-    }
-
-    /** @return iterable<UserInterface> */
-    private function allAccounts(): iterable
-    {
-        /** @var UserCollectionInterface $accounts */
-        $accounts = $this->grav['accounts'];
-        if (is_iterable($accounts)) {
-            foreach ($accounts as $account) {
-                if ($account instanceof UserInterface && $account->exists()) {
-                    yield $account;
-                }
-            }
-
-            return;
-        }
-
-        $dir = $this->grav['locator']->findResource('account://');
-        if (!is_string($dir)) {
-            return;
-        }
-        foreach (array_diff(scandir($dir) ?: [], ['.', '..']) as $file) {
-            if (!Utils::endsWith($file, YAML_EXT)) {
-                continue;
-            }
-            $account = $accounts->load(trim(Utils::pathinfo($file, PATHINFO_FILENAME)));
-            if ($account->exists()) {
-                yield $account;
-            }
         }
     }
 

@@ -17,7 +17,6 @@ use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
 use Grav\Common\User\Interfaces\UserCollectionInterface;
 use Grav\Common\User\Interfaces\UserInterface;
-use Grav\Common\Utils;
 use Grav\Plugin\Email\Utils as EmailUtils;
 use Grav\Plugin\Form\Forms;
 use Grav\Plugin\Login\Events\UserLoginEvent;
@@ -484,8 +483,6 @@ class Controller
             return true;
         }
 
-        /** @var UserCollectionInterface $users */
-        $users = $this->grav['accounts'];
         $email = $data['email'] ?? '';
 
         // Sanitize $email
@@ -507,7 +504,7 @@ class Controller
             return true;
         }
 
-        $matchedUsers = $this->findUsersByEmail($users, $email);
+        $matchedUsers = $this->findUsersByEmail($email);
         if (count($matchedUsers) > 1) {
             $this->grav['log']->warning(sprintf(
                 'plugin.login: magic-link request blocked: duplicate email "%s" matches users [%s]',
@@ -573,11 +570,12 @@ class Controller
     }
 
     /**
-     * Find all users matching email, across legacy and flex collections.
+     * Find all users matching email, across legacy and flex collections
+     * (Login::getAccounts()).
      *
      * @return array<string,UserInterface> Keyed by username.
      */
-    private function findUsersByEmail(UserCollectionInterface $users, string $email): array
+    private function findUsersByEmail(string $email): array
     {
         $needle = mb_strtolower(trim($email));
         if ($needle === '') {
@@ -585,42 +583,7 @@ class Controller
         }
 
         $matches = [];
-
-        // Flex collections/indexes are iterable; this catches modern installs efficiently.
-        if (is_iterable($users)) {
-            foreach ($users as $candidate) {
-                if (!$candidate instanceof UserInterface || !$candidate->exists()) {
-                    continue;
-                }
-
-                $candidateEmail = mb_strtolower((string)$candidate->get('email'));
-                if ($candidateEmail !== '' && $candidateEmail === $needle) {
-                    $matches[(string)$candidate->get('username')] = $candidate;
-                }
-            }
-
-            return $matches;
-        }
-
-        // Legacy DataUser collection is not iterable; scan account files and load users.
-        $locator = $this->grav['locator'];
-        $accountDir = $locator->findResource('account://');
-        if (!is_string($accountDir)) {
-            return [];
-        }
-
-        $files = array_diff(scandir($accountDir) ?: [], ['.', '..']);
-        foreach ($files as $file) {
-            if (!Utils::endsWith($file, YAML_EXT)) {
-                continue;
-            }
-
-            $username = trim(Utils::pathinfo($file, PATHINFO_FILENAME));
-            $candidate = $users->load($username);
-            if (!$candidate->exists()) {
-                continue;
-            }
-
+        foreach ($this->login->getAccounts() as $candidate) {
             $candidateEmail = mb_strtolower((string)$candidate->get('email'));
             if ($candidateEmail !== '' && $candidateEmail === $needle) {
                 $matches[(string)$candidate->get('username')] = $candidate;

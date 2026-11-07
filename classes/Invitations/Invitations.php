@@ -149,10 +149,12 @@ class Invitations implements \Countable, \Iterator, \ArrayAccess
             }
 
             $file = YamlFile::instance($path);
+            // Grav caches the file object per request: drop its copy, so this reads the file as it is now, under the lock.
             $file->free();
             $items = (array)$file->content();
             $data = $items[$token] ?? null;
             if (!is_array($data)) {
+                // Nothing to write: release the cached object.
                 $file->free();
 
                 return null;
@@ -160,6 +162,7 @@ class Invitations implements \Countable, \Iterator, \ArrayAccess
 
             unset($items[$token]);
             $file->save($items);
+            // Release the cached object: $this->items holds the result, and the next read comes from the file.
             $file->free();
 
             $this->items = $items;
@@ -205,6 +208,7 @@ class Invitations implements \Countable, \Iterator, \ArrayAccess
     {
         $file = $this->getFile();
         $data = $file->content();
+        // Release the cached object: $this->items holds the result, and claim() reads the file again under its lock.
         $file->free();
 
         return $data;
