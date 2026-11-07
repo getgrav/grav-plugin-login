@@ -141,7 +141,7 @@ class TokenStorage implements StorageInterface
             if ($tokens) {
                 $file->save($tokens);
             } else {
-                $file->delete();
+                $this->deleteFile($file);
             }
         }
     }
@@ -154,10 +154,23 @@ class TokenStorage implements StorageInterface
      */
     public function cleanAllTriplets($credential)
     {
-        $file = $this->getFile($credential);
+        $this->deleteFile($this->getFile($credential));
+    }
+
+    /**
+     * delete() leaves the triplets in memory: a cookie issued later in the same
+     * request (endOtherSessions() keeping your own) would save them back.
+     *
+     * @param CompiledYamlFile $file
+     * @return void
+     */
+    private function deleteFile(CompiledYamlFile $file): void
+    {
         if ($file->exists()) {
             $file->delete();
         }
+        // Drop the cached copy too, or a cookie issued later in this request saves the deleted triplets back.
+        $file->free();
     }
 
     /**
