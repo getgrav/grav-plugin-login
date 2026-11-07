@@ -1,0 +1,11 @@
+{% extends "forms/field.html.twig" %}
+
+{# "Sign out all users" in the classic admin. The button itself is Admin2's
+   (admin-next/fields/login-sign-out-all.js); here the field points to Admin2
+   and the CLI. Posts nothing with the form. #}
+
+{% block input %}
+    <div class="form-input-wrapper">
+        <p>{{ 'PLUGIN_LOGIN.SIGN_OUT_ALL_CLASSIC'|t }} <code>bin/plugin login sign-out --all</code></p>
+    </div>
+{% endblock %}

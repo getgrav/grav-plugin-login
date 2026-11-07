@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.12.1
+version: 3.13.0
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -49,6 +49,24 @@ form:
                 0: PLUGIN_ADMIN.DISABLED
               validate:
                 type: bool
+
+            sessions_section:
+              type: section
+              title: PLUGIN_LOGIN.SESSIONS
+
+              fields:
+
+                # Admin2 renders admin-next/fields/login-sign-out-all.js; the classic admin shows
+                # templates/admin/forms/fields/login-sign-out-all/login-sign-out-all.html.twig. Holds no value:
+                # `validate: ignore` keeps anything posted for it out of the saved settings.
+                sign_out_all:
+                  type: login-sign-out-all
+                  label: PLUGIN_LOGIN.SIGN_OUT_ALL_LABEL
+                  help: PLUGIN_LOGIN.SIGN_OUT_ALL_HELP
+                  text: PLUGIN_LOGIN.SIGN_OUT_ALL_LABEL
+                  content: PLUGIN_LOGIN.SIGN_OUT_ALL_CONFIRM
+                  validate:
+                    ignore: true
 
             login_methods_section:
               type: section

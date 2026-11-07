@@ -12,6 +12,7 @@ namespace Grav\Plugin\Login;
 use Birke\Rememberme\Cookie;
 use Grav\Common\Config\Config;
 use Grav\Common\Data\Data;
+use Grav\Common\File\CompiledYamlFile;
 use Grav\Common\Debugger;
 use Grav\Common\Grav;
 use Grav\Common\Language\Language;
@@ -450,13 +451,8 @@ class Login
             return $wait;
         }
 
-        /** @var UserCollectionInterface $accounts */
-        $accounts = $this->grav['accounts'];
-        $stored = $accounts->load($username);
-        if (is_callable([$stored, 'refresh'])) {
-            $stored->refresh(true);
-        }
-
+        // Read again also when the caller's object is the stored one itself.
+        $stored = $this->loadAccount($username, false);
         if ($password === '' || !$stored->exists() || !$stored->authenticate($password)) {
             return -1;
         }
@@ -541,62 +537,96 @@ class Login
     }
 
     /**
+     * The stored account of $user (a session's copy), to check against it.
+     *
      * @param UserInterface $user
-     * @return UserInterface The account as stored, freshly read.
+     * @return UserInterface The account as stored, freshly read, or $user when it has none.
      */
     protected function loadStoredAccount(UserInterface $user): UserInterface
     {
-        /** @var UserCollectionInterface $accounts */
-        $accounts = $this->grav['accounts'];
-        $stored = $accounts->load((string)$user->get('username'));
-        if ($stored !== $user && is_callable([$stored, 'refresh'])) {
-            $stored->refresh(true);
-        }
+        $stored = $this->loadAccount((string)$user->get('username'), false, $user);
 
         return $stored->exists() ? $stored : $user;
     }
 
     /**
+     * The account as stored now: this request may have read it a while ago, and
+     * someone may have saved it since.
+     *
+     * To read it ($forWrite false) a Flex object keeps what it holds in memory
+     * but isn't stored, and $sessionCopy, should load() return that very object,
+     * is left as it is. To change and save it ($forWrite true) it is only what is
+     * stored; a regular account, whose file stays in memory for the whole
+     * request, is then read again.
+     *
+     * @param string $username
+     * @param bool $forWrite
+     * @param UserInterface|null $sessionCopy
+     * @return UserInterface
+     */
+    private function loadAccount(string $username, bool $forWrite, ?UserInterface $sessionCopy = null): UserInterface
+    {
+        if ($forWrite) {
+            clearstatcache();
+        }
+
+        /** @var UserCollectionInterface $accounts */
+        $accounts = $this->grav['accounts'];
+        $account = $accounts->load($username);
+        if (is_callable([$account, 'refresh'])) {
+            if ($account !== $sessionCopy) {
+                $account->refresh(!$forWrite);
+            }
+        } elseif ($forWrite && ($file = $account->file()) !== null) {
+            // Grav caches the file object per request: drop it, so load() reads the file again.
+            $file->free();
+            $account = $accounts->load($username);
+        }
+
+        return $account;
+    }
+
+    /**
      * Sign an account out everywhere else after its password changed. Stamps
      * `api_tokens_valid_after`, which API tokens and signed-in browsers are
-     * checked against (see isSessionOutdated()), and forgets the account's
-     * remember-me cookies. When the account changes its own password the
+     * checked against (see sessionSignOutReason()), notes why in `signed_out`
+     * so those browsers can tell their user, and forgets the account's
+     * remember-me cookies, also while "Remember me" is off, so turning it on
+     * again can't bring them back. When the account changes its own password the
      * browser making the change stays signed in: its session gets the same
-     * stamp, and a remember-me cookie it had is issued again. Pass
+     * stamp and note, and a remember-me cookie it had is issued again. Pass
      * `$keepCurrent = false` when someone else changed it.
      *
      * The caller saves the account.
      *
      * @param UserInterface $user
      * @param bool $keepCurrent
+     * @param string $reason 'password', 'email' (its address changed), 'email_cancelled' (a change of it was cancelled) or 'everywhere' (signOutEverywhere())
      * @return void
      */
-    public function endOtherSessions(UserInterface $user, bool $keepCurrent = true): void
+    public function endOtherSessions(UserInterface $user, bool $keepCurrent = true, string $reason = 'password'): void
     {
         $now = time();
         $username = (string)$user->get('username');
+        $mark = ['at' => $now, 'reason' => $reason];
         $user->set('api_tokens_valid_after', $now);
+        $user->set('signed_out', $mark);
 
-        $sessionUser = null;
-        if ($keepCurrent) {
-            /** @var Session $session */
-            $session = $this->grav['session'];
-            $sessionUser = $session->isStarted() ? ($session->user ?? null) : null;
-        }
-        $ownSession = $sessionUser instanceof UserInterface
-            && $sessionUser->authenticated
-            && (string)$sessionUser->get('username') === $username;
-        if ($ownSession && $sessionUser !== $user) {
+        $sessionUser = $keepCurrent ? $this->currentSessionUser($username) : null;
+        if ($sessionUser && $sessionUser !== $user) {
+            // Also the note, so a later save of the session's copy doesn't put the old one back.
             $sessionUser->set('api_tokens_valid_after', $now);
+            $sessionUser->set('signed_out', $mark);
         }
 
-        if ($username === '' || !$this->grav['config']->get('plugins.login.rememberme.enabled')) {
+        if ($username === '') {
             return;
         }
 
         $rememberMe = $this->rememberMe();
         $cookie = $_COOKIE[(string)$this->grav['config']->get('plugins.login.rememberme.name')] ?? '';
-        $keepCookie = $ownSession
+        $keepCookie = $sessionUser
+            && $this->grav['config']->get('plugins.login.rememberme.enabled')
             && is_string($cookie)
             && explode('|', $cookie, 2)[0] === $username
             && $rememberMe->cookieIsValid();
@@ -608,33 +638,489 @@ class Login
     }
 
     /**
+     * The signed-in user of the session making this request, when it is $username.
+     *
+     * @param string $username
+     * @return UserInterface|null
+     */
+    private function currentSessionUser(string $username): ?UserInterface
+    {
+        if ($username === '') {
+            return null;
+        }
+
+        /** @var Session $session */
+        $session = $this->grav['session'];
+        $user = $session->isStarted() ? ($session->user ?? null) : null;
+
+        return $user instanceof UserInterface && $user->authenticated && (string)$user->get('username') === $username
+            ? $user
+            : null;
+    }
+
+    /**
      * Whether a signed-in session began before the account's password last
-     * changed (or before it was otherwise signed out everywhere), so it has to
+     * changed, or before it was otherwise signed out everywhere, so it has to
      * sign in again. Compares the session copy's `api_tokens_valid_after` with
-     * the stored account's.
+     * the stored account's. sessionSignOutReason() also says why, and checks
+     * "sign out everyone".
      *
      * @param UserInterface $sessionUser
      * @return bool
      */
     public function isSessionOutdated(UserInterface $sessionUser): bool
     {
-        if (!$sessionUser->exists() || !$sessionUser->authenticated) {
+        return $sessionUser->authenticated && $this->accountSignOutReason($sessionUser) !== null;
+    }
+
+    /**
+     * Why a signed-in session has to sign in again, or null if it may stay:
+     *
+     * - its account was signed out since the session logged in, with the reason
+     *   endOtherSessions() noted ('password', 'email', 'email_cancelled',
+     *   'everywhere'), or 'changed' when the stamp has no note, e.g. the account
+     *   was disabled through the API. Compares the session's copy of the account
+     *   with the stored one, so no clocks are involved;
+     * - 'everyone': it logged in before the last "sign out everyone" finished
+     *   (signOutEveryone()), which also reaches users without an account file.
+     *
+     * @param Session $session
+     * @param UserInterface $sessionUser
+     * @return string|null
+     */
+    public function sessionSignOutReason($session, UserInterface $sessionUser): ?string
+    {
+        if (!$sessionUser->authenticated) {
+            return null;
+        }
+
+        return $this->accountSignOutReason($sessionUser)
+            ?? ($this->signedOutWithEveryone($session) ? 'everyone' : null);
+    }
+
+    /**
+     * See sessionSignOutReason().
+     *
+     * @param UserInterface $sessionUser
+     * @return string|null
+     */
+    private function accountSignOutReason(UserInterface $sessionUser): ?string
+    {
+        if (!$sessionUser->exists()) {
+            return null;
+        }
+
+        $stored = $this->loadStoredAccount($sessionUser);
+        if ($stored === $sessionUser) {
+            // Gone, or the session holds the stored object itself.
+            return null;
+        }
+
+        return self::signOutReason(
+            (int)$stored->get('api_tokens_valid_after', 0),
+            (array)$stored->get('signed_out', []),
+            (int)$sessionUser->get('api_tokens_valid_after', 0),
+            (array)$sessionUser->get('signed_out', [])
+        );
+    }
+
+    /**
+     * Why a session's copy of an account has to sign in again, from the stored
+     * account's stamp (`api_tokens_valid_after`) and note (`signed_out`, see
+     * endOtherSessions()) and the copy's, or null if the copy is current. The
+     * reason is the note's when it belongs to the stamp, else 'changed' (the stamp
+     * was set some other way, e.g. the account was disabled through the API).
+     * Times are whole seconds: a copy holding the stored stamp is current, unless
+     * that second also saw another sign-out, which the notes tell apart.
+     *
+     * @param int $storedStamp 0 if the account was never signed out
+     * @param array<string, mixed> $storedMark
+     * @param int $copyStamp
+     * @param array<string, mixed> $copyMark
+     * @return string|null
+     */
+    public static function signOutReason(int $storedStamp, array $storedMark, int $copyStamp, array $copyMark): ?string
+    {
+        if ($storedStamp <= 0 || $copyStamp > $storedStamp || ($copyStamp === $storedStamp && $copyMark == $storedMark)) {
+            return null;
+        }
+
+        $reason = (int)($storedMark['at'] ?? 0) === $storedStamp ? (string)($storedMark['reason'] ?? '') : '';
+
+        return $reason !== '' ? $reason : 'changed';
+    }
+
+    /**
+     * The PLUGIN_LOGIN message for a signed-out browser, from its reason
+     * (sessionSignOutReason()): a password change says so, as it did before;
+     * any other reason gets one neutral message, naming neither the cause nor
+     * who signed it out.
+     *
+     * @param string $reason
+     * @return string
+     */
+    public static function signedOutMessage(string $reason): string
+    {
+        return $reason === 'password' ? 'SIGNED_OUT_PASSWORD_CHANGED' : 'SIGNED_OUT';
+    }
+
+    /**
+     * Sign an account out everywhere: its browser sessions end on their next
+     * request, its "remember me" cookies stop working and its API tokens
+     * (Admin2) are refused, as after someone else changed its password
+     * (endOtherSessions()). Its API keys keep working. Stamps and saves the
+     * account as stored now, not the object given (signOutStored()), and logs
+     * it; throws if it can't be read or saved. With $keepFor (the caller's
+     * username) the browser session making the request stays signed in when
+     * it is that user's, so signing out your own account ends only your other
+     * sessions, as after changing your own password; your API tokens end too.
+     *
+     * @param UserInterface $user
+     * @param string $by Who signed it out and where, for the log, e.g. 'by "admin" through the API'
+     * @param string $keepFor
+     * @return bool False if the account doesn't exist (nothing is saved then)
+     */
+    public function signOutEverywhere(UserInterface $user, string $by = '', string $keepFor = ''): bool
+    {
+        return $this->signOutStored((string)$user->get('username'), $by, $keepFor, false) !== null;
+    }
+
+    /**
+     * Sign the account out everywhere as it is stored now (loadAccount()),
+     * rather than an object a caller holds: that may be the session's own copy,
+     * which has to keep its old stamp to be signed out, or a copy read earlier
+     * in the request that would overwrite a change saved since.
+     *
+     * @param string $username
+     * @param string $by
+     * @param string $keepFor Keep the browser session making the request when it is this user's (signOutEverywhere(), signOutEveryone())
+     * @param bool $bulk Log at debug level only (the caller logs the total)
+     * @return string|null The username as stored, null if there is no such account
+     * @throws \Throwable When the account can't be read or saved
+     */
+    private function signOutStored(string $username, string $by, string $keepFor, bool $bulk): ?string
+    {
+        $account = $this->loadAccount($username, true);
+        if (!$account->exists()) {
+            return null;
+        }
+
+        $username = (string)$account->get('username');
+        $this->endOtherSessions($account, $keepFor !== '' && $username === $keepFor, 'everywhere');
+        $account->save();
+        $this->grav['log']->log($bulk ? 'debug' : 'info', $this->signedOutLogLine($username, $by));
+
+        return $username;
+    }
+
+    /**
+     * signOutEverywhere() for each of these accounts, each logged. An account
+     * that can't be saved doesn't stop the others: it is logged and listed under
+     * `failed`; a username without an account is listed under `missing`.
+     *
+     * @param string[] $usernames
+     * @param string $by See signOutEverywhere()
+     * @return array{signed_out: string[], failed: list<array{username: string, error: string}>, missing: string[]}
+     */
+    public function signOutAccounts(array $usernames, string $by = ''): array
+    {
+        return $this->signOutList($usernames, $by, '', false);
+    }
+
+    /** Where "sign out everyone" keeps its site-wide cutoff (signOutEveryone()). */
+    private const SIGN_OUT_ALL_FILE = 'user-data://login/sign-out-all.yaml';
+
+    /** @var int|null The site-wide cutoff as read for this request by signOutAllCutoff() (0: none), null until read */
+    private $signOutAllAt;
+
+    /**
+     * The cutoff file is written right after its cutoff, so a session that logged
+     * in this much later than the file's time can't be older: it isn't read. Leaves
+     * room for a file system whose clock is off.
+     */
+    private const SIGN_OUT_ALL_CLOCK_SLACK = 3600;
+
+    /**
+     * Sign every account out everywhere, then every session that logged in
+     * before now, also those of users without an account file (e.g. OAuth2
+     * logins that aren't saved), which no account reaches: a site-wide cutoff
+     * that each session checks when it starts (sessionSignOutReason()). Someone
+     * who logs in while this runs has to log in once more.
+     *
+     * Each account is read again and stamped when its turn comes, so a change
+     * saved to it meanwhile isn't overwritten. With $keepFor (the caller's
+     * username) the browser session making the request stays signed in when it
+     * is that user's, as after changing your own password; the caller's API
+     * tokens end like everyone's. Logs one line with the number of accounts, and
+     * each account only at debug level. An account that can't be read or saved
+     * doesn't stop the others: it is logged and listed under `failed`. If the
+     * cutoff can't be written, the accounts stay signed out, `sessions_ended` is
+     * false and the error is logged.
+     *
+     * @param string $by See signOutEverywhere()
+     * @param string $keepFor
+     * @return array{signed_out: string[], failed: list<array{username: string, error: string}>, sessions_ended: bool}
+     */
+    public function signOutEveryone(string $by = '', string $keepFor = ''): array
+    {
+        // First, so the sessions end even if the request dies while the accounts are signed out.
+        $this->writeSignOutAllCutoff($keepFor);
+        // Listed, not loaded: each account is read when its turn comes.
+        $list = $this->signOutList($this->accountUsernames(), $by, $keepFor, true);
+        // Again last, so it also ends the sessions that logged in while the accounts were signed out.
+        $result = ['signed_out' => $list['signed_out'], 'failed' => $list['failed'], 'sessions_ended' => $this->writeSignOutAllCutoff($keepFor)];
+
+        $count = count($result['signed_out']);
+        $this->grav['log']->info(sprintf(
+            'Login: signed everyone out: %s%d account%s%s%s',
+            $result['sessions_ended'] ? 'every session that logged in before now, and ' : '',
+            $count,
+            $count === 1 ? '' : 's',
+            $result['failed'] ? sprintf(' (%d failed)', count($result['failed'])) : '',
+            $by !== '' ? " ({$by})" : ''
+        ));
+
+        return $result;
+    }
+
+    /**
+     * Writes the site-wide sign-out cutoff (now) that sessionSignOutReason() checks.
+     *
+     * @param string $keepFor See signOutEveryone()
+     * @return bool False when the file could not be written (logged).
+     */
+    private function writeSignOutAllCutoff(string $keepFor): bool
+    {
+        $at = time();
+        $file = CompiledYamlFile::instance((string)$this->grav['locator']->findResource(self::SIGN_OUT_ALL_FILE, true, true));
+        try {
+            $file->save(['at' => $at]);
+            $this->signOutAllAt = $at;
+            if ($this->currentSessionUser($keepFor)) {
+                $this->grav['session']->sign_out_all_kept = $at;
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->grav['log']->error(sprintf('Login: could not write %s, so the sessions of users without an account file stay: %s', $file->filename(), $e->getMessage()));
+
+            return false;
+        } finally {
+            // Release Grav's per-request file object.
+            $file->free();
+        }
+    }
+
+    /**
+     * @param string[] $usernames
+     * @param string $by
+     * @param string $keepFor See signOutEveryone()
+     * @param bool $bulk Log each account at debug level only (the caller logs the total)
+     * @return array{signed_out: string[], failed: list<array{username: string, error: string}>, missing: string[]}
+     */
+    private function signOutList(array $usernames, string $by, string $keepFor, bool $bulk): array
+    {
+        $result = ['signed_out' => [], 'failed' => [], 'missing' => []];
+        foreach ($usernames as $username) {
+            try {
+                $stored = $this->signOutStored($username, $by, $keepFor, $bulk);
+            } catch (\Throwable $e) {
+                $result['failed'][] = ['username' => $username, 'error' => $e->getMessage()];
+                $this->grav['log']->error(sprintf('Login: could not sign "%s" out everywhere: %s', $username, $e->getMessage()));
+
+                continue;
+            }
+            if ($stored === null) {
+                // Removed since it was listed, or a file Grav can't load (e.g. Bob.yaml on a case-sensitive file system: usernames are lowercase).
+                $result['missing'][] = $username;
+                $this->grav['log']->debug(sprintf('Login: no account "%s" to sign out', $username));
+
+                continue;
+            }
+
+            $result['signed_out'][] = $stored;
+        }
+
+        return $result;
+    }
+
+    private function signedOutLogLine(string $username, string $by): string
+    {
+        return sprintf('Login: signed "%s" out everywhere%s', $username, $by !== '' ? " ({$by})" : '');
+    }
+
+    /**
+     * Whether a session ends with the last "sign out everyone": it logged in
+     * before it finished, or in the same second, and isn't the session that ran
+     * it. A session that doesn't know when it logged in (from before 3.13.0, or
+     * signed in by a plugin that sets the session's user itself instead of
+     * logging in through Login::login()) counts
+     * as older while the cutoff is younger than a session can stay idle (the
+     * session cookie's lifetime: system.session.timeout, or the admin's). Later
+     * it counts from when it is first seen (the caller notes that), so such
+     * logins aren't locked out for good.
+     *
+     * @param Session $session
+     * @return bool
+     */
+    private function signedOutWithEveryone($session): bool
+    {
+        $loginAt = (int)($session->login_at ?? 0);
+        $path = $this->grav['locator']->findResource(self::SIGN_OUT_ALL_FILE);
+        if (!is_string($path)) {
+            return false;
+        }
+        $modified = @filemtime($path);
+        if ($loginAt > 0 && $modified !== false && $loginAt > $modified + self::SIGN_OUT_ALL_CLOCK_SLACK) {
             return false;
         }
 
+        return self::endedBySignOutEveryone(
+            $this->signOutAllCutoff($path),
+            $loginAt,
+            (int)($session->sign_out_all_kept ?? 0),
+            (int)ini_get('session.cookie_lifetime') ?: (int)ini_get('session.gc_maxlifetime'),
+            time()
+        );
+    }
+
+    /**
+     * Whether a session ends with the last "sign out everyone", given its cutoff
+     * (signOutEveryone()): the session logged in before it finished, or in the
+     * same second, and isn't the one that ran it. A session that doesn't know
+     * when it logged in counts as older while the cutoff is younger than a
+     * session can stay idle; later it counts from when it is first seen.
+     *
+     * @param int $at When "sign out everyone" last finished, 0 if never
+     * @param int $loginAt When the session logged in, 0 if unknown
+     * @param int $kept The cutoff the session itself ran, 0 if none
+     * @param int $idle How long a session can stay idle, in seconds
+     * @param int $now
+     * @return bool
+     */
+    public static function endedBySignOutEveryone(int $at, int $loginAt, int $kept, int $idle, int $now): bool
+    {
+        if ($at <= 0 || $kept === $at) {
+            return false;
+        }
+
+        return $loginAt > 0 ? $loginAt <= $at : $at > $now - $idle;
+    }
+
+    /**
+     * When "sign out everyone" last finished (0: never), from the file at $path.
+     * A file that can't be read is ignored, so it can't lock anyone out, and
+     * logged once per version of it rather than on every request.
+     *
+     * @param string $path
+     * @return int
+     */
+    private function signOutAllCutoff(string $path): int
+    {
+        if ($this->signOutAllAt !== null) {
+            return $this->signOutAllAt;
+        }
+
+        $this->signOutAllAt = 0;
+        $file = CompiledYamlFile::instance($path);
+        try {
+            $this->signOutAllAt = (int)(((array)$file->content())['at'] ?? 0);
+        } catch (\Throwable $e) {
+            if ($this->firstSightOf($path)) {
+                $this->grav['log']->error(sprintf('Login: could not read %s, so it signs no session out: %s', $path, $e->getMessage()));
+            }
+        } finally {
+            // Release Grav's per-request file object.
+            $file->free();
+        }
+
+        return $this->signOutAllAt;
+    }
+
+    /**
+     * Whether this version of the file (its path, time and size) hasn't been
+     * seen before, so a problem with it is logged once rather than on every
+     * request. Says yes if that can't be remembered.
+     *
+     * @param string $path
+     * @return bool
+     */
+    private function firstSightOf(string $path): bool
+    {
+        try {
+            $seen = new LoginCache('sign-out-all');
+            $version = sha1($path . '|' . @filemtime($path) . '|' . @filesize($path));
+            if ($seen->has($version)) {
+                return false;
+            }
+            $seen->set($version, true, 86400);
+        } catch (\Throwable $e) {
+            // Nothing to remember it with: log every time rather than not at all.
+        }
+
+        return true;
+    }
+
+    /**
+     * Every existing account: from the Flex index when accounts are Flex
+     * objects, else one per account file (the regular collection can't be
+     * iterated). An account file that can't be read is logged and skipped; the
+     * Flex index skips those itself.
+     *
+     * @return iterable<UserInterface>
+     */
+    public function getAccounts(): iterable
+    {
         /** @var UserCollectionInterface $accounts */
         $accounts = $this->grav['accounts'];
-        $stored = $accounts->load((string)$sessionUser->get('username'));
-        if ($stored === $sessionUser || !$stored->exists()) {
-            return false;
-        }
-        if (is_callable([$stored, 'refresh'])) {
-            $stored->refresh(true);
+        if (is_iterable($accounts)) {
+            foreach ($accounts as $account) {
+                if ($account instanceof UserInterface && $account->exists()) {
+                    yield $account;
+                }
+            }
+
+            return;
         }
 
-        $cutoff = (int)$stored->get('api_tokens_valid_after', 0);
+        foreach ($this->accountUsernames() as $username) {
+            try {
+                $account = $accounts->load($username);
+            } catch (\Throwable $e) {
+                $this->grav['log']->error(sprintf('Login: could not read the account "%s": %s', $username, $e->getMessage()));
 
-        return $cutoff > 0 && (int)$sessionUser->get('api_tokens_valid_after', 0) < $cutoff;
+                continue;
+            }
+            if ($account->exists()) {
+                yield $account;
+            }
+        }
+    }
+
+    /**
+     * Every account's username, without loading the accounts: the Flex index's
+     * keys (what load() takes), else the account files' names in every
+     * account:// path, as load() looks in all of them.
+     *
+     * @return string[]
+     */
+    private function accountUsernames(): array
+    {
+        $accounts = $this->grav['accounts'];
+        if (is_iterable($accounts) && is_callable([$accounts, 'getKeys'])) {
+            return array_map('strval', $accounts->getKeys());
+        }
+
+        $usernames = [];
+        foreach ((array)$this->grav['locator']->findResources('account://') as $accountDir) {
+            foreach (scandir($accountDir) ?: [] as $file) {
+                if (Utils::endsWith($file, YAML_EXT)) {
+                    $usernames[trim(Utils::pathinfo($file, PATHINFO_FILENAME))] = true;
+                }
+            }
+        }
+
+        return array_map('strval', array_keys($usernames));
     }
 
     /**
@@ -1147,14 +1633,9 @@ class Login
             return;
         }
 
-        /** @var UserCollectionInterface $users */
-        $users = $this->grav['accounts'];
-        $stored = $users->load($user->username);
-        if ($stored === $user || !$stored->exists()) {
+        $stored = $this->loadStoredAccount($user);
+        if ($stored === $user) {
             return;
-        }
-        if (is_callable([$stored, 'refresh'])) {
-            $stored->refresh(true);
         }
 
         foreach ($fields as $field) {
@@ -1401,7 +1882,7 @@ class Login
     {
         if ($this->passkeys === false) {
             $this->passkeys = Passkeys::supported() && $this->grav['config']->get('plugins.login.passkeys.enabled', false)
-                ? new Passkeys($this->grav)
+                ? new Passkeys($this->grav, $this)
                 : null;
         }
 
