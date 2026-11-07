@@ -230,6 +230,23 @@ PLUGIN_LOGIN:
   LOCKOUT_UNLOCK_LABEL: "Clear login lockout"
   LOCKOUT_UNLOCKED: 'Cleared the login lockout for "%s"'
   LOCKOUT_NOT_LOCKED: '"%s" was not locked out'
+  SESSIONS: "Sessions"
+  SIGN_OUT_LABEL: "Sign out everywhere"
+  SIGN_OUT_CONFIRM: "Sign this account out of every browser and Admin2? Its 'remember me' cookies stop working too. The account, its password and its API keys stay as they are."
+  SIGN_OUT_DONE: 'Signed "%s" out everywhere.'
+  SIGN_OUT_SUPER_ONLY: "Only super admins can sign out super admin accounts."
+  SIGN_OUT_NO_ACCOUNT: 'User "%s" does not exist.'
+  SIGN_OUT_ALL_LABEL: "Sign out all users"
+  SIGN_OUT_ALL_HELP: "Ends the browser sessions, 'remember me' cookies and Admin2 sign-ins of every account, yours included, and the sessions of users without an account file (e.g. unsaved OAuth2 logins). Everyone has to log in again, you too in Admin2; only your own front-end login in this browser stays. Accounts, passwords and API keys stay as they are. For one account: 'Sign out everywhere' on the user's page or in the Users list in Admin2. On the server, for one account or everyone: `bin/plugin login sign-out`."
+  SIGN_OUT_ALL_CONFIRM: "Sign out every account now, yours included? Everyone has to log in again, and Admin2 will ask you to as well."
+  SIGN_OUT_ALL_DONE: "Signed %d accounts out everywhere; their API keys keep working."
+  SIGN_OUT_ALL_DONE_ONE: "Signed 1 account out everywhere; its API keys keep working."
+  SIGN_OUT_ALL_DONE_NONE: "No account was signed out everywhere."
+  SIGN_OUT_ALL_SESSIONS: "Every session that logged in before now has ended too, also those of users without an account file."
+  SIGN_OUT_ALL_SESSIONS_FAILED: "The sessions of users without an account file could not be ended: user/data/login/sign-out-all.yaml could not be written (see the Grav log)."
+  SIGN_OUT_RELOGIN: "Admin2 will ask you to log in again."
+  SIGN_OUT_ALL_FAILED: "Could not sign out: %s (see the Grav log)."
+  SIGN_OUT_ALL_CLASSIC: "Signing out all users works in Admin2, or on the server with:"
   # Titles and body copy for the pages the plugin provides. Titles are applied
   # in Login::getPage(); body headings use the [translate] shortcode. Both only
   # apply to the plugin's own pages: a page the site provides at the same route
@@ -276,6 +293,7 @@ PLUGIN_LOGIN:
   CURRENT_PASSWORD_TOO_MANY: "Too many wrong passwords. Please try again in %s minutes."
   PASSWORD_CHANGED: "Your password has been changed. Any other browser signed in to your account has been signed out."
   SIGNED_OUT_PASSWORD_CHANGED: "The password for your account was changed, so you have been signed out. Please sign in again."
+  SIGNED_OUT: "You have been signed out. Please sign in again."
   2FA_CURRENT_CODE: "Current 2FA code"
   2FA_CURRENT_CODE_HELP: "To turn 2-Factor Authentication off or regenerate the secret, enter the code your authenticator app shows now."
   2FA_CODE_REQUIRED: "Enter the code from your authenticator app to turn 2-Factor Authentication off or regenerate the secret."

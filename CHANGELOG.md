@@ -1,3 +1,14 @@
+# v3.12.2
+## xx/xx/2026
+
+1. [](#new)
+    * **Sign out everywhere**: you can now sign a user out of all their browsers and Admin2 at once, including yourself to end your other sessions. Their account, password and API keys stay as they are. Find it in Admin2's Users list, in the plugin settings (for all users) or as `bin/plugin login sign-out`
+    * For other plugins: `Login::signOutEverywhere()`, `signOutAccounts()`, `signOutEveryone()` and `getAccounts()`; `Login::sessionSignOutReason()` says why a session has to sign in again, and `Login::endOtherSessions()` takes the reason as its third argument
+1. [](#bugfix)
+    * A password change while "Remember me" is off now also deletes the account's "remember me" cookies, so turning it on again doesn't bring them back
+    * A browser signed out for another reason than a password change (e.g. an email change, or its account disabled through the API) is no longer told that its password was changed
+    * Changing your own password from a browser with a "remember me" cookie no longer brings back the other browsers' "remember me" cookies
+
 # v3.12.1
 ## 11/03/2026
 
