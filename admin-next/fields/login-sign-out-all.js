@@ -54,9 +54,7 @@ class LoginSignOutAll extends HTMLElement {
         const label = this._label;
         const dialogs = window.__GRAV_DIALOGS;
         const message = field.content || 'Sign out every account now, yours included?';
-        const confirmed = dialogs
-            ? await dialogs.confirm({ title: field.label || label, message, confirmLabel: label, variant: 'destructive' })
-            : window.confirm(message);
+        const confirmed = await dialogs.confirm({ title: field.label || label, message, confirmLabel: label, variant: 'destructive' });
         if (!confirmed) return;
 
         this._busy = true;
@@ -67,10 +65,10 @@ class LoginSignOutAll extends HTMLElement {
             const done = (result && result.message) || 'Signed out.';
             // Some accounts couldn't be saved, or the other sessions couldn't be ended (the message says which).
             const partial = result && ((Array.isArray(result.failed) && result.failed.length > 0) || result.sessions_ended === false);
-            if (toast) (partial ? toast.warning : toast.success)(done); else window.alert(done);
+            (partial ? toast.warning : toast.success)(done);
         } catch (err) {
             const failed = (err && err.message) || 'Signing out failed.';
-            if (toast) toast.error(failed); else window.alert(failed);
+            toast.error(failed);
         } finally {
             this._busy = false;
             this._button.disabled = false;

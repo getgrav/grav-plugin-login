@@ -1,5 +1,5 @@
-# v3.12.2
-## xx/xx/2026
+# v3.13.0
+## 11/07/2026
 
 1. [](#new)
     * **Sign out everywhere**: you can now sign a user out of all their browsers and Admin2 at once, including yourself to end your other sessions. Their account, password and API keys stay as they are. Find it in Admin2's Users list, in the plugin settings (for all users) or as `bin/plugin login sign-out`

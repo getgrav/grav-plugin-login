@@ -35,7 +35,7 @@ class SignOutController extends AbstractApiController
         $language = $this->grav['language'];
         $user = $this->getUser($request);
         if (!$this->hasPermission($user, 'api.super') && !$this->hasPermission($user, 'admin.super')) {
-            throw new ForbiddenException($language->translate('PLUGIN_LOGIN.SIGN_OUT_SUPER_ONLY'));
+            throw new ForbiddenException($language->translate('PLUGIN_LOGIN.SIGN_OUT_ALL_SUPER_ONLY'));
         }
         // A super admin: the API's own gate still applies its API-key scope cap, with its own message.
         $this->requireSuper($request);

@@ -236,6 +236,7 @@ PLUGIN_LOGIN:
   SIGN_OUT_DONE: 'Signed "%s" out everywhere.'
   SIGN_OUT_SUPER_ONLY: "Only super admins can sign out super admin accounts."
   SIGN_OUT_NO_ACCOUNT: 'User "%s" does not exist.'
+  SIGN_OUT_ALL_SUPER_ONLY: "Only super admins can sign out all users."
   SIGN_OUT_ALL_LABEL: "Sign out all users"
   SIGN_OUT_ALL_HELP: "Ends the browser sessions, 'remember me' cookies and Admin2 sign-ins of every account, yours included, and the sessions of users without an account file (e.g. unsaved OAuth2 logins). Everyone has to log in again, you too in Admin2; only your own front-end login in this browser stays. Accounts, passwords and API keys stay as they are. For one account: 'Sign out everywhere' on the user's page or in the Users list in Admin2. On the server, for one account or everyone: `bin/plugin login sign-out`."
   SIGN_OUT_ALL_CONFIRM: "Sign out every account now, yours included? Everyone has to log in again, and Admin2 will ask you to as well."

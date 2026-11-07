@@ -863,26 +863,12 @@ class Login
      */
     public function signOutEveryone(string $by = '', string $keepFor = ''): array
     {
+        // First, so the sessions end even if the request dies while the accounts are signed out.
+        $this->writeSignOutAllCutoff($keepFor);
         // Listed, not loaded: each account is read when its turn comes.
         $list = $this->signOutList($this->accountUsernames(), $by, $keepFor, true);
-        $result = ['signed_out' => $list['signed_out'], 'failed' => $list['failed'], 'sessions_ended' => false];
-
-        // Last, so it also ends the sessions that logged in while the accounts were signed out.
-        $at = time();
-        $file = CompiledYamlFile::instance((string)$this->grav['locator']->findResource(self::SIGN_OUT_ALL_FILE, true, true));
-        try {
-            $file->save(['at' => $at]);
-            $result['sessions_ended'] = true;
-            $this->signOutAllAt = $at;
-            if ($this->currentSessionUser($keepFor)) {
-                $this->grav['session']->sign_out_all_kept = $at;
-            }
-        } catch (\Throwable $e) {
-            $this->grav['log']->error(sprintf('Login: could not write %s, so the sessions of users without an account file stay: %s', $file->filename(), $e->getMessage()));
-        } finally {
-            // Release Grav's per-request file object.
-            $file->free();
-        }
+        // Again last, so it also ends the sessions that logged in while the accounts were signed out.
+        $result = ['signed_out' => $list['signed_out'], 'failed' => $list['failed'], 'sessions_ended' => $this->writeSignOutAllCutoff($keepFor)];
 
         $count = count($result['signed_out']);
         $this->grav['log']->info(sprintf(
@@ -895,6 +881,34 @@ class Login
         ));
 
         return $result;
+    }
+
+    /**
+     * Writes the site-wide sign-out cutoff (now) that sessionSignOutReason() checks.
+     *
+     * @param string $keepFor See signOutEveryone()
+     * @return bool False when the file could not be written (logged).
+     */
+    private function writeSignOutAllCutoff(string $keepFor): bool
+    {
+        $at = time();
+        $file = CompiledYamlFile::instance((string)$this->grav['locator']->findResource(self::SIGN_OUT_ALL_FILE, true, true));
+        try {
+            $file->save(['at' => $at]);
+            $this->signOutAllAt = $at;
+            if ($this->currentSessionUser($keepFor)) {
+                $this->grav['session']->sign_out_all_kept = $at;
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            $this->grav['log']->error(sprintf('Login: could not write %s, so the sessions of users without an account file stay: %s', $file->filename(), $e->getMessage()));
+
+            return false;
+        } finally {
+            // Release Grav's per-request file object.
+            $file->free();
+        }
     }
 
     /**
@@ -938,7 +952,7 @@ class Login
     /**
      * Whether a session ends with the last "sign out everyone": it logged in
      * before it finished, or in the same second, and isn't the session that ran
-     * it. A session that doesn't know when it logged in (from before 3.12.2, or
+     * it. A session that doesn't know when it logged in (from before 3.13.0, or
      * signed in by a plugin that sets the session's user itself instead of
      * logging in through Login::login()) counts
      * as older while the cutoff is younger than a session can stay idle (the

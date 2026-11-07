@@ -211,7 +211,7 @@ class LoginPlugin extends Plugin
             return;
         }
         if ($user instanceof UserInterface && $user->authenticated && empty($session->login_at)) {
-            // Signed in without onUserLogin (a plugin that sets the user itself, or before 3.12.2): it
+            // Signed in without onUserLogin (a plugin that sets the user itself, or before 3.13.0): it
             // counts from now, so the next "sign out everyone" reaches it.
             $session->login_at = time();
         }

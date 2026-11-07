@@ -36,7 +36,7 @@ final class SignOutRulesTest extends TestCase
             'an older note does not explain this stamp'          => [self::T, ['at' => self::T - 50, 'reason' => 'password'], self::T - 100, [], 'changed'],
             'same second: own password change, then an admin signs out' => [self::T, $everywhere, self::T, $password, 'everywhere'],
             'same second, the same sign-out'                     => [self::T, $everywhere, self::T, $everywhere, null],
-            'before 3.12.2: equal stamps, no notes'              => [self::T, [], self::T, [], null],
+            'before 3.13.0: equal stamps, no notes'              => [self::T, [], self::T, [], null],
         ];
     }
 
