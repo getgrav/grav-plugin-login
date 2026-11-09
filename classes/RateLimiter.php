@@ -9,6 +9,8 @@
 
 namespace Grav\Plugin\Login;
 
+use Grav\Common\Grav;
+
 /**
  * Class RateLimiter
  * @package Grav\Plugin\Login\RateLimiter
@@ -43,6 +45,12 @@ class RateLimiter
     /** @var int */
     protected $interval;
 
+    /** @var string|null Lock file shared by every request using this context. */
+    protected $lockFile;
+
+    /** @var int How deep this process is inside synchronized(). */
+    protected $lockDepth = 0;
+
     /**
      * RateLimiter constructor.
      * @param string $context
@@ -54,6 +62,71 @@ class RateLimiter
         $this->cache = new LoginCache($context, (int)$interval * 60);
         $this->maxCount = (int) $maxCount;
         $this->interval = (int) $interval;
+
+        $dir = Grav::instance()['locator']->findResource('cache://login', true, true);
+        $this->lockFile = $dir ? $dir . '/' . preg_replace('/[^A-Za-z0-9_-]/', '_', (string)$context) . '.lock' : null;
+    }
+
+    /**
+     * Run a callback holding this context's lock, so reading a counter and writing it back
+     * happen as one step for every request on the server. Without it, requests arriving at
+     * the same moment all read the same count, and attempts are lost. Nested calls in the
+     * same process reuse the lock. If the lock file can't be opened, the callback still runs.
+     *
+     * @param callable $callback
+     * @return mixed What the callback returns.
+     */
+    public function synchronized(callable $callback)
+    {
+        $handle = null;
+        if ($this->lockDepth === 0 && $this->lockFile) {
+            $dir = dirname($this->lockFile);
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            $handle = @fopen($this->lockFile, 'c');
+            if ($handle && !flock($handle, LOCK_EX)) {
+                fclose($handle);
+                $handle = null;
+            }
+        }
+
+        $this->lockDepth++;
+        try {
+            return $callback();
+        } finally {
+            $this->lockDepth--;
+            if ($handle) {
+                flock($handle, LOCK_UN);
+                fclose($handle);
+            }
+        }
+    }
+
+    /**
+     * Check the limit and record an attempt as one step. Returns false, recording nothing,
+     * when the key has used up its attempts.
+     *
+     * Use this in place of hasReachedLimit() followed later by registerRateLimitedAction():
+     * with that pair, requests sent at the same moment all pass the check before any of
+     * them is recorded. Count the attempt here, before the secret is checked, and reset
+     * the counter when it turns out to be right.
+     *
+     * @param string $key
+     * @param string $type
+     * @param array<string, string> $links
+     * @return bool
+     */
+    public function attempt($key, $type = 'username', array $links = []): bool
+    {
+        return (bool) $this->synchronized(function () use ($key, $type, $links) {
+            if ($this->hasReachedLimit($key, $type)) {
+                return false;
+            }
+            $this->registerRateLimitedAction($key, $type, $links);
+
+            return true;
+        });
     }
 
     /**
@@ -144,11 +217,13 @@ class RateLimiter
     public function registerRateLimitedAction($key, $type = 'username', array $links = [])
     {
         if ($key && $this->interval) {
-            $tries = $this->getAttempts($key, $type);
-            $tries[] = time();
+            $this->synchronized(function () use ($key, $type, $links) {
+                $tries = $this->getAttempts($key, $type);
+                $tries[] = time();
 
-            $this->cache->set($type . $key, $tries);
-            $this->indexKey($key, $type, $links);
+                $this->cache->set($type . $key, $tries);
+                $this->indexKey($key, $type, $links);
+            });
         }
 
         return $this;
@@ -164,8 +239,12 @@ class RateLimiter
      */
     public function addLinks($key, $type = 'username', array $links = [])
     {
-        if ($key && $this->interval && $links && $this->cache->has($type . $key)) {
-            $this->indexKey($key, $type, $links);
+        if ($key && $this->interval && $links) {
+            $this->synchronized(function () use ($key, $type, $links) {
+                if ($this->cache->has($type . $key)) {
+                    $this->indexKey($key, $type, $links);
+                }
+            });
         }
 
         return $this;
@@ -181,14 +260,16 @@ class RateLimiter
     public function resetRateLimit($key, $type = 'username')
     {
         if ($key) {
-            $this->cache->delete($type . $key);
+            $this->synchronized(function () use ($key, $type) {
+                $this->cache->delete($type . $key);
 
-            $index = $this->getIndex();
-            $id = $this->indexId($key, $type);
-            if (isset($index[$id])) {
-                unset($index[$id]);
-                $this->cache->set(static::INDEX_KEY, $index);
-            }
+                $index = $this->getIndex();
+                $id = $this->indexId($key, $type);
+                if (isset($index[$id])) {
+                    unset($index[$id]);
+                    $this->cache->set(static::INDEX_KEY, $index);
+                }
+            });
         }
 
         return $this;
@@ -211,36 +292,38 @@ class RateLimiter
             return 0;
         }
 
-        $index = $this->getIndex();
+        return (int) $this->synchronized(function () use ($key, $type) {
+            $index = $this->getIndex();
 
-        // Always target the key itself, even if the index never saw it — lockouts
-        // registered before this plugin version have no index entry.
-        $targets = [$this->indexId($key, $type) => ['type' => $type, 'key' => $key]];
-        foreach ($index as $id => $entry) {
-            if (isset($entry['links'][$type][$key])) {
-                $targets[$id] = $entry;
+            // Always target the key itself, even if the index never saw it — lockouts
+            // registered before this plugin version have no index entry.
+            $targets = [$this->indexId($key, $type) => ['type' => $type, 'key' => $key]];
+            foreach ($index as $id => $entry) {
+                if (isset($entry['links'][$type][$key])) {
+                    $targets[$id] = $entry;
+                }
             }
-        }
 
-        $cleared = 0;
-        $touched = false;
-        foreach ($targets as $id => $entry) {
-            $cacheKey = $entry['type'] . $entry['key'];
-            if ($this->cache->has($cacheKey)) {
-                $cleared++;
+            $cleared = 0;
+            $touched = false;
+            foreach ($targets as $id => $entry) {
+                $cacheKey = $entry['type'] . $entry['key'];
+                if ($this->cache->has($cacheKey)) {
+                    $cleared++;
+                }
+                $this->cache->delete($cacheKey);
+                if (isset($index[$id])) {
+                    unset($index[$id]);
+                    $touched = true;
+                }
             }
-            $this->cache->delete($cacheKey);
-            if (isset($index[$id])) {
-                unset($index[$id]);
-                $touched = true;
+
+            if ($touched) {
+                $this->cache->set(static::INDEX_KEY, $index);
             }
-        }
 
-        if ($touched) {
-            $this->cache->set(static::INDEX_KEY, $index);
-        }
-
-        return $cleared;
+            return $cleared;
+        });
     }
 
     /**
@@ -250,7 +333,9 @@ class RateLimiter
      */
     public function resetAllRateLimits()
     {
-        $this->cache->clear();
+        $this->synchronized(function () {
+            $this->cache->clear();
+        });
 
         return $this;
     }

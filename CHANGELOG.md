@@ -1,3 +1,12 @@
+# v3.13.1
+## 11/09/2026
+
+1. [](#bugfix)
+    * Failed logins sent at the same moment are now all counted, and no more get through than `max_login_count` allows. Before, a burst of simultaneous wrong passwords could get past the limit and most of them were never recorded, so the account wasn't locked
+    * Wrong 2FA codes and passkey requests sent at the same moment are limited the same way
+1. [](#improved)
+    * For other plugins: `RateLimiter::attempt()` checks the limit and records an attempt in one step, and `RateLimiter::synchronized()` runs code holding the limiter's lock
+
 # v3.13.0
 ## 11/07/2026
 
