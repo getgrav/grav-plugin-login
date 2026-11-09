@@ -380,13 +380,21 @@ class Login
         $rateLimiter = $this->getRateLimiter('login_attempts');
 
         // Refuse at the limit without registering the attempt, so retrying while
-        // locked out can't keep pushing the end of the lockout further away.
-        if (!$rateLimiter->hasReachedLimit($ipKey, 'ip') && !$rateLimiter->hasReachedLimit($username)) {
+        // locked out can't keep pushing the end of the lockout further away. The check
+        // and the registering happen under one lock, or logins sent at the same moment
+        // would all pass the check before any of them was counted.
+        $allowed = $rateLimiter->synchronized(function () use ($rateLimiter, $ipKey, $username) {
+            if ($rateLimiter->hasReachedLimit($ipKey, 'ip') || $rateLimiter->hasReachedLimit($username)) {
+                return false;
+            }
             // Link the IP counter to the username so an administrator unlocking the
             // account can clear the IP side too.
             $rateLimiter->registerRateLimitedAction($ipKey, 'ip', ['username' => $username])
                 ->registerRateLimitedAction($username);
 
+            return true;
+        });
+        if ($allowed) {
             return 0;
         }
 
@@ -491,15 +499,14 @@ class Login
     {
         $username = (string)$user->get('username');
         $limiter = $this->getRateLimiter('twofa_attempts');
-        if ($limiter->hasReachedLimit($username)) {
+        // Counted before the code is checked (see RateLimiter::attempt()); a right code clears it.
+        if (!$limiter->attempt($username)) {
             return max(1, (int)ceil($limiter->getRetryAfter($username) / 60));
         }
 
         $secret = (string)$this->loadStoredAccount($user)->get('twofa_secret');
         $code = trim((string)$code);
         if ($code === '' || $secret === '' || !$this->twoFactorAuth()->verifyCode($secret, $code)) {
-            $limiter->registerRateLimitedAction($username);
-
             return -1;
         }
 

@@ -59,10 +59,9 @@ class SiteController
 
         if (substr($step, -8) === '-options') {
             $limiter = $this->login->getRateLimiter('passkey_options');
-            if ($limiter->hasReachedLimit($ip, 'ip')) {
+            if (!$limiter->attempt($ip, 'ip')) {
                 return $this->error('PLUGIN_LOGIN.PASSKEY_TOO_MANY_TRIES', 429);
             }
-            $limiter->registerRateLimitedAction($ip, 'ip');
         } elseif (in_array($step, ['sign-in', 'second-step'], true)
             && $this->login->getRateLimiter('passkey_attempts')->hasReachedLimit($ip, 'ip')) {
             return $this->error('PLUGIN_LOGIN.PASSKEY_TOO_MANY_TRIES', 429);

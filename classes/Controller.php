@@ -200,8 +200,10 @@ class Controller
         // one is cleared as soon as the password verifies, and re-doing the
         // password to obtain a fresh challenge is exactly what an attacker
         // guessing the code does on every cycle (GHSA-9j6w-2q6c-q3q8).
+        // The attempt is counted before the code is checked, so codes sent at the same
+        // moment can't all get past the limit; a right code clears the count again.
         $rateLimiter = $this->login->getRateLimiter('twofa_attempts');
-        if ($rateLimiter->isRateLimited($username)) {
+        if (!$rateLimiter->attempt($username)) {
             $messages->add($t->translate(['PLUGIN_LOGIN.TOO_MANY_2FA_ATTEMPTS', $rateLimiter->getInterval()]), 'error');
 
             $user->authenticated = false;
@@ -223,8 +225,6 @@ class Controller
         $event->setUser($user);
 
         if (!$code || !$secret || !$twoFa->verifyCode($secret, $code)) {
-            $rateLimiter->registerRateLimitedAction($username);
-
             $event->setStatus(UserLoginEvent::AUTHENTICATION_FAILURE | UserLoginEvent::AUTHORIZATION_CHALLENGE);
             $event->setMessage($t->translate('PLUGIN_LOGIN.2FA_FAILED'),  'error');
 
