@@ -144,10 +144,11 @@ class SiteController
             return $this->error('PLUGIN_LOGIN.PASSKEY_SIGN_IN_FAILED', 401);
         }
 
-        $remember = !empty($data['rememberme']) && $this->grav['config']->get('plugins.login.rememberme.enabled');
+        // "Remember me" travels as the `rememberme` credential, as from the login form: userLogin() issues the
+        // cookie from it, and only while the setting is on.
         $event = $this->login->login(
-            ['username' => (string)$user->get('username')],
-            ['passkey' => true, 'twofa' => false, 'rate_limit' => false, 'remember_me' => $remember],
+            ['username' => (string)$user->get('username'), 'rememberme' => !empty($data['rememberme'])],
+            ['passkey' => true, 'twofa' => false, 'rate_limit' => false, 'remember_me' => true],
             ['user' => $user, 'return_event' => true]
         );
         $user = $event->getUser();

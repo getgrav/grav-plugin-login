@@ -3,6 +3,7 @@
 
 1. [](#bugfix)
     * A login no longer gets a "remember me" cookie while "Remember me" is off. Before, a request that asked for one, or a login through a plugin such as Login OAuth2, still got it, and the cookie worked once "Remember me" was turned on again
+    * Signing in with a passkey with "Remember me" ticked now keeps you signed in, as signing in with a password does. The box was ignored, so a passkey sign-in was never remembered
 
 # v3.13.1
 ## 11/09/2026
