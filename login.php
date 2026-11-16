@@ -2406,7 +2406,7 @@ class LoginPlugin extends Plugin
             // If the user wants to be remembered, create Rememberme cookie. Only while "Remember me" is on: the
             // login form hides its checkbox then, but a request or another login plugin can still ask for one.
             $username = $user->get('username');
-            if ($event->getCredential('rememberme') && $this->grav['config']->get('plugins.login.rememberme.enabled')) {
+            if ($event->getCredential('rememberme') && $this->config->get('plugins.login.rememberme.enabled')) {
                 if ($event->isDelayed()) {
                     // Defer issuance until the second factor succeeds.
                     $session->remember_me_pending = $username;
