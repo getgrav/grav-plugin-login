@@ -1,3 +1,9 @@
+# v3.13.2
+## 11/13/2026
+
+1. [](#bugfix)
+    * A login no longer gets a "remember me" cookie while "Remember me" is off. Before, a request that asked for one, or a login through a plugin such as Login OAuth2, still got it, and the cookie worked once "Remember me" was turned on again
+
 # v3.13.1
 ## 11/09/2026
 
