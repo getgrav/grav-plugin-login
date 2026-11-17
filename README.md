@@ -267,6 +267,7 @@ rememberme:
   enabled: true                             # Enable 'remember me' functionality
   timeout: 604800                           # Timeout in seconds. Defaults to 1 week
   name: grav-rememberme                     # Name prefix of the session cookie
+  always: false                             # Remember every sign-in on the site (password, passkey, magic link, sign-in services) without asking; the login form's checkbox is hidden. Admin sign-ins aren't affected
 
 max_pw_resets_count: 2                      # Number of password resets in a specific time frame (0 = unlimited)
 max_pw_resets_interval: 60                  # Time in minutes to track password resets
@@ -454,7 +455,7 @@ A "Login by link" button is automatically shown on the standard login page when 
 - Rate limiting applies per IP and per user account. When the limit is exceeded, an explicit "wait N minutes" message is shown.
 - If multiple accounts share the same email address, magic-link sign-in is blocked for that email and the user is asked to contact an administrator.
 - 2FA is respected if `twofa_enabled: true` in the plugin configuration.
-- `remember_me` is never set via magic link login.
+- A magic link sign-in isn't remembered, unless `rememberme.always` is on.
 
 ## Customizing the request page
 
