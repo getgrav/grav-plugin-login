@@ -41,6 +41,8 @@ PLUGIN_LOGIN:
   SESSION: "&ldquo;Remember Me&rdquo;-Session"
   REMEMBER_ME: "Remember Me"
   REMEMBER_ME_HELP: "Sets a persistent cookie on your browser to allow persistent-login authentication between sessions."
+  REMEMBER_ME_ALWAYS: "Remember every sign-in"
+  REMEMBER_ME_ALWAYS_HELP: "Keep people signed in after every sign-in on the site, by password, passkey, magic link or a sign-in service, without asking. The login form's \"Remember Me\" checkbox is hidden. Admin sign-ins aren't affected"
   REMEMBER_ME_STOLEN_COOKIE: "Someone else has used your login information to access this page! All sessions were logged out. Please log in with your credentials and check your data."
   BUILTIN_CSS: "Use built in CSS"
   BUILTIN_CSS_HELP: "Add the Login plugin's CSS to the site's pages, styling its login form and messages. Admin isn't affected. Turn it off to style them in your theme instead"

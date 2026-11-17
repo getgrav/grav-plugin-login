@@ -1,3 +1,9 @@
+# v3.13.3
+## 11/17/2026
+
+1. [](#new)
+    * **Remember every sign-in** (`rememberme.always`): keeps people signed in after every sign-in on the site, by password, passkey, magic link or a sign-in service, without a "Remember Me" checkbox, which the login form then hides. Useful for a sign-in form that has no checkbox, such as a store's. Admin sign-ins aren't affected. Off by default
+
 # v3.13.2
 ## 11/16/2026
 

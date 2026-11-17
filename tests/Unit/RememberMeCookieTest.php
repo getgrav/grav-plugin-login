@@ -45,10 +45,55 @@ final class RememberMeCookieTest extends TestCase
     #[DataProvider('logins')]
     public function testTheCookieFollowsTheSetting(bool $enabled, mixed $asked, bool $delayed, int $cookies, bool $pending): void
     {
+        $session = $this->runLogin(['plugins.login.rememberme.enabled' => $enabled], $asked, ['remember_me' => true], $delayed, $cookies);
+
+        self::assertSame($pending, isset($session->remember_me_pending));
+    }
+
+    /**
+     * @return array<string, array{0: bool, 1: array<string, mixed>, 2: bool, 3: int, 4: bool}>
+     */
+    public static function alwaysLogins(): array
+    {
+        // remember-me on, login options, 2FA pending, cookies created, pending set
+        return [
+            'password form, box not ticked'       => [true, ['rate_limit' => true, 'remember_me' => true, 'twofa' => true], false, 1, false],
+            'passkey'                             => [true, ['passkey' => true, 'remember_me' => true], false, 1, false],
+            'magic link (remember_me false)'      => [true, ['magic_link' => true, 'remember_me' => false], false, 1, false],
+            'magic link, 2FA still to come'       => [true, ['magic_link' => true, 'remember_me' => false], true, 0, true],
+            'admin sign-in'                       => [true, ['admin' => true, 'twofa' => false], false, 0, false],
+            'the remember-me cookie itself'       => [true, ['remember_me' => true, 'remember_me_login' => true], false, 0, false],
+            'remember-me turned off'              => [false, ['magic_link' => true, 'remember_me' => false], false, 0, false],
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     */
+    #[DataProvider('alwaysLogins')]
+    public function testRememberEverySignIn(bool $enabled, array $options, bool $delayed, int $cookies, bool $pending): void
+    {
+        $session = $this->runLogin(
+            ['plugins.login.rememberme.enabled' => $enabled, 'plugins.login.rememberme.always' => true],
+            null,
+            $options,
+            $delayed,
+            $cookies
+        );
+
+        self::assertSame($pending, isset($session->remember_me_pending));
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     * @param array<string, mixed> $options
+     */
+    private function runLogin(array $settings, mixed $asked, array $options, bool $delayed, int $cookies): \stdClass
+    {
         $rememberMe = $this->createMock(RememberMe::class);
         $rememberMe->expects(self::exactly($cookies))->method('createCookie')->with('jdoe');
 
-        $config = new class(['plugins.login.rememberme.enabled' => $enabled, 'system.session.initialize' => false]) {
+        $config = new class($settings + ['system.session.initialize' => false]) {
             /** @param array<string, mixed> $settings */
             public function __construct(private array $settings) {}
 
@@ -72,7 +117,7 @@ final class RememberMeCookieTest extends TestCase
         $status = UserLoginEvent::AUTHENTICATION_SUCCESS | ($delayed ? UserLoginEvent::AUTHORIZATION_DELAYED : 0);
         $event = new UserLoginEvent([
             'credentials' => $asked === null ? [] : ['rememberme' => $asked],
-            'options' => ['remember_me' => true],
+            'options' => $options,
             'session' => $session,
             'user' => $user,
             'status' => $status,
@@ -80,6 +125,6 @@ final class RememberMeCookieTest extends TestCase
 
         $plugin->userLogin($event);
 
-        self::assertSame($pending, isset($session->remember_me_pending));
+        return $session;
     }
 }

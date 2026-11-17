@@ -2397,7 +2397,14 @@ class LoginPlugin extends Plugin
         // starts empty, so anything stored before it is lost.
         $session->login_at = time();
 
-        if ($event->getOption('remember_me')) {
+        // "Remember every sign-in" (rememberme.always): a sign-in on the site is remembered without its
+        // checkbox, a magic link's too. Not an Admin sign-in, and not a sign-in by the remember-me cookie
+        // itself, which renews its own.
+        $always = $this->config->get('plugins.login.rememberme.always')
+            && !$event->getOption('admin')
+            && !$event->getOption('remember_me_login');
+
+        if ($event->getOption('remember_me') || $always) {
             /** @var Login $login */
             $login = $this->grav['login'];
 
@@ -2406,7 +2413,7 @@ class LoginPlugin extends Plugin
             // If the user wants to be remembered, create Rememberme cookie. Only while "Remember me" is on: the
             // login form hides its checkbox then, but a request or another login plugin can still ask for one.
             $username = $user->get('username');
-            if ($event->getCredential('rememberme') && $this->config->get('plugins.login.rememberme.enabled')) {
+            if (($event->getCredential('rememberme') || $always) && $this->config->get('plugins.login.rememberme.enabled')) {
                 if ($event->isDelayed()) {
                     // Defer issuance until the second factor succeeds.
                     $session->remember_me_pending = $username;

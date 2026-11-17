@@ -62,7 +62,7 @@
 
                 <div class="{{ form_button_outer_classes ?: 'form-actions secondary-accent' }}">
                     {% if show_password %}
-                    {% if config.plugins.login.rememberme.enabled and form.login.rememberme ?? true %}
+                    {% if config.plugins.login.rememberme.enabled and not config.plugins.login.rememberme.always and (form.login.rememberme ?? true) %}
                         <div class="form-data rememberme" data-grav-default="null" data-grav-disabled="true" data-grav-field="checkbox">
                             <div class="form-input-wrapper">
                                 <input type="checkbox" value="1" name="rememberme" id="#rememberme">
