@@ -1,7 +1,7 @@
 name: Login
 slug: login
 type: plugin
-version: 3.13.2
+version: 3.13.3
 testing: false
 description: Enables user authentication and login screen.
 icon: sign-in
@@ -142,6 +142,18 @@ form:
                   label: PLUGIN_ADMIN.ENABLED
                   help: PLUGIN_ADMIN.SESSION_ENABLED_HELP
                   highlight: 1
+                  options:
+                      1: PLUGIN_ADMIN.YES
+                      0: PLUGIN_ADMIN.NO
+                  validate:
+                      type: bool
+
+                rememberme.always:
+                  type: toggle
+                  label: PLUGIN_LOGIN.REMEMBER_ME_ALWAYS
+                  help: PLUGIN_LOGIN.REMEMBER_ME_ALWAYS_HELP
+                  highlight: 0
+                  default: 0
                   options:
                       1: PLUGIN_ADMIN.YES
                       0: PLUGIN_ADMIN.NO
