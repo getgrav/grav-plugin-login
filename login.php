@@ -1925,6 +1925,7 @@ class LoginPlugin extends Plugin
         // the code an account could be switched on with a secret the person's
         // app doesn't hold (a QR code scanned before a Regenerate, say), and
         // the next sign-in would lock them out.
+        $twofaChange = null;
         if (!empty($data['twofa_enabled']) && !$this->login->hasActiveTwoFactor($user)) {
             $secret = Login::cleanTwoFactorSecret($this->postedProfileValue($form, 'twofa_secret'))
                 ?? Login::cleanTwoFactorSecret($user->get('twofa_secret'));
@@ -1941,6 +1942,7 @@ class LoginPlugin extends Plugin
             }
             $data['twofa_enabled'] = true;
             $data['twofa_secret'] = $secret;
+            $twofaChange = 'PLUGIN_LOGIN.2FA_TURNED_ON';
         }
 
         // A `twofa_enabled` that came through empty is no change, not a request
@@ -1962,6 +1964,7 @@ class LoginPlugin extends Plugin
                 $event->stopPropagation();
                 return false;
             }
+            $twofaChange = 'PLUGIN_LOGIN.2FA_TURNED_OFF';
         }
 
         // A new password needs the current one (unless the account has none yet,
@@ -2044,6 +2047,12 @@ class LoginPlugin extends Plugin
 
             if ($passwordChanged) {
                 $this->grav['messages']->add($language->translate('PLUGIN_LOGIN.PASSWORD_CHANGED'), 'info');
+            }
+
+            // The form's own "profile updated" says nothing about 2FA, and the
+            // page looks much the same either way, so say what changed.
+            if ($twofaChange !== null) {
+                $this->grav['messages']->add($language->translate($twofaChange), 'info');
             }
 
             if ($user instanceof FlexObjectInterface) {

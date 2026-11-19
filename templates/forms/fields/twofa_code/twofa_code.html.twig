@@ -7,7 +7,12 @@
 {% block field %}
     {% set account = form.object ?? grav.user %}
     {% if grav.login.hasActiveTwoFactor(account) %}
+        {# Says that 2FA is on, and the help is drawn as text rather than a
+           tooltip: otherwise an empty "Current 2FA code" field reads as one
+           that still has to be filled in. #}
+        <p class="twofa-status" style="margin: 0 0 1rem;">{{ 'PLUGIN_LOGIN.2FA_IS_ON'|t }}</p>
         {{ parent() }}
+        <p class="twofa-code-help" style="margin: 0.25rem 0 1rem; font-size: 0.875em;">{{ (field.help ?? 'PLUGIN_LOGIN.2FA_CURRENT_CODE_HELP')|t }}</p>
     {% endif %}
 {% endblock %}
 

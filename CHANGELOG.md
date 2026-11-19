@@ -4,6 +4,7 @@
 1. [](#bugfix)
     * Turning on 2-Factor Authentication from the profile page now asks for a code from your authenticator app, and saves the secret only once that code checks out. Before, nothing checked that the app and the account had the same secret: the first QR code shown was never saved, so anyone who scanned it, or scanned one and then pressed Regenerate, could end up with 2FA on and a secret their app didn't have, and be locked out at the next sign-in. Now you scan the QR code, enter the code and save, with no Regenerate step. A site with its own profile form gets the code field with its `2fa_secret` field
 1. [](#improved)
+    * The profile page now says when 2-Factor Authentication has been turned on or off, and while it's on, the 2FA section says so and explains that the "Current 2FA code" field is only needed to turn it off or regenerate the secret. Before, saving showed only "Your profile has been updated" and the page looked the same as before
     * For other plugins: `Login::verifyNewTwoFactorCode()` and `newTwoFactorCodeError()` check a code against a secret being set up, and `Login::cleanTwoFactorSecret()` and `cleanTwoFactorCode()` tidy what was typed or posted. 2FA codes typed with a space, as apps show them ("123 456"), are now accepted when turning 2FA off or regenerating the secret
 
 # v3.13.3
