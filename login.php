@@ -1920,16 +1920,27 @@ class LoginPlugin extends Plugin
             }
         }
 
-        // The secret shown on the profile page is only stored by Regenerate, so
-        // switching two-factor on without one would save an account that reads
-        // as protected but is never asked for a code.
-        if (!empty($data['twofa_enabled']) && !$user->get('twofa_secret')) {
-            $this->grav->fireEvent('onFormValidationError', new Event([
-                'form'    => $form,
-                'message' => $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
-            ]));
-            $event->stopPropagation();
-            return false;
+        // Turning two-factor on takes a code from the authenticator app for the
+        // secret the page showed, and only then is that secret saved. Without
+        // the code an account could be switched on with a secret the person's
+        // app doesn't hold (a QR code scanned before a Regenerate, say), and
+        // the next sign-in would lock them out.
+        if (!empty($data['twofa_enabled']) && !$this->login->hasActiveTwoFactor($user)) {
+            $secret = Login::cleanTwoFactorSecret($this->postedProfileValue($form, 'twofa_secret'))
+                ?? Login::cleanTwoFactorSecret($user->get('twofa_secret'));
+            $twofaError = $secret === null
+                ? $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
+                : $this->login->newTwoFactorCodeError($user, $secret, $this->postedProfileValue($form, 'twofa_code'));
+            if ($twofaError !== null) {
+                $this->grav->fireEvent('onFormValidationError', new Event([
+                    'form'    => $form,
+                    'message' => $twofaError
+                ]));
+                $event->stopPropagation();
+                return false;
+            }
+            $data['twofa_enabled'] = true;
+            $data['twofa_secret'] = $secret;
         }
 
         // A `twofa_enabled` that came through empty is no change, not a request
@@ -1942,7 +1953,7 @@ class LoginPlugin extends Plugin
         // signed-in session alone can't remove it.
         if (array_key_exists('twofa_enabled', $data) && empty($data['twofa_enabled'])
             && $this->login->hasActiveTwoFactor($user)) {
-            $twofaError = $this->login->twoFactorCodeError($user, $form->getData('twofa_code'));
+            $twofaError = $this->login->twoFactorCodeError($user, $this->postedProfileValue($form, 'twofa_code'));
             if ($twofaError !== null) {
                 $this->grav->fireEvent('onFormValidationError', new Event([
                     'form'    => $form,
@@ -2054,6 +2065,29 @@ class LoginPlugin extends Plugin
         }
 
         return true;
+    }
+
+    /**
+     * A value the profile form posted. The form's data holds only the fields
+     * its blueprint names, and a site's own profile form may draw the 2FA
+     * secret field (which carries the setup code input) without a `twofa_code`
+     * field, so the request body is read when the form has no such field.
+     *
+     * @param FormInterface $form
+     * @param string $name
+     * @return mixed
+     */
+    private function postedProfileValue(FormInterface $form, string $name)
+    {
+        $value = $form->getData($name);
+        if ($value !== null) {
+            return $value;
+        }
+
+        $post = $this->grav['request']->getParsedBody();
+        $value = is_array($post) ? ($post['data'][$name] ?? null) : null;
+
+        return is_string($value) ? $value : null;
     }
 
     /**
