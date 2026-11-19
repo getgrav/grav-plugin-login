@@ -631,6 +631,18 @@ class Login
     }
 
     /**
+     * The 2FA secret saved on $user's stored account, cleaned, or null when it
+     * has none. Admin Next saves it grouped in fours, so it is cleaned first.
+     *
+     * @param UserInterface $user
+     * @return string|null
+     */
+    public function storedTwoFactorSecret(UserInterface $user): ?string
+    {
+        return static::cleanTwoFactorSecret($this->loadStoredAccount($user)->get('twofa_secret'));
+    }
+
+    /**
      * The stored account of $user (a session's copy), to check against it.
      *
      * @param UserInterface $user

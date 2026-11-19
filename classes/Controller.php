@@ -748,58 +748,133 @@ class Controller
     }
 
     /**
-     * @param null $secret
+     * [login.regenerate2FASecret] A new 2FA secret and its QR code, for the
+     * profile page's 2FA panel: "Enable 2FA", and "Regenerate" with 2FA on.
+     * The secret is saved with 2FA off: it goes on only once a code from it
+     * checks out (login.twofaEnable), so an account is never switched on with
+     * a secret the person's app doesn't hold.
+     *
      * @return bool
      */
     public function taskRegenerate2FASecret()
     {
-        try {
-            /** @var UserInterface $user */
-            $user = $this->grav['user'];
-
-            // Require a fully authorized session, not merely an existing one.
-            // During the 2FA challenge the session user is authenticated but
-            // NOT authorized (Login sets `authorized = false` while the login is
-            // delayed). Gating on `exists()` alone let a pending attacker mint
-            // and read the victim's new 2FA secret (GHSA-7mgc). Legitimate
-            // first-time enrollment / QR regeneration happens from the account
-            // profile page where the user is fully logged in (authorized=true),
-            // so that flow still passes this gate.
-            if ($user->exists() && $user->authorized === true) {
-                // Replacing an active second factor takes a current code, so a
-                // signed-in session alone can't swap in a secret of its own.
-                // First-time setup (2FA not on yet) needs none.
-                if ($this->login->hasActiveTwoFactor($user)) {
-                    $error = $this->login->twoFactorCodeError($user, $this->post['twofa_code'] ?? null);
-                    if ($error !== null) {
-                        header('Content-Type: application/json');
-                        echo json_encode(['status' => 'error', 'message' => $error]);
-                        exit;
-                    }
+        $this->twoFactorTask(function (UserInterface $user) {
+            // Replacing an active second factor takes a current code, so a
+            // signed-in session alone can't swap in a secret of its own (or,
+            // since a new secret turns 2FA off, drop it). First-time setup
+            // needs none.
+            if ($this->login->hasActiveTwoFactor($user)) {
+                $error = $this->login->twoFactorCodeError($user, $this->post['twofa_code'] ?? null);
+                if ($error !== null) {
+                    return ['status' => 'error', 'message' => $error];
                 }
-
-                /** @var TwoFactorAuth $twoFa */
-                $twoFa = $this->grav['login']->twoFactorAuth();
-                $secret = $twoFa->createSecret();
-                $image = $twoFa->getQrImageData($user->username, $secret);
-
-                // Change secret in the session.
-                $user->twofa_secret = $secret;
-
-                // Save secret into the user file.
-                $user->save();
-
-                $json_response = ['status' => 'success', 'image' => $image, 'secret' => trim(preg_replace('|(\w{4})|', '\\1 ', $secret))];
-            } else {
-                $json_response = ['status' => 'error', 'message' => 'user does not exist'];
             }
+
+            /** @var TwoFactorAuth $twoFa */
+            $twoFa = $this->login->twoFactorAuth();
+            $secret = $twoFa->createSecret();
+
+            $user->set('twofa_secret', $secret);
+            $user->set('twofa_enabled', false);
+            $user->save();
+
+            return [
+                'status' => 'success',
+                'image' => $twoFa->getQrImageData($user->username, $secret),
+                'secret' => trim(chunk_split($secret, 4, ' ')),
+            ];
+        });
+
+        return true;
+    }
+
+    /**
+     * [login.twofaEnable] "Verify & Enable": turn 2FA on once a code from the
+     * app checks out against the saved secret.
+     *
+     * @return bool
+     */
+    public function taskTwofaEnable()
+    {
+        $this->twoFactorTask(function (UserInterface $user) {
+            $language = $this->grav['language'];
+
+            if ($this->login->hasActiveTwoFactor($user)) {
+                return ['status' => 'success', 'message' => $language->translate('PLUGIN_LOGIN.2FA_TURNED_ON')];
+            }
+
+            $secret = $this->login->storedTwoFactorSecret($user);
+            $error = $secret === null
+                ? $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
+                : $this->login->newTwoFactorCodeError($user, $secret, $this->post['twofa_code'] ?? null);
+            if ($error !== null) {
+                return ['status' => 'error', 'message' => $error];
+            }
+
+            $user->set('twofa_secret', $secret);
+            $user->set('twofa_enabled', true);
+            $user->save();
+
+            return ['status' => 'success', 'message' => $language->translate('PLUGIN_LOGIN.2FA_TURNED_ON')];
+        });
+
+        return true;
+    }
+
+    /**
+     * [login.twofaDisable] Turn 2FA off and drop the secret. Takes a current
+     * code, so a signed-in session alone can't remove the second factor.
+     *
+     * @return bool
+     */
+    public function taskTwofaDisable()
+    {
+        $this->twoFactorTask(function (UserInterface $user) {
+            if ($this->login->hasActiveTwoFactor($user)) {
+                $error = $this->login->twoFactorCodeError($user, $this->post['twofa_code'] ?? null);
+                if ($error !== null) {
+                    return ['status' => 'error', 'message' => $error];
+                }
+            }
+
+            $user->set('twofa_enabled', false);
+            $user->set('twofa_secret', '');
+            $user->save();
+
+            return ['status' => 'success', 'message' => $this->grav['language']->translate('PLUGIN_LOGIN.2FA_TURNED_OFF')];
+        });
+
+        return true;
+    }
+
+    /**
+     * Run one of the profile page's 2FA panel tasks for the signed-in account
+     * and answer with JSON.
+     *
+     * Only a fully authorized session gets here. During the 2FA challenge the
+     * session user is authenticated but not authorized, and gating on
+     * `exists()` alone let a pending sign-in mint and read the account's new
+     * secret (GHSA-7mgc).
+     *
+     * @param callable(UserInterface): array $action
+     * @return never
+     */
+    private function twoFactorTask(callable $action): void
+    {
+        /** @var UserInterface $user */
+        $user = $this->grav['user'];
+
+        try {
+            $response = $user->exists() && $user->authorized === true
+                ? $action($user)
+                : ['status' => 'error', 'message' => $this->grav['language']->translate('PLUGIN_LOGIN.ACCESS_DENIED')];
         } catch (\Exception $e) {
-            $json_response = ['status' => 'error', 'message' => $e->getMessage()];
+            $response = ['status' => 'error', 'message' => $e->getMessage()];
         }
 
-        // Return JSON
         header('Content-Type: application/json');
-        echo json_encode($json_response);
+        header('Cache-Control: no-store');
+        echo json_encode($response);
         exit;
     }
 

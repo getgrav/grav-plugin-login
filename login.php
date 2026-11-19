@@ -94,6 +94,8 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
+            'onTask.login.twofaEnable'  => ['loginController', 0],
+            'onTask.login.twofaDisable' => ['loginController', 0],
             'onTask.login.resendEmailChange' => ['loginController', 0],
             'onTask.login.cancelEmailChange' => ['loginController', 0],
             'onTask.login.passkey'      => ['passkeyController', 0],
@@ -1068,10 +1070,11 @@ class LoginPlugin extends Plugin
                 break;
 
             case 'regenerate2FASecret':
-                // CSRF hardening (GHSA-4px8): this task was previously reachable
-                // with no nonce and via a top-level GET (SameSite=Lax). Require
-                // POST to kill the Lax GET vector, and verify the `login-form`
-                // nonce that the 2FA setup field now sends.
+            case 'twofaEnable':
+            case 'twofaDisable':
+                // CSRF hardening (GHSA-4px8): the profile page's 2FA panel tasks
+                // change the account, so they take a POST (no SameSite=Lax GET
+                // vector) and the `login-form` nonce the panel sends.
                 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST'
                     || !isset($post['login-form-nonce'])
                     || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
@@ -1920,52 +1923,11 @@ class LoginPlugin extends Plugin
             }
         }
 
-        // Turning two-factor on takes a code from the authenticator app for the
-        // secret the page showed, and only then is that secret saved. Without
-        // the code an account could be switched on with a secret the person's
-        // app doesn't hold (a QR code scanned before a Regenerate, say), and
-        // the next sign-in would lock them out.
-        $twofaChange = null;
-        if (!empty($data['twofa_enabled']) && !$this->login->hasActiveTwoFactor($user)) {
-            $secret = Login::cleanTwoFactorSecret($this->postedProfileValue($form, 'twofa_secret'))
-                ?? Login::cleanTwoFactorSecret($user->get('twofa_secret'));
-            $twofaError = $secret === null
-                ? $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
-                : $this->login->newTwoFactorCodeError($user, $secret, $this->postedProfileValue($form, 'twofa_code'));
-            if ($twofaError !== null) {
-                $this->grav->fireEvent('onFormValidationError', new Event([
-                    'form'    => $form,
-                    'message' => $twofaError
-                ]));
-                $event->stopPropagation();
-                return false;
-            }
-            $data['twofa_enabled'] = true;
-            $data['twofa_secret'] = $secret;
-            $twofaChange = 'PLUGIN_LOGIN.2FA_TURNED_ON';
-        }
-
-        // A `twofa_enabled` that came through empty is no change, not a request
-        // to switch 2FA off.
-        if (array_key_exists('twofa_enabled', $data) && $data['twofa_enabled'] === null) {
-            unset($data['twofa_enabled']);
-        }
-
-        // Turning off an active second factor takes a current code, so a
-        // signed-in session alone can't remove it.
-        if (array_key_exists('twofa_enabled', $data) && empty($data['twofa_enabled'])
-            && $this->login->hasActiveTwoFactor($user)) {
-            $twofaError = $this->login->twoFactorCodeError($user, $this->postedProfileValue($form, 'twofa_code'));
-            if ($twofaError !== null) {
-                $this->grav->fireEvent('onFormValidationError', new Event([
-                    'form'    => $form,
-                    'message' => $twofaError
-                ]));
-                $event->stopPropagation();
-                return false;
-            }
-            $twofaChange = 'PLUGIN_LOGIN.2FA_TURNED_OFF';
-        }
+        // 2-Factor Authentication changes only through the 2FA panel's own
+        // tasks (login.regenerate2FASecret, login.twofaEnable, login.twofaDisable),
+        // each checking a code from the app. A profile form drawn before that
+        // (one with the old Yes/No toggle) still posts these: they are no change.
+        unset($data['twofa_enabled'], $data['twofa_secret'], $data['twofa_code']);
 
         // A new password needs the current one (unless the account has none yet,
         // such as one created by a sign-in service) and, when the form asks for
@@ -2049,12 +2011,6 @@ class LoginPlugin extends Plugin
                 $this->grav['messages']->add($language->translate('PLUGIN_LOGIN.PASSWORD_CHANGED'), 'info');
             }
 
-            // The form's own "profile updated" says nothing about 2FA, and the
-            // page looks much the same either way, so say what changed.
-            if ($twofaChange !== null) {
-                $this->grav['messages']->add($language->translate($twofaChange), 'info');
-            }
-
             if ($user instanceof FlexObjectInterface) {
                 $flash->clearFiles();
                 $flash->save();
@@ -2074,29 +2030,6 @@ class LoginPlugin extends Plugin
         }
 
         return true;
-    }
-
-    /**
-     * A value the profile form posted. The form's data holds only the fields
-     * its blueprint names, and a site's own profile form may draw the 2FA
-     * secret field (which carries the setup code input) without a `twofa_code`
-     * field, so the request body is read when the form has no such field.
-     *
-     * @param FormInterface $form
-     * @param string $name
-     * @return mixed
-     */
-    private function postedProfileValue(FormInterface $form, string $name)
-    {
-        $value = $form->getData($name);
-        if ($value !== null) {
-            return $value;
-        }
-
-        $post = $this->grav['request']->getParsedBody();
-        $value = is_array($post) ? ($post['data'][$name] ?? null) : null;
-
-        return is_string($value) ? $value : null;
     }
 
     /**

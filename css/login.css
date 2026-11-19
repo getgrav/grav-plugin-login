@@ -144,3 +144,122 @@
 .passkey-proof label {
     display: block;
 }
+
+/* 2-Factor Authentication panel on the profile page. Colours come from the
+   theme's text colour, so it sits on light and dark themes alike. */
+.twofa-panel {
+    border: 1px solid rgba(127, 127, 127, 0.3);
+    border-radius: 8px;
+    background: rgba(127, 127, 127, 0.05);
+    padding: 1rem;
+}
+.twofa-panel [hidden] {
+    display: none !important;
+}
+.twofa-panel .twofa-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+.twofa-panel .twofa-head-text {
+    flex: 1;
+    min-width: 0;
+}
+.twofa-panel .twofa-title {
+    margin: 0;
+    font-weight: 600;
+}
+.twofa-panel .twofa-text {
+    margin: 0.15rem 0 0 0;
+    font-size: 0.875em;
+    opacity: 0.75;
+}
+.twofa-panel .twofa-icon {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.twofa-panel .twofa-icon-off { opacity: 0.6; }
+.twofa-panel .twofa-icon-finish { color: #f59e0b; }
+.twofa-panel .twofa-icon-on { color: #22c55e; }
+.twofa-panel .twofa-head-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.twofa-panel .twofa-qr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+.twofa-panel .twofa-qr-image {
+    width: 168px;
+    height: 168px;
+    padding: 8px;
+    border-radius: 8px;
+    background: #fff;
+}
+.twofa-panel .twofa-secret-box {
+    flex: 1;
+    min-width: 12rem;
+}
+.twofa-panel .twofa-label {
+    display: block;
+    margin: 0 0 0.35rem 0;
+    font-size: 0.875em;
+    font-weight: 500;
+}
+.twofa-panel .twofa-secret-code {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    background: rgba(127, 127, 127, 0.12);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    overflow-wrap: anywhere;
+}
+.twofa-panel .twofa-confirm {
+    margin-top: 1rem;
+}
+.twofa-panel .twofa-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+.twofa-panel .twofa-row .twofa-code-wrapper {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+}
+.twofa-panel .twofa-row .twofa-code {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.3em;
+}
+.twofa-panel .twofa-row .button {
+    flex: none;
+    white-space: nowrap;
+}
+.twofa-panel .twofa-error,
+.twofa-panel .twofa-notice {
+    margin: 0.75rem 0 0 0;
+}
+.twofa-panel .twofa-notice {
+    color: #22c55e;
+}
+@media (max-width: 480px) {
+    .twofa-panel .twofa-head { flex-wrap: wrap; }
+    .twofa-panel .twofa-row { flex-wrap: wrap; }
+    .twofa-panel .twofa-row .twofa-code-wrapper { flex-basis: 100%; }
+}

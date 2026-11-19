@@ -1,23 +1,4 @@
-{% extends "forms/fields/text/text.html.twig" %}
-
-{# The current 2FA code, asked for on the profile form while the account has
-   2-Factor Authentication on: turning it off or regenerating the secret needs
-   it. Left out otherwise. #}
-
-{% block field %}
-    {% set account = form.object ?? grav.user %}
-    {% if grav.login.hasActiveTwoFactor(account) %}
-        {# Says that 2FA is on, and the help is drawn as text rather than a
-           tooltip: otherwise an empty "Current 2FA code" field reads as one
-           that still has to be filled in. #}
-        <p class="twofa-status" style="margin: 0 0 1rem;">{{ 'PLUGIN_LOGIN.2FA_IS_ON'|t }}</p>
-        {{ parent() }}
-        <p class="twofa-code-help" style="margin: 0.25rem 0 1rem; font-size: 0.875em;">{{ (field.help ?? 'PLUGIN_LOGIN.2FA_CURRENT_CODE_HELP')|t }}</p>
-    {% endif %}
-{% endblock %}
-
-{% block input_attributes %}
-    inputmode="numeric"
-    data-2fa-code
-    {{ parent() }}
-{% endblock %}
+{# Kept so profile forms that still list a `twofa_code` field render: the
+   2FA panel (the 2fa_secret field) asks for the current code itself now, so
+   this draws nothing. #}
+{% block field %}{% endblock %}
