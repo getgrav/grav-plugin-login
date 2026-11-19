@@ -497,6 +497,33 @@ class Login
      */
     public function verifyCurrentTwoFactorCode(UserInterface $user, ?string $code): int
     {
+        return $this->verifyTwoFactorCodeFor($user, null, $code);
+    }
+
+    /**
+     * Check a code typed to turn 2-Factor Authentication on: it has to come from
+     * the secret being set up, so an account is never switched on with a secret
+     * the person's app doesn't hold. Counted like verifyCurrentTwoFactorCode().
+     *
+     * @param UserInterface $user
+     * @param string $secret The secret being set up.
+     * @param string|null $code
+     * @return int 0 when the code is right, -1 when it is wrong, or the minutes
+     *             to wait when too many wrong codes were tried.
+     */
+    public function verifyNewTwoFactorCode(UserInterface $user, string $secret, ?string $code): int
+    {
+        return $this->verifyTwoFactorCodeFor($user, $secret, $code);
+    }
+
+    /**
+     * @param UserInterface $user
+     * @param string|null $secret The secret to check against, or null for the stored one.
+     * @param string|null $code
+     * @return int
+     */
+    private function verifyTwoFactorCodeFor(UserInterface $user, ?string $secret, ?string $code): int
+    {
         $username = (string)$user->get('username');
         $limiter = $this->getRateLimiter('twofa_attempts');
         // Counted before the code is checked (see RateLimiter::attempt()); a right code clears it.
@@ -504,8 +531,8 @@ class Login
             return max(1, (int)ceil($limiter->getRetryAfter($username) / 60));
         }
 
-        $secret = (string)$this->loadStoredAccount($user)->get('twofa_secret');
-        $code = trim((string)$code);
+        $secret ??= (string)$this->loadStoredAccount($user)->get('twofa_secret');
+        $code = static::cleanTwoFactorCode($code);
         if ($code === '' || $secret === '' || !$this->twoFactorAuth()->verifyCode($secret, $code)) {
             return -1;
         }
@@ -541,6 +568,78 @@ class Login
         }
 
         return null;
+    }
+
+    /**
+     * Check the code given to turn 2-Factor Authentication on with $secret, and
+     * say why it was refused (null when it is right).
+     *
+     * @param UserInterface $user
+     * @param string $secret
+     * @param mixed $code
+     * @return string|null
+     */
+    public function newTwoFactorCodeError(UserInterface $user, string $secret, $code): ?string
+    {
+        /** @var Language $language */
+        $language = $this->grav['language'];
+
+        if (!is_string($code) || static::cleanTwoFactorCode($code) === '') {
+            return $language->translate('PLUGIN_LOGIN.2FA_SETUP_CODE_REQUIRED');
+        }
+
+        $result = $this->verifyNewTwoFactorCode($user, $secret, $code);
+        if ($result > 0) {
+            return $language->translate(['PLUGIN_LOGIN.2FA_CODE_TOO_MANY', $result]);
+        }
+        if ($result < 0) {
+            return $language->translate('PLUGIN_LOGIN.2FA_SETUP_CODE_WRONG');
+        }
+
+        return null;
+    }
+
+    /**
+     * A 2FA secret as typed or posted: spaces dropped and upper-cased. Null
+     * unless what is left is base32 of a sensible length (16 to 128 characters,
+     * 80 to 640 bits).
+     *
+     * @param mixed $secret
+     * @return string|null
+     */
+    public static function cleanTwoFactorSecret($secret): ?string
+    {
+        if (!is_string($secret)) {
+            return null;
+        }
+
+        $secret = strtoupper((string)preg_replace('/\s+/', '', $secret));
+
+        return preg_match('/^[A-Z2-7]{16,128}$/', $secret) ? $secret : null;
+    }
+
+    /**
+     * A 2FA code as typed: authenticator apps often show "123 456", and phones
+     * paste it that way.
+     *
+     * @param mixed $code
+     * @return string
+     */
+    public static function cleanTwoFactorCode($code): string
+    {
+        return is_string($code) ? (string)preg_replace('/\s+/', '', $code) : '';
+    }
+
+    /**
+     * The 2FA secret saved on $user's stored account, cleaned, or null when it
+     * has none. Admin Next saves it grouped in fours, so it is cleaned first.
+     *
+     * @param UserInterface $user
+     * @return string|null
+     */
+    public function storedTwoFactorSecret(UserInterface $user): ?string
+    {
+        return static::cleanTwoFactorSecret($this->loadStoredAccount($user)->get('twofa_secret'));
     }
 
     /**

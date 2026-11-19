@@ -94,6 +94,8 @@ class LoginPlugin extends Plugin
             'onTask.login.logout'       => ['loginController', 0],
             'onTask.login.reset'        => ['loginController', 0],
             'onTask.login.regenerate2FASecret' => ['loginController', 0],
+            'onTask.login.twofaEnable'  => ['loginController', 0],
+            'onTask.login.twofaDisable' => ['loginController', 0],
             'onTask.login.resendEmailChange' => ['loginController', 0],
             'onTask.login.cancelEmailChange' => ['loginController', 0],
             'onTask.login.passkey'      => ['passkeyController', 0],
@@ -1068,10 +1070,11 @@ class LoginPlugin extends Plugin
                 break;
 
             case 'regenerate2FASecret':
-                // CSRF hardening (GHSA-4px8): this task was previously reachable
-                // with no nonce and via a top-level GET (SameSite=Lax). Require
-                // POST to kill the Lax GET vector, and verify the `login-form`
-                // nonce that the 2FA setup field now sends.
+            case 'twofaEnable':
+            case 'twofaDisable':
+                // CSRF hardening (GHSA-4px8): the profile page's 2FA panel tasks
+                // change the account, so they take a POST (no SameSite=Lax GET
+                // vector) and the `login-form` nonce the panel sends.
                 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST'
                     || !isset($post['login-form-nonce'])
                     || !Utils::verifyNonce($post['login-form-nonce'], 'login-form')) {
@@ -1920,38 +1923,11 @@ class LoginPlugin extends Plugin
             }
         }
 
-        // The secret shown on the profile page is only stored by Regenerate, so
-        // switching two-factor on without one would save an account that reads
-        // as protected but is never asked for a code.
-        if (!empty($data['twofa_enabled']) && !$user->get('twofa_secret')) {
-            $this->grav->fireEvent('onFormValidationError', new Event([
-                'form'    => $form,
-                'message' => $language->translate('PLUGIN_LOGIN.2FA_SECRET_NOT_SAVED')
-            ]));
-            $event->stopPropagation();
-            return false;
-        }
-
-        // A `twofa_enabled` that came through empty is no change, not a request
-        // to switch 2FA off.
-        if (array_key_exists('twofa_enabled', $data) && $data['twofa_enabled'] === null) {
-            unset($data['twofa_enabled']);
-        }
-
-        // Turning off an active second factor takes a current code, so a
-        // signed-in session alone can't remove it.
-        if (array_key_exists('twofa_enabled', $data) && empty($data['twofa_enabled'])
-            && $this->login->hasActiveTwoFactor($user)) {
-            $twofaError = $this->login->twoFactorCodeError($user, $form->getData('twofa_code'));
-            if ($twofaError !== null) {
-                $this->grav->fireEvent('onFormValidationError', new Event([
-                    'form'    => $form,
-                    'message' => $twofaError
-                ]));
-                $event->stopPropagation();
-                return false;
-            }
-        }
+        // 2-Factor Authentication changes only through the 2FA panel's own
+        // tasks (login.regenerate2FASecret, login.twofaEnable, login.twofaDisable),
+        // each checking a code from the app. A profile form drawn before that
+        // (one with the old Yes/No toggle) still posts these: they are no change.
+        unset($data['twofa_enabled'], $data['twofa_secret'], $data['twofa_code']);
 
         // A new password needs the current one (unless the account has none yet,
         // such as one created by a sign-in service) and, when the form asks for

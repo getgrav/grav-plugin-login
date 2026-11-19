@@ -68,33 +68,10 @@ form:
           type: section
           underline: true
 
-        twofa_enabled:
-          type: toggle
-          label: PLUGIN_LOGIN.2FA_ENABLED
-          classes: twofa-toggle
-          highlight: 1
-          default: 0
-          options:
-            1: GRAV.YES
-            0: GRAV.NO
-          validate:
-            type: bool
-
-        twofa_code:
-          id: twofa_code
-          type: twofa_code
-          label: PLUGIN_LOGIN.2FA_CURRENT_CODE
-          help: PLUGIN_LOGIN.2FA_CURRENT_CODE_HELP
-          autocomplete: one-time-code
-          validate:
-            type: text
-
+        # The 2FA panel: Enable, Verify & Enable, Regenerate and Disable,
+        # each its own task. It posts nothing with this form.
         twofa_secret:
-            type: 2fa_secret
-            outerclasses: 'twofa-secret'
-            markdown: true
-            label: PLUGIN_LOGIN.2FA_SECRET
-            sublabel: PLUGIN_LOGIN.2FA_SECRET_HELP
+          type: 2fa_secret
 
 
     passkeys_check:
