@@ -59,7 +59,8 @@ form:
 
     twofa_check:
       type: conditional
-      condition: config.plugins.login.twofa_enabled
+      # True where 2FA setup is offered (plugins.login.twofa_enabled).
+      condition: twofa_enabled
 
       fields:
 

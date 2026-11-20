@@ -1,3 +1,9 @@
+# v3.13.5
+## 11/19/2026
+
+1. [](#bugfix)
+    * On Grav 2 the profile page's 2-Factor Authentication section showed even with **2FA Enabled** off. Its condition read `config.plugins.login.twofa_enabled`, which Grav 2's Twig sandbox keeps out of form conditions (plugin settings hold secrets), and a condition the sandbox refuses counts as true. The plugin now gives forms a `twofa_enabled` variable, as it does `passkeys_enabled`, and the profile form uses `condition: twofa_enabled`. A site with its own profile form should change its condition the same way
+
 # v3.13.4
 ## 11/19/2026
 

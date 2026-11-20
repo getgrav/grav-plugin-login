@@ -1489,6 +1489,11 @@ class LoginPlugin extends Plugin
         }
 
         $twig->twig_vars['passkeys_enabled'] = $this->login->passkeys() !== null;
+        // For profile forms: `condition: twofa_enabled`. Grav 2's Twig sandbox
+        // keeps `config.plugins` out of form conditions (plugin settings hold
+        // secrets), so `config.plugins.login.twofa_enabled` can't be read
+        // there, and a condition it refuses counts as true.
+        $twig->twig_vars['twofa_enabled'] = (bool)$this->config->get('plugins.login.twofa_enabled');
 
         // add CSS for frontend if required
         if (!$this->isAdmin() && $this->config->get('plugins.login.built_in_css')) {
