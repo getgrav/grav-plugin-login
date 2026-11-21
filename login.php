@@ -643,7 +643,9 @@ class LoginPlugin extends Plugin
         $username = $uri->param('username');
 
         $token = $uri->param('token');
-        $user = $users->load($username);
+        // A NUL byte (`%00` in the link) opens the empty account, which has no
+        // activation token: PHP 8.6 file functions throw on one.
+        $user = $users->load(is_string($username) && strpos($username, "\0") !== false ? '' : $username);
         if (is_callable([$user, 'refresh'])) {
             $user->refresh(true);
         }
@@ -770,7 +772,8 @@ class LoginPlugin extends Plugin
         // Same throttle as activation: an unauthenticated endpoint that
         // compares a secret token (GHSA-x239-6jqx-5hjh).
         $rateLimiter = $this->login->getRateLimiter('token_attempts');
-        if ($username === '' || $rateLimiter->isRateLimited($username)) {
+        // A NUL byte (`%00` in the link) is refused here: PHP 8.6 file functions throw on one.
+        if ($username === '' || strpos($username, "\0") !== false || $rateLimiter->isRateLimited($username)) {
             $messages->add($language->translate('PLUGIN_LOGIN.INVALID_REQUEST'), 'error');
             $this->grav->redirectLangSafe($redirect_route);
 
@@ -929,7 +932,8 @@ class LoginPlugin extends Plugin
 
         $username = (string)$uri->param('username');
         $token = (string)$uri->param('token');
-        if ($username === '' || $token === '') {
+        // A NUL byte (`%00` in the link) is refused here: PHP 8.6 file functions throw on one.
+        if ($username === '' || $token === '' || strpos($username, "\0") !== false) {
             $this->grav->redirectLangSafe($magicRequestRoute);
             return;
         }
@@ -1598,6 +1602,16 @@ class LoginPlugin extends Plugin
 
         // Check for existing username
         $username = $form_data->get('username');
+        // A form without the username pattern can let a NUL byte through, and PHP 8.6
+        // file functions throw on one.
+        if (is_string($username) && strpos($username, "\0") !== false) {
+            $this->grav->fireEvent('onFormValidationError', new Event([
+                'form'    => $form,
+                'message' => $language->translate('PLUGIN_LOGIN.USERNAME_NOT_VALID')
+            ]));
+            $event->stopPropagation();
+            return;
+        }
         $existing_username = $users->find($username, ['username']);
         if ($existing_username->exists()) {
             $this->grav->fireEvent('onFormValidationError', new Event([
@@ -2229,7 +2243,9 @@ class LoginPlugin extends Plugin
 
     public function userLoginAuthenticateByEmail(UserLoginEvent $event): void
     {
-        if (($username = $event->getCredential('username')) && !$event->getUser()->exists()) {
+        $username = $event->getCredential('username');
+        // Skip a name with a NUL byte: PHP 8.6 file functions throw on one, and no account has it.
+        if ($username && strpos((string)$username, "\0") === false && !$event->getUser()->exists()) {
             /** @var UserCollectionInterface $users */
             $users = $this->grav['accounts'];
 
@@ -2727,7 +2743,8 @@ class LoginPlugin extends Plugin
     protected function rowActionTarget(Event $event, string $superOnly): ?UserInterface
     {
         $username = $event['username'] ?? '';
-        if (!is_string($username) || $username === '') {
+        // No account has a NUL byte in its name, and PHP 8.6 file functions throw on one.
+        if (!is_string($username) || $username === '' || strpos($username, "\0") !== false) {
             return null;
         }
 
