@@ -1,5 +1,5 @@
 # v3.13.6
-## mm/dd/2026
+## 11/20/2026
 
 1. [](#improved)
     * Added PHP 8.6 compatibility (while keeping PHP 7.3+ support): rejected NUL bytes in usernames before they reach account storage on login (`UserLoginEvent`, login by email), password reset (`Controller::taskReset()`), registration (`processUserRegistration()`, `Login::validateField()`), activation, email-change and magic-link URLs, and Admin2 user row actions, so PHP 8.6 filesystem `ValueError` exceptions give the usual failed-login, invalid-link or invalid-username answers instead of 500s; and added `Php86CompatibilityTest` with a check that the plugin source keeps to PHP 7.3 syntax
