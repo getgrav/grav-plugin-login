@@ -99,7 +99,13 @@ class UserLoginEvent extends Event
         if (!$this->offsetExists('user')) {
             /** @var UserCollectionInterface $users */
             $users = Grav::instance()['accounts'];
-            $user = $users->load($this['credentials']['username']);
+            $username = $this['credentials']['username'];
+            // No stored account has a NUL byte in its name, and PHP 8.6 file functions
+            // throw on one: open the empty account, so the login fails like an unknown name.
+            if (is_string($username) && strpos($username, "\0") !== false) {
+                $username = '';
+            }
+            $user = $users->load($username);
             if (is_callable([$user, 'refresh'])) {
                 $user->refresh(true);
             }

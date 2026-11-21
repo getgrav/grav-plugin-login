@@ -681,7 +681,8 @@ class Controller
             $users = $this->grav['accounts'];
 
             $username = $data['username'] ?? null;
-            $user = !empty($username) ? $users->find($username) : null;
+            // A NUL byte gets the invalid link answer: PHP 8.6 file functions throw on one.
+            $user = !empty($username) && strpos((string)$username, "\0") === false ? $users->find($username) : null;
             $password = $data['password'] ?? null;
             $token = $data['token'] ?? null;
 

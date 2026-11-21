@@ -57,11 +57,13 @@ class SignOutController extends AbstractApiController
         $signedOut = $result['signed_out'];
         $failed = array_column($result['failed'], 'username');
         $count = count($signedOut);
-        $message = $language->translate(match ($count) {
-            0 => 'PLUGIN_LOGIN.SIGN_OUT_ALL_DONE_NONE',
-            1 => 'PLUGIN_LOGIN.SIGN_OUT_ALL_DONE_ONE',
-            default => ['PLUGIN_LOGIN.SIGN_OUT_ALL_DONE', $count],
-        });
+        if ($count === 0) {
+            $message = $language->translate('PLUGIN_LOGIN.SIGN_OUT_ALL_DONE_NONE');
+        } elseif ($count === 1) {
+            $message = $language->translate('PLUGIN_LOGIN.SIGN_OUT_ALL_DONE_ONE');
+        } else {
+            $message = $language->translate(['PLUGIN_LOGIN.SIGN_OUT_ALL_DONE', $count]);
+        }
         if ($failed) {
             $message .= ' ' . $language->translate(['PLUGIN_LOGIN.SIGN_OUT_ALL_FAILED', implode(', ', $failed)]);
         }

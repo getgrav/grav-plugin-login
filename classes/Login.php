@@ -531,7 +531,9 @@ class Login
             return max(1, (int)ceil($limiter->getRetryAfter($username) / 60));
         }
 
-        $secret ??= (string)$this->loadStoredAccount($user)->get('twofa_secret');
+        if ($secret === null) {
+            $secret = (string)$this->loadStoredAccount($user)->get('twofa_secret');
+        }
         $code = static::cleanTwoFactorCode($code);
         if ($code === '' || $secret === '' || !$this->twoFactorAuth()->verifyCode($secret, $code)) {
             return -1;
@@ -1452,7 +1454,9 @@ class Login
                 $username_regex = '/' . $config->get('system.username_regex') . '/';
 
                 $value = \is_string($value) ? trim($value) : '';
-                if ($value === '' || !preg_match($username_regex, $value)) {
+                // A NUL byte never passes, whatever system.username_regex allows: PHP 8.6
+                // file functions throw on one when the account is looked up.
+                if ($value === '' || strpos($value, "\0") !== false || !preg_match($username_regex, $value)) {
                     throw new \RuntimeException('Username does not pass the minimum requirements');
                 }
 

@@ -1,3 +1,11 @@
+# v3.13.6
+## mm/dd/2026
+
+1. [](#improved)
+    * Added PHP 8.6 compatibility (while keeping PHP 7.3+ support): rejected NUL bytes in usernames before they reach account storage on login (`UserLoginEvent`, login by email), password reset (`Controller::taskReset()`), registration (`processUserRegistration()`, `Login::validateField()`), activation, email-change and magic-link URLs, and Admin2 user row actions, so PHP 8.6 filesystem `ValueError` exceptions give the usual failed-login, invalid-link or invalid-username answers instead of 500s; and added `Php86CompatibilityTest` with a check that the plugin source keeps to PHP 7.3 syntax
+1. [](#bugfix)
+    * Fixed a fatal parse error on PHP 7.3 (Grav 1.7) since 3.13.4: replaced the `??=` in the 2FA code check and the `match` in `SignOutController`
+
 # v3.13.5
 ## 11/19/2026
 
