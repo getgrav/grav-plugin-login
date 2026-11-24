@@ -499,9 +499,9 @@ class Email
      */
     protected static function siteUrl(string $path): string
     {
-        $site_host = static::getConfig()->get('plugins.login.site_host');
-        if (!empty($site_host)) {
-            $path = rtrim($site_host, '/') . '/' . ltrim($path, '/');
+        $site_host = static::absoluteHttpUrl((string)static::getConfig()->get('plugins.login.site_host'));
+        if ($site_host !== null) {
+            $path = $site_host . '/' . ltrim($path, '/');
         } else {
             $pages = Grav::instance()['pages'];
             $base = (string)$pages->base();
@@ -661,8 +661,30 @@ class Email
     {
         $config = static::getConfig();
 
-        return !empty($config->get('plugins.login.site_host'))
-            || !empty($config->get('system.custom_base_url'));
+        return static::absoluteHttpUrl((string)$config->get('plugins.login.site_host')) !== null
+            || static::absoluteHttpUrl((string)$config->get('system.custom_base_url')) !== null;
+    }
+
+    /**
+     * The value as an absolute http(s) address without a trailing slash, or null.
+     *
+     * A host without a scheme (`example.com`) is not a trusted host: siteUrl()
+     * and core's Uri would still prefix it with the request's own scheme and
+     * Host, so the link is not pinned and must not count as configured.
+     *
+     * @param string $value
+     * @return string|null
+     */
+    public static function absoluteHttpUrl(string $value): ?string
+    {
+        $value = trim($value);
+        $parts = $value !== '' ? parse_url($value) : false;
+        if (!is_array($parts) || empty($parts['host'])
+            || !in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)) {
+            return null;
+        }
+
+        return rtrim($value, '/');
     }
 
     /**
