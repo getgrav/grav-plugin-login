@@ -216,6 +216,9 @@ PLUGIN_LOGIN:
   REQUIRE_TRUSTED_HOST_HELP: "When enabled, password reset, activation, magic login and invitation emails are not sent unless a Site Host (or the core Custom Base URL) is configured, instead of falling back to the request host. Prevents these links from being pointed at a spoofed host"
   FORGOT_TEMPORARILY_UNAVAILABLE: "Password reset is temporarily unavailable. Please contact the site administrator."
   UNTRUSTED_HOST_NOTICE: 'Email links are not yet pinned to a trusted host, so password reset, activation, magic login and invitation emails fall back to the request host. <a href="https://learn.getgrav.org/security/trusted-host" target="_blank" rel="noopener">How to fix this</a>'
+  TRUSTED_HOST_USE_SITE_URL: "Use {site_url}"
+  TRUSTED_HOST_SAVED: "Email links now use {site_url}"
+  TRUSTED_HOST_OPEN_SETTINGS: "Login settings"
   MAGIC_LINK_ENABLED: "Enable magic-link login"
   MAGIC_LINK_ENABLED_HELP: "Allow users to request a one-time login link by email"
   MAGIC_LINK: "Magic Link"
