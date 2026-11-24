@@ -1861,6 +1861,10 @@ class LoginPlugin extends Plugin
         // doesn't write the old address back.
         $this->login->refreshEmailFields($user);
 
+        // Likewise for state, access, groups, password hash and passkeys, so a passkey removed or access taken
+        // away since this session started isn't written back.
+        $this->login->refreshAccountFields($user);
+
         // Stop overloading of username
         $username = $form->data('username');
         if (isset($username)) {

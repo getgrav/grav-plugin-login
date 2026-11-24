@@ -76,6 +76,15 @@ class TokenStorage implements StorageInterface
             return self::TRIPLET_INVALID;
         }
 
+        // The triplet was issued to an account which has since been deleted and created again under the same
+        // username: the cookie belongs to the old account. Triplets stored before this check have no `created`.
+        if (array_key_exists('created', $entry)) {
+            $created = $this->accountCreated((string)$credential);
+            if ($created > 0 && $created !== (int)$entry['created']) {
+                return self::TRIPLET_NOT_FOUND;
+            }
+        }
+
         return self::TRIPLET_FOUND;
     }
 
@@ -97,8 +106,9 @@ class TokenStorage implements StorageInterface
         $file = $this->getFile($credential);
         $tokens = (array)$file->content();
 
-        // Update token
-        $tokens[$persistentToken] = [$token => time()];
+        // Update token, with the time the account was created, so a cookie can't sign in to an account that
+        // was deleted and created again under the same username.
+        $tokens[$persistentToken] = [$token => time(), 'created' => $this->accountCreated((string)$credential)];
 
         $file->save($tokens);
     }
@@ -180,6 +190,25 @@ class TokenStorage implements StorageInterface
     {
         if (is_dir($this->path)) {
             Folder::delete($this->path, false);
+        }
+    }
+
+    /**
+     * The `created` time of the account of this username, 0 when there is no account or it has none (accounts made by
+     * registration or the CLI may not).
+     *
+     * @param string $credential
+     * @return int
+     */
+    protected function accountCreated(string $credential): int
+    {
+        try {
+            $accounts = Grav::instance()['accounts'] ?? null;
+            $account = $accounts ? $accounts->load($credential) : null;
+
+            return $account && $account->exists() ? (int)$account->get('created', 0) : 0;
+        } catch (\Throwable $e) {
+            return 0;
         }
     }
 
