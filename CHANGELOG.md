@@ -1,3 +1,11 @@
+# v3.13.8
+## 11/24/2026
+
+1. [](#bugfix)
+    * A login page request that posts `task` as a list instead of text no longer causes an error page
+    * A dump of a login event, such as the debugger's, now holds only its status, username, message and redirect, never the submitted password, the account or the session
+    * Error messages from login tasks are escaped before they are shown on the page
+
 # v3.13.7
 ## 11/24/2026
 

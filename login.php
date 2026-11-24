@@ -1516,7 +1516,7 @@ class LoginPlugin extends Plugin
         }
 
         $task = $this->grav['uri']->param('task') ?: ($_POST['task'] ?? '');
-        $task = substr($task, \strlen('login.'));
+        $task = is_string($task) ? substr($task, \strlen('login.')) : '';
         if ($task === 'reset') {
             $username = $this->grav['uri']->param('user');
             $token = $this->grav['uri']->param('token');
