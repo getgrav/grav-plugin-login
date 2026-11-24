@@ -2554,6 +2554,23 @@ class LoginPlugin extends Plugin
             'location'       => ['top'],
             'message'        => $this->grav['language']->translate('PLUGIN_LOGIN.UNTRUSTED_HOST_NOTICE'),
             'reappear_after' => '+7 days',
+            // Admin2 fills {site_url} with the address the admin is using
+            // (browser origin plus the site's base path) and saves it through
+            // the config API, so it lands in the environment the admin is
+            // working in: user/config/plugins/login.yaml for Default, or that
+            // environment's own login.yaml.
+            'actions'        => [
+                [
+                    'label'   => $this->grav['language']->translate('PLUGIN_LOGIN.TRUSTED_HOST_USE_SITE_URL'),
+                    'config'  => ['scope' => 'plugins/login', 'values' => ['site_host' => '{site_url}']],
+                    'success' => $this->grav['language']->translate('PLUGIN_LOGIN.TRUSTED_HOST_SAVED'),
+                    'primary' => true,
+                ],
+                [
+                    'label' => $this->grav['language']->translate('PLUGIN_LOGIN.TRUSTED_HOST_OPEN_SETTINGS'),
+                    'route' => '/plugins/login#security',
+                ],
+            ],
         ];
         $event['notifications'] = $notifications;
     }

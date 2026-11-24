@@ -1,3 +1,11 @@
+# v3.13.7
+## 11/24/2026
+
+1. [](#new)
+    * The Admin2 trusted-host warning now has a button that sets Site Host to the address you're using in one click, saved to the environment you're working in, and a button that opens the Login settings
+1. [](#bugfix)
+    * [security] Only a Site Host or Custom Base URL with `https://` (or `http://`) counts as a trusted host. A value without a scheme left email links on the request host, while the admin warning was hidden and "Require Trusted Host" let the email through; it is now treated as not set
+
 # v3.13.6
 ## 11/20/2026
 
