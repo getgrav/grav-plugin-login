@@ -103,7 +103,8 @@ class Controller
         try {
             $success = $this->{$method}();
         } catch (\RuntimeException $e) {
-            $messages->add($e->getMessage(), 'error');
+            // Messages are printed as HTML, and some carry text a user chose (a username, a parser error).
+            $messages->add(htmlspecialchars($e->getMessage(), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'error');
             $this->grav['log']->error('plugin.login: '. $e->getMessage());
         }
 

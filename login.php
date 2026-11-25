@@ -1516,7 +1516,7 @@ class LoginPlugin extends Plugin
         }
 
         $task = $this->grav['uri']->param('task') ?: ($_POST['task'] ?? '');
-        $task = substr($task, \strlen('login.'));
+        $task = is_string($task) ? substr($task, \strlen('login.')) : '';
         if ($task === 'reset') {
             $username = $this->grav['uri']->param('user');
             $token = $this->grav['uri']->param('token');
@@ -1860,6 +1860,10 @@ class LoginPlugin extends Plugin
         // Pick up an email change confirmed in another browser, so this save
         // doesn't write the old address back.
         $this->login->refreshEmailFields($user);
+
+        // Likewise for state, access, groups, password hash and passkeys, so a passkey removed or access taken
+        // away since this session started isn't written back.
+        $this->login->refreshAccountFields($user);
 
         // Stop overloading of username
         $username = $form->data('username');

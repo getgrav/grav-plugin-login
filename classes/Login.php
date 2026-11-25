@@ -1733,6 +1733,20 @@ class Login
     }
 
     /**
+     * Copy the fields that decide what an account may do and how it signs in (state, access, groups, password
+     * hash, passkeys) from the stored account onto the session's copy. A save of the session's copy, such as a
+     * profile save, would otherwise write back what an admin or another browser changed meanwhile: a removed
+     * passkey, a changed password, taken-away access.
+     *
+     * @param UserInterface $user
+     * @return void
+     */
+    public function refreshAccountFields(UserInterface $user): void
+    {
+        $this->refreshStoredFields($user, ['state', 'access', 'groups', 'hashed_password', 'passkeys', 'webauthn_id']);
+    }
+
+    /**
      * @param UserInterface $user
      * @param array<int, string> $fields
      * @return void

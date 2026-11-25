@@ -398,6 +398,14 @@ class UserLoginEvent extends Event
      */
     public function __debugInfo(): array
     {
-        return get_object_vars($this);
+        // Never the submitted credentials, the account (password hash, 2FA secret) or the session.
+        $user = $this->items['user'] ?? null;
+
+        return [
+            'status' => $this->items['status'] ?? null,
+            'username' => $user instanceof UserInterface ? $user->username : ($this->items['credentials']['username'] ?? null),
+            'message' => $this->items['message'] ?? null,
+            'redirect' => $this->items['redirect'] ?? null,
+        ];
     }
 }

@@ -1,3 +1,13 @@
+# v3.13.8
+## 11/24/2026
+
+1. [](#bugfix)
+    * A login page request that posts `task` as a list instead of text no longer causes an error page
+    * A dump of a login event, such as the debugger's, now holds only its status, username, message and redirect, never the submitted password, the account or the session
+    * Error messages from login tasks are escaped before they are shown on the page
+    * A remember-me cookie no longer signs in to an account that was deleted and created again under the same username
+    * A profile save no longer writes back an older copy of the account's state, access, groups, password or passkeys, such as a passkey removed or access taken away since the session started
+
 # v3.13.7
 ## 11/24/2026
 
